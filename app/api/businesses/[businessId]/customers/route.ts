@@ -94,7 +94,6 @@ export async function GET(
               take: 1,
             },
           },
-          cacheStrategy: { ttl: 180 }, // Cache for 3 minutes
         });
 
         // Transform the data to include computed fields
@@ -104,8 +103,7 @@ export async function GET(
           email: customer.email,
           phone: customer.phone,
           status: customer.status,
-          type: customer.type,
-          totalBookings: customer.totalBookings,
+          bookingCount: customer.bookingCount,
           totalSpent: customer.totalSpent,
           lastBooking: customer.bookings[0]?.eventDate || null,
         }));

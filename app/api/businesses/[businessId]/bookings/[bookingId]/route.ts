@@ -20,6 +20,7 @@ const updateBookingSchema = z.object({
   customerName: z.string(),
   customerEmail: z.string().email(),
   customerPhone: z.string(),
+  bounceHouseId: z.string(),
 });
 
 /**
@@ -27,7 +28,7 @@ const updateBookingSchema = z.object({
  */
 export async function GET(
   request: NextRequest,
-  context: { params: { businessId: string; bookingId: string } }
+  { params }: { params: { businessId: string, bookingId: string }}
 ) {
   try {
     const user = await getCurrentUser();
@@ -35,7 +36,7 @@ export async function GET(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { businessId, bookingId } = context.params;
+    const { businessId, bookingId } = await params;
 
     const result = await withBusinessAuth(businessId, user.id, async () => {
       const booking = await prisma.booking.findFirst({
@@ -72,7 +73,7 @@ export async function GET(
  */
 export async function PATCH(
   request: NextRequest,
-  context: { params: { businessId: string; bookingId: string } }
+  { params }: { params: { businessId: string, bookingId: string }}
 ) {
   try {
     const user = await getCurrentUser();
@@ -80,7 +81,7 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { businessId, bookingId } = context.params;
+    const { businessId, bookingId } = await params;
     const body = await request.json();
 
     console.log("API Route Hit - PATCH Booking");
@@ -104,7 +105,7 @@ export async function PATCH(
       // Check for overlapping bookings (excluding current booking)
       const conflictingBooking = await prisma.booking.findFirst({
         where: {
-          id: { not: bookingId }, // Exclude the current booking
+          id: { not: bookingId }, 
           bounceHouseId: validatedData.bounceHouseId,
           eventDate,
           OR: [

@@ -8,7 +8,6 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { BookingsHeader } from "./bookings-header";
 import { BookingsViewControls } from "./bookings-view-controls";
 import { Calendar } from "@/components/ui/calendar";
 import { Card as CalendarCard, CardContent as CalendarCardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";

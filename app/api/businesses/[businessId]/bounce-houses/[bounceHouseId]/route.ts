@@ -102,11 +102,11 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: Promise<{ businessId: string; bounceHouseId: string }> }
+  { params }: { params: { businessId: string, bounceHouseId: string } }
 ) {
   try {
-    const params = await context.params;
-    const { businessId, bounceHouseId } = params;
+    
+    const { businessId, bounceHouseId } = await params;
     const user = await getCurrentUser();
     
     if (!user) {
@@ -117,11 +117,11 @@ export async function DELETE(
       businessId,
       user.id,
       async (business) => {
-        // Delete the bounce house
+        console.log(businessId, bounceHouseId);
         await prisma.bounceHouse.delete({
           where: {
             id: bounceHouseId,
-            businessId: business.id,
+            businessId: businessId,
           },
         });
 

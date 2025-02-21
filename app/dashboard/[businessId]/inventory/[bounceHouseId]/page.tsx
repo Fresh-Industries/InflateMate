@@ -27,11 +27,28 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Image from "next/image";
 
 interface ImageFile {
   file: File;
   preview: string;
   isPrimary: boolean;
+}
+
+interface BounceHouse {
+  status: string;
+  name: string;
+  description?: string;
+  dimensions: string;
+  minimumSpace: string;
+  capacity: number;
+  weightLimit: number;
+  ageRange: string;
+  price: number;
+  setupTime: number;
+  teardownTime: number;
+  images: string[];
+  primaryImage?: string;
 }
 
 export default function EditBounceHousePage() {
@@ -43,7 +60,7 @@ export default function EditBounceHousePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [bounceHouse, setBounceHouse] = useState<any>(null);
+  const [bounceHouse, setBounceHouse] = useState<BounceHouse | null>(null);
   const [selectedImages, setSelectedImages] = useState<ImageFile[]>([]);
   const [existingImages, setExistingImages] = useState<{ url: string; isPrimary: boolean; }[]>([]);
 
@@ -62,10 +79,11 @@ export default function EditBounceHousePage() {
             isPrimary: url === data.primaryImage
           }))
         );
-      } catch (error) {
+      } catch (error: unknown) {
+        const errorMessage = error instanceof Error ? error.message : "Failed to fetch bounce house details";
         toast({
           title: "Error",
-          description: "Failed to fetch bounce house details",
+          description: errorMessage,
           variant: "destructive",
         });
         router.push(`/dashboard/${params.id}/inventory`);
@@ -75,7 +93,7 @@ export default function EditBounceHousePage() {
     };
 
     fetchBounceHouse();
-  }, [params.id, params.bounceHouseId]);
+  }, [params.id, params.bounceHouseId, businessId, router, toast]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -133,17 +151,23 @@ export default function EditBounceHousePage() {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setBounceHouse(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setBounceHouse((prev: BounceHouse | null) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        [name]: value
+      };
+    });
   };
 
   const handleSelectChange = (value: string) => {
-    setBounceHouse(prev => ({
-      ...prev,
-      status: value
-    }));
+    setBounceHouse((prev: BounceHouse | null) => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        status: value
+      };
+    });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -152,7 +176,7 @@ export default function EditBounceHousePage() {
 
     try {
       // Upload new images if any
-      let uploadedImages = [];
+      let uploadedImages: { url: string; isPrimary: boolean; }[] = [];
       if (selectedImages.length > 0) {
         const files = selectedImages.map(img => img.file);
         const uploadedFiles = await startUpload(files);
@@ -206,7 +230,7 @@ export default function EditBounceHousePage() {
   const handleDelete = async () => {
     setIsSubmitting(true);
     try {
-      const response = await fetch(`/api/businesses/${params.id}/bounce-houses/${params.bounceHouseId}`, {
+      const response = await fetch(`/api/businesses/${businessId}/bounce-houses/${params.bounceHouseId}`, {
         method: "DELETE",
       });
 
@@ -462,9 +486,11 @@ export default function EditBounceHousePage() {
 
               {selectedImages.map((image, index) => (
                 <div key={`new-${index}`} className="relative group">
-                  <img
+                  <Image
                     src={image.preview}
                     alt={`New bounce house ${index + 1}`}
+                    width={128}
+                    height={128}
                     className="w-full h-32 object-cover rounded-lg"
                   />
                   <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center gap-2">

@@ -14,8 +14,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
 import { format } from "date-fns";
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "@/lib/stripe-client";
@@ -31,7 +29,6 @@ import {
 
 export function NewBookingForm({ businessId }: { businessId: string }) {
   const { toast } = useToast();
-  const queryClient = useQueryClient();
   const router = useRouter();
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [pendingBookingData, setPendingBookingData] = useState(null);
@@ -179,8 +176,9 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         }}>
           <PaymentForm
             amount={calculateTotal()}
-            onSuccess={() => {
-              // Handle post-payment booking creation...
+            bookingId={pendingBookingData.bookingId}
+            customerEmail={pendingBookingData.customerEmail}
+            onSuccess={async () => {
               router.push(`/dashboard/${businessId}/bookings`);
             }}
             onError={(error) => toast({ title: "Payment Error", description: error, variant: "destructive" })}

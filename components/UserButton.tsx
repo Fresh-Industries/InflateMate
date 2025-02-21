@@ -10,24 +10,37 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { User, Settings } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
+import { useSession } from "next-auth/react";
 
 export function UserButton() {
+  const { data: session } = useSession();
+  
+  // Get user's initials for the avatar fallback
+  const getInitials = (name: string | null) => {
+    if (!name) return "??";
+    return name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase();
+  };
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="relative h-10 w-10 rounded-full">
           <Avatar className="h-10 w-10">
-            <AvatarImage src="/avatars/user.png" alt="User" />
-            <AvatarFallback>JD</AvatarFallback>
+            <AvatarImage src={session?.user?.image ?? ""} alt={session?.user?.name ?? "User avatar"} />
+            <AvatarFallback>{getInitials(session?.user?.name ?? "")}</AvatarFallback>
           </Avatar>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56" align="end" forceMount>
         <DropdownMenuLabel className="font-normal">
           <div className="flex flex-col space-y-1">
-            <p className="text-sm font-medium leading-none">John Doe</p>
+            <p className="text-sm font-medium leading-none">{session?.user?.name || "Anonymous"}</p>
             <p className="text-xs leading-none text-muted-foreground">
-              john@inflatemate.com
+              {session?.user?.email || "No email"}
             </p>
           </div>
         </DropdownMenuLabel>

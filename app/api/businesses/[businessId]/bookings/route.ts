@@ -41,7 +41,7 @@ export async function POST(
 
     // Validate request body with Zod
     const validatedData = bookingSchema.parse(body);
-    const { businessId } = params;
+    const { businessId } = await params;
 
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
@@ -61,7 +61,7 @@ export async function POST(
       // Check if bounce house is available
       const bounceHouse = await prisma.bounceHouse.findFirst({
         where: {
-          id: validatedData.bounceHouseId,
+          
           businessId: business.id,
           status: "AVAILABLE",
         },
@@ -109,6 +109,11 @@ export async function POST(
             name: validatedData.customerName,
             email: validatedData.customerEmail,
             phone: validatedData.customerPhone,
+            address: validatedData.eventAddress,
+            city: validatedData.eventCity,
+            state: validatedData.eventState,
+            zipCode: validatedData.eventZipCode,
+            businessId: business.id,
           },
         });
       }

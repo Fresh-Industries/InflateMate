@@ -75,11 +75,10 @@ export default function AuthPage() {
       } else {
         router.push('/onboarding');
       }
-    } catch (error: unknown) {
-      console.error('Sign-in error:', error);
+    } catch {
       toast({
         title: "Error",
-        description: "Failed to sign in",
+        description: "Something went wrong",
         variant: "destructive",
       });
     } finally {
@@ -118,10 +117,10 @@ export default function AuthPage() {
       }
 
       router.push("/auth/onboarding");
-    } catch (error: any) {
+    } catch {
       toast({
         title: "Error",
-        description: error.message || "Something went wrong",
+        description: "Something went wrong",
         variant: "destructive",
       });
     } finally {
@@ -129,13 +128,16 @@ export default function AuthPage() {
     }
   };
 
+
+  
+
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
     try {
       await signIn("google", {
-        callbackUrl: searchParams?.get("callbackUrl") || "/dashboard",
+        callbackUrl: "/auth/callback",  // We'll create this route to handle the redirect
       });
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to sign in with Google",

@@ -27,6 +27,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Check if user has any businesses
+    const userWithBusinesses = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { businesses: true }
+    });
+
     // Parse and validate the request body
     const body = await req.json();
     const validatedData = businessSchema.parse(body);
@@ -46,7 +52,7 @@ export async function POST(req: NextRequest) {
     });
 
     // Update user's onboarded status if this is their first business
-    if (!user.businesses?.length) {
+    if (!userWithBusinesses?.businesses.length) {
       await prisma.user.update({
         where: { id: user.id },
         data: { onboarded: true },
@@ -70,9 +76,10 @@ export async function POST(req: NextRequest) {
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET() {
   try {
     const user = await getCurrentUser();
+    console.log(user);
     
     if (!user) {
       return NextResponse.json(
@@ -97,7 +104,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      cacheStrategy: { ttl: 300 }, // Cache for 5 minutes
+      
     });
 
     return NextResponse.json(businesses);

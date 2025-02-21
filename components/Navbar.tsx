@@ -17,22 +17,20 @@ export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { data: session, status } = useSession();
 
-  console.log(session);
-
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
   // Optionally handle the loading state
   if (status === "loading") {
-    return null; // or a spinner/loading indicator
+    return null;
   }
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-sm shadow-sm border-b border-sky-100">
+    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-extrabold bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent">
+            <span className="text-2xl font-extrabold bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent transition-transform duration-300 hover:scale-105">
               Inflatemate
             </span>
           </Link>
@@ -43,7 +41,7 @@ export default function Navbar() {
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-gray-600 hover:text-sky-500 transition-colors"
+                className="text-gray-600 hover:text-sky-500 transition-colors font-medium"
               >
                 {item.label}
               </Link>
@@ -53,12 +51,19 @@ export default function Navbar() {
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {session ? (
-              <><Link href={`/dashboard/${session.user.businesses[0]}`}>
-                <Button variant="ghost">Go to Dashboard</Button>
-              </Link><LogoutButton /></>
+              <>
+                <Link href={`/dashboard/${session.user.businesses[0]}`}>
+                  <Button variant="ghost" className="hover:text-sky-500 transition-colors">
+                    Go to Dashboard
+                  </Button>
+                </Link>
+                <LogoutButton />
+              </>
             ) : (
               <Link href="/auth">
-                <Button variant="ghost">Sign In</Button>
+                <Button variant="ghost" className="hover:text-sky-500 transition-colors">
+                  Sign In
+                </Button>
               </Link>
             )}
           </div>
@@ -69,7 +74,7 @@ export default function Navbar() {
               onClick={toggleMenu}
               aria-label="Toggle Menu"
               aria-expanded={isMenuOpen}
-              className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"
             >
               {isMenuOpen ? (
                 <X className="h-6 w-6 text-sky-500" />
@@ -87,7 +92,7 @@ export default function Navbar() {
           isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
         }`}
       >
-        <div className="bg-white border-t border-sky-100 shadow-md">
+        <div className="bg-white border-t border-gray-200 shadow-md">
           <div className="px-4 py-4 space-y-4">
             {navItems.map((item) => (
               <Link
@@ -99,13 +104,13 @@ export default function Navbar() {
                 {item.label}
               </Link>
             ))}
-            <div className="border-t border-sky-100 pt-4 space-y-4">
+            <div className="border-t border-gray-200 pt-4 space-y-4">
               <Link href={session ? "/dashboard" : "/auth"}>
                 <Button variant="ghost" className="w-full justify-center">
                   {session ? "Go to Dashboard" : "Sign In"}
                 </Button>
               </Link>
-              <Button className="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600">
+              <Button className="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white">
                 Start Free Trial
               </Button>
             </div>

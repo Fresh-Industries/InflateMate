@@ -5,16 +5,20 @@ import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";
 import {
   Calendar,
-  LayoutDashboard,
   Package,
   Users,
   Settings,
-  FileText,
-  TrendingUp,
-  MessageSquare,
+ 
   Bell,
   Menu,
-  Network,
+  Globe,
+  Mail,
+  Users2,
+  Building2,
+  BarChart3,
+  Inbox,
+  FileStack,
+  Wallet,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -100,7 +104,7 @@ export default function DashboardLayout({
     {
       title: "Overview",
       href: `/dashboard/${businessId}`,
-      icon: LayoutDashboard,
+      icon: Building2,
     },
     {
       title: "Bookings",
@@ -120,22 +124,37 @@ export default function DashboardLayout({
     {
       title: "Analytics",
       href: `/dashboard/${businessId}/analytics`,
-      icon: TrendingUp,
+      icon: BarChart3,
     },
     {
       title: "Messages",
       href: `/dashboard/${businessId}/messages`,
-      icon: MessageSquare,
+      icon: Inbox,
     },
     {
       title: "Documents",
       href: `/dashboard/${businessId}/documents`,
-      icon: FileText,
+      icon: FileStack,
+    },
+    {
+      title: "Payments",
+      href: `/dashboard/${businessId}/payments`,
+      icon: Wallet,
+    },
+    {
+      title: "Employees", 
+      href: `/dashboard/${businessId}/employees`,
+      icon: Users2,
+    },
+    {
+      title: "Marketing",
+      href: `/dashboard/${businessId}/marketing`,
+      icon: Mail,
     },
     {
       title: "Website",
       href: `/dashboard/${businessId}/website`,
-      icon: Network,
+      icon: Globe,
     },
     {
       title: "Settings",
@@ -147,14 +166,17 @@ export default function DashboardLayout({
   const SidebarContent = ({ className }: { className?: string }) => (
     <div className={cn("flex h-full flex-col", className)}>
       {/* Logo */}
-      <div className="border-b p-6">
-        <Link href={`/dashboard/${businessId}`} className="flex items-center gap-2">
-          <div className="rounded-lg bg-primary p-1">
-            <span className="text-xl">🎈</span>
+      {
+        !isMobileOpen && (
+          <div className="border-b p-6">
+            <Link href={`/`} className="flex items-center gap-2">
+              <span className="font-bold text-xl">InflateMate</span>
+            </Link>
           </div>
-          <span className="font-bold text-xl">InflateMate</span>
-        </Link>
-      </div>
+        )
+      }
+      
+      
 
       {/* Navigation */}
       <nav className="flex-1 space-y-1 p-4">
@@ -195,7 +217,11 @@ export default function DashboardLayout({
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="p-0 w-[300px]">
           <SheetHeader className="px-6 py-4 border-b">
-            <SheetTitle>Navigation</SheetTitle>
+            <SheetTitle>
+          <Link href={`/`} className="flex items-center gap-2">
+            <span className="font-bold text-xl">InflateMate</span>
+          </Link>
+            </SheetTitle>
           </SheetHeader>
           <div className="flex flex-col h-[calc(100vh-5rem)]">
             <SidebarContent />

@@ -72,28 +72,28 @@ model VerificationToken {
 
 // Multi-tenancy and business models
 model Business {
-  id           String        @id @default(cuid())
-  name         String
-  description  String?
-  address      String?
-  city         String?
-  state        String?
-  zipCode      String?
-  phone        String?
-  email        String?
-  website      String?
+  id              String        @id @default(cuid())
+  name            String
+  description     String?
+  address         String?
+  city            String?
+  state           String?
+  zipCode         String?
+  phone           String?
+  email           String?
+  website         String?
   stripeAccountId String?
-  logo         String?
-  userId       String
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bounceHouses BounceHouse[]
-  bookings     Booking[]
-  customers    Customer[]
-  packages     Package[]
-  addOns       AddOn[]
-  settings     Json?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  logo            String?
+  userId          String
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bounceHouses    BounceHouse[]
+  bookings        Booking[]
+  customers       Customer[]
+  packages        Package[]
+  addOns          AddOn[]
+  settings        Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   // Business settings
   businessHours      BusinessHours[]
@@ -199,6 +199,7 @@ model Customer {
   state        String?
   zipCode      String?
   notes        String? // Customer notes/preferences
+  status       String    @default("Active") // Add status field with default value
   bookingCount Int       @default(0)
   totalSpent   Float     @default(0)
   lastBooking  DateTime?

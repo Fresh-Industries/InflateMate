@@ -13,10 +13,10 @@ const updateCustomerSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  context: { params: Promise<{ businessId: string; customerId: string }> }
+  { params }: { params: { businessId: string, customerId: string }}
 ) {
   try {
-    const { businessId, customerId } = await context.params;
+    const { businessId, customerId } = await params;
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -75,10 +75,10 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  context: { params: { businessId: string; customerId: string } }
+  { params }: { params: { businessId: string, customerId: string }}
 ) {
   try {
-    const { businessId, customerId } = context.params;
+    const { businessId, customerId } = await params;
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
