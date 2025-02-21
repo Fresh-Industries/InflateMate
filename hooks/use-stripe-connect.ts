@@ -1,61 +1,53 @@
 import { useState, useEffect } from "react";
-import { loadConnectAndInitialize } from "@stripe/connect-js";
+import { loadConnectAndInitialize, StripeConnectInstance } from "@stripe/connect-js";
 
-export const useStripeConnect = (businessId: string) => {
-  const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+export const useStripeConnect = (connectedAccountId: string) => {
+  const [stripeConnectInstance, setStripeConnectInstance] = useState<StripeConnectInstance | undefined>();
 
   useEffect(() => {
-    if (!businessId) return;
-
-    const initializeStripeConnect = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        // Create or retrieve Stripe Connect account and get client secret
-        const response = await fetch(`/api/businesses/${businessId}/stripe/connect`, {
+    if (connectedAccountId) {
+      const fetchClientSecret = async () => {
+        const response = await fetch(`/api/stripe/connect`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
           },
+          body: JSON.stringify({
+            account: connectedAccountId,
+          }),
         });
 
         if (!response.ok) {
-          const error = await response.json();
-          throw new Error(error.error || "Failed to initialize Stripe Connect");
+          // Handle errors on the client side here
+          const { error } = await response.json();
+          throw new Error(`An error occurred: ${error}`);
+        } else {
+          const { client_secret: clientSecret } = await response.json();
+          return clientSecret;
         }
+      };
 
-        const { clientSecret } = await response.json();
+      const publishableKey = process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+      if (!publishableKey) {
+        throw new Error('Stripe publishable key is not defined');
+      }
 
-        // Initialize Stripe Connect
-        const stripeConnect = await loadConnectAndInitialize({
-          publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
-          clientSecret,
+      setStripeConnectInstance(
+        loadConnectAndInitialize({
+          publishableKey,
+          fetchClientSecret: fetchClientSecret,
           appearance: {
             overlays: "dialog",
             variables: {
-              colorPrimary: "#0F172A",
+              colorPrimary: "#635BFF",
             },
           },
-        });
+        })
+      );
+    }
+  }, [connectedAccountId]);
 
-        setStripeConnectInstance(stripeConnect);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : "An error occurred");
-        console.error("Stripe Connect initialization error:", err);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+  return stripeConnectInstance;
+};
 
-    initializeStripeConnect();
-  }, [businessId]);
-
-  return {
-    stripeConnectInstance,
-    isLoading,
-    error,
-  };
-}; 
+export default useStripeConnect;

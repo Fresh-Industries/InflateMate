@@ -8,7 +8,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { User, Settings, LogOut } from "lucide-react";
+import { User, Settings } from "lucide-react";
+import { LogoutButton } from "./LogoutButton";
 
 export function UserButton() {
   return (
@@ -40,10 +41,7 @@ export function UserButton() {
           <span>Settings</span>
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-red-600">
-          <LogOut className="mr-2 h-4 w-4" />
-          <span>Log out</span>
-        </DropdownMenuItem>
+        <LogoutButton showIcon={false} className="w-full justify-start text-red-600" />
       </DropdownMenuContent>
     </DropdownMenu>
   );

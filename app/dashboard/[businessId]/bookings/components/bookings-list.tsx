@@ -138,7 +138,9 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
     }
   };
 
-  const filteredBookings = (bookingsData || []).filter((booking: Booking) => {
+
+
+  const filteredBookings = (bookingsData.data || []).filter((booking: Booking) => {
     const searchString = searchTerm.toLowerCase();
     return (
       booking.customer.name.toLowerCase().includes(searchString) ||

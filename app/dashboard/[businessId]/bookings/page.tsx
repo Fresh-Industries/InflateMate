@@ -85,7 +85,7 @@ interface PageProps {
 }
 
 export default async function BookingsPage({ params }: PageProps) {
-  const { businessId } = params;
+  const { businessId } = await params;
   const initialData = await getInitialData(businessId);
 
   return (

@@ -28,7 +28,11 @@ export async function POST(req: NextRequest) {
 
     // Create a Stripe Connect account
     const account = await stripe.accounts.create({
-      type: "express",
+      controller : {
+        stripe_dashboard: {
+          type: "none",
+        }
+      },
       country: "US",
       email: user.email!,
       capabilities: {
@@ -71,27 +75,15 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Create an account link for onboarding
-    const origin = req.headers.get("origin") || "http://localhost:3000";
-    const accountLink = await stripe.accountLinks.create({
-      account: account.id,
-      refresh_url: `${origin}/dashboard/${business.id}/settings?refresh=true`,
-      return_url: `${origin}/dashboard/${business.id}`,
-      type: "account_onboarding",
-    });
-
-    // Update the user's onboarded status if this is their first business
-    if (!user.businesses?.length) {
+    // Update the user's onboarded status 
       await prisma.user.update({
         where: { id: user.id },
         data: { onboarded: true },
       });
-    }
 
     return NextResponse.json({
       business,
       stripeAccountId: account.id,
-      accountLinkUrl: accountLink.url,
     }, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
