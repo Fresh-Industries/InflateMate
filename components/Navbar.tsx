@@ -1,11 +1,11 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Menu, X } from "lucide-react";
-import { useSession } from "next-auth/react";
 import { LogoutButton } from "./LogoutButton";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 const navItems = [
   { label: "Features", href: "/features" },
@@ -15,14 +15,40 @@ const navItems = [
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { data: session, status } = useSession();
+  const [userBusinesses, setUserBusinesses] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { isLoaded, userId } = useAuth();
+  const { user } = useUser();
+
+  useEffect(() => {
+    async function fetchUserBusinesses() {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+      
+      try {
+        const response = await fetch('/api/businesses');
+        if (response.ok) {
+          const businesses = await response.json();
+          setUserBusinesses(businesses);
+        }
+      } catch (error) {
+        console.error("Error fetching user businesses:", error);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    if (isLoaded) {
+      fetchUserBusinesses();
+    }
+  }, [isLoaded, userId]);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
 
-  // Optionally handle the loading state
-  if (status === "loading") {
-    return null;
-  }
+  // Wait until Clerk has loaded
+  const isLoadingUser = !isLoaded || loading;
 
   return (
     <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
@@ -50,9 +76,13 @@ export default function Navbar() {
 
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center space-x-4">
-            {session ? (
+            {isLoadingUser ? (
+              <div className="h-10 w-20 bg-gray-200 animate-pulse rounded"></div>
+            ) : userId ? (
               <>
-                <Link href={`/dashboard/${session.user.businesses[0]}`}>
+                <Link href={userBusinesses.length > 0 
+                  ? `/dashboard/${userBusinesses[0].id}` 
+                  : "/onboarding"}>
                   <Button variant="ghost" className="hover:text-sky-500 transition-colors">
                     Go to Dashboard
                   </Button>
@@ -60,7 +90,7 @@ export default function Navbar() {
                 <LogoutButton />
               </>
             ) : (
-              <Link href="/auth">
+              <Link href="/sign-in">
                 <Button variant="ghost" className="hover:text-sky-500 transition-colors">
                   Sign In
                 </Button>
@@ -105,11 +135,17 @@ export default function Navbar() {
               </Link>
             ))}
             <div className="border-t border-gray-200 pt-4 space-y-4">
-              <Link href={session ? "/dashboard" : "/auth"}>
-                <Button variant="ghost" className="w-full justify-center">
-                  {session ? "Go to Dashboard" : "Sign In"}
-                </Button>
-              </Link>
+              {isLoadingUser ? (
+                <div className="h-10 w-full bg-gray-200 animate-pulse rounded"></div>
+              ) : (
+                <Link href={userId ? (userBusinesses.length > 0 
+                  ? `/dashboard/${userBusinesses[0].id}` 
+                  : "/onboarding") : "/sign-in"}>
+                  <Button variant="ghost" className="w-full justify-center">
+                    {userId ? "Go to Dashboard" : "Sign In"}
+                  </Button>
+                </Link>
+              )}
               <Button className="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white">
                 Start Free Trial
               </Button>

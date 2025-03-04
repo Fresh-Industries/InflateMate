@@ -25,9 +25,9 @@ import {
   LayoutGrid,
   List,
 } from "lucide-react";
-import { CreateBounceHouseDialog } from "@/components/bounce-house/CreateBounceHouseDialog";
+import { CreateBounceHouseDialog } from "@/app/dashboard/[businessId]/inventory/_components/CreateBounceHouseDialog";
 import { useToast } from "@/hooks/use-toast";
-import { BounceHouseList } from "@/components/bounce-house/BounceHouseList";
+import { BounceHouseList } from "@/app/dashboard/[businessId]/inventory/_components/BounceHouseList";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -84,7 +84,7 @@ export default function InventoryPage() {
       }
       setIsLoading(true);
       setError(null);
-      const response = await fetch(`/api/businesses/${businessId}/bounce-houses`);
+      const response = await fetch(`/api/businesses/${businessId}/inventory`);
       if (!response.ok) {
         throw new Error("Failed to fetch bounce houses");
       }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/utils";
+import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -13,7 +13,7 @@ const updateCustomerSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { businessId: string, customerId: string }}
+  { params }: { params: Promise<{ businessId: string, customerId: string }>}
 ) {
   try {
     const { businessId, customerId } = await params;
@@ -75,7 +75,7 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { businessId: string, customerId: string }}
+  { params }: { params: Promise<{ businessId: string, customerId: string }>}
 ) {
   try {
     const { businessId, customerId } = await params;

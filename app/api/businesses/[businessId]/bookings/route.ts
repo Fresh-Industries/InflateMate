@@ -1,160 +1,139 @@
+// /api/businesses/[businessId]/bookings/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/utils";
-import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withBusinessAuth, getCurrentUser } from "@/lib/auth/clerk-utils";
+import { stripe } from "@/lib/stripe-server";
+import { prisma } from "@/lib/prisma";
 
-// Define booking schema using Zod for validation
-const bookingSchema = z.object({
-  eventDate: z.string(), // ISO format string
-  startTime: z.string(), // ISO format string
-  endTime: z.string(), 
-  eventType: z.string().optional(),
-  eventAddress: z.string(),
-  eventCity: z.string(),
-  eventState: z.string(),
-  eventZipCode: z.string(),
-  participantCount: z.number(),
-  specialInstructions: z.string().optional(),
-  bounceHouseId: z.string(),
-  customerName: z.string(),
+// Define a schema for the expected payload
+const paymentIntentSchema = z.object({
+  amount: z.number(), // amount in cents
   customerEmail: z.string().email(),
-  customerPhone: z.string(),
-  totalAmount: z.number(),
-  depositAmount: z.number().optional(),
-  depositPaid: z.boolean().optional(),
+  metadata: z.record(z.any()), // booking details stored as metadata
 });
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { businessId: string } }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
+    // Authenticate the user
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const body = await req.json();
-    if (!body) {
-      return NextResponse.json({ error: "Request body is required" }, { status: 400 });
-    }
-
-    // Validate request body with Zod
-    const validatedData = bookingSchema.parse(body);
-    const { businessId } = await params;
-
+    console.log("userId", user?.id);
+    const businessId  = (await params).businessId;
+    console.log("businessId", businessId);
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
+    
+    // Parse and validate the request payload
+    const body = await req.json();
+    console.log("Received payment intent request body:", body);
+    const { amount, customerEmail, metadata } = paymentIntentSchema.parse(body);
+    console.log("Validated payment intent data:", { amount, customerEmail });
 
+    // Use your withBusinessAuth helper to verify that the user is allowed for this business
     const result = await withBusinessAuth(businessId, user.id, async (business) => {
-      // Convert eventDate, startTime, and endTime to Date objects
-      const eventDate = new Date(validatedData.eventDate);
-      const startTime = new Date(validatedData.startTime);
-      const endTime = new Date(validatedData.endTime);
-
-      // Ensure startTime < endTime
-      if (startTime >= endTime) {
-        return { error: "Start time must be before end time" };
-      }
-
-      // Check if bounce house is available
-      const bounceHouse = await prisma.bounceHouse.findFirst({
-        where: {
-          
-          businessId: business.id,
-          status: "AVAILABLE",
-        },
+      console.log("Business data in withBusinessAuth:", {
+        id: business.id,
+        hasStripeAccount: !!business.stripeAccountId,
+        stripeAccountId: business.stripeAccountId
       });
-
-      if (!bounceHouse) {
-        return { error: "Bounce house is not available for booking" };
+      
+      if (!business.stripeAccountId) {
+        console.error("No stripeAccountId found for business:", businessId);
+        return { error: "Connected Stripe account is not set up for this business" };
       }
-
-      // Check for overlapping bookings
-      const conflictingBooking = await prisma.booking.findFirst({
-        where: {
-          bounceHouseId: validatedData.bounceHouseId,
-          eventDate,
-          OR: [
-            {
-              AND: [
-                { startTime: { lte: startTime } },
-                { endTime: { gt: startTime } },
-              ],
-            },
-            {
-              AND: [
-                { startTime: { lt: endTime } },
-                { endTime: { gte: endTime } },
-              ],
-            },
-          ],
-          status: { notIn: ["CANCELLED"] },
-        },
-      });
-
-      if (conflictingBooking) {
-        return { error: "Selected time slot is already booked" };
-      }
-
-      // Create a new customer if not existing
-      let customer = await prisma.customer.findFirst({
-        where: { email: validatedData.customerEmail },
-      });
-
-      if (!customer) {
-        customer = await prisma.customer.create({
-          data: {
-            name: validatedData.customerName,
-            email: validatedData.customerEmail,
-            phone: validatedData.customerPhone,
-            address: validatedData.eventAddress,
-            city: validatedData.eventCity,
-            state: validatedData.eventState,
-            zipCode: validatedData.eventZipCode,
-            businessId: business.id,
-          },
+      
+      console.log("Creating PaymentIntent for connected account:", business.stripeAccountId);
+      
+      try {
+        // Add some debugging for the metadata
+        console.log("Creating PaymentIntent with metadata:", metadata);
+        console.log("Metadata keys:", Object.keys(metadata));
+        console.log("Critical metadata fields:", {
+          bounceHouseId: metadata.bounceHouseId,
+          businessId: metadata.businessId,
+          customerEmail: customerEmail
         });
+
+        // Create a PaymentIntent on behalf of the connected account.
+        // You have two options:
+        // - Direct Charges: PaymentIntent is created on the connected account (using stripeAccount)
+        // - Destination Charges: PaymentIntent is created on your platform, then funds transferred.
+        // In this example we use direct charges.
+        const paymentIntent = await stripe.paymentIntents.create(
+          {
+            amount,
+            currency: "usd",
+            payment_method_types: ["card"],
+            receipt_email: customerEmail,
+            metadata, // Store booking details here so you can later create the booking record (or update it) after payment succeeds.
+          },
+          {
+            stripeAccount: business.stripeAccountId,
+          }
+        );
+
+        console.log("PaymentIntent created successfully:", {
+          id: paymentIntent.id,
+          clientSecret: paymentIntent.client_secret ? "exists" : "missing",
+          clientSecretLength: paymentIntent.client_secret ? paymentIntent.client_secret.length : 0
+        });
+
+        // After creating the PaymentIntent, verify the metadata was set correctly
+        console.log("PaymentIntent created with ID:", paymentIntent.id);
+        console.log("Metadata successfully set:", !!paymentIntent.metadata);
+        console.log("Metadata keys in created PaymentIntent:", Object.keys(paymentIntent.metadata));
+        if (!paymentIntent.metadata || Object.keys(paymentIntent.metadata).length === 0) {
+          console.error("WARNING: No metadata was set on the PaymentIntent. Webhook processing will fail!");
+        }
+
+        if (!paymentIntent.client_secret) {
+          console.error("No client_secret returned from Stripe");
+          return { error: "Failed to get client secret from Stripe" };
+        }
+
+        return { data: { clientSecret: paymentIntent.client_secret } };
+      } catch (stripeError) {
+        console.error("Stripe error creating payment intent:", stripeError);
+        return { error: stripeError instanceof Error ? stripeError.message : "Stripe payment intent creation failed" };
       }
+    });
 
-      // Create new booking
-      const booking = await prisma.booking.create({
-        data: {
-          eventDate,
-          startTime,
-          endTime,
-          status: "PENDING",
-          totalAmount: validatedData.totalAmount,
-          depositAmount: validatedData.depositAmount,
-          depositPaid: validatedData.depositPaid || false,
-          eventType: validatedData.eventType,
-          eventAddress: validatedData.eventAddress,
-          eventCity: validatedData.eventCity,
-          eventState: validatedData.eventState,
-          eventZipCode: validatedData.eventZipCode,
-          participantCount: validatedData.participantCount,
-          specialInstructions: validatedData.specialInstructions,
-          businessId: business.id,
-          bounceHouseId: validatedData.bounceHouseId,
-          customerId: customer.id,
-        },
-        include: {
-          bounceHouse: { select: { name: true } },
-          customer: { select: { name: true, email: true, phone: true } },
-        },
-      });
-
-      return { data: booking };
+    console.log("Result from withBusinessAuth:", {
+      hasError: !!result.error,
+      hasData: !!result.data,
+      dataKeys: result.data ? Object.keys(result.data) : [],
+      error: result.error || "none"
     });
 
     if (result.error) {
+      console.error("Error creating payment intent:", result.error);
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-
-    return NextResponse.json(result.data, { status: 201 });
+    
+    console.log("Returning successful response with client secret");
+    
+    // Verify that result.data exists and has clientSecret before returning
+    if (result.data && 'clientSecret' in result.data) {
+      const clientSecret = result.data.clientSecret as string;
+      console.log("Client secret found with length:", clientSecret.length);
+      
+      // Return in a format the frontend expects
+      return NextResponse.json({ 
+        clientSecret,
+        data: { clientSecret } 
+      }, { status: 200 });
+    } else {
+      console.error("Missing client secret in result data:", result);
+      return NextResponse.json({ error: "Missing client secret in result" }, { status: 500 });
+    }
   } catch (error) {
-    console.error("[BOOKING_ERROR]", error);
+    console.error("Error creating PaymentIntent:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid input", details: error.errors },
@@ -162,7 +141,7 @@ export async function POST(
       );
     }
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to create booking" },
+      { error: error instanceof Error ? error.message : "Internal server error" },
       { status: 500 }
     );
   }
@@ -170,51 +149,25 @@ export async function POST(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { businessId: string } }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const { businessId } = await params;
+    const  businessId  = (await params).businessId;
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
 
-    const result = await withBusinessAuth(businessId, user.id, async (business) => {
-      const bookings = await prisma.booking.findMany({
-        where: {
-          businessId: business.id,
-          eventDate: {
-            gte: new Date(new Date().setHours(0, 0, 0, 0)),
-          },
-        },
-        orderBy: {
-          eventDate: 'asc',
-        },
-        include: {
-          bounceHouse: {
-            select: {
-              name: true,
-            },
-          },
-        },
-      });
-
-      return bookings;
+    const bookings = await prisma.booking.findMany({
+      where: {
+        businessId: businessId,
+      },
     });
 
-    if ('error' in result) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-
-    return NextResponse.json(result);
+    return NextResponse.json(bookings, { status: 200 });
   } catch (error) {
-    console.error("[BOOKING_GET_ERROR]", error);
+    console.error("Error fetching bookings:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Failed to fetch bookings" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

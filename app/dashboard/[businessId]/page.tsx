@@ -112,14 +112,17 @@ export default function DashboardPage() {
         console.log("booking data" ,bookingsData.data);
         console.log("business data" ,businessData);
 
+        // Check if bookingsData is an array, if not, use an empty array
+        const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
+
         // Calculate dashboard metrics
-        const activeBookings = bookingsData.data.filter((b) => b.status === 'CONFIRMED').length;
-        const pendingBookings = bookingsData.data.filter((b) => b.status === 'PENDING').length;
-        const totalRevenue = bookingsData.data.reduce((acc, b) => acc + (b.totalAmount || 0), 0);
+        const activeBookings = bookingsArray.filter((b) => b.status === 'CONFIRMED').length;
+        const pendingBookings = bookingsArray.filter((b) => b.status === 'PENDING').length;
+        const totalRevenue = bookingsArray.reduce((acc, b) => acc + (b.totalAmount || 0), 0);
 
         // Get available and maintenance units
-        const availableUnits = businessData.bounceHouses.filter((bh) => bh.status === 'AVAILABLE').length;
-        const maintenanceUnits = businessData.bounceHouses.filter((bh) => bh.status === 'MAINTENANCE').length;
+        const availableUnits = businessData.inventory.filter((bh) => bh.status === 'AVAILABLE').length;
+        const maintenanceUnits = businessData.inventory.filter((bh) => bh.status === 'MAINTENANCE').length;
 
         setData({
           totalRevenue,
@@ -129,7 +132,7 @@ export default function DashboardPage() {
           availableUnits,
           maintenanceUnits,
           recentActivity: [], // You can populate this from bookings/payments history
-          upcomingBookings: bookingsData.data.slice(0, 3) // Take first 3 upcoming bookings
+          upcomingBookings: bookingsArray.slice(0, 3) // Take first 3 upcoming bookings
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -141,7 +144,7 @@ export default function DashboardPage() {
         
         // If unauthorized, redirect to auth page
         if (error instanceof Error && error.message.includes('Unauthorized')) {
-          window.location.href = '/auth';
+          window.location.href = '/sign-in';
         }
       } finally {
         setIsLoading(false);
@@ -182,9 +185,9 @@ export default function DashboardPage() {
             <CalendarCheck className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.activeBookings}</div>
+            <div className="text-2xl font-bold">{data.activeBookings || 0} </div>
             <p className="text-xs text-muted-foreground">
-              {data.pendingBookings} pending approval
+              {data.pendingBookings || 0} pending approval
             </p>
           </CardContent>
         </Card>
@@ -195,7 +198,7 @@ export default function DashboardPage() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalCustomers}</div>
+            <div className="text-2xl font-bold">{data.totalCustomers || 0}</div>
             <p className="text-xs text-muted-foreground">
               Registered customers
             </p>
@@ -208,9 +211,9 @@ export default function DashboardPage() {
             <Package className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.availableUnits}</div>
+            <div className="text-2xl font-bold">{data.availableUnits || 0}</div>
             <p className="text-xs text-muted-foreground">
-              {data.maintenanceUnits} need maintenance
+              {data.maintenanceUnits || 0} need maintenance
             </p>
           </CardContent>
         </Card>
@@ -231,7 +234,7 @@ export default function DashboardPage() {
                       <CalendarCheck className="h-4 w-4 text-blue-600" />
                     </div>
                     <div className="flex-1">
-                      <p className="text-sm font-medium">New Booking: {booking.bounceHouse.name}</p>
+                      <p className="text-sm font-medium">New Booking</p>
                       <p className="text-xs text-muted-foreground">
                         {new Date(booking.eventDate).toLocaleDateString()} • {booking.startTime} - {booking.endTime}
                       </p>
@@ -282,7 +285,7 @@ export default function DashboardPage() {
               data.upcomingBookings.map((booking) => (
                 <div key={booking.id} className="flex items-center gap-4 rounded-lg border p-4">
                   <div className="flex-1">
-                    <p className="font-medium">{booking.bounceHouse.name}</p>
+                    <p className="font-medium">{booking.bounceHouse?.name || 'Unknown Bounce House'}</p>
                     <p className="text-sm text-muted-foreground">
                       {new Date(booking.eventDate).toLocaleDateString()} • {booking.startTime} - {booking.endTime}
                     </p>

@@ -1,5 +1,5 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { getCurrentUser } from "@/lib/auth/utils";
+import { getCurrentUser } from "@/lib/auth/clerk-utils";
 
 const f = createUploadthing();
 

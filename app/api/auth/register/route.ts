@@ -1,13 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import bcrypt from "bcrypt";
 
 const registerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
-  company: z.string().optional(),
+  clerkUserId: z.string().min(1, "Clerk user ID is required"),
 });
 
 export async function POST(req: NextRequest) {
@@ -27,28 +25,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Hash password
-    const hashedPassword = await bcrypt.hash(validatedData.password, 12);
-
-    // Create user
-    const user = await prisma.user.create({
+    
+    await prisma.user.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
-        password: hashedPassword,
-        role: "USER", // Set default role
+        clerkUserId: validatedData.clerkUserId,
       },
     });
-
-    // If company name is provided, create a business for the user
-    if (validatedData.company) {
-      await prisma.business.create({
-        data: {
-          name: validatedData.company,
-          userId: user.id,
-        },
-      });
-    }
 
     return NextResponse.json(
       { message: "User created successfully" },

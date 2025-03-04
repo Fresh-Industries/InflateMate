@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/utils";
+import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";  
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -11,10 +11,10 @@ const customerSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { businessId: string } }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    const { businessId } = await params;
+    const businessId  = (await params).businessId;
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json(
@@ -71,10 +71,10 @@ export async function POST(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { businessId: string }}
+  { params }: { params: Promise<{ businessId: string }>}
 ) {
   try {
-    const { businessId } = await params;
+    const businessId  = (await params).businessId;
     const user = await getCurrentUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

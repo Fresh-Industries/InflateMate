@@ -1,5 +1,5 @@
 'use client'
-import { UserButton } from "@/components/UserButton";
+import { UserButton } from "@clerk/nextjs";
 import { ModeToggle } from "@/components/ModeToggle";
 import Link from "next/link";
 import { useParams, usePathname } from "next/navigation";

@@ -13,66 +13,23 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Account {
-  id                String  @id @default(cuid())
-  userId            String
-  type              String
-  provider          String
-  providerAccountId String
-  refresh_token     String? @db.Text
-  access_token      String? @db.Text
-  expires_at        Int?
-  token_type        String?
-  scope             String?
-  id_token          String? @db.Text
-  session_state     String?
-
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@unique([provider, providerAccountId])
-  @@index([userId])
-}
-
-model Session {
-  id           String   @id @default(cuid())
-  sessionToken String   @unique
-  userId       String
-  expires      DateTime
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-
-  @@index([userId])
-}
-
 model User {
-  id            String    @id @default(cuid())
-  name          String?
-  email         String?   @unique
-  emailVerified DateTime?
-  image         String?
-  password      String? // Hashed password for email/password auth
-  role          UserRole  @default(USER)
-  onboarded     Boolean   @default(false)
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-
-  accounts   Account[]
-  sessions   Session[]
-  businesses Business[] // For multi-tenancy
+  id          String     @id @default(cuid())
+  name        String?
+  email       String?    @unique
+  image       String?
+  clerkUserId String?    @unique
+  onboarded   Boolean    @default(false)
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  businesses  Business[]
 
   @@index([email])
 }
 
-model VerificationToken {
-  identifier String
-  token      String   @unique
-  expires    DateTime
-
-  @@unique([identifier, token])
-}
-
 // Multi-tenancy and business models
 model Business {
-  id              String        @id @default(cuid())
+  id              String      @id @default(cuid())
   name            String
   description     String?
   address         String?
@@ -85,66 +42,35 @@ model Business {
   stripeAccountId String?
   logo            String?
   userId          String
-  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  bounceHouses    BounceHouse[]
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   bookings        Booking[]
   customers       Customer[]
-  packages        Package[]
-  addOns          AddOn[]
   settings        Json?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  inventory       Inventory[]
+  payments        Payment[]
 
-  // Business settings
-  businessHours      BusinessHours[]
-  serviceArea        ServiceArea?
   cancellationPolicy String? // Cancellation policy text
-  depositRequired    Boolean         @default(true)
-  depositPercentage  Float           @default(25.0) // Default 25% deposit
-  minAdvanceBooking  Int             @default(24) // Minimum hours before booking
-  maxAdvanceBooking  Int             @default(90) // Maximum days to book in advance
-  bufferTime         Int             @default(60) // Buffer time in minutes between bookings
-  Employee           Employee[]
-  Payment            Payment[]
-  Coupon             Coupon[]
+  depositRequired    Boolean @default(true)
+  depositPercentage  Float   @default(25.0) // Default 25% deposit
+  minAdvanceBooking  Int     @default(24) // Minimum hours before booking
+  maxAdvanceBooking  Int     @default(90) // Maximum days to book in advance
+  bufferTime         Int     @default(60) // Buffer time in minutes between bookings
 
   @@index([userId])
 }
 
-model BusinessHours {
-  id        String   @id @default(cuid())
-  dayOfWeek Int // 0-6 (Sunday-Saturday)
-  openTime  DateTime
-  closeTime DateTime
-  isOpen    Boolean  @default(true)
-
-  businessId String
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-
-  @@unique([businessId, dayOfWeek])
-  @@index([businessId])
-}
-
-model ServiceArea {
-  id          String   @id @default(cuid())
-  businessId  String   @unique
-  business    Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  radius      Float // Service radius in miles
-  zipCodes    String[] // Array of service area zip codes
-  coordinates Json? // GeoJSON for custom service area
-
-  @@index([businessId])
-}
-
-model BounceHouse {
-  id                  String               @id @default(cuid())
+model Inventory {
+  id                  String          @id @default(cuid())
+  type                InventoryType
   name                String
   description         String?
   dimensions          String
   capacity            Int
   price               Float
-  setupTime           Int
-  teardownTime        Int
+  setupTime           Int // Minutes
+  teardownTime        Int // Minutes
   images              String[]
   primaryImage        String?
   status              InventoryStatus
@@ -152,40 +78,27 @@ model BounceHouse {
   weightLimit         Int
   ageRange            String
   weatherRestrictions String[]
-  features            BounceHouseFeature[]
-  bookings            Booking[]
-  business            Business             @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bookingItems        BookingItem[] // Changed from direct booking relation to BookingItem relation
+  business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
   businessId          String
   availability        Availability[]
-  createdAt           DateTime             @default(now())
-  updatedAt           DateTime             @updatedAt
-  PackageItem         PackageItem[]
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
 
   @@index([businessId])
 }
 
-// Features for bounce houses (e.g., "Slide", "Basketball Hoop", etc.)
-model BounceHouseFeature {
-  id            String      @id @default(cuid())
-  name          String
-  bounceHouseId String
-  bounceHouse   BounceHouse @relation(fields: [bounceHouseId], references: [id], onDelete: Cascade)
-
-  @@unique([bounceHouseId, name])
-  @@index([bounceHouseId])
-}
-
 // Track availability and block out dates
 model Availability {
-  id            String      @id @default(cuid())
-  bounceHouseId String
-  bounceHouse   BounceHouse @relation(fields: [bounceHouseId], references: [id], onDelete: Cascade)
-  startTime     DateTime
-  endTime       DateTime
-  isAvailable   Boolean     @default(true)
-  reason        String? // Reason for unavailability (e.g., "Maintenance", "Holiday")
+  id          String    @id @default(cuid())
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
+  startTime   DateTime
+  endTime     DateTime
+  isAvailable Boolean   @default(true)
+  reason      String? // Reason for unavailability (e.g., "Maintenance", "Holiday")
 
-  @@index([bounceHouseId])
+  @@index([inventoryId])
   @@index([startTime, endTime])
 }
 
@@ -199,7 +112,7 @@ model Customer {
   state        String?
   zipCode      String?
   notes        String? // Customer notes/preferences
-  status       String    @default("Active") // Add status field with default value
+  status       String    @default("Active")
   bookingCount Int       @default(0)
   totalSpent   Float     @default(0)
   lastBooking  DateTime?
@@ -210,20 +123,21 @@ model Customer {
   business   Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
   bookings   Booking[]
 
+  @@unique([email, businessId]) // Makes email unique only within a business context
   @@index([businessId])
   @@index([email])
   @@index([phone])
 }
 
 model Booking {
-  id                  String         @id @default(cuid())
+  id                  String        @id @default(cuid())
   eventDate           DateTime
   startTime           DateTime
   endTime             DateTime
-  status              BookingStatus  @default(PENDING)
+  status              BookingStatus @default(PENDING)
   totalAmount         Float
   depositAmount       Float?
-  depositPaid         Boolean        @default(false)
+  depositPaid         Boolean       @default(false)
   eventType           String?
   eventAddress        String
   eventCity           String
@@ -233,146 +147,54 @@ model Booking {
   participantCount    Int
   specialInstructions String?
   businessId          String
-  business            Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  bounceHouseId       String
-  bounceHouse         BounceHouse    @relation(fields: [bounceHouseId], references: [id])
+  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   customerId          String
-  customer            Customer       @relation(fields: [customerId], references: [id])
-  packageId           String?
-  package             Package?       @relation(fields: [packageId], references: [id])
-  addOns              BookingAddOn[]
+  customer            Customer      @relation(fields: [customerId], references: [id])
+  inventoryItems      BookingItem[] // New relation to BookingItem
   payments            Payment[]
-  createdAt           DateTime       @default(now())
-  updatedAt           DateTime       @updatedAt
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
 
   @@index([businessId])
-  @@index([bounceHouseId])
   @@index([customerId])
-  @@index([packageId])
   @@index([eventDate])
   @@index([startTime, endTime])
 }
 
-model Package {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  price       Float
-  isActive    Boolean @default(true)
-
-  businessId String
-  business   Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  items      PackageItem[]
-  bookings   Booking[]
-  addOns     AddOn[]
-  createdAt  DateTime      @default(now())
-  updatedAt  DateTime      @updatedAt
-
-  @@index([businessId])
-}
-
-model PackageItem {
-  id            String      @id @default(cuid())
-  packageId     String
-  package       Package     @relation(fields: [packageId], references: [id], onDelete: Cascade)
-  bounceHouseId String
-  bounceHouse   BounceHouse @relation(fields: [bounceHouseId], references: [id], onDelete: Cascade)
-
-  @@unique([packageId, bounceHouseId])
-  @@index([packageId])
-  @@index([bounceHouseId])
-}
-
-model AddOn {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
-  price       Float
-  isActive    Boolean @default(true)
-
-  businessId    String
-  business      Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  packages      Package[]
-  bookingAddOns BookingAddOn[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
-
-  @@index([businessId])
-}
-
-model BookingAddOn {
-  id        String   @id @default(cuid())
-  bookingId String
-  booking   Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  addOnId   String?
-  addOn     AddOn?   @relation(fields: [addOnId], references: [id])
-  name      String
-  quantity  Int
-  price     Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+// New model to handle multiple inventory items per booking
+model BookingItem {
+  id          String    @id @default(cuid())
+  bookingId   String
+  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  inventoryId String
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  quantity    Int       @default(1)
+  price       Float // Price at time of booking
 
   @@index([bookingId])
-  @@index([addOnId])
+  @@index([inventoryId])
 }
 
 model Payment {
   id                 String        @id @default(cuid())
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
-  paidAt             DateTime?
   amount             Decimal       @db.Decimal(10, 2)
   currency           String        @default("USD")
   status             PaymentStatus
   type               PaymentType
   stripePaymentId    String? // Stripe payment intent ID
   stripeClientSecret String? // For client-side confirmation
-  booking            Booking       @relation(fields: [bookingId], references: [id])
-  bookingId          String
-  business           Business      @relation(fields: [businessId], references: [id])
-  businessId         String
   refundAmount       Decimal?      @db.Decimal(10, 2)
   refundReason       String?
   metadata           Json? // Additional payment metadata
-}
 
-model Coupon {
-  id             String       @id @default(cuid())
-  code           String       @unique
-  description    String?
-  discountType   DiscountType
-  discountAmount Float // Percentage or fixed amount
-  maxUses        Int? // Maximum number of times the coupon can be used
-  usedCount      Int          @default(0)
-  startDate      DateTime?
-  endDate        DateTime?
-  isActive       Boolean      @default(true)
-  minimumAmount  Float? // Minimum order amount for the coupon to be valid
-  business       Business     @relation(fields: [businessId], references: [id])
-  businessId     String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-}
-
-model Employee {
-  id        String       @id @default(cuid())
-  name      String
-  email     String
-  phone     String?
-  role      EmployeeRole @default(STAFF)
-  createdAt DateTime     @default(now())
-  updatedAt DateTime     @updatedAt
-
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+  bookingId  String
+  business   Business @relation(fields: [businessId], references: [id])
   businessId String
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
-  @@index([businessId])
-  @@index([email])
-}
-
-enum UserRole {
-  USER
-  ADMIN
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  paidAt    DateTime?
 }
 
 enum InventoryStatus {
@@ -380,6 +202,13 @@ enum InventoryStatus {
   BOOKED
   MAINTENANCE
   RETIRED
+}
+
+enum InventoryType {
+  BOUNCE_HOUSE
+  INFLATABLE
+  GAME
+  OTHER
 }
 
 enum BookingStatus {
@@ -391,15 +220,8 @@ enum BookingStatus {
   WEATHER_HOLD
 }
 
-enum EmployeeRole {
-  STAFF
-  MANAGER
-  ADMIN
-}
-
 enum PaymentType {
   DEPOSIT
-  BALANCE
   FULL_PAYMENT
   REFUND
 }
@@ -409,9 +231,4 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
-}
-
-enum DiscountType {
-  PERCENTAGE
-  FIXED
 }

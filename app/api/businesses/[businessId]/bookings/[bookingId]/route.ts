@@ -1,9 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/utils";
+import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { withBusinessAuth } from "@/lib/auth/clerk-utils";
 
-// Booking Update Schema
+// Schema for updating a booking
 const updateBookingSchema = z.object({
   eventDate: z.string(),
   startTime: z.string(),
@@ -27,37 +28,33 @@ const updateBookingSchema = z.object({
  * GET a specific booking
  */
 export async function GET(
-  request: NextRequest,
-  { params }: { params: { businessId: string, bookingId: string }}
+  req: NextRequest,
+  { params }: { params: { businessId: string; bookingId: string } }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
+    
     const { businessId, bookingId } = await params;
-
-    const result = await withBusinessAuth(businessId, user.id, async () => {
+    const result = await withBusinessAuth(businessId, userId, async () => {
       const booking = await prisma.booking.findFirst({
         where: { id: bookingId, businessId },
         include: {
+          inventoryItems: { include: { inventory: true } },
           customer: true,
-          bounceHouse: true,
         },
       });
-
       if (!booking) {
         return { error: "Booking not found" };
       }
-
       return { data: booking };
     });
-
+    
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 404 });
     }
-
     return NextResponse.json(result.data);
   } catch (error) {
     console.error("Error in GET booking route:", error);
@@ -69,68 +66,61 @@ export async function GET(
 }
 
 /**
- * PATCH (Update) an existing booking
+ * PATCH (update) an existing booking
  */
 export async function PATCH(
-  request: NextRequest,
-  { params }: { params: { businessId: string, bookingId: string }}
+  req: NextRequest,
+  { params }: { params: Promise<{ businessId: string; bookingId: string }> }
 ) {
   try {
-    const user = await getCurrentUser();
-    if (!user) {
+    const { userId } = await auth();
+    if (!userId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
+    
     const { businessId, bookingId } = await params;
-    const body = await request.json();
-
-    console.log("API Route Hit - PATCH Booking");
-    console.log("Business ID:", businessId);
-    console.log("Booking ID:", bookingId);
-    console.log("Update Data:", body);
-
-    // Validate request body using Zod
+    const body = await req.json();
     const validatedData = updateBookingSchema.parse(body);
-
-    const result = await withBusinessAuth(businessId, user.id, async () => {
-      // Convert date fields
+    
+    const result = await withBusinessAuth(businessId, userId, async () => {
       const eventDate = new Date(validatedData.eventDate);
       const startTime = new Date(validatedData.startTime);
       const endTime = new Date(validatedData.endTime);
-
+      
       if (startTime >= endTime) {
         return { error: "Start time must be before end time" };
       }
-
-      // Check for overlapping bookings (excluding current booking)
-      const conflictingBooking = await prisma.booking.findFirst({
+      
+      // Check for overlapping bookings (exclude current booking) using BookingItem
+      const conflictingItem = await prisma.bookingItem.findFirst({
         where: {
-          id: { not: bookingId }, 
-          bounceHouseId: validatedData.bounceHouseId,
-          eventDate,
-          OR: [
-            {
-              AND: [
-                { startTime: { lte: startTime } },
-                { endTime: { gt: startTime } },
-              ],
-            },
-            {
-              AND: [
-                { startTime: { lt: endTime } },
-                { endTime: { gte: endTime } },
-              ],
-            },
-          ],
-          status: { notIn: ["CANCELLED"] },
+          inventoryId: validatedData.bounceHouseId,
+          booking: {
+            id: { not: bookingId },
+            eventDate,
+            OR: [
+              {
+                AND: [
+                  { startTime: { lte: startTime } },
+                  { endTime: { gt: startTime } },
+                ],
+              },
+              {
+                AND: [
+                  { startTime: { lt: endTime } },
+                  { endTime: { gte: endTime } },
+                ],
+              },
+            ],
+            status: { notIn: ["CANCELLED"] },
+          },
         },
       });
-
-      if (conflictingBooking) {
+      if (conflictingItem) {
         return { error: "Selected time slot is already booked" };
       }
-
-      // Update the booking
+      
+      // Update the booking record and nested customer info
       const updatedBooking = await prisma.booking.update({
         where: { id: bookingId, businessId },
         data: {
@@ -146,6 +136,7 @@ export async function PATCH(
           participantAge: validatedData.participantAge,
           specialInstructions: validatedData.specialInstructions,
           totalAmount: validatedData.totalAmount,
+          // Update associated customer data
           customer: {
             update: {
               name: validatedData.customerName,
@@ -153,20 +144,20 @@ export async function PATCH(
               phone: validatedData.customerPhone,
             },
           },
+          // (Optionally, update inventoryItems if needed)
         },
         include: {
+          inventoryItems: { include: { inventory: true } },
           customer: true,
-          bounceHouse: true,
         },
       });
-
+      
       return { data: updatedBooking };
     });
-
+    
     if (result.error) {
       return NextResponse.json({ error: result.error }, { status: 400 });
     }
-
     return NextResponse.json(result.data, { status: 200 });
   } catch (error) {
     console.error("Error in PATCH booking route:", error);
@@ -176,6 +167,41 @@ export async function PATCH(
         { status: 400 }
       );
     }
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+/**
+ * DELETE a specific booking
+ */
+export async function DELETE(
+  req: NextRequest,
+  { params }: { params: Promise<{ businessId: string; bookingId: string }> }
+) {
+
+  try {
+    const { userId } = await auth();
+    if (!userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const { businessId, bookingId } = await params;
+    const result = await withBusinessAuth(businessId, userId, async () => {
+      const booking = await prisma.booking.delete({
+        where: { id: bookingId, businessId },
+      });
+      return { data: booking };
+    });
+
+    if (result.error) {
+      return NextResponse.json({ error: result.error }, { status: 400 });
+    }
+    return NextResponse.json(result.data, { status: 200 });
+  } catch (error) {
+    console.error("Error in DELETE booking route:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal Server Error" },
       { status: 500 }
