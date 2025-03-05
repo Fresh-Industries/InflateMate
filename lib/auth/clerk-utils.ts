@@ -84,12 +84,31 @@ export async function withBusinessAuth<T>(
   try {
     console.log(`withBusinessAuth called for business ${businessId} and user ${userId}`);
     
-    const business = await prisma.business.findFirst({
+    // First, try to find the business directly with the userId
+    let business = await prisma.business.findFirst({
       where: {
         id: businessId,
         userId: userId,
       },
     });
+
+    // If not found, check if the userId is a Clerk ID and find the corresponding user
+    if (!business) {
+      console.log(`Business not found directly, checking for Clerk user mapping`);
+      const user = await prisma.user.findUnique({
+        where: { clerkUserId: userId },
+      });
+      
+      if (user) {
+        console.log(`Found user with Clerk ID ${userId}, checking business with user ID ${user.id}`);
+        business = await prisma.business.findFirst({
+          where: {
+            id: businessId,
+            userId: user.id,
+          },
+        });
+      }
+    }
 
     if (!business) {
       console.error(`Business ${businessId} not found for user ${userId}`);

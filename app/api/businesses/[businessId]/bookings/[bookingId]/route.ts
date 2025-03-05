@@ -49,7 +49,23 @@ export async function GET(
       if (!booking) {
         return { error: "Booking not found" };
       }
-      return { data: booking };
+      
+      // Ensure bounceHouseId is set in the response
+      let responseData: any = { ...booking };
+      
+      // If there's an inventory item, set the bounceHouseId
+      if (booking.inventoryItems && booking.inventoryItems.length > 0) {
+        responseData.bounceHouseId = booking.inventoryItems[0].inventoryId;
+        
+        // Also set the bounceHouse object for convenience
+        responseData.bounceHouse = {
+          id: booking.inventoryItems[0].inventoryId,
+          name: booking.inventoryItems[0].inventory.name
+        };
+      }
+      
+      console.log("Returning booking with bounceHouseId:", responseData.bounceHouseId);
+      return { data: responseData };
     });
     
     if (result.error) {
@@ -78,95 +94,159 @@ export async function PATCH(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
     
-    const { businessId, bookingId } = await params;
-    const body = await req.json();
-    const validatedData = updateBookingSchema.parse(body);
+    const businessId = (await params).businessId;
+    const bookingId = (await params).bookingId;
     
-    const result = await withBusinessAuth(businessId, userId, async () => {
-      const eventDate = new Date(validatedData.eventDate);
-      const startTime = new Date(validatedData.startTime);
-      const endTime = new Date(validatedData.endTime);
+    const body = await req.json();
+    console.log("Update booking request body:", body);
+    
+    // Extract customer data from the nested customer object if it exists
+    const processedBody = { ...body };
+    
+    if (body.customer && !body.customerName) {
+      processedBody.customerName = body.customer.name;
+      processedBody.customerEmail = body.customer.email;
+      processedBody.customerPhone = body.customer.phone;
+      console.log("Extracted customer data from nested customer object");
+    }
+    
+    try {
+      const validatedData = updateBookingSchema.parse(processedBody);
       
-      if (startTime >= endTime) {
-        return { error: "Start time must be before end time" };
-      }
-      
-      // Check for overlapping bookings (exclude current booking) using BookingItem
-      const conflictingItem = await prisma.bookingItem.findFirst({
-        where: {
-          inventoryId: validatedData.bounceHouseId,
-          booking: {
-            id: { not: bookingId },
-            eventDate,
-            OR: [
-              {
-                AND: [
-                  { startTime: { lte: startTime } },
-                  { endTime: { gt: startTime } },
-                ],
-              },
-              {
-                AND: [
-                  { startTime: { lt: endTime } },
-                  { endTime: { gte: endTime } },
-                ],
-              },
-            ],
-            status: { notIn: ["CANCELLED"] },
-          },
-        },
-      });
-      if (conflictingItem) {
-        return { error: "Selected time slot is already booked" };
-      }
-      
-      // Update the booking record and nested customer info
-      const updatedBooking = await prisma.booking.update({
-        where: { id: bookingId, businessId },
-        data: {
-          eventDate,
-          startTime,
-          endTime,
-          eventType: validatedData.eventType,
-          eventAddress: validatedData.eventAddress,
-          eventCity: validatedData.eventCity,
-          eventState: validatedData.eventState,
-          eventZipCode: validatedData.eventZipCode,
-          participantCount: validatedData.participantCount,
-          participantAge: validatedData.participantAge,
-          specialInstructions: validatedData.specialInstructions,
-          totalAmount: validatedData.totalAmount,
-          // Update associated customer data
-          customer: {
-            update: {
-              name: validatedData.customerName,
-              email: validatedData.customerEmail,
-              phone: validatedData.customerPhone,
+      const result = await withBusinessAuth(businessId, userId, async () => {
+        // Get the existing booking first
+        const existingBooking = await prisma.booking.findUnique({
+          where: { id: bookingId },
+          include: { inventoryItems: true }
+        });
+        
+        if (!existingBooking) {
+          return { error: "Booking not found" };
+        }
+        
+        // Create a date that preserves the user's selected date regardless of time zone
+        // We use YYYY-MM-DD format and set the time to noon to avoid any date shifting
+        const dateParts = validatedData.eventDate.split('-');
+        const year = parseInt(dateParts[0]);
+        const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-indexed
+        const day = parseInt(dateParts[2]);
+        
+        // Create a date at noon UTC on the selected day to avoid time zone issues
+        const eventDate = new Date(Date.UTC(year, month, day, 12, 0, 0));
+        
+        console.log(`Original date string: ${validatedData.eventDate}`);
+        console.log(`Parsed event date: ${eventDate.toISOString()}`);
+        
+        // Format times properly - handle both HH:MM format and full ISO strings
+        let startTime, endTime;
+        
+        if (validatedData.startTime.includes('T')) {
+          startTime = new Date(validatedData.startTime);
+        } else {
+          // Handle HH:MM format - use the same date as eventDate for consistency
+          const [hours, minutes] = validatedData.startTime.split(':').map(Number);
+          startTime = new Date(Date.UTC(year, month, day, hours, minutes));
+          console.log(`Parsed start time: ${startTime.toISOString()}`);
+        }
+        
+        if (validatedData.endTime.includes('T')) {
+          endTime = new Date(validatedData.endTime);
+        } else {
+          // Handle HH:MM format - use the same date as eventDate for consistency
+          const [hours, minutes] = validatedData.endTime.split(':').map(Number);
+          endTime = new Date(Date.UTC(year, month, day, hours, minutes));
+          console.log(`Parsed end time: ${endTime.toISOString()}`);
+        }
+        
+        if (startTime >= endTime) {
+          return { error: "Start time must be before end time" };
+        }
+        
+        console.log(`Checking conflicts for booking ${bookingId} on date ${eventDate.toISOString().split('T')[0]}`);
+        
+        // Check for overlapping bookings (exclude current booking) using BookingItem
+        const conflictingItem = await prisma.bookingItem.findFirst({
+          where: {
+            inventoryId: validatedData.bounceHouseId,
+            booking: {
+              id: { not: bookingId }, // Exclude the current booking
+              eventDate,
+              status: { notIn: ["CANCELLED"] },
             },
           },
-          // (Optionally, update inventoryItems if needed)
-        },
-        include: {
-          inventoryItems: { include: { inventory: true } },
-          customer: true,
-        },
+          include: {
+            booking: true,
+          }
+        });
+        
+        if (conflictingItem) {
+          console.log("Found conflicting booking:", conflictingItem);
+          return { error: "Selected date is already booked for this bounce house" };
+        }
+        
+        // Update the booking record and nested customer info
+        const updatedBooking = await prisma.booking.update({
+          where: { id: bookingId, businessId },
+          data: {
+            eventDate,
+            startTime,
+            endTime,
+            eventType: validatedData.eventType,
+            eventAddress: validatedData.eventAddress,
+            eventCity: validatedData.eventCity,
+            eventState: validatedData.eventState,
+            eventZipCode: validatedData.eventZipCode,
+            participantCount: validatedData.participantCount,
+            participantAge: validatedData.participantAge,
+            specialInstructions: validatedData.specialInstructions,
+            totalAmount: validatedData.totalAmount,
+            // Update associated customer data
+            customer: {
+              update: {
+                name: validatedData.customerName,
+                email: validatedData.customerEmail,
+                phone: validatedData.customerPhone,
+              },
+            },
+            // Update inventory items if bounceHouseId has changed
+            inventoryItems: existingBooking.inventoryItems[0]?.inventoryId !== validatedData.bounceHouseId
+              ? {
+                  deleteMany: {},
+                  create: {
+                    inventoryId: validatedData.bounceHouseId,
+                    price: validatedData.totalAmount,
+                  }
+                }
+              : undefined,
+          },
+          include: {
+            inventoryItems: { include: { inventory: true } },
+            customer: true,
+          },
+        });
+        
+        return { data: updatedBooking };
       });
       
-      return { data: updatedBooking };
-    });
-    
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 400 });
-    }
-    return NextResponse.json(result.data, { status: 200 });
-  } catch (error) {
-    console.error("Error in PATCH booking route:", error);
-    if (error instanceof z.ZodError) {
+      if (result.error) {
+        return NextResponse.json({ error: result.error }, { status: 400 });
+      }
+      return NextResponse.json(result.data, { status: 200 });
+    } catch (error) {
+      console.error("Error in PATCH booking route:", error);
+      if (error instanceof z.ZodError) {
+        return NextResponse.json(
+          { error: "Invalid input", details: error.errors },
+          { status: 400 }
+        );
+      }
       return NextResponse.json(
-        { error: "Invalid input", details: error.errors },
-        { status: 400 }
+        { error: error instanceof Error ? error.message : "Internal Server Error" },
+        { status: 500 }
       );
     }
+  } catch (error) {
+    console.error("Error in PATCH booking route:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal Server Error" },
       { status: 500 }

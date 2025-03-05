@@ -14,6 +14,9 @@ interface PaymentFormProps {
   onSuccess: () => Promise<void>;
   onError?: (error: string) => void;
   businessId: string;
+  subtotal?: number;
+  taxAmount?: number;
+  taxRate?: number;
 }
 
 export function PaymentForm({
@@ -23,6 +26,9 @@ export function PaymentForm({
   onSuccess,
   onError = () => {},
   businessId,
+  subtotal,
+  taxAmount,
+  taxRate,
 }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -118,6 +124,30 @@ export function PaymentForm({
           {errorMessage}
         </div>
       )}
+      
+      {/* Payment Summary */}
+      <div className="p-4 border rounded-md space-y-2 bg-muted/30">
+        <h3 className="font-medium">Payment Summary</h3>
+        
+        {subtotal !== undefined && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Subtotal:</span>
+            <span>${subtotal.toFixed(2)}</span>
+          </div>
+        )}
+        
+        {taxAmount !== undefined && taxRate !== undefined && (
+          <div className="flex justify-between text-sm">
+            <span className="text-muted-foreground">Tax ({taxRate}%):</span>
+            <span>${taxAmount.toFixed(2)}</span>
+          </div>
+        )}
+        
+        <div className="flex justify-between font-medium pt-2 border-t">
+          <span>Total:</span>
+          <span>${amount.toFixed(2)}</span>
+        </div>
+      </div>
       
       {stripe && elements ? (
         <PaymentElement />

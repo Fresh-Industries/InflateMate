@@ -24,6 +24,9 @@ interface Booking {
   endTime: string;
   status: BookingStatus;
   totalAmount: number;
+  subtotalAmount?: number;
+  taxAmount?: number;
+  taxRate?: number;
   bounceHouseId: string;
   bounceHouse: BounceHouse;
   eventType: string;
@@ -114,6 +117,9 @@ async function getInitialData(businessId: string) {
       endTime: booking.endTime.toISOString(),
       status: booking.status,
       totalAmount: booking.totalAmount,
+      subtotalAmount: booking.subtotalAmount || 0,
+      taxAmount: booking.taxAmount || 0,
+      taxRate: booking.taxRate || 0,
       bounceHouseId: firstItem?.inventoryId || '',
       bounceHouse,
       eventType: booking.eventType || 'Not specified',
