@@ -24,10 +24,10 @@ import {
   History,
   LayoutGrid,
   List,
+  Plus,
 } from "lucide-react";
-import { CreateBounceHouseDialog } from "@/app/dashboard/[businessId]/inventory/_components/CreateBounceHouseDialog";
 import { useToast } from "@/hooks/use-toast";
-import { BounceHouseList } from "@/app/dashboard/[businessId]/inventory/_components/BounceHouseList";
+import { InventoryList } from "@/app/dashboard/[businessId]/inventory/_components/InventoryList";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -39,11 +39,18 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { formatCurrency } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
-interface BounceHouse {
+interface InventoryItem {
   id: string;
   name: string;
   status: "AVAILABLE" | "MAINTENANCE" | "RETIRED";
+  type: "BOUNCE_HOUSE" | "INFLATABLE" | "GAME" | "OTHER";
   description: string;
   dimensions: string;
   capacity: number;
@@ -55,12 +62,13 @@ interface BounceHouse {
   ageRange: string;
   primaryImage?: string;
   images: string[];
-  features: { name: string }[];
   weatherRestrictions: string[];
   availability?: {
     startTime: string;
     endTime: string;
   }[];
+  quantity: number;
+  bookingCount: number;
 }
 
 export default function InventoryPage() {
@@ -69,15 +77,16 @@ export default function InventoryPage() {
   const businessId = params?.businessId as string;
   const { toast } = useToast();
 
-  const [bounceHouses, setBounceHouses] = useState<BounceHouse[]>([]);
+  const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [statusFilter, setStatusFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
 
-  // Fetch bounce houses using useCallback to memoize the function
-  const fetchBounceHouses = useCallback(async () => {
+  // Fetch inventory items
+  const fetchInventory = useCallback(async () => {
     try {
       if (!businessId) {
         throw new Error("No business ID found");
@@ -86,16 +95,16 @@ export default function InventoryPage() {
       setError(null);
       const response = await fetch(`/api/businesses/${businessId}/inventory`);
       if (!response.ok) {
-        throw new Error("Failed to fetch bounce houses");
+        throw new Error("Failed to fetch inventory");
       }
       const data = await response.json();
-      setBounceHouses(data);
+      setInventoryItems(data);
     } catch (error) {
-      console.error("Error fetching bounce houses:", error);
-      setError(error instanceof Error ? error.message : "Failed to fetch bounce houses");
+      console.error("Error fetching inventory:", error);
+      setError(error instanceof Error ? error.message : "Failed to fetch inventory");
       toast({
         title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch bounce houses",
+        description: error instanceof Error ? error.message : "Failed to fetch inventory",
         variant: "destructive",
       });
     } finally {
@@ -105,23 +114,24 @@ export default function InventoryPage() {
 
   useEffect(() => {
     if (businessId) {
-      fetchBounceHouses();
+      fetchInventory();
     }
-  }, [businessId, fetchBounceHouses]);
+  }, [businessId, fetchInventory]);
 
-  // Memoize filtered bounce houses to avoid unnecessary recalculations
-  const filteredBounceHouses = useMemo(() => {
-    return bounceHouses.filter((bounceHouse) => {
-      const matchesStatus = statusFilter === "all" || bounceHouse.status === statusFilter;
-      const matchesSearch = bounceHouse.name.toLowerCase().includes(searchQuery.toLowerCase());
-      return matchesStatus && matchesSearch;
+  // Memoize filtered inventory items
+  const filteredInventory = useMemo(() => {
+    return inventoryItems.filter((item) => {
+      const matchesStatus = statusFilter === "all" || item.status === statusFilter;
+      const matchesType = typeFilter === "all" || item.type === typeFilter;
+      const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesStatus && matchesType && matchesSearch;
     });
-  }, [bounceHouses, statusFilter, searchQuery]);
+  }, [inventoryItems, statusFilter, typeFilter, searchQuery]);
 
-  const availableCount = bounceHouses.filter((bh) => bh.status === "AVAILABLE").length;
-  const maintenanceCount = bounceHouses.filter((bh) => bh.status === "MAINTENANCE").length;
-  const totalBookings = bounceHouses.reduce(
-    (acc, bh) => acc + (bh.availability?.length || 0),
+  const availableCount = inventoryItems.filter((item) => item.status === "AVAILABLE").length;
+  const maintenanceCount = inventoryItems.filter((item) => item.status === "MAINTENANCE").length;
+  const totalBookings = inventoryItems.reduce(
+    (acc, item) => acc + (item.bookingCount || 0),
     0
   );
 
@@ -139,6 +149,22 @@ export default function InventoryPage() {
     }
   };
 
+  // Returns a display name for inventory type
+  const getInventoryTypeDisplay = (type: string) => {
+    switch (type) {
+      case "BOUNCE_HOUSE":
+        return "Bounce House";
+      case "INFLATABLE":
+        return "Inflatable";
+      case "GAME":
+        return "Game";
+      case "OTHER":
+        return "Other";
+      default:
+        return type;
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -146,13 +172,31 @@ export default function InventoryPage() {
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
           <p className="text-muted-foreground">
-            Manage your bounce house inventory and maintenance schedules
+            Manage your inventory items and maintenance schedules
           </p>
         </div>
-        <CreateBounceHouseDialog 
-          businessId={businessId} 
-          onBounceHouseCreated={fetchBounceHouses} 
-        />
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button>
+              <Plus className="mr-2 h-4 w-4" />
+              Add Item
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=BOUNCE_HOUSE`)}>
+              Bounce House
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=INFLATABLE`)}>
+              Inflatable
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=GAME`)}>
+              Game
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=OTHER`)}>
+              Other
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       {/* Stats Overview */}
@@ -195,11 +239,11 @@ export default function InventoryPage() {
       <Card>
         <CardHeader>
           <CardTitle>Inventory List</CardTitle>
-          <CardDescription>View and manage your bounce house inventory</CardDescription>
+          <CardDescription>View and manage your inventory items</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1">
+          <div className="flex items-center gap-4 mb-6 flex-wrap">
+            <div className="relative flex-1 min-w-[200px]">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search inventory..."
@@ -217,6 +261,18 @@ export default function InventoryPage() {
                 <SelectItem value="AVAILABLE">Available</SelectItem>
                 <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
                 <SelectItem value="RETIRED">Retired</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={typeFilter} onValueChange={setTypeFilter}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Type" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="BOUNCE_HOUSE">Bounce House</SelectItem>
+                <SelectItem value="INFLATABLE">Inflatable</SelectItem>
+                <SelectItem value="GAME">Game</SelectItem>
+                <SelectItem value="OTHER">Other</SelectItem>
               </SelectContent>
             </Select>
             <div className="flex gap-2 border rounded-md p-1">
@@ -247,11 +303,11 @@ export default function InventoryPage() {
           {/* Content */}
           {isLoading ? (
             <div className="text-center py-8">Loading...</div>
-          ) : filteredBounceHouses.length === 0 ? (
-            <div className="text-center py-8">No bounce houses found</div>
+          ) : filteredInventory.length === 0 ? (
+            <div className="text-center py-8">No inventory items found</div>
           ) : viewMode === "grid" ? (
-            <BounceHouseList
-              bounceHouses={filteredBounceHouses}
+            <InventoryList
+              inventoryItems={filteredInventory}
               businessId={businessId}
             />
           ) : (
@@ -260,36 +316,38 @@ export default function InventoryPage() {
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>
+                    <TableHead>Type</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Price</TableHead>
                     <TableHead>Capacity</TableHead>
                     <TableHead>Dimensions</TableHead>
-                    <TableHead>Age Range</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredBounceHouses.map((bounceHouse) => (
-                    <TableRow key={bounceHouse.id}>
+                  {filteredInventory.map((item) => (
+                    <TableRow key={item.id}>
                       <TableCell className="font-medium">
-                        {bounceHouse.name}
+                        {item.name}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={getStatusBadgeVariant(bounceHouse.status)}>
-                          {bounceHouse.status}
+                        {getInventoryTypeDisplay(item.type)}
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={getStatusBadgeVariant(item.status)}>
+                          {item.status}
                         </Badge>
                       </TableCell>
-                      <TableCell>{formatCurrency(bounceHouse.price)}</TableCell>
-                      <TableCell>{bounceHouse.capacity} people</TableCell>
-                      <TableCell>{bounceHouse.dimensions}</TableCell>
-                      <TableCell>{bounceHouse.ageRange}</TableCell>
+                      <TableCell>{formatCurrency(item.price)}</TableCell>
+                      <TableCell>{item.capacity} people</TableCell>
+                      <TableCell>{item.dimensions}</TableCell>
                       <TableCell className="text-right">
                         <Button
                           variant="outline"
                           size="sm"
                           onClick={() =>
                             router.push(
-                              `/dashboard/${businessId}/inventory/${bounceHouse.id}`
+                              `/dashboard/${businessId}/inventory/${item.id}`
                             )
                           }
                         >

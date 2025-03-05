@@ -3,24 +3,46 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { InventoryStatus, InventoryType } from "@prisma/client";
 
-const bounceHouseSchema = z.object({
+// Base schema with common fields for all inventory types
+const baseInventorySchema = z.object({
   name: z.string().min(1, "Name is required"),
   description: z.string().optional(),
-  dimensions: z.string().min(1, "Dimensions are required"),
-  capacity: z.number().min(1, "Capacity must be at least 1"),
   price: z.number().min(0, "Price must be 0 or greater"),
-  setupTime: z.number().min(0),
-  teardownTime: z.number().min(0),
+  status: z.enum(["AVAILABLE", "MAINTENANCE", "RETIRED"]),
   images: z.array(z.object({
     url: z.string(),
     isPrimary: z.boolean()
   })),
-  status: z.enum(["AVAILABLE", "MAINTENANCE", "RETIRED"]),
+  quantity: z.number().int().min(0).default(1),
+  type: z.enum(["BOUNCE_HOUSE", "INFLATABLE", "GAME", "OTHER"]),
+});
+
+// Type-specific schemas
+const bounceHouseSchema = baseInventorySchema.extend({
+  dimensions: z.string().min(1, "Dimensions are required"),
+  capacity: z.number().min(1, "Capacity must be at least 1"),
+  setupTime: z.number().min(0),
+  teardownTime: z.number().min(0),
   minimumSpace: z.string().min(1, "Minimum space is required"),
   weightLimit: z.number().min(0),
   ageRange: z.string().min(1, "Age range is required"),
   weatherRestrictions: z.array(z.string()).optional(),
+});
+
+const gameSchema = baseInventorySchema.extend({
+  dimensions: z.string().min(1, "Dimensions are required").optional(),
+  ageRange: z.string().min(1, "Age range is required"),
+  setupTime: z.number().min(0).optional(),
+  teardownTime: z.number().min(0).optional(),
+  capacity: z.number().min(1, "Capacity must be at least 1").optional(),
+});
+
+const otherSchema = baseInventorySchema.extend({
+  dimensions: z.string().optional(),
+  setupTime: z.number().min(0).optional(),
+  teardownTime: z.number().min(0).optional(),
 });
 
 export async function POST(
@@ -46,40 +68,56 @@ export async function POST(
 
     const result = await withBusinessAuth(businessId, user.id, async (business) => {
       const body = await req.json();
-      const validatedData = bounceHouseSchema.parse(body);
+      
+      // Validate based on inventory type
+      let validatedData;
+      const { type } = body;
+      
+      switch (type) {
+        case "BOUNCE_HOUSE":
+        case "INFLATABLE":
+          validatedData = bounceHouseSchema.parse(body);
+          break;
+        case "GAME":
+          validatedData = gameSchema.parse(body);
+          break;
+        case "OTHER":
+          validatedData = otherSchema.parse(body);
+          break;
+        default:
+          throw new Error("Invalid inventory type");
+      }
 
       // Transform image data to get an array of URLs and determine the primary image.
       const imageUrls = validatedData.images.map(img => img.url);
       const primaryImageUrl =
         validatedData.images.find(img => img.isPrimary)?.url ||
-        imageUrls[0];
+        (imageUrls.length > 0 ? imageUrls[0] : undefined);
 
-      // Supply an empty array if weatherRestrictions is not provided.
-      const weatherRestrictions = validatedData.weatherRestrictions || [];
-
-      // Create the inventory (bounce house) record.
-      const bounceHouse = await prisma.inventory.create({
+      // Create the inventory record
+      const inventory = await prisma.inventory.create({
         data: {
           name: validatedData.name,
-          description: validatedData.description,
-          dimensions: validatedData.dimensions,
-          capacity: validatedData.capacity,
+          description: validatedData.description || "",
+          dimensions: validatedData.dimensions as string || "",
+          capacity: (validatedData as any).capacity || 1,
           price: validatedData.price,
-          setupTime: validatedData.setupTime,
-          teardownTime: validatedData.teardownTime,
+          setupTime: (validatedData as any).setupTime || 0,
+          teardownTime: (validatedData as any).teardownTime || 0,
           images: imageUrls,
           primaryImage: primaryImageUrl,
-          status: validatedData.status,
-          minimumSpace: validatedData.minimumSpace,
-          weightLimit: validatedData.weightLimit,
-          ageRange: validatedData.ageRange,
+          status: validatedData.status as InventoryStatus,
+          minimumSpace: (validatedData as any).minimumSpace || "",
+          weightLimit: (validatedData as any).weightLimit || 0,
+          ageRange: (validatedData as any).ageRange || "",
           businessId: business.id,
-          type: "BOUNCE_HOUSE",
-          weatherRestrictions: weatherRestrictions,
+          type: validatedData.type as InventoryType,
+          weatherRestrictions: (validatedData as any).weatherRestrictions || [],
+          quantity: validatedData.quantity,
         },
       });
 
-      return bounceHouse;
+      return inventory;
     });
 
     if (result.error) {
@@ -98,9 +136,9 @@ export async function POST(
       );
     }
 
-    console.error("Bounce house creation error:", error);
+    console.error("Inventory creation error:", error);
     return NextResponse.json(
-      { error: "Failed to create bounce house" },
+      { error: "Failed to create inventory item" },
       { status: 500 }
     );
   }
@@ -136,13 +174,50 @@ export async function GET(
       );
     }
 
-    const bounceHouses = await prisma.inventory.findMany({
-      where: { businessId: businessId },
+    // Get query parameters for filtering
+    const url = new URL(req.url);
+    const typeFilter = url.searchParams.get('type') as InventoryType | null;
+    const statusFilter = url.searchParams.get('status') as InventoryStatus | null;
+
+    // Build the where clause based on filters
+    const whereClause: {
+      businessId: string;
+      type?: InventoryType;
+      status?: InventoryStatus;
+    } = { businessId };
+    
+    if (typeFilter) {
+      whereClause.type = typeFilter;
+    }
+    
+    if (statusFilter) {
+      whereClause.status = statusFilter;
+    }
+
+    const inventoryItems = await prisma.inventory.findMany({
+      where: whereClause,
+      include: {
+        _count: {
+          select: {
+            bookingItems: true
+          }
+        }
+      },
+      orderBy: { updatedAt: 'desc' },
     });
 
-    return NextResponse.json(bounceHouses);
+    // Transform the data to include the booking count
+    const transformedItems = inventoryItems.map(item => {
+      const { _count, ...rest } = item;
+      return {
+        ...rest,
+        bookingCount: _count.bookingItems
+      };
+    });
+
+    return NextResponse.json(transformedItems);
   } catch (error) {
-    console.error("[BOUNCE_HOUSES_GET]", error);
+    console.error("[INVENTORY_GET]", error);
     return NextResponse.json(
       { message: "Internal server error" },
       { status: 500 }
