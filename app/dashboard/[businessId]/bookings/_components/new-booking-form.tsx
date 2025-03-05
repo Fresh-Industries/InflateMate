@@ -35,6 +35,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { SheetClose } from "@/components/ui/sheet";
+import React from "react";
 
 // Inventory item type
 type InventoryItem = {
@@ -56,6 +59,8 @@ type Business = {
   stripeAccountId?: string;  // Original field name in database
   stripeConnectedAccountId?: string;  // Field name expected by frontend components
   // Add other business fields as needed
+  defaultTaxRate?: number;
+  applyTaxToBookings?: boolean;
 };
 
 // Booking metadata type
@@ -73,6 +78,9 @@ type BookingMetadata = {
   participantAge: string;
   specialInstructions: string;
   totalAmount: string;
+  subtotalAmount: string;
+  taxAmount: string;
+  taxRate: string;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -93,6 +101,9 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [hasSearched, setHasSearched] = useState(false);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [businessData, setBusinessData] = useState<Business | null>(null);
+  const [taxRate, setTaxRate] = useState(0);
+  const [applyTax, setApplyTax] = useState(false);
+  const sheetCloseRef = React.useRef<HTMLButtonElement>(null);
   
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
@@ -102,8 +113,8 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     customerEmail: "",
     customerPhone: "",
     eventDate: "",
-    startTime: "",
-    endTime: "",
+    startTime: "09:00",
+    endTime: "17:00",
     eventType: "OTHER",
     eventAddress: "",
     eventCity: "",
@@ -156,12 +167,32 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     { number: 3, title: "Review & Pay", icon: CreditCard },
   ];
 
+  // Fetch business data including tax settings
+  useEffect(() => {
+    const fetchBusinessData = async () => {
+      try {
+        const response = await fetch(`/api/businesses/${businessId}`);
+        if (!response.ok) {
+          throw new Error("Failed to fetch business data");
+        }
+        const data = await response.json();
+        setBusinessData(data);
+        setTaxRate(data.defaultTaxRate || 0);
+        setApplyTax(data.applyTaxToBookings || false);
+      } catch (error) {
+        console.error("Error fetching business data:", error);
+      }
+    };
+    
+    fetchBusinessData();
+  }, [businessId]);
+
   // Search for available inventory
   const searchAvailability = async () => {
-    if (!newBooking.eventDate || !newBooking.startTime || !newBooking.endTime) {
+    if (!newBooking.eventDate) {
       toast({ 
         title: "Missing Information", 
-        description: "Please select a date and time range first", 
+        description: "Please select a date first", 
         variant: "destructive" 
       });
       return;
@@ -188,7 +219,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       if (data.availableInventory.length === 0) {
         toast({ 
           title: "No Availability", 
-          description: "No inventory items are available for your selected date and time. Please try a different date or time.", 
+          description: "No inventory items are available for your selected date. Please try a different date.", 
           variant: "destructive" 
         });
       }
@@ -247,20 +278,64 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     if (currentStep > 1) setCurrentStep(prev => prev - 1);
   };
 
-  // Submit booking
+  // Calculate total with tax
+  const calculateTotal = () => {
+    if (!selectedItem) return 0;
+    
+    const subtotal = selectedItem.price;
+    if (!applyTax || taxRate <= 0) return subtotal;
+    
+    const taxAmount = subtotal * (taxRate / 100);
+    return subtotal + taxAmount;
+  };
+  
+  // Calculate tax amount
+  const calculateTaxAmount = () => {
+    if (!selectedItem || !applyTax || taxRate <= 0) return 0;
+    return selectedItem.price * (taxRate / 100);
+  };
+  
+  // Calculate subtotal (pre-tax amount)
+  const calculateSubtotal = () => {
+    return selectedItem ? selectedItem.price : 0;
+  };
+
+  // Add a helper function to create a UTC date
+  const createUTCDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return new Date(Date.UTC(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate()
+    ));
+  };
+
+  // Modify the handleSubmit function to use UTC dates
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
     console.log("Starting submission...");
 
     try {
-      const amount = selectedItem ? Math.round(selectedItem.price * 100) : 0; // convert to cents
+      const subtotal = calculateSubtotal();
+      const taxAmount = calculateTaxAmount();
+      const total = calculateTotal();
+      const amount = Math.round(total * 100); // convert to cents
+      
       console.log("Amount:", amount);
       if (isNaN(amount) || amount <= 0) throw new Error("Invalid total amount.");
 
+      // Create a UTC date to avoid timezone issues
+      const utcDate = createUTCDate(newBooking.eventDate);
+      const formattedEventDate = utcDate.toISOString().split('T')[0]; // YYYY-MM-DD format
+      
+      console.log("Original date:", newBooking.eventDate);
+      console.log("UTC date:", utcDate.toISOString());
+      console.log("Formatted date for booking:", formattedEventDate);
+      
       const metadata: BookingMetadata = {
         bounceHouseId: newBooking.bounceHouseId,
-        eventDate: newBooking.eventDate,
+        eventDate: formattedEventDate,
         startTime: newBooking.startTime,
         endTime: newBooking.endTime,
         eventType: newBooking.eventType,
@@ -271,7 +346,10 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         participantCount: String(newBooking.participantCount),
         participantAge: String(newBooking.participantAge || ""),
         specialInstructions: newBooking.specialInstructions,
-        totalAmount: String(amount / 100),
+        totalAmount: String(total),
+        subtotalAmount: String(subtotal),
+        taxAmount: String(taxAmount),
+        taxRate: String(taxRate),
         customerName: newBooking.customerName,
         customerEmail: newBooking.customerEmail,
         customerPhone: newBooking.customerPhone,
@@ -390,9 +468,21 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     }
   };
 
-  // Calculate total from selected item
-  const calculateTotal = () => {
-    return selectedItem ? selectedItem.price : 0;
+  // Add a function to handle successful payment
+  const handlePaymentSuccess = async () => {
+    // Close the sheet
+    if (sheetCloseRef.current) {
+      sheetCloseRef.current.click();
+    }
+    
+    // Refresh the page to show the new booking
+    router.refresh();
+    
+    // Show success message
+    toast({
+      title: "Booking Confirmed",
+      description: "Your booking has been successfully created",
+    });
   };
 
   // Clear availability when date/time changes
@@ -469,6 +559,8 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
 
     return (
       <div className="space-y-6">
+        {/* Hidden SheetClose button that we can programmatically click */}
+        <SheetClose ref={sheetCloseRef} className="hidden" />
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-semibold">Payment</h2>
           <Button variant="outline" onClick={() => setShowPaymentForm(false)} disabled={isSubmitting}>
@@ -493,16 +585,17 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
             bookingId={pendingBookingData.bookingId || ""}
             customerEmail={pendingBookingData.customerEmail}
             businessId={businessId}
-            onSuccess={async () => {
+            subtotal={calculateSubtotal()}
+            taxAmount={calculateTaxAmount()}
+            taxRate={taxRate}
+            onSuccess={handlePaymentSuccess}
+            onError={(error) => {
               toast({
-                title: "Booking Confirmed",
-                description: "Your booking has been successfully created.",
+                title: "Payment Failed",
+                description: error,
+                variant: "destructive",
               });
-              router.push(`/dashboard/${businessId}/bookings`);
             }}
-            onError={(error) =>
-              toast({ title: "Payment Error", description: error, variant: "destructive" })
-            }
           />
         </Elements>
       </div>
@@ -546,6 +639,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       <div className="mt-8 space-y-8">
         {currentStep === 1 && (
           <div className="space-y-6">
+            <div className="p-4 bg-blue-50 border border-blue-200 rounded-md text-blue-700 mb-4">
+              <p className="font-medium">24-Hour Rental Period</p>
+              <p className="text-sm">All bookings are for a full day (24-hour rental). This gives our team time to deliver, set up, and clean the equipment.</p>
+            </div>
+            
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Event Date</Label>
@@ -558,9 +656,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                   min={format(new Date(), "yyyy-MM-dd")}
                   required
                 />
+                <p className="text-xs text-muted-foreground">Select the date of your event</p>
               </div>
+              
               <div className="space-y-2">
-                <Label>Start Time</Label>
+                <Label>Delivery/Setup Time</Label>
                 <Input
                   type="time"
                   value={newBooking.startTime}
@@ -568,10 +668,13 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                     setNewBooking({ ...newBooking, startTime: e.target.value })
                   }
                   required
+                  disabled={true}
                 />
+                <p className="text-xs text-muted-foreground">Standard delivery time: 9:00 AM</p>
               </div>
+              
               <div className="space-y-2">
-                <Label>End Time</Label>
+                <Label>Pickup Time</Label>
                 <Input
                   type="time"
                   value={newBooking.endTime}
@@ -579,8 +682,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                     setNewBooking({ ...newBooking, endTime: e.target.value })
                   }
                   required
+                  disabled={true}
                 />
+                <p className="text-xs text-muted-foreground">Standard pickup time: 5:00 PM next day</p>
               </div>
+              
               <div className="space-y-2">
                 <Label>Event Type</Label>
                 <Select
@@ -610,9 +716,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                 onClick={searchAvailability}
                 disabled={
                   isSearchingAvailability ||
-                  !newBooking.eventDate ||
-                  !newBooking.startTime ||
-                  !newBooking.endTime
+                  !newBooking.eventDate
                 }
                 className="w-full max-w-md"
               >
@@ -874,7 +978,13 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                       <span className="font-medium">Date:</span> {newBooking.eventDate}
                     </p>
                     <p>
-                      <span className="font-medium">Time:</span> {newBooking.startTime} - {newBooking.endTime}
+                      <span className="font-medium">Rental Period:</span> 24-Hour Rental
+                    </p>
+                    <p>
+                      <span className="font-medium">Delivery/Setup:</span> {newBooking.startTime}
+                    </p>
+                    <p>
+                      <span className="font-medium">Pickup:</span> {newBooking.endTime} (next day)
                     </p>
                     <p>
                       <span className="font-medium">Event Type:</span> {newBooking.eventType}
@@ -915,10 +1025,24 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
               <CardHeader>
                 <CardTitle>Payment Summary</CardTitle>
               </CardHeader>
-              <CardContent>
-                <div className="flex justify-between items-center">
-                  <p className="text-lg font-medium">Total:</p>
-                  <p className="text-2xl font-bold">${calculateTotal().toFixed(2)}</p>
+              <CardContent className="space-y-4">
+                <div className="flex justify-between">
+                  <span>Subtotal:</span>
+                  <span>${calculateSubtotal().toFixed(2)}</span>
+                </div>
+                
+                {applyTax && taxRate > 0 && (
+                  <div className="flex justify-between text-muted-foreground">
+                    <span>Tax ({taxRate}%):</span>
+                    <span>${calculateTaxAmount().toFixed(2)}</span>
+                  </div>
+                )}
+                
+                <Separator />
+                
+                <div className="flex justify-between font-bold">
+                  <span>Total:</span>
+                  <span>${calculateTotal().toFixed(2)}</span>
                 </div>
               </CardContent>
             </Card>

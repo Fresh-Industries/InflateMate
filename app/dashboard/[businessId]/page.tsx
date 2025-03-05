@@ -1,12 +1,13 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { DollarSign, Users, Package, CalendarCheck } from "lucide-react";
+import { useParams, useRouter } from "next/navigation";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { DollarSign, Users, Package, CalendarCheck, ChevronRight, Calendar } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
+import { format, startOfToday, endOfToday, addDays, isWithinInterval } from "date-fns";
 
 interface Booking {
   id: string;
@@ -38,25 +39,19 @@ interface DashboardData {
   totalCustomers: number;
   availableUnits: number;
   maintenanceUnits: number;
+  todayBookings: Booking[];
+  upcomingBookings: Booking[];
   recentActivity: Array<{
     type: 'BOOKING' | 'PAYMENT' | 'MAINTENANCE';
     title: string;
     subtitle: string;
     timestamp: string;
   }>;
-  upcomingBookings: Array<{
-    id: string;
-    bounceHouse: { name: string };
-    eventDate: string;
-    startTime: string;
-    endTime: string;
-    totalAmount: number;
-    status: string;
-  }>;
 }
 
 export default function DashboardPage() {
   const params = useParams();
+  const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
@@ -83,7 +78,6 @@ export default function DashboardPage() {
         
         try {
           businessData = await businessResponse.json();
-          console.log(businessData);
         } catch (e) {
           console.error('Failed to parse business response:', e);
           throw new Error('Invalid response from server');
@@ -99,7 +93,6 @@ export default function DashboardPage() {
         
         try {
           bookingsData = await bookingsResponse.json();
-          console.log(bookingsData);
         } catch (e) {
           console.error('Failed to parse bookings response:', e);
           throw new Error('Invalid response from server');
@@ -109,30 +102,62 @@ export default function DashboardPage() {
           throw new Error(bookingsData.error || 'Failed to fetch bookings');
         }
 
-        console.log("booking data" ,bookingsData.data);
-        console.log("business data" ,businessData);
-
         // Check if bookingsData is an array, if not, use an empty array
-        const bookingsArray = Array.isArray(bookingsData) ? bookingsData : [];
+        const bookingsArray = Array.isArray(bookingsData) ? bookingsData : 
+                             (bookingsData.data && Array.isArray(bookingsData.data)) ? bookingsData.data : [];
+
+        // Filter bookings by date
+        const today = new Date();
+        const todayStart = startOfToday();
+        const todayEnd = endOfToday();
+        const nextWeekEnd = addDays(today, 7);
+
+        // Get today's bookings
+        const todayBookings = bookingsArray.filter((booking: Booking) => {
+          const bookingDate = new Date(booking.eventDate);
+          return isWithinInterval(bookingDate, { start: todayStart, end: todayEnd }) && 
+                 booking.status !== 'CANCELLED';
+        });
+
+        // Get upcoming bookings (next 7 days, excluding today)
+        const upcomingBookings = bookingsArray.filter((booking: Booking) => {
+          const bookingDate = new Date(booking.eventDate);
+          return bookingDate > todayEnd && 
+                 bookingDate <= nextWeekEnd && 
+                 booking.status !== 'CANCELLED';
+        });
+
+        // Calculate monthly revenue (current month)
+        const currentMonth = today.getMonth();
+        const currentYear = today.getFullYear();
+        const monthlyRevenue = bookingsArray.reduce((acc: number, booking: Booking) => {
+          const bookingDate = new Date(booking.eventDate);
+          if (bookingDate.getMonth() === currentMonth && 
+              bookingDate.getFullYear() === currentYear && 
+              booking.status !== 'CANCELLED') {
+            return acc + (booking.totalAmount || 0);
+          }
+          return acc;
+        }, 0);
 
         // Calculate dashboard metrics
-        const activeBookings = bookingsArray.filter((b) => b.status === 'CONFIRMED').length;
-        const pendingBookings = bookingsArray.filter((b) => b.status === 'PENDING').length;
-        const totalRevenue = bookingsArray.reduce((acc, b) => acc + (b.totalAmount || 0), 0);
+        const activeBookings = bookingsArray.filter((b: Booking) => b.status === 'CONFIRMED').length;
+        const pendingBookings = bookingsArray.filter((b: Booking) => b.status === 'PENDING').length;
 
         // Get available and maintenance units
-        const availableUnits = businessData.inventory.filter((bh) => bh.status === 'AVAILABLE').length;
-        const maintenanceUnits = businessData.inventory.filter((bh) => bh.status === 'MAINTENANCE').length;
+        const availableUnits = businessData.inventory?.filter((bh: BounceHouse) => bh.status === 'AVAILABLE').length || 0;
+        const maintenanceUnits = businessData.inventory?.filter((bh: BounceHouse) => bh.status === 'MAINTENANCE').length || 0;
 
         setData({
-          totalRevenue,
+          totalRevenue: monthlyRevenue,
           activeBookings,
           pendingBookings,
           totalCustomers: businessData.customers?.length || 0,
           availableUnits,
           maintenanceUnits,
-          recentActivity: [], // You can populate this from bookings/payments history
-          upcomingBookings: bookingsArray.slice(0, 3) // Take first 3 upcoming bookings
+          todayBookings,
+          upcomingBookings,
+          recentActivity: [] // You can populate this from bookings/payments history
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -174,7 +199,7 @@ export default function DashboardPage() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(data.totalRevenue)}</div>
             <p className="text-xs text-muted-foreground">
-              From all bookings
+              This month
             </p>
           </CardContent>
         </Card>
@@ -219,87 +244,77 @@ export default function DashboardPage() {
         </Card>
       </div>
 
-      {/* Recent Activity & Quick Actions */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-        <Card className="lg:col-span-4">
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {data.upcomingBookings.length > 0 ? (
-                data.upcomingBookings.map((booking) => (
-                  <div key={booking.id} className="flex items-center gap-4">
-                    <div className="rounded-full bg-blue-100 p-2">
-                      <CalendarCheck className="h-4 w-4 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">New Booking</p>
-                      <p className="text-xs text-muted-foreground">
-                        {new Date(booking.eventDate).toLocaleDateString()} • {booking.startTime} - {booking.endTime}
-                      </p>
-                    </div>
-                    <Button variant="outline" size="sm">View</Button>
-                  </div>
-                ))
-              ) : (
-                <p className="text-sm text-muted-foreground">No recent activity</p>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Button className="w-full justify-start" variant="outline">
-              <CalendarCheck className="mr-2 h-4 w-4" />
-              Create New Booking
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <Users className="mr-2 h-4 w-4" />
-              Add New Customer
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <Package className="mr-2 h-4 w-4" />
-              Update Inventory
-            </Button>
-            <Button className="w-full justify-start" variant="outline">
-              <DollarSign className="mr-2 h-4 w-4" />
-              Record Payment
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Upcoming Bookings */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Upcoming Bookings</CardTitle>
+      {/* Today's Bookings */}
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Today's Bookings</CardTitle>
+            <CardDescription>Scheduled for today</CardDescription>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-1"
+            onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
+          >
+            <span>View</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {data.upcomingBookings.length > 0 ? (
-              data.upcomingBookings.map((booking) => (
-                <div key={booking.id} className="flex items-center gap-4 rounded-lg border p-4">
-                  <div className="flex-1">
-                    <p className="font-medium">{booking.bounceHouse?.name || 'Unknown Bounce House'}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {new Date(booking.eventDate).toLocaleDateString()} • {booking.startTime} - {booking.endTime}
-                    </p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">{formatCurrency(booking.totalAmount)}</p>
-                    <p className="text-sm text-green-600">{booking.status}</p>
-                  </div>
-                  <Button variant="outline" size="sm">Details</Button>
-                </div>
-              ))
-            ) : (
-              <p className="text-sm text-muted-foreground">No upcoming bookings</p>
-            )}
+          <div className="flex items-center gap-4">
+            <Calendar className="h-10 w-10 text-muted-foreground" />
+            <div className="text-3xl font-bold">{data.todayBookings.length}</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Upcoming Bookings */}
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Upcoming Bookings</CardTitle>
+            <CardDescription>Next 7 days</CardDescription>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-1"
+            onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
+          >
+            <span>View</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <Calendar className="h-10 w-10 text-muted-foreground" />
+            <div className="text-3xl font-bold">{data.upcomingBookings.length}</div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Total Revenue */}
+      <Card className="overflow-hidden">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0">
+          <div>
+            <CardTitle>Total Revenue</CardTitle>
+            <CardDescription>This month</CardDescription>
+          </div>
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            className="gap-1"
+            onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
+          >
+            <span>Details</span>
+            <ChevronRight className="h-4 w-4" />
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center gap-4">
+            <DollarSign className="h-10 w-10 text-muted-foreground" />
+            <div className="text-3xl font-bold">{formatCurrency(data.totalRevenue)}</div>
           </div>
         </CardContent>
       </Card>

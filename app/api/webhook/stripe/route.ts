@@ -74,6 +74,30 @@ export async function POST(req: NextRequest) {
   }
 }
 
+// Add a helper function to create a UTC date
+const createUTCDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return new Date(Date.UTC(
+    date.getFullYear(),
+    date.getMonth(),
+    date.getDate()
+  ));
+};
+
+// Add a helper function to create a UTC datetime
+const createUTCDateTime = (dateString: string, timeString: string) => {
+  // Parse the time string (format: HH:MM)
+  const [hours, minutes] = timeString.split(':').map(Number);
+  
+  // Create a UTC date from the date string
+  const date = createUTCDate(dateString);
+  
+  // Set the hours and minutes
+  date.setUTCHours(hours, minutes, 0, 0);
+  
+  return date;
+};
+
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent succeeded: ${paymentIntent.id}`);
   
@@ -144,24 +168,42 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     // Add try-catch block for booking creation
     let booking;
     try {
-      // Combine event date with time strings to form proper Date objects
-      const startDateTime = new Date(`${metadata.eventDate}T${metadata.startTime}:00`);
-      const endDateTime = new Date(`${metadata.eventDate}T${metadata.endTime}:00`);
+      // Log the raw date and time values from metadata
+      console.log("Raw date/time values from metadata:", {
+        eventDate: metadata.eventDate,
+        startTime: metadata.startTime,
+        endTime: metadata.endTime
+      });
+      
+      // Create proper UTC Date objects to avoid timezone issues
+      const eventDate = createUTCDate(metadata.eventDate);
+      const startDateTime = createUTCDateTime(metadata.eventDate, metadata.startTime);
+      const endDateTime = createUTCDateTime(metadata.eventDate, metadata.endTime);
 
-      console.log("Creating booking with dates:", {
-        startDateTime,
-        endDateTime,
+      console.log("Creating booking with UTC dates:", {
+        eventDate: eventDate.toISOString(),
+        startDateTime: startDateTime.toISOString(),
+        endDateTime: endDateTime.toISOString(),
+        isValidEvent: !isNaN(eventDate.getTime()),
         isValidStart: !isNaN(startDateTime.getTime()),
         isValidEnd: !isNaN(endDateTime.getTime())
       });
 
+      // Parse tax-related fields from metadata
+      const subtotalAmount = parseFloat(metadata.subtotalAmount || '0') || 0;
+      const taxAmount = parseFloat(metadata.taxAmount || '0') || 0;
+      const taxRate = parseFloat(metadata.taxRate || '0') || 0;
+
       const bookingData = {
         id: metadata.bookingId || '',
-        eventDate: new Date(metadata.eventDate),
+        eventDate: eventDate,
         startTime: startDateTime,
         endTime: endDateTime,
         status: 'CONFIRMED' as const,
         totalAmount: paymentIntent.amount / 100,
+        subtotalAmount: subtotalAmount,
+        taxAmount: taxAmount,
+        taxRate: taxRate,
         depositPaid: true,
         eventType: metadata.eventType || 'OTHER',
         eventAddress: metadata.eventAddress || '',
@@ -177,7 +219,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           create: [{
             inventoryId: metadata.bounceHouseId,
             quantity: 1,
-            price: paymentIntent.amount / 100,
+            price: subtotalAmount, // Use subtotal for the item price
           }],
         },
       };

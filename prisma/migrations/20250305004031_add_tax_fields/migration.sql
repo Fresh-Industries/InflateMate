@@ -1,0 +1,11 @@
+-- AlterTable
+ALTER TABLE "Booking" ADD COLUMN     "subtotalAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "taxAmount" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "taxRate" DOUBLE PRECISION NOT NULL DEFAULT 0;
+
+-- AlterTable
+ALTER TABLE "Business" ADD COLUMN     "applyTaxToBookings" BOOLEAN NOT NULL DEFAULT false,
+ADD COLUMN     "coverImage" TEXT,
+ADD COLUMN     "defaultTaxRate" DOUBLE PRECISION NOT NULL DEFAULT 0,
+ADD COLUMN     "socialMedia" JSONB,
+ADD COLUMN     "stripeCustomerId" TEXT;
