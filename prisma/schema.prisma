@@ -78,6 +78,7 @@ model Inventory {
   weightLimit         Int
   ageRange            String
   weatherRestrictions String[]
+  quantity            Int             @default(1) // Number of items in inventory
   bookingItems        BookingItem[] // Changed from direct booking relation to BookingItem relation
   business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
   businessId          String
