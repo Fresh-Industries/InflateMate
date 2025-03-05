@@ -68,13 +68,24 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface Customer {
   id: string;
   name: string;
   email: string;
   phone: string;
-  totalBookings: number;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  notes?: string;
+  bookingCount: number;
   totalSpent: number;
   lastBooking: string | null;
   status: "Active" | "Inactive";
@@ -85,7 +96,13 @@ interface CustomerFormData {
   name: string;
   email: string;
   phone: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zipCode?: string;
+  notes?: string;
   type: "Regular" | "VIP";
+  status?: "Active" | "Inactive";
 }
 
 type DialogMode = "add" | "edit" | null;
@@ -155,7 +172,13 @@ export default function CustomersPage() {
       name: customer.name,
       email: customer.email,
       phone: customer.phone,
+      address: customer.address || "",
+      city: customer.city || "",
+      state: customer.state || "",
+      zipCode: customer.zipCode || "",
+      notes: customer.notes || "",
       type: customer.type,
+      status: customer.status,
     });
   };
 
@@ -208,12 +231,22 @@ export default function CustomersPage() {
           method: "DELETE",
         }
       );
-      if (!response.ok) throw new Error("Failed to delete customer");
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        toast({
+          title: "Error",
+          description: data.error || "Failed to delete customer",
+          variant: "destructive",
+        });
+        return;
+      }
 
       await fetchCustomers();
       toast({
         title: "Success",
-        description: "Customer deleted successfully",
+        description: data.message || "Customer deleted successfully",
       });
     } catch (error) {
       console.error("Error deleting customer:", error);
@@ -236,7 +269,13 @@ export default function CustomersPage() {
       name: "",
       email: "",
       phone: "",
+      address: "",
+      city: "",
+      state: "",
+      zipCode: "",
+      notes: "",
       type: "Regular",
+      status: "Active",
     });
   };
 
@@ -386,6 +425,7 @@ export default function CustomersPage() {
                 <TableRow>
                   <TableHead>Customer</TableHead>
                   <TableHead>Contact</TableHead>
+                  <TableHead>Address</TableHead>
                   <TableHead>Total Bookings</TableHead>
                   <TableHead>Total Spent</TableHead>
                   <TableHead>Last Booking</TableHead>
@@ -424,6 +464,18 @@ export default function CustomersPage() {
                             <div className="font-medium">{customer.name}</div>
                             <div className="text-sm text-muted-foreground">
                               Customer #{customer.id}
+                              {customer.notes && (
+                                <TooltipProvider>
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <span className="ml-2 cursor-help">📝</span>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p className="max-w-xs">{customer.notes}</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                </TooltipProvider>
+                              )}
                             </div>
                           </div>
                         </div>
@@ -440,7 +492,21 @@ export default function CustomersPage() {
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>{customer.totalBookings}</TableCell>
+                      <TableCell>
+                        {customer.address ? (
+                          <div className="text-sm">
+                            {customer.address}
+                            {customer.city && customer.state ? (
+                              <div>{customer.city}, {customer.state} {customer.zipCode}</div>
+                            ) : (
+                              <div>{customer.city || ""} {customer.state || ""} {customer.zipCode || ""}</div>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">No address</span>
+                        )}
+                      </TableCell>
+                      <TableCell>{customer.bookingCount}</TableCell>
                       <TableCell>${customer.totalSpent}</TableCell>
                       <TableCell>{customer.lastBooking || "Never"}</TableCell>
                       <TableCell>
@@ -450,6 +516,18 @@ export default function CustomersPage() {
                           }
                         >
                           {customer.status}
+                          {customer.status === "Inactive" && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="ml-1 cursor-help">ℹ️</span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>No bookings in over a year</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </Badge>
                       </TableCell>
                       <TableCell>
@@ -459,6 +537,18 @@ export default function CustomersPage() {
                           }
                         >
                           {customer.type}
+                          {customer.type === "VIP" && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <span className="ml-1 cursor-help">⭐</span>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>More than one booking</p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -490,10 +580,16 @@ export default function CustomersPage() {
                                   <AlertDialogTitle>
                                     Are you sure?
                                   </AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    This action cannot be undone. This will
-                                    permanently delete the customer and all
-                                    associated data.
+                                  <AlertDialogDescription className="space-y-2">
+                                    This action cannot be undone. This will permanently delete the customer and all associated data.
+                                    <div className="mt-2 text-sm bg-amber-50 border border-amber-200 p-3 rounded-md">
+                                      <div className="font-medium text-amber-800">Important:</div>
+                                      <ul className="list-disc pl-5 mt-1 text-amber-700">
+                                        <li>Customers with upcoming bookings cannot be deleted</li>
+                                        <li>Customers with past bookings will be marked as inactive instead of deleted</li>
+                                        <li>Only customers with no booking history will be permanently deleted</li>
+                                      </ul>
+                                    </div>
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
@@ -566,25 +662,103 @@ export default function CustomersPage() {
                 }
               />
             </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={formData.address}
+                  onChange={(e) =>
+                    setFormData({ ...formData, address: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={formData.city}
+                  onChange={(e) =>
+                    setFormData({ ...formData, city: e.target.value })
+                  }
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={formData.state}
+                  onChange={(e) =>
+                    setFormData({ ...formData, state: e.target.value })
+                  }
+                />
+              </div>
+              <div>
+                <Label htmlFor="zipCode">Zip Code</Label>
+                <Input
+                  id="zipCode"
+                  value={formData.zipCode}
+                  onChange={(e) =>
+                    setFormData({ ...formData, zipCode: e.target.value })
+                  }
+                />
+              </div>
+            </div>
             <div>
-              <Label htmlFor="type">Customer Type</Label>
-              <Select
-                value={formData.type}
-                onValueChange={(value) =>
-                  setFormData({
-                    ...formData,
-                    type: value as "Regular" | "VIP",
-                  })
+              <Label htmlFor="notes">Notes</Label>
+              <Input
+                id="notes"
+                value={formData.notes}
+                onChange={(e) =>
+                  setFormData({ ...formData, notes: e.target.value })
                 }
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Regular">Regular</SelectItem>
-                  <SelectItem value="VIP">VIP</SelectItem>
-                </SelectContent>
-              </Select>
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="type">Customer Type</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) =>
+                    setFormData({
+                      ...formData,
+                      type: value as "Regular" | "VIP",
+                    })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Regular">Regular</SelectItem>
+                    <SelectItem value="VIP">VIP</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              {dialogMode === "edit" && (
+                <div>
+                  <Label htmlFor="status">Status</Label>
+                  <Select
+                    value={formData.status}
+                    onValueChange={(value) =>
+                      setFormData({
+                        ...formData,
+                        status: value as "Active" | "Inactive",
+                      })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select status" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Active">Active</SelectItem>
+                      <SelectItem value="Inactive">Inactive</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
             </div>
           </div>
           <DialogFooter>

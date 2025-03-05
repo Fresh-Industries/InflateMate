@@ -7,6 +7,12 @@ const customerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
   phone: z.string().min(10, "Phone number is required"),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zipCode: z.string().optional(),
+  notes: z.string().optional(),
+  type: z.enum(["Regular", "VIP"]).default("Regular"),
 });
 
 export async function POST(
@@ -97,16 +103,60 @@ export async function GET(
         });
 
         // Transform the data to include computed fields
-        return customers.map(customer => ({
-          id: customer.id,
-          name: customer.name,
-          email: customer.email,
-          phone: customer.phone,
-          status: customer.status,
-          bookingCount: customer.bookingCount,
-          totalSpent: customer.totalSpent,
-          lastBooking: customer.bookings[0]?.eventDate || null,
-        }));
+        return customers.map(customer => {
+          // Set customer as VIP if they have more than one booking
+          const isVip = customer.bookingCount > 1;
+          
+          // Check if customer is inactive (no bookings in over a year)
+          const lastBookingDate = customer.bookings[0]?.eventDate;
+          const oneYearAgo = new Date();
+          oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+          
+          const isInactive = !lastBookingDate || new Date(lastBookingDate) < oneYearAgo;
+          
+          // If customer should be VIP but isn't, update them
+          if (isVip && customer.type !== "VIP") {
+            // Update customer type in the database
+            prisma.customer.update({
+              where: {
+                id: customer.id,
+              },
+              data: {
+                type: "VIP",
+              },
+            }).catch(err => console.error("Error updating customer to VIP:", err));
+          }
+          
+          // If customer should be inactive but isn't, update them
+          if (isInactive && customer.status !== "Inactive") {
+            // Update customer status in the database
+            prisma.customer.update({
+              where: {
+                id: customer.id,
+              },
+              data: {
+                status: "Inactive",
+              },
+            }).catch(err => console.error("Error updating customer to Inactive:", err));
+          }
+          
+          return {
+            id: customer.id,
+            name: customer.name,
+            email: customer.email,
+            phone: customer.phone,
+            address: customer.address,
+            city: customer.city,
+            state: customer.state,
+            zipCode: customer.zipCode,
+            notes: customer.notes,
+            status: isInactive ? "Inactive" : customer.status,
+            type: isVip ? "VIP" : (customer.type as "Regular" | "VIP"),
+            bookingCount: customer.bookingCount,
+            totalSpent: customer.totalSpent,
+            lastBooking: customer.bookings[0]?.eventDate || null,
+          };
+        });
       }
     );
 

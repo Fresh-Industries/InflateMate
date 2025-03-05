@@ -114,6 +114,7 @@ model Customer {
   zipCode      String?
   notes        String? // Customer notes/preferences
   status       String    @default("Active")
+  type         String    @default("Regular") // Customer type (Regular/VIP)
   bookingCount Int       @default(0)
   totalSpent   Float     @default(0)
   lastBooking  DateTime?
