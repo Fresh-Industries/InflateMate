@@ -24,9 +24,10 @@ async function verifyWebhook(req: Request): Promise<WebhookEvent> {
 
 export async function POST(req: Request) {
   try {
+    console.log("Webhook received, attempting verification...");
     // First, verify the webhook and get the event object.
     const event = await verifyWebhook(req);
-    console.log(event);
+    console.log("Webhook verified successfully:", event.type);
     // For user.created events
     if (event.type === 'user.created') {
       // Extract relevant data from Clerk's event payload
@@ -81,6 +82,8 @@ export async function POST(req: Request) {
     return NextResponse.json({ message: 'Received' })
   } catch (error: any) {
     console.error("[WEBHOOK_ERROR]", error);
+    // Log more details about the request
+    console.error("[WEBHOOK_HEADERS]", Object.fromEntries(headers().entries()));
     return NextResponse.json(
       { message: "Webhook processing failed", error: error.message },
       { status: 500 }

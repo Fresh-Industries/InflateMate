@@ -1,9 +1,8 @@
 'use client';
 
-import { signOut } from "next-auth/react";
+import { useClerk } from "@clerk/nextjs";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 import {
   AlertDialog,
@@ -22,14 +21,14 @@ interface LogoutButtonProps extends ButtonProps {
 }
 
 export function LogoutButton({ showIcon = true, className, ...props }: LogoutButtonProps) {
-  const router = useRouter();
+  const { signOut } = useClerk();
   const [isLoading, setIsLoading] = useState(false);
 
   const handleLogout = async () => {
     setIsLoading(true);
     try {
-      await signOut({ redirect: false });
-      router.push('/auth');
+      await signOut();
+      // Clerk will handle the redirect to the sign-in page automatically
     } catch (error) {
       console.error('Logout error:', error);
     } finally {
