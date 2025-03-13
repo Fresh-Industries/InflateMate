@@ -7,6 +7,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/:domain(.*)',
   '/api/webhooks(.*)',
+  '/api'
 ]);
 
 // This function handles domain routing and authentication
@@ -29,14 +30,8 @@ export default clerkMiddleware(async (auth, req) => {
   if (hostname === 'localhost:3000' || hostname === 'localhost') {
     console.log('Main app domain detected');
     
-    // Don't rewrite test pages
-    if (path.startsWith('/test-page') || 
-        path.startsWith('/simple-test') || 
-        path.startsWith('/direct-test') ||
-        path.startsWith('/api/test')) {
-      console.log('Test page detected, not rewriting');
-      return NextResponse.next();
-    }
+    
+   
     
     // For all other main app routes, continue with auth check
     console.log('Main app route, continuing with auth check');

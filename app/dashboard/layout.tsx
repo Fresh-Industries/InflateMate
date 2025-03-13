@@ -122,11 +122,6 @@ export default function DashboardLayout({
       icon: Users,
     },
     {
-      title: "Analytics",
-      href: `/dashboard/${businessId}/analytics`,
-      icon: BarChart3,
-    },
-    {
       title: "Messages",
       href: `/dashboard/${businessId}/messages`,
       icon: Inbox,

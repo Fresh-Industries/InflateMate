@@ -90,7 +90,7 @@ export default async function DomainPage({ params }: { params: { domain: string 
     };
   
   return (
-      <div className="min-h-screen bg-white dark:bg-gray-900">
+      <div className="min-h-screen bg-white">
         {/* Hero Section */}
         <section 
           className="py-16 md:py-24 overflow-hidden relative"
@@ -131,7 +131,7 @@ export default async function DomainPage({ params }: { params: { domain: string 
                 </div>
               </div>
               <div className="md:w-1/2 mt-8 md:mt-0">
-                <div className="bg-white dark:bg-gray-800 p-3 rounded-2xl shadow-2xl transform rotate-2 hover:rotate-0 transition-all duration-300">
+                <div className="bg-white p-3 rounded-2xl shadow-2xl transform rotate-2 hover:rotate-0 transition-all duration-300">
                   <img 
                     src={siteConfig.hero?.imageUrl || '/images/hero-image.jpg'}
                     alt="Bounce House Fun" 
@@ -148,7 +148,7 @@ export default async function DomainPage({ params }: { params: { domain: string 
         </section>
         
         {/* Trust Indicators */}
-        <section className="py-8 bg-white dark:bg-gray-900 border-b dark:border-gray-800">
+        <section className="py-8 bg-white border-b">
           <div className="container mx-auto px-4">
             <div className="flex flex-wrap justify-center items-center gap-4 md:gap-8">
               <div className="flex items-center gap-1">
@@ -157,32 +157,32 @@ export default async function DomainPage({ params }: { params: { domain: string 
                 <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                 <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
                 <Star className="h-5 w-5 fill-yellow-400 text-yellow-400" />
-                <span className="ml-2 font-medium text-gray-900 dark:text-white">Trusted by 500+ Customers</span>
+                <span className="ml-2 font-medium text-gray-900">Trusted by 500+ Customers</span>
               </div>
-              <div className="h-6 border-r border-gray-300 dark:border-gray-700 hidden md:block"></div>
+              <div className="h-6 border-r border-gray-300 hidden md:block"></div>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-900 dark:text-white">100% Clean Equipment</span>
+                <span className="font-medium text-gray-900">100% Clean Equipment</span>
               </div>
-              <div className="h-6 border-r border-gray-300 dark:border-gray-700 hidden md:block"></div>
+              <div className="h-6 border-r border-gray-300 hidden md:block"></div>
               <div className="flex items-center gap-2">
-                <span className="font-medium text-gray-900 dark:text-white">Free Delivery & Setup</span>
+                <span className="font-medium text-gray-900">Free Delivery & Setup</span>
               </div>
             </div>
           </div>
         </section>
         
         {/* Features Section */}
-        <section className="py-16 bg-white dark:bg-gray-900">
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 
-              className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white"
+              className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900"
               style={{ color: colors.primary || '#3b82f6' }}
             >
               Why Choose Our Bounce Houses?
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <div 
-                className="rounded-xl p-6 text-center hover:shadow-xl transition-all dark:bg-gray-800"
+                className="rounded-xl p-6 text-center hover:shadow-xl transition-all"
                 style={{ backgroundColor: `${colors.primary}10` || '#3b82f610' }}
               >
                 <div 
@@ -192,18 +192,18 @@ export default async function DomainPage({ params }: { params: { domain: string 
                   <span className="text-2xl">🧼</span>
                 </div>
                 <h3 
-                  className="text-xl font-bold mb-2 text-gray-900 dark:text-white"
+                  className="text-xl font-bold mb-2 text-gray-900"
                   style={{ color: colors.primary || '#3b82f6' }}
                 >
                   Clean & Safe
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600">
                   All our inflatables are thoroughly cleaned and sanitized before every rental.
                 </p>
               </div>
               
               <div 
-                className="rounded-xl p-6 text-center hover:shadow-xl transition-all dark:bg-gray-800"
+                className="rounded-xl p-6 text-center hover:shadow-xl transition-all"
                 style={{ backgroundColor: `${colors.primary}10` || '#3b82f610' }}
               >
                 <div 
@@ -213,18 +213,18 @@ export default async function DomainPage({ params }: { params: { domain: string 
                   <span className="text-2xl">🎉</span>
                 </div>
                 <h3 
-                  className="text-xl font-bold mb-2 text-gray-900 dark:text-white"
+                  className="text-xl font-bold mb-2 text-gray-900"
                   style={{ color: colors.primary || '#3b82f6' }}
                 >
                   Fun for Everyone
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600">
                   Our bounce houses are perfect for kids and adults of all ages.
                 </p>
               </div>
               
               <div 
-                className="rounded-xl p-6 text-center hover:shadow-xl transition-all dark:bg-gray-800"
+                className="rounded-xl p-6 text-center hover:shadow-xl transition-all"
                 style={{ backgroundColor: `${colors.primary}10` || '#3b82f610' }}
               >
                 <div 
@@ -234,12 +234,12 @@ export default async function DomainPage({ params }: { params: { domain: string 
                   <span className="text-2xl">🚚</span>
                 </div>
                 <h3 
-                  className="text-xl font-bold mb-2 text-gray-900 dark:text-white"
+                  className="text-xl font-bold mb-2 text-gray-900"
                   style={{ color: colors.primary || '#3b82f6' }}
                 >
                   Free Delivery
                 </h3>
-                <p className="text-gray-600 dark:text-gray-300">
+                <p className="text-gray-600">
                   We handle delivery, setup, and pickup for a hassle-free experience.
                 </p>
               </div>
@@ -249,11 +249,11 @@ export default async function DomainPage({ params }: { params: { domain: string 
         
         {/* Popular Rentals Section */}
         <section 
-          className="py-16 bg-gray-50 dark:bg-gray-800 border-t border-b dark:border-gray-700"
+          className="py-16 bg-gray-50 border-t border-b"
         >
           <div className="container mx-auto px-4">
             <h2 
-              className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white"
+              className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900"
               style={{ color: colors.primary || '#3b82f6' }}
             >
               Our Most Popular Rentals
@@ -261,7 +261,7 @@ export default async function DomainPage({ params }: { params: { domain: string 
             
             {inventoryItems.length === 0 ? (
               <div className="text-center py-8">
-                <p className="text-gray-600 dark:text-gray-300 mb-6">No inventory items available at the moment.</p>
+                <p className="text-gray-600 mb-6">No inventory items available at the moment.</p>
                 <Button 
                   size="lg"
                   style={{ 
@@ -277,7 +277,7 @@ export default async function DomainPage({ params }: { params: { domain: string 
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                 {inventoryItems.map((item) => (
-                  <div key={item.id} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
+                  <div key={item.id} className="bg-white rounded-xl overflow-hidden shadow-md hover:shadow-xl transition-all">
                     <div 
                       className="h-48 flex items-center justify-center"
                       style={{ 
@@ -295,13 +295,13 @@ export default async function DomainPage({ params }: { params: { domain: string 
                       )}
                     </div>
                     <div className="p-6">
-                      <h3 className="text-xl font-bold mb-2 text-gray-900 dark:text-white">{item.name}</h3>
-                      <p className="text-gray-600 dark:text-gray-300 mb-4">
+                      <h3 className="text-xl font-bold mb-2 text-gray-900">{item.name}</h3>
+                      <p className="text-gray-600 mb-4">
                         {item.description || `Perfect for any event or party!`}
                       </p>
                       <div className="flex justify-between items-center">
                         <span 
-                          className="text-xl font-bold text-gray-900 dark:text-white"
+                          className="text-xl font-bold"
                           style={{ color: colors.primary || '#3b82f6' }}
                         >
                           ${item.price}/day
@@ -339,37 +339,37 @@ export default async function DomainPage({ params }: { params: { domain: string 
         </section>
         
         {/* Testimonials */}
-        <section className="py-16 bg-white dark:bg-gray-900">
+        <section className="py-16 bg-white">
           <div className="container mx-auto px-4">
             <h2 
-              className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900 dark:text-white"
+              className="text-3xl md:text-4xl font-bold text-center mb-12 text-gray-900"
               style={{ color: colors.primary || '#3b82f6' }}
             >
               What Our Customers Say
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-all border dark:border-gray-700">
+              <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all border">
                 <div className="flex items-center mb-4">
                   <div className="text-yellow-400 text-xl">★★★★★</div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">&ldquo;The kids had an absolute blast! The bounce house was clean, the delivery was on time, and pickup was hassle-free.&rdquo;</p>
-                <p className="font-bold text-gray-900 dark:text-white">- Sarah M.</p>
+                <p className="text-gray-600 mb-4">&ldquo;The kids had an absolute blast! The bounce house was clean, the delivery was on time, and pickup was hassle-free.&rdquo;</p>
+                <p className="font-bold text-gray-900">- Sarah M.</p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-all border dark:border-gray-700">
+              <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all border">
                 <div className="flex items-center mb-4">
                   <div className="text-yellow-400 text-xl">★★★★★</div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">&ldquo;We rented the water slide for our summer party and it was the highlight of the event. Excellent service!&rdquo;</p>
-                <p className="font-bold text-gray-900 dark:text-white">- Michael T.</p>
+                <p className="text-gray-600 mb-4">&ldquo;We rented the water slide for our summer party and it was the highlight of the event. Excellent service!&rdquo;</p>
+                <p className="font-bold text-gray-900">- Michael T.</p>
               </div>
               
-              <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-md hover:shadow-xl transition-all border dark:border-gray-700">
+              <div className="bg-white p-6 rounded-xl shadow-md hover:shadow-xl transition-all border">
                 <div className="flex items-center mb-4">
                   <div className="text-yellow-400 text-xl">★★★★★</div>
                 </div>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">&ldquo;Professional, punctual, and the bounce house was in perfect condition. Will definitely rent again!&rdquo;</p>
-                <p className="font-bold text-gray-900 dark:text-white">- Jessica K.</p>
+                <p className="text-gray-600 mb-4">&ldquo;Professional, punctual, and the bounce house was in perfect condition. Will definitely rent again!&rdquo;</p>
+                <p className="font-bold text-gray-900">- Jessica K.</p>
               </div>
             </div>
           </div>
@@ -408,13 +408,13 @@ export default async function DomainPage({ params }: { params: { domain: string 
         
         {/* Contact Info */}
         <section 
-          className="py-16 bg-gray-50 dark:bg-gray-800"
+          className="py-16 bg-gray-50"
         >
           <div className="container mx-auto px-4">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               <div>
                 <h2 
-                  className="text-3xl font-bold mb-6 text-gray-900 dark:text-white"
+                  className="text-3xl font-bold mb-6 text-gray-900"
                   style={{ color: colors.primary || '#3b82f6' }}
                 >
                   Contact Us
@@ -429,8 +429,8 @@ export default async function DomainPage({ params }: { params: { domain: string 
                         <span className="text-lg">📞</span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Phone:</p>
-                        <p className="text-gray-600 dark:text-gray-300">{business.phone}</p>
+                        <p className="font-medium text-gray-900">Phone:</p>
+                        <p className="text-gray-600">{business.phone}</p>
                       </div>
                     </div>
                   )}
@@ -444,8 +444,8 @@ export default async function DomainPage({ params }: { params: { domain: string 
                         <span className="text-lg">✉️</span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Email:</p>
-                        <p className="text-gray-600 dark:text-gray-300">{business.email}</p>
+                        <p className="font-medium text-gray-900">Email:</p>
+                        <p className="text-gray-600">{business.email}</p>
                       </div>
                     </div>
                   )}
@@ -459,8 +459,8 @@ export default async function DomainPage({ params }: { params: { domain: string 
                         <span className="text-lg">📍</span>
                       </div>
                       <div>
-                        <p className="font-medium text-gray-900 dark:text-white">Address:</p>
-                        <p className="text-gray-600 dark:text-gray-300">
+                        <p className="font-medium text-gray-900">Address:</p>
+                        <p className="text-gray-600">
                           {business.address}, {business.city || ''} {business.state || ''} {business.zipCode || ''}
                         </p>
                       </div>
@@ -471,12 +471,12 @@ export default async function DomainPage({ params }: { params: { domain: string 
       
               <div>
                 <h2 
-                  className="text-3xl font-bold mb-6 text-gray-900 dark:text-white"
+                  className="text-3xl font-bold mb-6 text-gray-900"
                   style={{ color: colors.primary || '#3b82f6' }}
                 >
                   Service Areas
                 </h2>
-                <p className="text-gray-600 dark:text-gray-300 mb-4">
+                <p className="text-gray-600 mb-4">
                   We proudly serve the following areas and surrounding communities:
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
@@ -495,7 +495,7 @@ export default async function DomainPage({ params }: { params: { domain: string 
                 </div>
               </div>
             </div>
-          </div>
+      </div>
         </section>
     </div>
   );

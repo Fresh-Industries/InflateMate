@@ -668,7 +668,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                     setNewBooking({ ...newBooking, startTime: e.target.value })
                   }
                   required
-                  disabled={true}
                 />
                 <p className="text-xs text-muted-foreground">Standard delivery time: 9:00 AM</p>
               </div>
@@ -682,7 +681,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                     setNewBooking({ ...newBooking, endTime: e.target.value })
                   }
                   required
-                  disabled={true}
                 />
                 <p className="text-xs text-muted-foreground">Standard pickup time: 5:00 PM next day</p>
               </div>
