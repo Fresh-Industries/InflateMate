@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
 import { notFound } from 'next/navigation';
 import { getBusinessByDomain } from '@/lib/business/domain-utils';
 import { DomainLayoutClient } from './layout-client';
 import { Metadata } from 'next';
+import { prisma } from '@/lib/prisma';
 
 export const dynamic = 'force-dynamic';
 
@@ -50,7 +50,7 @@ export default async function DomainLayout({
   children,
   params,
 }: {
-  children: ReactNode;
+  children: React.ReactNode;
   params: { domain: string };
 }) {
   const domain = decodeURIComponent(params.domain);
@@ -64,8 +64,28 @@ export default async function DomainLayout({
     const siteConfig = business.siteConfig || {};
     const colors = siteConfig.colors || {};
     
+    // Fetch active sales funnel if it exists
+    let activeFunnel = null;
+    try {
+      activeFunnel = await prisma.salesFunnel.findFirst({
+        where: {
+          businessId: business.id,
+          isActive: true,
+        },
+      });
+    } catch (error) {
+      console.error("Error fetching active sales funnel:", error);
+    }
+
+    // Return just the client component, not wrapped in html/body tags
     return (
-      <DomainLayoutClient business={business} siteConfig={siteConfig} colors={colors}>
+      <DomainLayoutClient 
+        business={business as any} 
+        domain={domain} 
+        siteConfig={siteConfig} 
+        colors={colors}
+        activeFunnel={activeFunnel as any}
+      >
         {children}
       </DomainLayoutClient>
     );

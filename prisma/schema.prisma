@@ -22,7 +22,7 @@ model User {
 }
 
 model Business {
-  id                 String      @id @default(cuid())
+  id                 String        @id @default(cuid())
   name               String
   description        String?
   address            String?
@@ -33,29 +33,32 @@ model Business {
   email              String?
   website            String?
   logo               String?
-  createdAt          DateTime    @default(now())
-  updatedAt          DateTime    @updatedAt
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
   settings           Json?
   cancellationPolicy String?
-  depositRequired    Boolean     @default(true)
-  depositPercentage  Float       @default(25.0)
-  minAdvanceBooking  Int         @default(24)
-  maxAdvanceBooking  Int         @default(90)
-  bufferTime         Int         @default(60)
+  depositRequired    Boolean       @default(true)
+  depositPercentage  Float         @default(25.0)
+  minAdvanceBooking  Int           @default(24)
+  maxAdvanceBooking  Int           @default(90)
+  bufferTime         Int           @default(60)
   userId             String
   stripeAccountId    String?
-  applyTaxToBookings Boolean     @default(false)
+  applyTaxToBookings Boolean       @default(false)
   coverImage         String?
-  defaultTaxRate     Float       @default(0)
+  defaultTaxRate     Float         @default(0)
   socialMedia        Json?
   stripeCustomerId   String?
   customDomain       String?
   siteConfig         Json?
   bookings           Booking[]
-  user               User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   customers          Customer[]
   inventory          Inventory[]
   payments           Payment[]
+  coupons            Coupon[]
+  leads              Lead[]
+  salesFunnels       SalesFunnel[]
 
   @@index([userId])
 }
@@ -230,4 +233,66 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}
+
+model Coupon {
+  id             String       @id @default(cuid())
+  code           String
+  description    String?
+  discountType   DiscountType
+  discountAmount Float
+  maxUses        Int?
+  usedCount      Int          @default(0)
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean      @default(true)
+  minimumAmount  Float?
+  businessId     String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([code, businessId])
+  @@index([businessId])
+}
+
+model Lead {
+  id         String   @id @default(cuid())
+  name       String
+  email      String
+  phone      String?
+  message    String?
+  source     String   @default("popup")
+  couponCode String?
+  businessId String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  converted  Boolean  @default(false)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([email])
+}
+
+model SalesFunnel {
+  id              String   @id @default(cuid())
+  name            String
+  isActive        Boolean  @default(true)
+  popupTitle      String
+  popupText       String
+  popupImage      String?
+  formTitle       String
+  thankYouMessage String
+  couponId        String?
+  businessId      String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
 }

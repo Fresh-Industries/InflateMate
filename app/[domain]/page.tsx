@@ -53,8 +53,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function DomainPage({ params }: { params: { domain: string } }) {
+  console.log("Domain page rendered with domain:", params.domain);
+  
   const domain = decodeURIComponent(params.domain);
-  console.log('Domain page rendered with domain:', domain);
   
   try {
     // Use the domain utils to find the business by either custom domain or subdomain
