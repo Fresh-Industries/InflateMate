@@ -1,0 +1,12 @@
+This is a placeholder for the hero-dashboard.png image.
+
+Since we can't directly create a binary image file through text editing, you should:
+
+1. Create or find a suitable dashboard screenshot image
+2. Name it "hero-dashboard.png"
+3. Place it in the public/images/ directory
+
+For now, you can use a placeholder image service like:
+https://placehold.co/1200x800/0066ff/ffffff?text=InflateMate+Dashboard
+
+Or create a simple dashboard mockup using a design tool like Figma or Canva. 

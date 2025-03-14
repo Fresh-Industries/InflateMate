@@ -1,5 +1,3 @@
-"use server";
-
 import { redirect, notFound } from "next/navigation";
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
