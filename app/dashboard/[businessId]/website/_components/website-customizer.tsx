@@ -6,7 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SiteConfig } from "@/lib/business/domain-utils";
-import { Save, Loader2, EyeIcon } from "lucide-react";
+import { Save, Loader2 } from "lucide-react";
 import GeneralSettings from "./general-settings";
 import ColorSettings from "./color-settings";
 import HeroSettings from "./hero-settings";
@@ -116,22 +116,12 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
     }, 100); // 100ms debounce
   }, []);
   
-  // Handle preview
-  const handlePreview = () => {
-    setIsPreviewOpen(true);
-  };
   
   return (
     <div className="space-y-6">
       <div className="flex justify-end items-center mb-4">
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handlePreview}
-          >
-            <EyeIcon className="h-4 w-4 mr-2" />
-            Preview
-          </Button>
+          
           
           <Button 
             onClick={handleSave}

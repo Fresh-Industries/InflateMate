@@ -15,7 +15,6 @@ const updateBookingSchema = z.object({
   eventState: z.string(),
   eventZipCode: z.string(),
   participantCount: z.number(),
-  participantAge: z.number().optional(),
   specialInstructions: z.string().optional(),
   totalAmount: z.number(),
   customerName: z.string(),
@@ -197,7 +196,6 @@ export async function PATCH(
             eventState: validatedData.eventState,
             eventZipCode: validatedData.eventZipCode,
             participantCount: validatedData.participantCount,
-            participantAge: validatedData.participantAge,
             specialInstructions: validatedData.specialInstructions,
             totalAmount: validatedData.totalAmount,
             // Update associated customer data

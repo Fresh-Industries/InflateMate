@@ -5,23 +5,51 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Menu, X, Home, Package, Calendar, Info, Phone, ChevronRight, MapPin, Mail, PartyPopper } from 'lucide-react';
 import { usePathname } from 'next/navigation';
+import { SalesFunnel, SalesFunnelPopup } from '@/components/tenant/SalesFunnel';
+
+interface Business {
+  id: string;
+  name: string;
+  logo?: string;
+  [key: string]: unknown;
+}
+
+interface SiteConfig {
+  colors?: {
+    primary?: string;
+    secondary?: string;
+  };
+  [key: string]: unknown;
+}
 
 interface DomainLayoutClientProps {
   children: ReactNode;
-  business: any;
-  siteConfig: any;
-  colors: any;
+  business: Business;
+  domain: string;
+  siteConfig: SiteConfig;
+  colors: {
+    primary?: string;
+    secondary?: string;
+  };
+  activeFunnel?: SalesFunnel;
 }
 
 export function DomainLayoutClient({ 
   children, 
   business, 
-  siteConfig, 
-  colors 
+  siteConfig,
+  colors,
+  activeFunnel
 }: DomainLayoutClientProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
   const pathname = usePathname();
+  
+  // Handle client-side mounting to prevent hydration errors
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   // Handle scroll effect for navbar
   useEffect(() => {
@@ -67,7 +95,7 @@ export function DomainLayoutClient({
   };
   
   return (
-    <div className="min-h-screen bg-white text-gray-900">
+    <div className="flex flex-col min-h-screen">
       <header 
         className={`sticky top-0 z-50 transition-all duration-300 ${
           scrolled ? 'shadow-md py-2' : 'py-4'
@@ -220,9 +248,11 @@ export function DomainLayoutClient({
         </div>
       </header>
       
-      <main className="flex-1 bg-white">{children}</main>
+      <main className="flex-1">
+        {children}
+      </main>
       
-      <footer className="border-t mt-8 bg-white">
+      <footer className="bg-gray-50 border-t mt-auto">
         <div className="container mx-auto px-4 py-12">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Business info */}
@@ -327,6 +357,18 @@ export function DomainLayoutClient({
           </div>
         </div>
       </footer>
+      
+      {/* Sales Funnel Popup - Only render on client side */}
+      {isMounted && activeFunnel && (
+        <SalesFunnelPopup 
+          businessId={business.id}
+          funnel={activeFunnel}
+          colors={{
+            primary: colors.primary || "#3b82f6",
+            secondary: colors.secondary || "#6b7280",
+          }}
+        />
+      )}
     </div>
   );
 } 

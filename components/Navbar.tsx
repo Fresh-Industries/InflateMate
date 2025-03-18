@@ -3,22 +3,48 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Sparkles, ChevronDown, Star, Zap, LifeBuoy } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
 import { useAuth, useUser } from "@clerk/nextjs";
 
+interface Business {
+  id: string;
+  name: string;
+}
+
 const navItems = [
-  { label: "Features", href: "/features" },
-  { label: "Pricing", href: "/pricing" },
-  { label: "Resources", href: "/resources" },
+  { 
+    label: "Features", 
+    href: "/features",
+    icon: <Star className="w-4 h-4" />
+  },
+  { 
+    label: "Pricing", 
+    href: "/pricing",
+    icon: <Zap className="w-4 h-4" />
+  },
+  { 
+    label: "Resources", 
+    href: "/resources",
+    icon: <LifeBuoy className="w-4 h-4" />
+  },
 ];
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userBusinesses, setUserBusinesses] = useState([]);
+  const [userBusinesses, setUserBusinesses] = useState<Business[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
   const { isLoaded, userId } = useAuth();
   const { user } = useUser();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 20);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     async function fetchUserBusinesses() {
@@ -46,30 +72,43 @@ export default function Navbar() {
   }, [isLoaded, userId]);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-
-  // Wait until Clerk has loaded
   const isLoadingUser = !isLoaded || loading;
 
   return (
-    <nav className="sticky top-0 z-50 w-full bg-white/80 backdrop-blur-md shadow-sm border-b border-gray-200">
+    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-xl shadow-lg' : 'bg-transparent'}`}>
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-between">
+        <div className="flex h-20 items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center space-x-2">
-            <span className="text-2xl font-extrabold bg-gradient-to-r from-sky-400 to-blue-500 bg-clip-text text-transparent transition-transform duration-300 hover:scale-105">
-              Inflatemate
-            </span>
+          <Link href="/" className="flex items-center gap-2 group">
+            <div className="relative flex items-center">
+              <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full opacity-80 group-hover:opacity-100 blur-md transition-all duration-300"></div>
+              <div className="relative flex items-center">
+                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mr-1">
+                  Inflate
+                </span>
+                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-1.5 transform group-hover:rotate-12 transition-all duration-300">
+                  <Sparkles className="w-4 h-4 text-white" />
+                </div>
+                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-1">
+                  mate
+                </span>
+              </div>
+            </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          <div className="hidden md:flex items-center space-x-1">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="text-gray-600 hover:text-sky-500 transition-colors font-medium"
+                className="relative px-5 py-2 text-gray-700 hover:text-blue-600 font-medium group flex items-center gap-2"
               >
-                {item.label}
+                <div className="absolute inset-0 w-full h-full bg-blue-50/0 group-hover:bg-blue-50/80 rounded-full transition-all duration-200"></div>
+                <span className="relative z-10">{item.label}</span>
+                <span className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  {item.icon}
+                </span>
               </Link>
             ))}
           </div>
@@ -77,24 +116,34 @@ export default function Navbar() {
           {/* Desktop Action Buttons */}
           <div className="hidden md:flex items-center space-x-4">
             {isLoadingUser ? (
-              <div className="h-10 w-20 bg-gray-200 animate-pulse rounded"></div>
+              <div className="h-10 w-24 bg-gradient-to-r from-blue-100 to-purple-100 animate-pulse rounded-full"></div>
             ) : userId ? (
               <>
                 <Link href={userBusinesses.length > 0 
                   ? `/dashboard/${userBusinesses[0].id}` 
                   : "/onboarding"}>
-                  <Button variant="ghost" className="hover:text-sky-500 transition-colors">
-                    Go to Dashboard
+                  <Button variant="ghost" className="h-12 px-6 rounded-full hover:bg-blue-50 border border-blue-100/50 shadow-sm">
+                    Dashboard
                   </Button>
                 </Link>
                 <LogoutButton />
               </>
             ) : (
-              <Link href="/sign-in">
-                <Button variant="ghost" className="hover:text-sky-500 transition-colors">
-                  Sign In
-                </Button>
-              </Link>
+              <>
+                <Link href="/sign-in">
+                  <Button variant="ghost" className="h-12 px-6 rounded-full hover:bg-blue-50 border border-blue-100/50 shadow-sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/sign-up">
+                  <Button className="h-12 px-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group">
+                    <span>Get Started</span>
+                    <div className="ml-2 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center transform group-hover:rotate-90 transition-all duration-300">
+                      <ChevronDown className="w-3 h-3 text-white" />
+                    </div>
+                  </Button>
+                </Link>
+              </>
             )}
           </div>
 
@@ -102,14 +151,12 @@ export default function Navbar() {
           <div className="md:hidden">
             <button
               onClick={toggleMenu}
-              aria-label="Toggle Menu"
-              aria-expanded={isMenuOpen}
-              className="p-2 rounded-md focus:outline-none focus:ring-2 focus:ring-sky-500 transition-colors"
+              className="p-2 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-colors shadow-sm"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-sky-500" />
+                <X className="h-6 w-6 text-blue-600" />
               ) : (
-                <Menu className="h-6 w-6 text-sky-500" />
+                <Menu className="h-6 w-6 text-blue-600" />
               )}
             </button>
           </div>
@@ -117,42 +164,54 @@ export default function Navbar() {
       </div>
 
       {/* Mobile Navigation */}
-      <div
-        className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
-          isMenuOpen ? "max-h-screen opacity-100" : "max-h-0 opacity-0"
-        }`}
-      >
-        <div className="bg-white border-t border-gray-200 shadow-md">
-          <div className="px-4 py-4 space-y-4">
+      {isMenuOpen && (
+        <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-blue-100 shadow-lg">
+          <div className="container mx-auto px-4 py-6 space-y-5">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 onClick={() => setIsMenuOpen(false)}
-                className="block text-gray-600 hover:text-sky-500 transition-colors px-4 py-2"
+                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 rounded-xl hover:bg-blue-50/80 transition-all"
               >
-                {item.label}
+                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 flex items-center justify-center">
+                  {item.icon}
+                </div>
+                <span className="font-medium">{item.label}</span>
               </Link>
             ))}
-            <div className="border-t border-gray-200 pt-4 space-y-4">
+            <div className="border-t border-blue-100 pt-5 space-y-4">
               {isLoadingUser ? (
-                <div className="h-10 w-full bg-gray-200 animate-pulse rounded"></div>
-              ) : (
-                <Link href={userId ? (userBusinesses.length > 0 
+                <div className="h-14 bg-gradient-to-r from-blue-100 to-purple-100 animate-pulse rounded-xl"></div>
+              ) : userId ? (
+                <Link href={userBusinesses.length > 0 
                   ? `/dashboard/${userBusinesses[0].id}` 
-                  : "/onboarding") : "/sign-in"}>
-                  <Button variant="ghost" className="w-full justify-center">
-                    {userId ? "Go to Dashboard" : "Sign In"}
+                  : "/onboarding"}>
+                  <Button variant="ghost" className="w-full justify-center h-14 rounded-xl border border-blue-100 shadow-sm">
+                    Dashboard
                   </Button>
                 </Link>
+              ) : (
+                <>
+                  <Link href="/sign-in">
+                    <Button variant="ghost" className="w-full justify-center h-14 rounded-xl border border-blue-100 shadow-sm">
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/sign-up">
+                    <Button className="w-full justify-center h-14 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg">
+                      Get Started
+                      <div className="ml-2 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
+                        <ChevronDown className="w-3 h-3 text-white" />
+                      </div>
+                    </Button>
+                  </Link>
+                </>
               )}
-              <Button className="w-full bg-gradient-to-r from-sky-400 to-blue-500 hover:from-sky-500 hover:to-blue-600 text-white">
-                Start Free Trial
-              </Button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </nav>
   );
 }
