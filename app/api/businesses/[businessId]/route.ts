@@ -8,20 +8,37 @@ export async function GET(
   { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    const businessId  = (await params).businessId;
+    const businessId = (await params).businessId;
     const { userId } = await auth();
     console.log("Fetching business data for businessId:", businessId, "userId:", userId);
-    
+
+    // If userId is null, treat as a public request
     if (!userId) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      console.log("Public request detected");
+      const business = await prisma.business.findUnique({
+        where: { id: businessId },
+        select: {
+          id: true,
+          name: true,
+          stripeAccountId: true,
+          inventory: true,
+        },
+      });
+
+      if (!business) {
+        return NextResponse.json(
+          { error: "Business not found" },
+          { status: 404 }
+        );
+      }
+
+      return NextResponse.json(business);
     }
 
+    // Authenticated request logic
     const business = await prisma.business.findFirst({
       where: {
-        id: businessId, 
+        id: businessId,
         user: {
           clerkUserId: userId,
         },
@@ -44,7 +61,6 @@ export async function GET(
     });
 
     if (!business) {
-      console.log("Business not found for businessId:", businessId);
       return NextResponse.json(
         { error: "Business not found" },
         { status: 404 }

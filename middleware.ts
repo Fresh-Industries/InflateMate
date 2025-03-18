@@ -30,9 +30,6 @@ export default clerkMiddleware(async (auth, req) => {
   if (hostname === 'localhost:3000' || hostname === 'localhost') {
     console.log('Main app domain detected');
     
-    
-   
-    
     // For all other main app routes, continue with auth check
     console.log('Main app route, continuing with auth check');
     
@@ -41,6 +38,11 @@ export default clerkMiddleware(async (auth, req) => {
       await auth.protect();
     }
     
+    return NextResponse.next();
+  }
+  
+  // Skip rewriting for all /api requests
+  if (path.startsWith('/api')) {
     return NextResponse.next();
   }
   

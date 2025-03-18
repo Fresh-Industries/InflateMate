@@ -31,6 +31,7 @@ import { cn } from "@/lib/utils";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface Business {
   id: string;
@@ -137,11 +138,6 @@ export default function DashboardLayout({
       icon: Wallet,
     },
     {
-      title: "Employees", 
-      href: `/dashboard/${businessId}/employees`,
-      icon: Users2,
-    },
-    {
       title: "Marketing",
       href: `/dashboard/${businessId}/marketing`,
       icon: Mail,
@@ -159,22 +155,20 @@ export default function DashboardLayout({
   ];
 
   const SidebarContent = ({ className }: { className?: string }) => (
-    <div className={cn("flex h-full flex-col", className)}>
+    <div className={cn("flex h-full flex-col bg-[#f5f5ff]", className)}>
       {/* Logo */}
       {
         !isMobileOpen && (
-          <div className="border-b p-6">
+          <div className="p-6">
             <Link href={`/`} className="flex items-center gap-2">
-              <span className="font-bold text-xl">InflateMate</span>
+              <span className="font-bold text-xl text-[#5056e0]">Inflate<span className="text-[#7a44f0]">mate</span></span>
             </Link>
           </div>
         )
       }
-      
-      
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-1 p-4">
+      <nav className="flex-1 space-y-2 p-4">
         {sidebarItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -182,40 +176,32 @@ export default function DashboardLayout({
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
+                "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200",
                 isActive 
-                  ? "bg-primary text-primary-foreground" 
-                  : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                  ? "bg-[#5056e0] text-white shadow-md" 
+                  : "text-gray-700 hover:bg-[#eeeeff] hover:text-[#5056e0]"
               )}
               onClick={() => setIsMobileOpen(false)}
             >
-              <item.icon className="h-4 w-4" />
+              <item.icon className="h-5 w-5" />
               {item.title}
             </Link>
           );
         })}
       </nav>
-
-      {/* User Controls */}
-      <div className="border-t p-4">
-        <div className="flex items-center justify-between">
-          <UserButton />
-          <ModeToggle />
-        </div>
-      </div>
     </div>
   );
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-[#f9faff]">
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-        <SheetContent side="left" className="p-0 w-[300px]">
-          <SheetHeader className="px-6 py-4 border-b">
+        <SheetContent side="left" className="p-0 w-[280px] bg-[#f5f5ff]">
+          <SheetHeader className="px-6 py-4">
             <SheetTitle>
-          <Link href={`/`} className="flex items-center gap-2">
-            <span className="font-bold text-xl">InflateMate</span>
-          </Link>
+              <Link href={`/`} className="flex items-center gap-2">
+                <span className="font-bold text-xl text-[#5056e0]">Inflate<span className="text-[#7a44f0]">mate</span></span>
+              </Link>
             </SheetTitle>
           </SheetHeader>
           <div className="flex flex-col h-[calc(100vh-5rem)]">
@@ -225,47 +211,80 @@ export default function DashboardLayout({
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <nav className="hidden lg:block w-64 border-r bg-card">
+      <nav className="hidden lg:block w-64 bg-[#f5f5ff] shadow-sm">
         <SidebarContent />
       </nav>
 
       {/* Main Content */}
       <div className="flex-1">
-        {/* Top Bar */}
-        <header className="sticky top-0 z-40 border-b bg-background">
-          <div className="flex h-16 items-center gap-4 px-4">
+        {/* Top Bar with matching color scheme */}
+        <header className="bg-[#f5f5ff] border-b border-[#e5e5f0]">
+          <div className="flex h-16 items-center gap-4 px-6">
             <Button 
               variant="ghost" 
               size="icon" 
-              className="lg:hidden"
+              className="lg:hidden text-gray-700 hover:bg-[#eeeeff] hover:text-[#5056e0] rounded-full"
               onClick={() => setIsMobileOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </Button>
             
             <div className="flex flex-col">
-              <h1 className="text-xl font-semibold">
-                {isLoading ? 'Loading...' : currentBusiness?.name || 'Dashboard'}
-              </h1>
-              {currentBusiness && (
-                <p className="text-sm text-muted-foreground">
-                  {currentBusiness.city}, {currentBusiness.state}
-                </p>
+              {isLoading ? (
+                <>
+                  <Skeleton className="h-6 w-48 mb-1" />
+                  <Skeleton className="h-4 w-32" />
+                </>
+              ) : (
+                <>
+                  {/* Business name as a link to overview page */}
+                  <Link 
+                    href={`/dashboard/${businessId}`}
+                    className="text-xl font-semibold text-gray-800 hover:text-[#5056e0] transition-colors"
+                  >
+                    {currentBusiness?.name || 'Dashboard'}
+                  </Link>
+                  {currentBusiness && (
+                    <p className="text-sm text-gray-500">
+                      {currentBusiness.city}, {currentBusiness.state}
+                    </p>
+                  )}
+                </>
               )}
             </div>
             <div className="flex-1" />
-            <button className="relative">
-              <Bell className="h-5 w-5 text-muted-foreground" />
-              <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground">
-                3
-              </span>
-            </button>
+            
+            {/* User controls in top bar */}
+            <div className="flex items-center gap-3">
+              {/* Notification button */}
+              <button 
+                className="relative p-2 rounded-full hover:bg-[#eeeeff] transition-all duration-200"
+                aria-label="Notifications"
+              >
+                <Bell className="h-5 w-5 text-gray-700" />
+                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#5056e0] text-[10px] font-medium text-white">
+                  3
+                </span>
+              </button>
+              
+              {/* Mode Toggle */}
+              <div className="hover:bg-[#eeeeff] rounded-full transition-all duration-200 p-1">
+                <ModeToggle />
+              </div>
+              
+              {/* User Button */}
+              <div className="hover:bg-[#eeeeff] rounded-full transition-all duration-200 p-1">
+                <UserButton />
+              </div>
+            </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="p-4 md:p-6">
-          {children}
+        <main className="p-5 md:p-8">
+          <div className="max-w-7xl mx-auto">
+            {children}
+          </div>
         </main>
       </div>
     </div>

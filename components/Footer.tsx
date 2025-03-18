@@ -1,159 +1,155 @@
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Facebook, Instagram, Twitter, Youtube, Send, Heart } from "lucide-react";
+import { Facebook, Instagram, Twitter, Youtube, Send, Heart, ArrowRight, Mail, MapPin, Phone } from "lucide-react";
 
 export default function Footer() {
   return (
-    <footer className="relative overflow-hidden pt-16 pb-12 bg-gradient-to-b from-white via-blue-50 to-purple-100">
+    <footer className="relative bg-gradient-to-b from-white via-slate-50 to-blue-50 pt-24 pb-12">
       {/* Decorative Elements */}
-      <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-hidden">
-        <div className="absolute -top-10 left-1/4 w-20 h-20 rounded-full bg-blue-200 opacity-30 animate-float"></div>
-        <div className="absolute top-40 right-1/4 w-16 h-16 rounded-full bg-purple-200 opacity-30 animate-float-delayed"></div>
-        <div className="absolute bottom-20 left-1/3 w-24 h-24 rounded-full bg-pink-200 opacity-30 animate-float"></div>
-        <div className="absolute -bottom-10 right-1/5 w-32 h-32 rounded-full bg-yellow-200 opacity-20 animate-float-delayed"></div>
+      <div className="absolute inset-0 pointer-events-none">
+        <div className="absolute w-full h-full bg-[radial-gradient(circle_800px_at_50%_-100%,rgba(79,70,229,0.1),transparent)]"></div>
+        <div className="absolute w-full h-full bg-[radial-gradient(circle_800px_at_0%_50%,rgba(147,51,234,0.1),transparent)]"></div>
+        <div className="absolute w-full h-full bg-[radial-gradient(circle_800px_at_100%_50%,rgba(59,130,246,0.1),transparent)]"></div>
       </div>
-      
-      <div className="container mx-auto px-4 relative z-10">
+
+      <div className="container mx-auto px-4 relative">
         {/* Newsletter Section */}
-        <div className="max-w-3xl mx-auto mb-16 bg-white rounded-3xl shadow-xl p-8 transform hover:scale-[1.01] transition-transform">
-          <div className="text-center mb-6">
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent mb-2">
-              Join Our Bounce Newsletter! 🎈
-            </h3>
-            <p className="text-gray-600">
-              Get inflatable inspiration, party tips, and exclusive bounce-tastic offers!
-            </p>
+        <div className="max-w-3xl mx-auto mb-20 relative">
+          <div className="absolute -inset-3 bg-gradient-to-r from-blue-500 to-purple-600 rounded-[2rem] blur-2xl opacity-30"></div>
+          <div className="bg-white rounded-[2rem] shadow-2xl p-8 sm:p-12 relative">
+            <div className="text-center mb-8">
+              <h3 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-3">
+                Join Our Newsletter 🎈
+              </h3>
+              <p className="text-gray-600 text-lg">
+                Get inflatable inspiration and exclusive offers!
+              </p>
+            </div>
+            <form className="flex flex-col sm:flex-row gap-3">
+              <input
+                type="email"
+                placeholder="Enter your email"
+                className="flex-1 px-6 py-4 rounded-full border-2 border-blue-100 focus:border-blue-400 focus:outline-none focus:ring-2 focus:ring-blue-400/20 transition-all duration-300 text-lg"
+              />
+              <Button className="h-[3.75rem] px-8 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 text-lg">
+                Subscribe <Send className="ml-2 h-5 w-5" />
+              </Button>
+            </form>
           </div>
-          <form className="flex flex-col sm:flex-row gap-3">
-            <input
-              type="email"
-              placeholder="your@email.com"
-              className="flex-1 px-4 py-3 rounded-full border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent"
-            />
-            <Button className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-full px-6 py-3 flex items-center justify-center gap-2 shadow-md">
-              <span>Bounce In</span>
-              <Send className="h-4 w-4" />
-            </Button>
-          </form>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-10">
-          {/* Company Info */}
-          <div className="space-y-4">
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-600 bg-clip-text text-transparent flex items-center gap-2">
-              <span className="text-3xl animate-bounce">🎈</span> Inflatemate
-            </h3>
-            <p className="text-gray-600">
-              Elevating celebrations with magical bounce houses! Making party planning a breeze for rental businesses.
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-12 xl:gap-16">
+          {/* Brand Section */}
+          <div className="md:col-span-5 space-y-6">
+            <Link href="/" className="block group">
+              <div className="relative inline-flex items-center">
+                <div className="absolute -inset-3 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full opacity-20 group-hover:opacity-40 blur transition-all duration-300"></div>
+                <span className="relative text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  Inflatemate
+                </span>
+              </div>
+            </Link>
+            <p className="text-gray-600 text-lg leading-relaxed">
+              Elevating celebrations with magical bounce houses and making party planning a breeze for rental businesses.
             </p>
-            <div className="flex space-x-4">
-              <a href="#" className="text-blue-400 hover:text-blue-600 transition-colors">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-blue-400 hover:text-blue-600 transition-colors">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-blue-400 hover:text-blue-600 transition-colors">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="text-blue-400 hover:text-blue-600 transition-colors">
-                <Youtube className="h-5 w-5" />
-              </a>
+            
+            <div className="flex flex-col gap-4 mt-8">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <MapPin className="h-5 w-5" />
+                </div>
+                <span className="text-gray-600">123 Bounce Street, Inflatable City, IC 12345</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600">
+                  <Mail className="h-5 w-5" />
+                </div>
+                <span className="text-gray-600">hello@inflatemate.com</span>
+              </div>
+              
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center text-blue-600">
+                  <Phone className="h-5 w-5" />
+                </div>
+                <span className="text-gray-600">(555) 123-4567</span>
+              </div>
+            </div>
+            
+            <div className="flex space-x-4 mt-6">
+              {[
+                { icon: Facebook, color: "hover:text-[#1877F2] hover:bg-[#1877F2]/10" },
+                { icon: Instagram, color: "hover:text-[#E4405F] hover:bg-[#E4405F]/10" },
+                { icon: Twitter, color: "hover:text-[#1DA1F2] hover:bg-[#1DA1F2]/10" },
+                { icon: Youtube, color: "hover:text-[#FF0000] hover:bg-[#FF0000]/10" }
+              ].map((social, index) => (
+                <a
+                  key={index}
+                  href="#"
+                  className={`w-10 h-10 rounded-full flex items-center justify-center bg-white shadow-sm border border-gray-100 transform hover:scale-110 transition-all duration-300 text-gray-400 ${social.color}`}
+                >
+                  <social.icon className="h-5 w-5" />
+                </a>
+              ))}
             </div>
           </div>
 
           {/* Quick Links */}
-          <div className="space-y-4">
-            <h4 className="font-bold text-lg text-blue-600 flex items-center gap-2">
-              <span className="text-xl">🦘</span> Quick Bounces
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Our Bounce Story
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Inflatable Guide
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Safety Bounce Tips
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Party Inspiration
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Support */}
-          <div className="space-y-4">
-            <h4 className="font-bold text-lg text-blue-600 flex items-center gap-2">
-              <span className="text-xl">🎪</span> Bounce Support
-            </h4>
-            <ul className="space-y-3">
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Help Bounce Center
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Contact Our Team
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Bouncy FAQs
-                </Link>
-              </li>
-              <li>
-                <Link href="#" className="text-gray-600 hover:text-blue-500 transition-colors flex items-center gap-1.5">
-                  <span className="h-1.5 w-1.5 rounded-full bg-blue-400"></span>
-                  Inflatable Community
-                </Link>
-              </li>
-            </ul>
-          </div>
-
-          {/* Get Started */}
-          <div className="space-y-4">
-            <h4 className="font-bold text-lg text-blue-600 flex items-center gap-2">
-              <span className="text-xl">🎉</span> Start Bouncing!
-            </h4>
-            <p className="text-gray-600">Ready to transform your bounce house business?</p>
-            <Link href="/sign-up">
-              <Button className="w-full bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white rounded-full shadow-md">
-                Try Free for 14 Days
-              </Button>
-            </Link>
-            <p className="text-sm text-gray-500">No credit card required to start!</p>
+          <div className="md:col-span-7">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-8">
+              {[
+                {
+                  title: "Product",
+                  links: ["Features", "Pricing", "Integrations", "Updates", "Beta Program"]
+                },
+                {
+                  title: "Resources",
+                  links: ["Documentation", "Guides", "API Reference", "Community", "Support"]
+                },
+                {
+                  title: "Company",
+                  links: ["About Us", "Careers", "Press", "Contact", "Partners"]
+                }
+              ].map((section, index) => (
+                <div key={index} className="space-y-6">
+                  <h4 className="text-lg font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                    {section.title}
+                  </h4>
+                  <ul className="space-y-4">
+                    {section.links.map((link, linkIndex) => (
+                      <li key={linkIndex}>
+                        <Link
+                          href="#"
+                          className="text-gray-600 hover:text-blue-600 transition-colors duration-200 flex items-center group"
+                        >
+                          <ArrowRight className="h-4 w-4 opacity-0 -ml-4 group-hover:opacity-100 group-hover:ml-0 transition-all duration-300" />
+                          <span>{link}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-16 pt-8 border-t border-blue-200">
+        <div className="mt-16 pt-8 border-t border-gray-100">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <p className="text-sm text-gray-500 flex items-center">
-              © 2024 Inflatemate. Made with <Heart className="h-3 w-3 mx-1 text-red-400 fill-red-400" /> for bounce house businesses
+            <p className="text-gray-500 flex items-center text-sm">
+              © 2024 Inflatemate. Made with <Heart className="h-4 w-4 mx-1 text-red-500 fill-red-500 animate-pulse" /> for bounce house businesses
             </p>
-            <div className="flex gap-6">
-              <Link href="#" className="text-gray-500 hover:text-blue-500 transition-colors text-sm">Privacy</Link>
-              <Link href="#" className="text-gray-500 hover:text-blue-500 transition-colors text-sm">Terms</Link>
-              <Link href="#" className="text-gray-500 hover:text-blue-500 transition-colors text-sm">Cookies</Link>
-              <Link href="#" className="text-gray-500 hover:text-blue-500 transition-colors text-sm">Sitemap</Link>
+            <div className="flex gap-8">
+              {["Privacy Policy", "Terms of Service", "Cookie Policy"].map((item, index) => (
+                <Link
+                  key={index}
+                  href="#"
+                  className="text-gray-500 hover:text-blue-600 transition-colors duration-200 text-sm"
+                >
+                  {item}
+                </Link>
+              ))}
             </div>
           </div>
         </div>

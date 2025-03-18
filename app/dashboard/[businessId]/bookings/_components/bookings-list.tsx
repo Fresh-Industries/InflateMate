@@ -1,20 +1,17 @@
 'use client';
 
 import { useState } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent } from "@/components/ui/tabs";
-import { format, parseISO } from "date-fns";
+import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { BookingsViewControls } from "./bookings-view-controls";
 import { Calendar } from "@/components/ui/calendar";
-import { Card as CalendarCard, CardContent as CalendarCardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetClose } from "@/components/ui/sheet";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Edit, Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, User, CreditCard, X, ChevronRight, ChevronDown } from "lucide-react";
+import { Edit, Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, User, X, ChevronRight, ChevronDown } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";

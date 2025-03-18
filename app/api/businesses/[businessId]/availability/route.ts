@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -16,9 +15,6 @@ export async function GET(
   { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    // Authenticate the user - optional for public-facing availability search
-    const { userId } = await auth();
-    
     const businessId  = (await params).businessId;
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
