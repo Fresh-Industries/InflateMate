@@ -110,7 +110,6 @@ type DialogMode = "add" | "edit" | null;
 export default function CustomersPage() {
   const params = useParams();
   const businessId = params.businessId as string;
-  console.log("businessId", businessId);
   const { toast } = useToast();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -131,9 +130,7 @@ export default function CustomersPage() {
   });
 
   useEffect(() => {
-
     fetchCustomers();
-    console.log("customers", customers);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -143,7 +140,6 @@ export default function CustomersPage() {
       const response = await fetch(`/api/businesses/${businessId}/customers`);
       if (!response.ok) throw new Error("Failed to fetch customers");
       const data = await response.json();
-      console.log("data", data);
       setCustomers(data);
     } catch (error) {
       console.error("Error fetching customers:", error);
@@ -301,22 +297,22 @@ export default function CustomersPage() {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="container mx-auto p-4 space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Customers</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Customers</h1>
           <p className="text-muted-foreground">
             Manage your customer relationships and bookings
           </p>
         </div>
-        <Button className="gap-2" onClick={openAddDialog}>
+        <Button className="gap-2 w-full sm:w-auto" onClick={openAddDialog}>
           <Plus className="h-4 w-4" /> Add Customer
         </Button>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
@@ -395,18 +391,18 @@ export default function CustomersPage() {
         </CardHeader>
         <CardContent>
           {/* Filters */}
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+            <div className="relative flex-1 w-full">
               <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search customers..."
-                className="pl-8"
+                className="pl-8 w-full"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[180px]">
+              <SelectTrigger className="w-full sm:w-[180px]">
                 <SelectValue placeholder="Customer Type" />
               </SelectTrigger>
               <SelectContent>
@@ -419,51 +415,51 @@ export default function CustomersPage() {
           </div>
 
           {/* Customer Table */}
-          <div className="rounded-md border">
-            <Table>
+          <div className="rounded-md border overflow-x-auto">
+            <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Contact</TableHead>
-                  <TableHead>Address</TableHead>
-                  <TableHead>Total Bookings</TableHead>
-                  <TableHead>Total Spent</TableHead>
-                  <TableHead>Last Booking</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Type</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead className="w-[200px]">Customer</TableHead>
+                  <TableHead className="hidden md:table-cell w-[200px]">Contact</TableHead>
+                  <TableHead className="hidden lg:table-cell w-[200px]">Address</TableHead>
+                  <TableHead className="hidden sm:table-cell w-[100px]">Bookings</TableHead>
+                  <TableHead className="w-[100px]">Total Spent</TableHead>
+                  <TableHead className="hidden md:table-cell w-[150px]">Last Booking</TableHead>
+                  <TableHead className="w-[100px]">Status</TableHead>
+                  <TableHead className="hidden sm:table-cell w-[100px]">Type</TableHead>
+                  <TableHead className="text-right w-[80px]">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center py-8">
                       Loading customers...
                     </TableCell>
                   </TableRow>
                 ) : filteredCustomers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={8} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center py-8">
                       No customers found
                     </TableCell>
                   </TableRow>
                 ) : (
                   filteredCustomers.map((customer) => (
                     <TableRow key={customer.id}>
-                      <TableCell>
-                        <div className="flex items-center gap-3">
-                          <Avatar>
-                            <AvatarFallback>
+                      <TableCell className="max-w-[180px]">
+                        <div className="flex items-center gap-2 sm:gap-3">
+                          <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0">
+                            <AvatarFallback className="text-xs sm:text-sm">
                               {customer.name
                                 .split(" ")
                                 .map((n) => n[0])
                                 .join("")}
                             </AvatarFallback>
                           </Avatar>
-                          <div>
-                            <div className="font-medium">{customer.name}</div>
-                            <div className="text-sm text-muted-foreground">
-                              Customer #{customer.id}
+                          <div className="min-w-0 overflow-hidden">
+                            <div className="font-medium text-sm sm:text-base truncate">{customer.name}</div>
+                            <div className="text-xs text-muted-foreground truncate">
+                              ID: {customer.id.slice(0, 8)}
                               {customer.notes && (
                                 <TooltipProvider>
                                   <Tooltip>
@@ -477,22 +473,28 @@ export default function CustomersPage() {
                                 </TooltipProvider>
                               )}
                             </div>
+                            <div className="block md:hidden text-xs mt-1">
+                              <div className="flex items-center gap-1 truncate">
+                                <Mail className="h-3 w-3 flex-shrink-0" />
+                                <span className="truncate">{customer.email}</span>
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden md:table-cell max-w-[200px]">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
-                            <Mail className="h-3 w-3" />
-                            <span className="text-sm">{customer.email}</span>
+                            <Mail className="h-3 w-3 flex-shrink-0" />
+                            <span className="text-sm truncate">{customer.email}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Phone className="h-3 w-3" />
-                            <span className="text-sm">{customer.phone}</span>
+                            <Phone className="h-3 w-3 flex-shrink-0" />
+                            <span className="text-sm truncate">{customer.phone}</span>
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden lg:table-cell">
                         {customer.address ? (
                           <div className="text-sm">
                             {customer.address}
@@ -506,31 +508,20 @@ export default function CustomersPage() {
                           <span className="text-muted-foreground text-sm">No address</span>
                         )}
                       </TableCell>
-                      <TableCell>{customer.bookingCount}</TableCell>
+                      <TableCell className="hidden sm:table-cell">{customer.bookingCount}</TableCell>
                       <TableCell>${customer.totalSpent}</TableCell>
-                      <TableCell>{customer.lastBooking || "Never"}</TableCell>
+                      <TableCell className="hidden md:table-cell">{customer.lastBooking || "Never"}</TableCell>
                       <TableCell>
                         <Badge
                           variant={
                             customer.status === "Active" ? "default" : "secondary"
                           }
+                          className="whitespace-nowrap"
                         >
                           {customer.status}
-                          {customer.status === "Inactive" && (
-                            <TooltipProvider>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <span className="ml-1 cursor-help">ℹ️</span>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>No bookings in over a year</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </TooltipProvider>
-                          )}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <Badge
                           variant={
                             customer.type === "VIP" ? "default" : "outline"
@@ -619,7 +610,7 @@ export default function CustomersPage() {
 
       {/* Add/Edit Customer Dialog */}
       <Dialog open={dialogMode !== null} onOpenChange={closeDialog}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md md:max-w-lg max-h-[95vh] overflow-hidden">
           <DialogHeader>
             <DialogTitle>
               {dialogMode === "add" ? "Add New Customer" : "Edit Customer"}
@@ -630,9 +621,9 @@ export default function CustomersPage() {
                 : "Edit customer information"}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Name</Label>
+          <div className="space-y-4 max-h-[calc(95vh-10rem)] overflow-y-auto px-1 pr-2">
+            <div className="space-y-2">
+              <Label htmlFor="name">Name *</Label>
               <Input
                 id="name"
                 value={formData.name}
@@ -641,8 +632,8 @@ export default function CustomersPage() {
                 }
               />
             </div>
-            <div>
-              <Label htmlFor="email">Email</Label>
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
               <Input
                 id="email"
                 type="email"
@@ -652,8 +643,8 @@ export default function CustomersPage() {
                 }
               />
             </div>
-            <div>
-              <Label htmlFor="phone">Phone</Label>
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone *</Label>
               <Input
                 id="phone"
                 value={formData.phone}
@@ -662,8 +653,8 @@ export default function CustomersPage() {
                 }
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="address">Address</Label>
                 <Input
                   id="address"
@@ -673,7 +664,7 @@ export default function CustomersPage() {
                   }
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
                 <Input
                   id="city"
@@ -684,8 +675,8 @@ export default function CustomersPage() {
                 />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
                 <Input
                   id="state"
@@ -695,7 +686,7 @@ export default function CustomersPage() {
                   }
                 />
               </div>
-              <div>
+              <div className="space-y-2">
                 <Label htmlFor="zipCode">Zip Code</Label>
                 <Input
                   id="zipCode"
@@ -706,7 +697,7 @@ export default function CustomersPage() {
                 />
               </div>
             </div>
-            <div>
+            <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
               <Input
                 id="notes"
@@ -716,9 +707,9 @@ export default function CustomersPage() {
                 }
               />
             </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="type">Customer Type</Label>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="type">Customer Type *</Label>
                 <Select
                   value={formData.type}
                   onValueChange={(value) =>
@@ -728,7 +719,7 @@ export default function CustomersPage() {
                     })
                   }
                 >
-                  <SelectTrigger>
+                  <SelectTrigger id="type">
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
@@ -738,8 +729,8 @@ export default function CustomersPage() {
                 </Select>
               </div>
               {dialogMode === "edit" && (
-                <div>
-                  <Label htmlFor="status">Status</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="status">Status *</Label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) =>
@@ -749,7 +740,7 @@ export default function CustomersPage() {
                       })
                     }
                   >
-                    <SelectTrigger>
+                    <SelectTrigger id="status">
                       <SelectValue placeholder="Select status" />
                     </SelectTrigger>
                     <SelectContent>
@@ -760,12 +751,15 @@ export default function CustomersPage() {
                 </div>
               )}
             </div>
+            <div className="text-xs text-muted-foreground mt-2">
+              Fields marked with * are required
+            </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={closeDialog}>
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
+            <Button variant="outline" onClick={closeDialog} className="sm:mr-2 w-full sm:w-auto order-1 sm:order-none">
               Cancel
             </Button>
-            <Button onClick={handleSubmitDialog}>
+            <Button onClick={handleSubmitDialog} className="w-full sm:w-auto">
               {dialogMode === "add" ? "Add Customer" : "Save Changes"}
             </Button>
           </DialogFooter>

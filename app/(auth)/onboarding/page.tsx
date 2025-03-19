@@ -106,7 +106,7 @@ export default function OnboardingPage() {
       setCurrentStep(3);
       toast({
         title: "Success!",
-        description: "Business created. Let’s complete your payment setup.",
+        description: "Business created. Let's complete your payment setup.",
       });
     } catch (error) {
       setError(true);
@@ -133,9 +133,9 @@ export default function OnboardingPage() {
       case 1:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-4 text-gray-900">Business Identity</h2>
+            <h2 className="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Business Identity</h2>
             <div>
-              <Label htmlFor="businessName" className="mb-1 block text-gray-700">
+              <Label htmlFor="businessName" className="mb-1 block text-gray-700 font-medium">
                 Business Name
               </Label>
               <Input
@@ -143,6 +143,7 @@ export default function OnboardingPage() {
                 value={formData.businessName}
                 onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
                 placeholder="Your Business Name"
+                className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
                 required
               />
             </div>
@@ -151,9 +152,9 @@ export default function OnboardingPage() {
       case 2:
         return (
           <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-4 text-gray-900">Location &amp; Contact</h2>
+            <h2 className="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Location &amp; Contact</h2>
             <div>
-              <Label htmlFor="businessAddress" className="mb-1 block text-gray-700">
+              <Label htmlFor="businessAddress" className="mb-1 block text-gray-700 font-medium">
                 Street Address
               </Label>
               <Input
@@ -161,12 +162,13 @@ export default function OnboardingPage() {
                 value={formData.businessAddress}
                 onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
                 placeholder="123 Main St"
+                className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
                 required
               />
             </div>
             <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
               <div>
-                <Label htmlFor="businessCity" className="mb-1 block text-gray-700">
+                <Label htmlFor="businessCity" className="mb-1 block text-gray-700 font-medium">
                   City
                 </Label>
                 <Input
@@ -174,11 +176,12 @@ export default function OnboardingPage() {
                   value={formData.businessCity}
                   onChange={(e) => setFormData({ ...formData, businessCity: e.target.value })}
                   placeholder="City"
+                  className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="businessState" className="mb-1 block text-gray-700">
+                <Label htmlFor="businessState" className="mb-1 block text-gray-700 font-medium">
                   State
                 </Label>
                 <Input
@@ -187,11 +190,12 @@ export default function OnboardingPage() {
                   onChange={(e) => setFormData({ ...formData, businessState: e.target.value.toUpperCase() })}
                   placeholder="CA"
                   maxLength={2}
+                  className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="businessZip" className="mb-1 block text-gray-700">
+                <Label htmlFor="businessZip" className="mb-1 block text-gray-700 font-medium">
                   ZIP Code
                 </Label>
                 <Input
@@ -199,12 +203,13 @@ export default function OnboardingPage() {
                   value={formData.businessZip}
                   onChange={(e) => setFormData({ ...formData, businessZip: e.target.value })}
                   placeholder="90001"
+                  className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all" 
                   required
                 />
               </div>
             </div>
             <div>
-              <Label htmlFor="businessPhone" className="mb-1 block text-gray-700">
+              <Label htmlFor="businessPhone" className="mb-1 block text-gray-700 font-medium">
                 Phone Number
               </Label>
               <Input
@@ -213,6 +218,7 @@ export default function OnboardingPage() {
                 value={formData.businessPhone}
                 onChange={(e) => setFormData({ ...formData, businessPhone: e.target.value })}
                 placeholder="+1 555 1234567"
+                className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
                 required
               />
             </div>
@@ -221,7 +227,7 @@ export default function OnboardingPage() {
       case 3:
         return (
           <div className="space-y-4">
-            <p className="text-xl font-semibold text-center text-gray-800">Complete Your Onboarding</p>
+            <p className="text-xl font-semibold text-center bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Complete Your Onboarding</p>
             {stripeConnectInstance ? (
               <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
                 <ConnectAccountOnboarding
@@ -236,9 +242,12 @@ export default function OnboardingPage() {
                 />
               </ConnectComponentsProvider>
             ) : (
-              <p className="text-gray-600 text-center">Loading payment setup...</p>
+              <div className="text-center py-6">
+                <div className="w-12 h-12 mx-auto border-4 border-t-transparent border-blue-500 rounded-full animate-spin mb-4"></div>
+                <p className="text-gray-600">Loading payment setup...</p>
+              </div>
             )}
-            {error && <p className="text-red-600 text-center mt-2">Something went wrong!</p>}
+            {error && <p className="text-red-600 text-center mt-2 font-medium">Something went wrong!</p>}
           </div>
         );
       default:
@@ -247,17 +256,17 @@ export default function OnboardingPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-gray-50">
-      <Card className="w-full max-w-lg shadow-xl rounded-lg">
-        <CardHeader className="text-center">
-          <CardTitle className="text-3xl font-extrabold text-gray-900">Welcome Onboard</CardTitle>
+    <main className="min-h-screen flex items-center justify-center p-6">
+      <Card className="w-full max-w-lg shadow-xl rounded-2xl border border-gray-100 bg-white/90 backdrop-blur-sm">
+        <CardHeader className="text-center pb-2">
+          <CardTitle className="text-3xl font-extrabold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Welcome Onboard</CardTitle>
           <CardDescription className="text-gray-600 mt-1">{`Step ${currentStep} of ${totalSteps}`}</CardDescription>
         </CardHeader>
         <CardContent className="px-8 py-6">
           <div className="mb-6">
-            <div className="relative h-2 bg-gray-200 rounded-full">
+            <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
-                className="absolute h-2 bg-blue-500 rounded-full transition-all duration-500"
+                className="absolute h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
                 style={{ width: `${(currentStep / totalSteps) * 100}%` }}
               />
             </div>
@@ -266,17 +275,30 @@ export default function OnboardingPage() {
             {renderStep()}
             <div className="flex justify-between">
               {currentStep > 1 && currentStep < 3 && (
-                <Button type="button" variant="outline" onClick={handleBack}>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={handleBack}
+                  className="border-gray-300 hover:bg-gray-100 hover:text-gray-900 transition-all"
+                >
                   Back
                 </Button>
               )}
               {currentStep === 1 && (
-                <Button type="button" onClick={handleNext}>
+                <Button 
+                  type="button" 
+                  onClick={handleNext}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-md hover:shadow-lg transition-all ml-auto"
+                >
                   Next
                 </Button>
               )}
               {currentStep === 2 && (
-                <Button type="submit" disabled={isLoading}>
+                <Button 
+                  type="submit" 
+                  disabled={isLoading}
+                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-md hover:shadow-lg transition-all ml-auto disabled:opacity-70 disabled:cursor-not-allowed"
+                >
                   {isLoading ? "Creating Business..." : "Set Up Payments"}
                 </Button>
               )}

@@ -7,7 +7,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/:domain(.*)',
   '/api/webhooks(.*)',
-  '/api'
+  '/api(.*)'
 ]);
 
 // This function handles domain routing and authentication

@@ -33,9 +33,16 @@ export default function CallbackPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
-        <p className="text-lg text-gray-600">Setting up your account...</p>
+      <div className="flex flex-col items-center gap-6">
+        <div className="w-16 h-16 relative">
+          <div className="absolute inset-0 rounded-full bg-gradient-to-r from-blue-400 to-purple-500 animate-pulse"></div>
+          <div className="absolute inset-1 rounded-full bg-white"></div>
+          <div className="absolute inset-3 rounded-full border-4 border-blue-500 border-t-transparent animate-spin"></div>
+        </div>
+        <h2 className="text-2xl font-bold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+          InflateMate
+        </h2>
+        <p className="text-lg text-gray-600 animate-pulse">Setting up your account...</p>
       </div>
     </div>
   );

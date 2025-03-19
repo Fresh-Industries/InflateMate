@@ -8,17 +8,14 @@ import {
   Package,
   Users,
   Settings,
- 
   Bell,
   Menu,
   Globe,
   Mail,
-  Users2,
-  Building2,
-  BarChart3,
   Inbox,
   FileStack,
   Wallet,
+  Building2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -193,7 +190,7 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="min-h-screen flex bg-[#f9faff]">
+    <div className="min-h-screen flex bg-[#f9faff] overflow-hidden">
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
         <SheetContent side="left" className="p-0 w-[280px] bg-[#f5f5ff]">
@@ -211,14 +208,14 @@ export default function DashboardLayout({
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <nav className="hidden lg:block w-64 bg-[#f5f5ff] shadow-sm">
+      <aside className="hidden lg:block w-64 fixed left-0 top-0 h-screen z-30 bg-[#f5f5ff] shadow-sm">
         <SidebarContent />
-      </nav>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1">
+      <div className="flex-1 flex flex-col lg:ml-64 relative">
         {/* Top Bar with matching color scheme */}
-        <header className="bg-[#f5f5ff] border-b border-[#e5e5f0]">
+        <header className="bg-[#f5f5ff] border-b border-[#e5e5f0] fixed top-0 right-0 left-0 lg:left-64 z-20 h-16">
           <div className="flex h-16 items-center gap-4 px-6">
             <Button 
               variant="ghost" 
@@ -267,10 +264,7 @@ export default function DashboardLayout({
                 </span>
               </button>
               
-              {/* Mode Toggle */}
-              <div className="hover:bg-[#eeeeff] rounded-full transition-all duration-200 p-1">
-                <ModeToggle />
-              </div>
+      
               
               {/* User Button */}
               <div className="hover:bg-[#eeeeff] rounded-full transition-all duration-200 p-1">
@@ -281,7 +275,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page Content */}
-        <main className="p-5 md:p-8">
+        <main className="flex-1 overflow-auto p-5 md:p-8 mt-16">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

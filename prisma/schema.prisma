@@ -25,39 +25,41 @@ model Business {
   id                 String        @id @default(cuid())
   name               String
   description        String?
+  
+  // Contact info
   address            String?
   city               String?
   state              String?
   zipCode            String?
   phone              String?
   email              String?
-  website            String?
+  
+  // Brand assets
   logo               String?
+  
+  // Core timestamps
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
-  settings           Json?
-  cancellationPolicy String?
-  depositRequired    Boolean       @default(true)
-  depositPercentage  Float         @default(25.0)
+  
+  // Booking settings
   minAdvanceBooking  Int           @default(24)
   maxAdvanceBooking  Int           @default(90)
-  bufferTime         Int           @default(60)
+  minimumPurchase    Float         @default(0)  // New field for minimum booking amount
+  
+  // Relationships & integrations
   userId             String
   stripeAccountId    String?
-  applyTaxToBookings Boolean       @default(false)
-  coverImage         String?
-  defaultTaxRate     Float         @default(0)
   socialMedia        Json?
-  stripeCustomerId   String?
   customDomain       String?
   siteConfig         Json?
+  
+  // Relations
   bookings           Booking[]
   user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   customers          Customer[]
   inventory          Inventory[]
   payments           Payment[]
   coupons            Coupon[]
-  leads              Lead[]
   salesFunnels       SalesFunnel[]
 
   @@index([userId])
@@ -199,6 +201,46 @@ model Payment {
   business           Business      @relation(fields: [businessId], references: [id])
 }
 
+model Coupon {
+  id             String       @id @default(cuid())
+  code           String
+  description    String?
+  discountType   DiscountType
+  discountAmount Float
+  maxUses        Int?
+  usedCount      Int          @default(0)
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean      @default(true)
+  minimumAmount  Float?
+  businessId     String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([code, businessId])
+  @@index([businessId])
+}
+
+model SalesFunnel {
+  id              String   @id @default(cuid())
+  name            String
+  isActive        Boolean  @default(true)
+  popupTitle      String
+  popupText       String
+  popupImage      String?
+  formTitle       String
+  thankYouMessage String
+  couponId        String?
+  businessId      String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+
 enum InventoryStatus {
   AVAILABLE
   BOOKED
@@ -238,61 +280,4 @@ enum PaymentStatus {
 enum DiscountType {
   PERCENTAGE
   FIXED
-}
-
-model Coupon {
-  id             String       @id @default(cuid())
-  code           String
-  description    String?
-  discountType   DiscountType
-  discountAmount Float
-  maxUses        Int?
-  usedCount      Int          @default(0)
-  startDate      DateTime?
-  endDate        DateTime?
-  isActive       Boolean      @default(true)
-  minimumAmount  Float?
-  businessId     String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
-
-  @@unique([code, businessId])
-  @@index([businessId])
-}
-
-model Lead {
-  id         String   @id @default(cuid())
-  name       String
-  email      String
-  phone      String?
-  message    String?
-  source     String   @default("popup")
-  couponCode String?
-  businessId String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  converted  Boolean  @default(false)
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-
-  @@index([businessId])
-  @@index([email])
-}
-
-model SalesFunnel {
-  id              String   @id @default(cuid())
-  name            String
-  isActive        Boolean  @default(true)
-  popupTitle      String
-  popupText       String
-  popupImage      String?
-  formTitle       String
-  thankYouMessage String
-  couponId        String?
-  businessId      String
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-
-  @@index([businessId])
 }

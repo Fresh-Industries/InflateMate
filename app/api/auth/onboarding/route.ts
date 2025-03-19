@@ -28,6 +28,8 @@ export async function POST(req: NextRequest) {
       where: { clerkUserId: userId },
     });
 
+    console.log(user);
+
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
@@ -77,11 +79,9 @@ export async function POST(req: NextRequest) {
         userId: user.id,
         stripeAccountId: account.id,
         // Default settings
-        depositRequired: true,
-        depositPercentage: 25.0,
         minAdvanceBooking: 24,
         maxAdvanceBooking: 90,
-        bufferTime: 60,
+        minimumPurchase: 100,
       },
     });
 

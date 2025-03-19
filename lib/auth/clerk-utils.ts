@@ -116,12 +116,23 @@ export async function withBusinessAuth<T>(
     }
 
     console.log(`Business ${businessId} found, executing callback`);
-    const result = await callback(business as Business);
+    let result;
+    try {
+      result = await callback(business as Business);
+    } catch (callbackError) {
+      console.error("Error in business callback:", callbackError);
+      return { error: callbackError instanceof Error ? callbackError.message : "Error processing request" };
+    }
+    
+    // Handle null or undefined result
+    if (result === null || result === undefined) {
+      console.log("Callback returned null or undefined, returning empty data object");
+      return { data: {} as T };
+    }
     
     // Check if the result is already an object with data/error structure
-    if (result && typeof result === 'object' && ('data' in result || 'error' in result)) {
-      console.log(`Result from callback has data/error structure:`, 
-                 { hasData: 'data' in result, hasError: 'error' in result });
+    if (typeof result === 'object' && result !== null && ('data' in result || 'error' in result)) {
+      console.log(`Result from callback has data/error structure`);
       return result as BusinessAuthResult<T>;
     }
     
