@@ -93,3 +93,220 @@ export async function GET(
     );
   }
 }
+
+// Original PATCH handler - now replaced by patchWithFormData
+// export async function PATCH(
+//   req: NextRequest,
+//   { params }: { params: Promise<{ businessId: string }> }
+// ) {
+//   try {
+//     const businessId = (await params).businessId;
+//     const { userId } = await auth();
+//     
+//     if (!userId) {
+//       return NextResponse.json(
+//         { error: "Unauthorized" },
+//         { status: 401 }
+//       );
+//     }
+// 
+//     // Parse form data
+//     const formData = await req.formData();
+//     
+//     // Extract business data from form
+//     const updateData: Record<string, any> = {};
+//     
+//     // Text fields
+//     const textFields = [
+//       'name', 'description', 'email', 'phone', 
+//       'address', 'city', 'state', 'zipCode'
+//     ];
+//     
+//     textFields.forEach(field => {
+//       const value = formData.get(field);
+//       if (value !== null) {
+//         updateData[field] = value.toString();
+//       }
+//     });
+//     
+//     // Number fields
+//     const numberFields = [
+//       'minAdvanceBooking', 'maxAdvanceBooking', 
+//       'minimumPurchase', 'depositPercentage', 'taxRate'
+//     ];
+//     
+//     numberFields.forEach(field => {
+//       const value = formData.get(field);
+//       if (value !== null && value !== '') {
+//         updateData[field] = parseFloat(value.toString());
+//       }
+//     });
+//     
+//     // Find the business by ID and verify ownership
+//     const business = await prisma.business.findFirst({
+//       where: {
+//         id: businessId,
+//         user: {
+//           clerkUserId: userId,
+//         },
+//       },
+//     });
+// 
+//     if (!business) {
+//       return NextResponse.json(
+//         { error: "Business not found or you don't have access" },
+//         { status: 404 }
+//       );
+//     }
+//     
+//     // Update the business
+//     const updatedBusiness = await prisma.business.update({
+//       where: { id: businessId },
+//       data: updateData,
+//     });
+// 
+//     return NextResponse.json({
+//       message: "Business updated successfully",
+//       business: updatedBusiness,
+//     });
+//   } catch (error) {
+//     console.error("Error updating business:", error);
+//     return NextResponse.json(
+//       { error: "Failed to update business" },
+//       { status: 500 }
+//     );
+//   }
+// }
+
+// For direct PATCH requests (if needed), we can still support them by parsing the formData
+export async function PATCH(
+  req: NextRequest,
+  { params }: { params: Promise<{ businessId: string }> }
+) {
+  try {
+    const formData = await req.formData();
+    return patchWithFormData(formData, { params });
+  } catch (error) {
+    console.error("Error in PATCH handler:", error);
+    return NextResponse.json(
+      { error: "Failed to process request" },
+      { status: 500 }
+    );
+  }
+}
+
+// Handle form submissions with method override (_method=PATCH)
+export async function POST(
+  req: NextRequest,
+  { params }: { params: Promise<{ businessId: string }> }
+) {
+  try {
+    const formData = await req.formData();
+    const methodOverride = formData.get('_method')?.toString();
+    
+    if (methodOverride === 'PATCH') {
+      // Call a modified PATCH handler that accepts the formData
+      return patchWithFormData(formData, { params });
+    }
+    
+    // Handle actual POST requests here if needed
+    return NextResponse.json(
+      { error: "Method not implemented" },
+      { status: 501 }
+    );
+  } catch (error) {
+    console.error("Error in POST handler:", error);
+    return NextResponse.json(
+      { error: "Failed to process request" },
+      { status: 500 }
+    );
+  }
+}
+
+// Modified PATCH function that accepts formData directly
+async function patchWithFormData(
+  formData: FormData,
+  { params }: { params: Promise<{ businessId: string }> }
+) {
+  try {
+    const businessId = (await params).businessId;
+    const { userId } = await auth();
+    
+    if (!userId) {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+    
+    // Extract business data from form
+    const updateData: Record<string, any> = {};
+    
+    // Text fields
+    const textFields = [
+      'name', 'description', 'email', 'phone', 
+      'address', 'city', 'state', 'zipCode', 'logo'
+    ];
+    
+    textFields.forEach(field => {
+      const value = formData.get(field);
+      if (value !== null) {
+        updateData[field] = value.toString();
+        // Log the logo URL if it's being updated
+        if (field === 'logo') {
+          console.log(`Updating business logo: ${value.toString()}`);
+        }
+      }
+    });
+    
+    // Log all fields being updated
+    console.log('Fields being updated:', Object.keys(updateData));
+    
+    // Number fields
+    const numberFields = [
+      'minAdvanceBooking', 'maxAdvanceBooking', 
+      'minimumPurchase', 'depositPercentage', 'taxRate'
+    ];
+    
+    numberFields.forEach(field => {
+      const value = formData.get(field);
+      if (value !== null && value !== '') {
+        updateData[field] = parseFloat(value.toString());
+      }
+    });
+    
+    // Find the business by ID and verify ownership
+    const business = await prisma.business.findFirst({
+      where: {
+        id: businessId,
+        user: {
+          clerkUserId: userId,
+        },
+      },
+    });
+
+    if (!business) {
+      return NextResponse.json(
+        { error: "Business not found or you don't have access" },
+        { status: 404 }
+      );
+    }
+    
+    // Update the business
+    const updatedBusiness = await prisma.business.update({
+      where: { id: businessId },
+      data: updateData,
+    });
+
+    return NextResponse.json({
+      message: "Business updated successfully",
+      business: updatedBusiness,
+    });
+  } catch (error) {
+    console.error("Error updating business:", error);
+    return NextResponse.json(
+      { error: "Failed to update business" },
+      { status: 500 }
+    );
+  }
+}

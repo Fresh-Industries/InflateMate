@@ -13,7 +13,7 @@ export const ourFileRouter = {
        * @see https://docs.uploadthing.com/file-routes#route-config
        */
       maxFileSize: "4MB",
-      maxFileCount: 4,
+      maxFileCount: 1,
     },
   })
     // Set permissions and file types for this FileRoute
@@ -30,11 +30,28 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
+      console.log("file url:", file.url);
 
-      console.log("file url", file.url);
-
-      // !!! Whatever is returned here is sent to the clientside `onClientUploadComplete` callback
-      return { uploadedBy: metadata.userId };
+      // Return data relevant to the upload
+      return { uploadedBy: metadata.userId, url: file.url };
+    }),
+    
+  // Business logo uploader with different settings
+  logoUploader: f({
+    image: {
+      maxFileSize: "2MB",
+      maxFileCount: 1,
+    },
+  })
+    .middleware(async () => {
+      const user = await getCurrentUser();
+      if (!user) throw new Error("Unauthorized");
+      return { userId: user.id };
+    })
+    .onUploadComplete(async ({ metadata, file }) => {
+      console.log("Logo upload complete for userId:", metadata.userId);
+      console.log("Logo file url:", file.url);
+      return { uploadedBy: metadata.userId, url: file.url };
     }),
 } satisfies FileRouter;
 

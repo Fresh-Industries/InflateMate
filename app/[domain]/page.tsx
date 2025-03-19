@@ -68,7 +68,7 @@ export default async function DomainPage({ params }: { params: { domain: string 
     // Default modern, vibrant color scheme if none provided
     const primaryColor = colors.primary || '#4f46e5'; // Indigo
     const accentColor = colors.accent || '#f97316'; // Orange
-    const tertiaryColor = '#06b6d4'; // Cyan - not from config, just a default
+    const tertiaryColor = colors.secondary || '#06b6d4'; // Cyan - not from config, just a default
     
     // Fetch available inventory items for this business
     const inventoryItems = await prisma.inventory.findMany({
