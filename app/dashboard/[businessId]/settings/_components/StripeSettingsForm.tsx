@@ -2,23 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-// Import the Connect.js initializer function
 import { loadConnectAndInitialize } from "@stripe/connect-js";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
-import {
-  ConnectPayments,
-  ConnectPaymentDetails,
   ConnectComponentsProvider,
   ConnectAccountManagement,
-  ConnectPayouts,
-  
 } from "@stripe/react-connect-js";
-import PaymentAnalytics from "./_components/PaymentAnalytics";
 
 export default function PaymentsPage() {
   const params = useParams();
@@ -28,8 +16,7 @@ export default function PaymentsPage() {
   const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
-  const [showPaymentDetails, setShowPaymentDetails] = useState(false);
+
 
   // Fetch the business and account session data from your server, then initialize Connect.js.
   useEffect(() => {
@@ -79,14 +66,11 @@ export default function PaymentsPage() {
     fetchBusinessAndInitStripe();
   }, [businessId]);
 
-  const handleClosePaymentDetails = () => {
-    setShowPaymentDetails(false);
-    setSelectedPaymentId(null);
-  };
+  
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Payments</h1>
+      <h1 className="text-3xl font-bold">Stripe Settings</h1>
 
       {isLoading && (
         <div className="flex items-center justify-center py-10">
@@ -117,48 +101,17 @@ export default function PaymentsPage() {
         clientSecret &&
         stripeConnectInstance && (
           <div className="space-y-6">
-            <Tabs defaultValue="payments" className="w-full">
-              <TabsList>
-                <TabsTrigger value="overview">Overview</TabsTrigger>
-                <TabsTrigger value="payments">Payments</TabsTrigger>
-                <TabsTrigger value="payouts">Payouts</TabsTrigger>
-              </TabsList>
+    
               <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
-                <TabsContent value="overview" className="space-y-6">
-                  <PaymentAnalytics businessId={businessId} />
-                </TabsContent>
 
-              <TabsContent value="payments" className="space-y-6">
-                <div className="bg-white p-6 rounded-lg shadow">
-                  
-                    <ConnectPayments />
-                    {showPaymentDetails && selectedPaymentId && (
-                      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                        <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-3xl max-h-[90vh] overflow-auto">
-                          <div className="flex justify-between items-center mb-4">
-                            <h3 className="text-lg font-semibold">Payment Details</h3>
-                            <button
-                              onClick={handleClosePaymentDetails}
-                              className="text-gray-500 hover:text-gray-700"
-                            >
-                              ✕
-                            </button>
-                          </div>
-                          <ConnectPaymentDetails
-                            payment={selectedPaymentId}
-                            onClose={handleClosePaymentDetails}
-                          />
-                        </div>
-                      </div>
-                    )}
-                  
-                </div>
-              </TabsContent>
-              <TabsContent value="payouts" className="space-y-6">
-                <ConnectPayouts />
-              </TabsContent>
+             
+              
+                <ConnectAccountManagement />
+              
+              
+          
               </ConnectComponentsProvider>
-            </Tabs>
+           
           </div>
         )}
     </div>
