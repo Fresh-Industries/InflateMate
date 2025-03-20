@@ -34,7 +34,7 @@ interface PageProps {
 }
 
 export default async function WebsitePage({ params }: PageProps) {
-  const { businessId } = params;
+  const { businessId } = await params;
   const business = await getBusinessData(businessId);
 
   return (

@@ -7,11 +7,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SiteConfig } from "@/lib/business/domain-utils";
 import { Save, Loader2 } from "lucide-react";
-import GeneralSettings from "./general-settings";
+import AboutSettings from "./about-settings";
+import ContactSettings from "./contact-settings";
 import ColorSettings from "./color-settings";
-import HeroSettings from "./hero-settings";
-import PagesSettings from "./pages-settings";
-import PreviewModal from "./preview-modal";
+import LandingSettings from "./landing-settings";
 
 interface WebsiteCustomizerProps {
   businessId: string;
@@ -22,7 +21,6 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   const router = useRouter();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   // Initialize siteConfig from business data or create default
@@ -142,14 +140,26 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
         </div>
       </div>
       
-      <Tabs defaultValue="general" className="w-full">
+      <Tabs defaultValue="landing" className="w-full">
         <TabsList className="w-full bg-muted/50 p-0 h-auto">
           <div className="flex w-full">
             <TabsTrigger 
-              value="general" 
+              value="landing" 
               className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
             >
-              General
+              Landing Page
+            </TabsTrigger>
+            <TabsTrigger 
+              value="about" 
+              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
+            >
+              About Page
+            </TabsTrigger>
+            <TabsTrigger 
+              value="contact" 
+              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
+            >
+              Contact Page
             </TabsTrigger>
             <TabsTrigger 
               value="colors" 
@@ -157,60 +167,40 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
             >
               Colors
             </TabsTrigger>
-            <TabsTrigger 
-              value="hero" 
-              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
-            >
-              Hero Section
-            </TabsTrigger>
-            <TabsTrigger 
-              value="pages" 
-              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
-            >
-              Pages
-            </TabsTrigger>
           </div>
         </TabsList>
         
         <div className="mt-6">
-          <TabsContent value="general" className="m-0">
-            <GeneralSettings 
+          <TabsContent value="landing" className="m-0">
+            <LandingSettings 
+              hero={siteConfig.hero || {}} 
+              updateHero={(data) => updateSiteConfig('hero', data)}
+            />
+          </TabsContent>
+          
+          <TabsContent value="about" className="m-0">
+            <AboutSettings 
               businessData={initialData} 
               siteConfig={siteConfig} 
               updateSiteConfig={(data) => updateSiteConfig('about', data)}
             />
           </TabsContent>
           
+          <TabsContent value="contact" className="m-0">
+          <ContactSettings 
+              businessData={initialData} 
+            />
+          </TabsContent>
+          
           <TabsContent value="colors" className="m-0">
-            <ColorSettings 
+          <ColorSettings 
               colors={siteConfig.colors || {}} 
               updateColors={(data) => updateSiteConfig('colors', data)}
-            />
-          </TabsContent>
-          
-          <TabsContent value="hero" className="m-0">
-            <HeroSettings 
-              hero={siteConfig.hero || {}} 
-              updateHero={(data) => updateSiteConfig('hero', data)}
-            />
-          </TabsContent>
-          
-          <TabsContent value="pages" className="m-0">
-            <PagesSettings 
-              pages={siteConfig.pages || {}} 
-              updatePages={(data) => updateSiteConfig('pages', data)}
             />
           </TabsContent>
         </div>
       </Tabs>
       
-      {/* Preview Modal */}
-      <PreviewModal 
-        isOpen={isPreviewOpen} 
-        onClose={() => setIsPreviewOpen(false)}
-        businessId={businessId}
-        siteConfig={siteConfig}
-      />
     </div>
   );
 } 

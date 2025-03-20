@@ -24,7 +24,7 @@ interface HeroSettingsProps {
   }) => void;
 }
 
-export default function HeroSettings({ hero, updateHero }: HeroSettingsProps) {
+export default function LandingSettings({ hero, updateHero }: HeroSettingsProps) {
   const [title, setTitle] = useState(hero.title || "Welcome to our website");
   const [description, setDescription] = useState(
     hero.description || "We provide high-quality inflatable rentals for all types of events."
@@ -179,30 +179,7 @@ export default function HeroSettings({ hero, updateHero }: HeroSettingsProps) {
               </p>
             </div>
           </div>
-          
-          <div className="p-4 border rounded-md">
-            <h3 className="font-medium mb-4">Preview</h3>
-            <div className="rounded-md overflow-hidden border">
-              <div className="relative aspect-[21/9] bg-gray-100">
-                {imageUrl ? (
-                  <Image
-                    src={imageUrl}
-                    alt="Hero preview"
-                    fill
-                    className="object-cover"
-                  />
-                ) : (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <p className="text-muted-foreground">No image uploaded</p>
-                  </div>
-                )}
-                <div className="absolute inset-0 bg-black/40 flex flex-col items-center justify-center text-white p-6 text-center">
-                  <h2 className="text-2xl md:text-4xl font-bold mb-2">{title}</h2>
-                  <p className="max-w-2xl">{description}</p>
-                </div>
-              </div>
-            </div>
-          </div>
+        
         </CardContent>
       </Card>
     </div>

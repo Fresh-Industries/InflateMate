@@ -14,7 +14,6 @@ import {
   ConnectPayments,
   ConnectPaymentDetails,
   ConnectComponentsProvider,
-  ConnectAccountManagement,
   ConnectPayouts,
   
 } from "@stripe/react-connect-js";
