@@ -55,7 +55,7 @@ export function BookingsHeader({ businessId }: BookingsHeaderProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <Card>
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Today's Bookings</CardTitle>
+            <CardTitle className="text-sm font-medium">Today&apos;s Bookings</CardTitle>
             <CardDescription>Scheduled for today</CardDescription>
           </CardHeader>
           <CardContent>

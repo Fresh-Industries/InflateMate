@@ -1,7 +1,6 @@
 // /api/businesses/[businessId]/bookings/route.ts
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { withBusinessAuth, getCurrentUser } from "@/lib/auth/clerk-utils";
 import { stripe } from "@/lib/stripe-server";
 import { prisma } from "@/lib/prisma";
 
@@ -83,7 +82,7 @@ export async function GET(
   { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    const  businessId  = (await params).businessId;
+    const businessId = (await params).businessId;
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
@@ -92,9 +91,37 @@ export async function GET(
       where: {
         businessId: businessId,
       },
+      include: {
+        inventoryItems: {
+          include: {
+            inventory: true
+          }
+        },
+        customer: true,
+      },
+      orderBy: {
+        eventDate: 'asc',
+      },
+    });
+    
+    // Transform bookings to match the expected format
+    const formattedBookings = bookings.map(booking => {
+      const firstItem = booking.inventoryItems[0] || null;
+      
+      return {
+        ...booking,
+        bounceHouseId: firstItem?.inventoryId || '',
+        bounceHouse: firstItem?.inventory ? {
+          id: firstItem.inventory.id,
+          name: firstItem.inventory.name,
+        } : {
+          id: '',
+          name: 'Unknown',
+        }
+      };
     });
 
-    return NextResponse.json(bookings, { status: 200 });
+    return NextResponse.json(formattedBookings, { status: 200 });
   } catch (error) {
     console.error("Error fetching bookings:", error);
     return NextResponse.json(

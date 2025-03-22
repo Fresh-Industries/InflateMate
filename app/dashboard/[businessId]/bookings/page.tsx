@@ -5,7 +5,6 @@ import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import LoadingBookings from "./loading";
 import { BookingsHeader } from "./_components/bookings-header";
-import { Booking as PrismaBooking, Inventory, BookingStatus } from "@prisma/client";
 
 export const dynamic = 'force-dynamic';
 
@@ -17,32 +16,7 @@ interface BounceHouse {
   status: string;
 }
 
-interface Booking {
-  id: string;
-  eventDate: string;
-  startTime: string;
-  endTime: string;
-  status: BookingStatus;
-  totalAmount: number;
-  subtotalAmount?: number;
-  taxAmount?: number;
-  taxRate?: number;
-  bounceHouseId: string;
-  bounceHouse: BounceHouse;
-  eventType: string;
-  participantCount: number;
-  customer: {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-  };
-  eventAddress: string;
-  eventCity: string;
-  eventState: string;
-  eventZipCode: string;
-  specialInstructions?: string;
-}
+// We'll use the API's response type directly
 
 async function getInitialData(businessId: string) {
   const { userId } = await auth();
@@ -50,88 +24,34 @@ async function getInitialData(businessId: string) {
     redirect('/sign-in');
   }
 
-  const [bounceHouses, rawBookings] = await Promise.all([
-    prisma.inventory.findMany({
-      where: {
-        businessId,
-        status: "AVAILABLE",
-      },
-      select: {
-        id: true,
-        name: true,
-        price: true,
-        status: true,
-      },
-      cacheStrategy: { ttl: 240 },
-    }),
-    prisma.booking.findMany({
-      where: {
-        businessId,
-        eventDate: {
-          gte: new Date(),
-        },
-      },
-      include: {
-        inventoryItems: {
-          include: {
-            inventory: true
-          }
-        },
-        customer: {
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-      },
-      orderBy: {
-        eventDate: 'asc',
-      },
-    }),
-  ]);
-
-  // Transform bookings to expected format
-  const bookings: Booking[] = rawBookings.map(booking => {
-    // Use the first inventory item for each booking
-    const firstItem = booking.inventoryItems[0] || null;
-    
-    // Create a bounceHouse object from the first item's inventory
-    const bounceHouse: BounceHouse = firstItem?.inventory ? {
-      id: firstItem.inventory.id,
-      name: firstItem.inventory.name,
-      price: firstItem.inventory.price,
-      status: firstItem.inventory.status,
-    } : {
-      id: '', // Fallback empty values
-      name: 'Unknown',
-      price: 0,
-      status: 'UNKNOWN',
-    };
-
-    return {
-      id: booking.id,
-      eventDate: booking.eventDate.toISOString(),
-      startTime: booking.startTime.toISOString(),
-      endTime: booking.endTime.toISOString(),
-      status: booking.status,
-      totalAmount: booking.totalAmount,
-      subtotalAmount: booking.subtotalAmount || 0,
-      taxAmount: booking.taxAmount || 0,
-      taxRate: booking.taxRate || 0,
-      bounceHouseId: firstItem?.inventoryId || '',
-      bounceHouse,
-      eventType: booking.eventType || 'Not specified',
-      participantCount: booking.participantCount,
-      customer: booking.customer,
-      eventAddress: booking.eventAddress,
-      eventCity: booking.eventCity,
-      eventState: booking.eventState,
-      eventZipCode: booking.eventZipCode,
-      specialInstructions: booking.specialInstructions || undefined
-    };
+  // Fetch bounceHouses from direct DB query (more efficient for this simple query)
+  const bounceHouses = await prisma.inventory.findMany({
+    where: {
+      businessId,
+      status: "AVAILABLE",
+    },
+    select: {
+      id: true,
+      name: true,
+      price: true,
+      status: true,
+    },
+    cacheStrategy: { ttl: 240 },
   });
+
+  // Fetch bookings from the API endpoint instead of direct DB query
+  const response = await fetch(`${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/businesses/${businessId}/bookings`, {
+    cache: 'no-store',
+    next: { tags: ['bookings'] }
+  });
+  
+  if (!response.ok) {
+    console.error("Failed to fetch bookings:", await response.text());
+    return { bounceHouses, bookings: [] };
+  }
+  
+  const bookings = await response.json();
+  console.log("Fetched bookings from API:", bookings);
 
   return {
     bounceHouses: bounceHouses as BounceHouse[],
