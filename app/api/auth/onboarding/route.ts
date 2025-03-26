@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe-server";
 import { z } from "zod";
 import Stripe from "stripe";
+import { Twilio } from "twilio";
 
 const businessSchema = z.object({
   businessName: z.string().min(2, "Business name must be at least 2 characters"),
@@ -17,6 +18,7 @@ const businessSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // Retrieve the current user from the session
+    const twilio = new Twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN);
     const { userId } = await auth();
     console.log(userId);
     if (!userId) {
@@ -84,6 +86,19 @@ export async function POST(req: NextRequest) {
         minimumPurchase: 100,
       },
     });
+
+    // Create sub account for business
+    const twilioSubAccount = await twilio.api.v2010.accounts.create({
+      friendlyName: business.name,
+    });
+
+    // Update the business record with the Twilio sub account SID
+    await prisma.business.update({
+      where: { id: business.id },
+      data: { twilioSubAccountSid: twilioSubAccount.sid },
+    });
+
+
 
     // Update the user's onboarded status 
     await prisma.user.update({

@@ -33,13 +33,14 @@ model Business {
   zipCode            String?
   phone              String?
   email              String?
-  
+  serviceArea        String[]
   // Brand assets
   logo               String?
   
   // Core timestamps
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @updatedAt
+
   
   // Booking settings
   minAdvanceBooking  Int           @default(24)
@@ -49,6 +50,7 @@ model Business {
   // Relationships & integrations
   userId             String
   stripeAccountId    String?
+  twilioSubAccountSid String?
   socialMedia        Json?
   customDomain       String?
   siteConfig         Json?
@@ -122,6 +124,7 @@ model Customer {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
   businessId   String
+  isLead       Boolean   @default(false)
   status       String    @default("Active")
   type         String    @default("Regular")
   bookings     Booking[]

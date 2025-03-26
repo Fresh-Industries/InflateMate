@@ -21,8 +21,6 @@ import { format, startOfToday, endOfToday, addDays, isWithinInterval, subMonths,
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { 
-  LineChart, 
-  Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -33,8 +31,11 @@ import {
   PieChart as RechartsPieChart,
   Pie,
   Cell,
-  Legend
+  Legend,
+  AreaChart,
+  Area
 } from 'recharts';
+import { cn } from "@/lib/utils";
 
 interface Booking {
   id: string;
@@ -43,13 +44,18 @@ interface Booking {
   eventDate: string;
   startTime: string;
   endTime: string;
-  customer: {
+  customerId: string;
+  customer?: {
+    id: string;
     name: string;
   };
-  inventoryItems: Array<{
+  bookingItems?: Array<{
+    inventoryId: string;
     inventory: {
       name: string;
-    }
+    };
+    quantity: number;
+    price: number;
   }>;
 }
 
@@ -86,6 +92,17 @@ interface DashboardData {
   topCustomers: Customer[];
 }
 
+const chartColors = {
+  primary: '#6366f1',
+  secondary: '#22c55e',
+  tertiary: '#f59e0b',
+  quaternary: '#ec4899',
+  background: '#f8fafc',
+  text: '#64748b',
+  grid: '#e2e8f0',
+  gradient: ['rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0)']
+};
+
 export default function DashboardPage() {
   const params = useParams();
   const router = useRouter();
@@ -94,8 +111,6 @@ export default function DashboardPage() {
   const [data, setData] = useState<DashboardData | null>(null);
   const businessId = params.businessId as string;
   const [timeframe, setTimeframe] = useState<'week' | 'month'>('week');
-
-  const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
   useEffect(() => {
     const fetchDashboardData = async () => {
@@ -114,56 +129,57 @@ export default function DashboardPage() {
         
         // Fetch business data
         const businessResponse = await fetch(`/api/businesses/${businessId}`);
-        let businessData;
-        
-        try {
-          businessData = await businessResponse.json();
-        } catch (e) {
-          console.error('Failed to parse business response:', e);
-          throw new Error('Invalid response from server');
-        }
+        const businessData = await businessResponse.json();
 
         if (!businessResponse.ok) {
           throw new Error(businessData.error || 'Failed to fetch business data');
         }
 
-        // Fetch bookings
-        const bookingsResponse = await fetch(`/api/businesses/${businessId}/bookings`);
-        let bookingsData;
-        
-        try {
-          bookingsData = await bookingsResponse.json();
-        } catch (e) {
-          console.error('Failed to parse bookings response:', e);
-          throw new Error('Invalid response from server');
-        }
+        // Fetch bookings and inventory
+        const [bookingsResponse, inventoryResponse] = await Promise.all([
+          fetch(`/api/businesses/${businessId}/bookings?expand=customer,bookingItems`),
+          fetch(`/api/businesses/${businessId}/inventory`)
+        ]);
+
+        const [bookingsData, inventoryData] = await Promise.all([
+          bookingsResponse.json(),
+          inventoryResponse.json()
+        ]);
 
         if (!bookingsResponse.ok) {
           throw new Error(bookingsData.error || 'Failed to fetch bookings');
         }
 
-        // Check if bookingsData is an array, if not, use an empty array
-        const bookingsArray = Array.isArray(bookingsData) ? bookingsData : 
-                             (bookingsData.data && Array.isArray(bookingsData.data)) ? bookingsData.data : [];
-
-        // Fetch customers
-        const customersResponse = await fetch(`/api/businesses/${businessId}/customers`);
-        let customersData;
-        
-        try {
-          customersData = await customersResponse.json();
-        } catch (e) {
-          console.error('Failed to parse customers response:', e);
-          throw new Error('Invalid response from server');
+        if (!inventoryResponse.ok) {
+          throw new Error(inventoryData.error || 'Failed to fetch inventory');
         }
+
+        // Fetch customers for all bookings in one request
+        const customersResponse = await fetch(`/api/businesses/${businessId}/customers`);
+        const customersData = await customersResponse.json();
 
         if (!customersResponse.ok) {
           throw new Error(customersData.error || 'Failed to fetch customers');
         }
 
-        // Check if customersData is an array, if not, use an empty array
-        const customersArray = Array.isArray(customersData) ? customersData : 
-                              (customersData.data && Array.isArray(customersData.data)) ? customersData.data : [];
+        // Create inventory map for quick lookup
+        const inventoryMap = new Map(
+          inventoryData.map((item: Inventory) => [item.id, item])
+        );
+
+        // Check if bookingsData is an array
+        const bookingsArray = Array.isArray(bookingsData) ? bookingsData : 
+                            (bookingsData.data && Array.isArray(bookingsData.data)) ? bookingsData.data : [];
+
+        // Add customer data to bookings
+        const bookingsWithCustomers = bookingsArray.map((booking: Booking) => ({
+          ...booking,
+          customer: booking.customer || { name: 'Anonymous' },
+          bookingItems: booking.bookingItems?.map(item => ({
+            ...item,
+            inventory: item.inventoryId ? inventoryMap.get(item.inventoryId) || { name: 'Unknown Item' } : { name: 'Unknown Item' }
+          })) || []
+        }));
 
         // Filter bookings by date
         const today = new Date();
@@ -176,14 +192,14 @@ export default function DashboardPage() {
         const lastMonthEnd = endOfMonth(subMonths(today, 1));
 
         // Get today's bookings
-        const todayBookings = bookingsArray.filter((booking: Booking) => {
+        const todayBookings = bookingsWithCustomers.filter((booking: Booking) => {
           const bookingDate = new Date(booking.eventDate);
           return isWithinInterval(bookingDate, { start: todayStart, end: todayEnd }) && 
                  booking.status !== 'CANCELLED';
         });
 
         // Get upcoming bookings (next 7 days, excluding today)
-        const upcomingBookings = bookingsArray.filter((booking: Booking) => {
+        const upcomingBookings = bookingsWithCustomers.filter((booking: Booking) => {
           const bookingDate = new Date(booking.eventDate);
           return bookingDate > todayEnd && 
                  bookingDate <= nextWeekEnd && 
@@ -191,12 +207,12 @@ export default function DashboardPage() {
         });
 
         // Get recent bookings (last 10)
-        const recentBookings = [...bookingsArray]
+        const recentBookings = [...bookingsWithCustomers]
           .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
           .slice(0, 10);
 
         // Calculate monthly revenue (current month)
-        const monthlyRevenue = bookingsArray.reduce((acc: number, booking: Booking) => {
+        const monthlyRevenue = bookingsWithCustomers.reduce((acc: number, booking: Booking) => {
           const bookingDate = new Date(booking.eventDate);
           if (isWithinInterval(bookingDate, { start: currentMonthStart, end: currentMonthEnd }) && 
               booking.status !== 'CANCELLED') {
@@ -206,7 +222,7 @@ export default function DashboardPage() {
         }, 0);
 
         // Calculate last month's revenue
-        const lastMonthRevenue = bookingsArray.reduce((acc: number, booking: Booking) => {
+        const lastMonthRevenue = bookingsWithCustomers.reduce((acc: number, booking: Booking) => {
           const bookingDate = new Date(booking.eventDate);
           if (isWithinInterval(bookingDate, { start: lastMonthStart, end: lastMonthEnd }) && 
               booking.status !== 'CANCELLED') {
@@ -222,7 +238,7 @@ export default function DashboardPage() {
         });
 
         const dailyRevenue = last30Days.map(day => {
-          const dayRevenue = bookingsArray.reduce((acc: number, booking: Booking) => {
+          const dayRevenue = bookingsWithCustomers.reduce((acc: number, booking: Booking) => {
             const bookingDate = new Date(booking.eventDate);
             if (isSameDay(bookingDate, day) && booking.status !== 'CANCELLED') {
               return acc + (booking.totalAmount || 0);
@@ -238,21 +254,25 @@ export default function DashboardPage() {
 
         // Calculate bookings by status
         const bookingsByStatus = [
-          { name: 'Confirmed', value: bookingsArray.filter((b: Booking) => b.status === 'CONFIRMED').length },
-          { name: 'Pending', value: bookingsArray.filter((b: Booking) => b.status === 'PENDING').length },
-          { name: 'Completed', value: bookingsArray.filter((b: Booking) => b.status === 'COMPLETED').length },
-          { name: 'Cancelled', value: bookingsArray.filter((b: Booking) => b.status === 'CANCELLED').length },
-          { name: 'No Show', value: bookingsArray.filter((b: Booking) => b.status === 'NO_SHOW').length },
-          { name: 'Weather Hold', value: bookingsArray.filter((b: Booking) => b.status === 'WEATHER_HOLD').length }
+          { name: 'Confirmed', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'CONFIRMED').length },
+          { name: 'Pending', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'PENDING').length },
+          { name: 'Completed', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'COMPLETED').length },
+          { name: 'Cancelled', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'CANCELLED').length },
+          { name: 'No Show', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'NO_SHOW').length },
+          { name: 'Weather Hold', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'WEATHER_HOLD').length }
         ].filter(item => item.value > 0);
 
         // Calculate top inventory items by booking count
         const inventoryBookingCounts: Record<string, { name: string, bookings: number }> = {};
         
-        bookingsArray.forEach((booking: Booking) => {
-          if (booking.inventoryItems && booking.status !== 'CANCELLED') {
-            booking.inventoryItems.forEach(item => {
-              const name = item.inventory.name;
+        console.log('Bookings data:', bookingsWithCustomers);
+        
+        bookingsWithCustomers.forEach((booking: Booking) => {
+          console.log('Processing booking:', booking.id, 'Booking items:', booking.bookingItems);
+          if (booking.bookingItems && booking.status !== 'CANCELLED') {
+            booking.bookingItems.forEach((item: { inventory?: { name: string } }) => {
+              console.log('Processing item:', item);
+              const name = item.inventory?.name || 'Unknown Item';
               if (!inventoryBookingCounts[name]) {
                 inventoryBookingCounts[name] = { name, bookings: 0 };
               }
@@ -261,18 +281,22 @@ export default function DashboardPage() {
           }
         });
         
+        console.log('Final inventory counts:', inventoryBookingCounts);
+        
         const topInventory = Object.values(inventoryBookingCounts)
           .sort((a, b) => b.bookings - a.bookings)
           .slice(0, 5);
 
+        console.log('Top inventory:', topInventory);
+
         // Get top customers by total spent
-        const topCustomers = [...customersArray]
+        const topCustomers = [...customersData]
           .sort((a, b) => b.totalSpent - a.totalSpent)
           .slice(0, 5);
 
         // Calculate dashboard metrics
-        const activeBookings = bookingsArray.filter((b: Booking) => b.status === 'CONFIRMED').length;
-        const pendingBookings = bookingsArray.filter((b: Booking) => b.status === 'PENDING').length;
+        const activeBookings = bookingsWithCustomers.filter((b: Booking) => b.status === 'CONFIRMED').length;
+        const pendingBookings = bookingsWithCustomers.filter((b: Booking) => b.status === 'PENDING').length;
 
         // Get available and maintenance units
         const availableUnits = businessData.inventory?.filter((item: Inventory) => item.status === 'AVAILABLE').length || 0;
@@ -282,7 +306,7 @@ export default function DashboardPage() {
           totalRevenue: monthlyRevenue,
           activeBookings,
           pendingBookings,
-          totalCustomers: customersArray.length || 0,
+          totalCustomers: customersData.length || 0,
           availableUnits,
           maintenanceUnits,
           todayBookings,
@@ -303,7 +327,6 @@ export default function DashboardPage() {
           variant: "destructive",
         });
         
-        // If unauthorized, redirect to auth page
         if (error instanceof Error && error.message.includes('Unauthorized')) {
           window.location.href = '/sign-in';
         }
@@ -356,66 +379,88 @@ export default function DashboardPage() {
   const isRevenueUp = revenueChangePercent >= 0;
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold tracking-tight">Dashboard Overview</h1>
+    <div className="p-8 bg-[#fafbff] min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-2xl font-semibold text-[#1a1f36]">Dashboard Overview</h1>
+        <div className="flex items-center gap-4">
+          <Button variant="outline" className="bg-white shadow-sm border-none hover:bg-gray-50">
+            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+            {format(new Date(), 'MMM dd, yyyy')}
+          </Button>
+        </div>
+      </div>
       
       {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Monthly Revenue</CardTitle>
-            <DollarSign className="h-4 w-4 text-muted-foreground" />
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Monthly Revenue</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-blue-500" />
+            </div>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <div className="text-2xl font-bold">{formatCurrency(data.monthlyRevenue)}</div>
+              <div className="text-2xl font-bold text-[#1a1f36]">{formatCurrency(data.monthlyRevenue)}</div>
               {revenueChangePercent !== 0 && (
-                <div className={`ml-2 flex items-center text-xs ${isRevenueUp ? 'text-green-500' : 'text-red-500'}`}>
+                <div className={cn(
+                  "ml-2 flex items-center text-xs px-2 py-1 rounded-full",
+                  isRevenueUp ? "text-green-700 bg-green-50" : "text-red-700 bg-red-50"
+                )}>
                   {isRevenueUp ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
                   {Math.abs(revenueChangePercent)}%
                 </div>
               )}
             </div>
-            <p className="text-xs text-muted-foreground">
+            <p className="text-sm text-gray-500 mt-1">
               vs. last month ({formatCurrency(data.lastMonthRevenue)})
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Active Bookings</CardTitle>
-            <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Active Bookings</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center">
+              <CalendarCheck className="h-5 w-5 text-purple-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.activeBookings || 0} </div>
-            <p className="text-xs text-muted-foreground">
-              {data.pendingBookings || 0} pending approval
-            </p>
+            <div className="text-2xl font-bold text-[#1a1f36]">{data.activeBookings || 0}</div>
+            <div className="flex items-center mt-1">
+              <div className="h-2 w-2 rounded-full bg-yellow-400 mr-2" />
+              <p className="text-sm text-gray-500">
+                {data.pendingBookings || 0} pending approval
+              </p>
+            </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
-            <Users className="h-4 w-4 text-muted-foreground" />
+        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Total Customers</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
+              <Users className="h-5 w-5 text-green-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.totalCustomers || 0}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-[#1a1f36]">{data.totalCustomers || 0}</div>
+            <p className="text-sm text-gray-500 mt-1">
               Lifetime customers
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Inventory Status</CardTitle>
-            <Package className="h-4 w-4 text-muted-foreground" />
+        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-600">Inventory Status</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center">
+              <Package className="h-5 w-5 text-red-500" />
+            </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{data.availableUnits || 0}</div>
-            <p className="text-xs text-muted-foreground">
+            <div className="text-2xl font-bold text-[#1a1f36]">{data.availableUnits || 0}</div>
+            <p className="text-sm text-gray-500 mt-1">
               {data.maintenanceUnits || 0} in maintenance
             </p>
           </CardContent>
@@ -423,50 +468,110 @@ export default function DashboardPage() {
       </div>
 
       {/* Revenue Chart */}
-      <Card>
+      <Card className="col-span-full bg-white rounded-xl shadow-sm border-none mb-6">
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Revenue Trends</CardTitle>
-            <Tabs defaultValue="week" className="w-[200px]" onValueChange={(value) => setTimeframe(value as 'week' | 'month')}>
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="week">Week</TabsTrigger>
-                <TabsTrigger value="month">Month</TabsTrigger>
+            <div>
+              <CardTitle className="text-xl font-semibold text-[#1a1f36]">Revenue Trends</CardTitle>
+              <CardDescription className="text-gray-500">
+                {timeframe === 'week' ? 'Last 7 days' : 'Last 30 days'} revenue
+              </CardDescription>
+            </div>
+            <Tabs 
+              defaultValue="week" 
+              className="w-[200px]"
+              onValueChange={(value) => setTimeframe(value as 'week' | 'month')}
+            >
+              <TabsList className="grid w-full grid-cols-2 bg-gray-100/50 p-1 rounded-lg">
+                <TabsTrigger 
+                  value="week"
+                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary"
+                >
+                  Week
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="month"
+                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary"
+                >
+                  Month
+                </TabsTrigger>
               </TabsList>
             </Tabs>
           </div>
-          <CardDescription>
-            {timeframe === 'week' ? 'Last 7 days' : 'Last 30 days'} revenue
-          </CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px]">
+        <CardContent className="h-[300px] pt-4">
           <ResponsiveContainer width="100%" height="100%">
-            <LineChart
+            <AreaChart
               data={timeframe === 'week' ? data.dailyRevenue.slice(-7) : data.dailyRevenue}
-              margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
             >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="date" />
-              <YAxis tickFormatter={(value) => `$${value}`} />
-              <RechartsTooltip formatter={(value) => [`$${value}`, 'Revenue']} />
-              <Line 
-                type="monotone" 
-                dataKey="amount" 
-                stroke="#8884d8" 
-                activeDot={{ r: 8 }} 
-                name="Revenue"
+              <defs>
+                <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={chartColors.primary} stopOpacity={0.2}/>
+                  <stop offset="100%" stopColor={chartColors.primary} stopOpacity={0}/>
+                </linearGradient>
+              </defs>
+              <CartesianGrid 
+                strokeDasharray="3 3" 
+                stroke={chartColors.grid} 
+                vertical={false}
+                opacity={0.3}
               />
-            </LineChart>
+              <XAxis 
+                dataKey="date" 
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartColors.text, fontSize: 12, dy: 10 }}
+                tickMargin={10}
+              />
+              <YAxis 
+                tickFormatter={(value) => `$${value}`}
+                axisLine={false}
+                tickLine={false}
+                tick={{ fill: chartColors.text, fontSize: 12 }}
+                tickMargin={10}
+              />
+              <RechartsTooltip
+                cursor={{ stroke: chartColors.primary, strokeWidth: 1, strokeDasharray: "4 4" }}
+                content={({ active, payload, label }) => {
+                  if (active && payload?.[0]?.value !== undefined) {
+                    return (
+                      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
+                        <p className="text-sm text-gray-600">{label}</p>
+                        <p className="text-lg font-semibold text-gray-900">
+                          ${payload[0].value.toLocaleString()}
+                        </p>
+                      </div>
+                    );
+                  }
+                  return null;
+                }}
+              />
+              <Area
+                type="monotone"
+                dataKey="amount"
+                stroke={chartColors.primary}
+                strokeWidth={2.5}
+                fill="url(#revenueGradient)"
+                dot={false}
+                activeDot={{ 
+                  r: 6, 
+                  fill: 'white',
+                  stroke: chartColors.primary,
+                  strokeWidth: 2
+                }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </CardContent>
       </Card>
 
-      {/* Booking Status and Top Inventory */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid grid-cols-2 gap-6 mb-6">
         {/* Booking Status Chart */}
-        <Card>
+        <Card className="bg-white rounded-xl shadow-sm border-none">
           <CardHeader>
-            <CardTitle>Booking Status</CardTitle>
-            <CardDescription>Distribution of bookings by status</CardDescription>
+            <CardTitle className="text-xl font-semibold text-[#1a1f36]">Booking Status</CardTitle>
+            <CardDescription className="text-gray-500">Distribution of bookings</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -475,40 +580,122 @@ export default function DashboardPage() {
                   data={data.bookingsByStatus}
                   cx="50%"
                   cy="50%"
-                  labelLine={false}
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
-                  outerRadius={80}
-                  fill="#8884d8"
+                  innerRadius={75}
+                  outerRadius={90}
+                  paddingAngle={4}
                   dataKey="value"
+                  startAngle={90}
+                  endAngle={-270}
                 >
                   {data.bookingsByStatus.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell 
+                      key={`cell-${index}`} 
+                      fill={[
+                        '#6366f1',
+                        '#22c55e',
+                        '#f59e0b',
+                        '#ec4899',
+                        '#8b5cf6',
+                        '#06b6d4'
+                      ][index % 6]}
+                      stroke="white"
+                      strokeWidth={2}
+                    />
                   ))}
                 </Pie>
-                <Legend />
+                <Legend
+                  verticalAlign="middle"
+                  align="right"
+                  layout="vertical"
+                  iconType="circle"
+                  iconSize={8}
+                  formatter={(value) => (
+                    <span className="text-sm text-gray-600">{value}</span>
+                  )}
+                />
+                <RechartsTooltip
+                  content={({ active, payload }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
+                          <p className="text-sm text-gray-600">{payload[0].name}</p>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {payload[0].value} bookings
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
               </RechartsPieChart>
             </ResponsiveContainer>
           </CardContent>
         </Card>
 
         {/* Top Inventory */}
-        <Card>
+        <Card className="bg-white rounded-xl shadow-sm border-none">
           <CardHeader>
-            <CardTitle>Top Inventory</CardTitle>
-            <CardDescription>Most booked items</CardDescription>
+            <CardTitle className="text-xl font-semibold text-[#1a1f36]">Top Inventory</CardTitle>
+            <CardDescription className="text-gray-500">Most booked items</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart
                 data={data.topInventory}
                 layout="vertical"
-                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
               >
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis type="number" />
-                <YAxis dataKey="name" type="category" width={100} />
-                <RechartsTooltip />
-                <Bar dataKey="bookings" fill="#82ca9d" name="Bookings" />
+                <defs>
+                  <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0%" stopColor="#6366f1" stopOpacity={1}/>
+                    <stop offset="100%" stopColor="#818cf8" stopOpacity={1}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid 
+                  strokeDasharray="3 3" 
+                  stroke={chartColors.grid} 
+                  horizontal={false}
+                  opacity={0.3}
+                />
+                <XAxis 
+                  type="number"
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: chartColors.text, fontSize: 12 }}
+                  tickMargin={10}
+                />
+                <YAxis 
+                  dataKey="name" 
+                  type="category" 
+                  axisLine={false}
+                  tickLine={false}
+                  tick={{ fill: chartColors.text, fontSize: 12 }}
+                  width={120}
+                  tickMargin={10}
+                />
+                <RechartsTooltip
+                  cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
+                  content={({ active, payload, label }) => {
+                    if (active && payload && payload.length) {
+                      return (
+                        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
+                          <p className="text-sm text-gray-600">{label}</p>
+                          <p className="text-lg font-semibold text-gray-900">
+                            {payload[0].value} bookings
+                          </p>
+                        </div>
+                      );
+                    }
+                    return null;
+                  }}
+                />
+                <Bar 
+                  dataKey="bookings" 
+                  radius={[4, 4, 4, 4]}
+                  barSize={24}
+                  fill="url(#barGradient)"
+                />
               </BarChart>
             </ResponsiveContainer>
           </CardContent>
@@ -518,7 +705,7 @@ export default function DashboardPage() {
       {/* Today's Bookings and Upcoming Bookings */}
       <div className="grid gap-4 md:grid-cols-2">
         {/* Today's Bookings */}
-        <Card>
+        <Card className="bg-white rounded-xl shadow-sm border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle>Today&apos;s Bookings</CardTitle>
@@ -556,7 +743,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       <p className="text-sm font-medium">{formatCurrency(booking.totalAmount)}</p>
                       <p className="text-xs text-muted-foreground">
-                        {booking.inventoryItems?.[0]?.inventory?.name || 'Item'}
+                        {booking.bookingItems?.[0]?.inventory?.name || 'Item'}
                       </p>
                     </div>
                   </div>
@@ -577,7 +764,7 @@ export default function DashboardPage() {
         </Card>
 
         {/* Upcoming Bookings */}
-        <Card>
+        <Card className="bg-white rounded-xl shadow-sm border-none">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
               <CardTitle>Upcoming Bookings</CardTitle>
@@ -604,16 +791,16 @@ export default function DashboardPage() {
                 {data.upcomingBookings.slice(0, 3).map((booking) => (
                   <div key={booking.id} className="flex items-center justify-between border-b pb-2">
                     <div>
-                      <p className="font-medium">{booking.customer?.name || 'Customer'}</p>
-                      <div className="flex items-center text-sm text-muted-foreground">
+                      <p className="font-medium text-[#1a1f36]">{booking.customer?.name || 'Anonymous'}</p>
+                      <div className="flex items-center text-sm text-gray-500">
                         <Calendar className="mr-1 h-3 w-3" />
                         {format(new Date(booking.eventDate), 'EEE, MMM d')}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">{formatCurrency(booking.totalAmount)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {booking.inventoryItems?.[0]?.inventory?.name || 'Item'}
+                      <p className="text-sm font-semibold text-[#1a1f36]">{formatCurrency(booking.totalAmount)}</p>
+                      <p className="text-xs text-gray-500">
+                        {booking.bookingItems?.[0]?.inventory?.name || 'Item'}
                       </p>
                     </div>
                   </div>
@@ -635,7 +822,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Top Customers */}
-      <Card>
+      <Card className="bg-white rounded-xl shadow-sm border-none">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
             <CardTitle>Top Customers</CardTitle>

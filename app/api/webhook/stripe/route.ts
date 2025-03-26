@@ -3,6 +3,8 @@ import { stripe } from "@/lib/stripe-server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
+import { Resend } from "resend";
+const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
   const sig = (await headers()).get('stripe-signature');
@@ -118,6 +120,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   try {
     const email = paymentIntent.receipt_email || '';
     const businessId = metadata.businessId || '';
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+    });
 
     console.log("Creating/updating customer with:", { email, businessId });
 
@@ -266,6 +271,22 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       console.error("Error creating payment record:", paymentError);
       throw paymentError;
     }
+    
+    
+    const subject = 'Booking Confirmed';
+    const html = `
+    <p>Hello ${customer.name},</p>
+    <p>Your booking has been confirmed.</p>
+    <p>Booking ID: ${booking.id}</p>
+    <p>Event Date: ${booking.eventDate}</p>
+    `;
+
+    await resend.emails.send({
+      from: `Booking Confirmation ${business?.name} <${business?.email}>`,
+      to: email,
+      subject: subject,
+      html: html,
+    });
 
     console.log(`Booking ${booking.id} confirmed successfully`);
   } catch (error) {

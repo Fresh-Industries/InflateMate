@@ -37,6 +37,8 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import React from "react";
+import { Checkbox } from "@/components/ui/checkbox";
+import Link from "next/link";
 
 // Inventory item type
 type InventoryItem = {
@@ -102,6 +104,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [businessData, setBusinessData] = useState<Business | null>(null);
   const [taxRate, setTaxRate] = useState(0);
   const [applyTax, setApplyTax] = useState(false);
+  const [termsAccepted, setTermsAccepted] = useState(false);
   
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
@@ -257,6 +260,10 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const validateCustomerInfo = () => {
     if (!newBooking.customerName || !newBooking.customerEmail || !newBooking.customerPhone) {
       toast({ title: "Error", description: "Please complete all customer details.", variant: "destructive" });
+      return false;
+    }
+    if (!termsAccepted) {
+      toast({ title: "Error", description: "Please accept the terms of service.", variant: "destructive" });
       return false;
     }
     return true;
@@ -914,6 +921,36 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                 placeholder="Any special requests or setup instructions"
                 rows={3}
               />
+            </div>
+
+            <div className="flex items-center space-x-2 pt-4 border-t">
+              <div className="flex items-start space-x-2">
+                <Checkbox 
+                  id="terms" 
+                  checked={termsAccepted}
+                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
+                  aria-required="true"
+                  className={!termsAccepted && "border-red-500"}
+                />
+                <div className="grid gap-1.5 leading-none">
+                  <label
+                    htmlFor="terms"
+                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    By checking this box, you agree to receive communications from us and accept our{" "}
+                    <Link href="/terms" className="text-primary hover:underline font-medium" target="_blank">
+                      Terms of Service
+                    </Link>
+                    , including consent to receive emails and SMS notifications about your booking.
+                    <span className="text-red-500 ml-1">*</span>
+                  </label>
+                  {!termsAccepted && (
+                    <p className="text-xs text-red-500">
+                      You must accept the terms to continue
+                    </p>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         )}

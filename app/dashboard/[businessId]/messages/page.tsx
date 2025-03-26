@@ -17,7 +17,7 @@ export default function MessagesPage() {
   const { customers, loading: customersLoading, error: customersError } = useCustomers(businessId);
   const { messages, loading: messagesLoading, error: messagesError } = useMessages(
     businessId,
-    selectedCustomer?.id || null
+    selectedCustomer?.phone || null
   );
 
   const handleSelectCustomer = (customer: Customer) => {
@@ -54,9 +54,8 @@ export default function MessagesPage() {
           </div>
           <div className="lg:col-span-2 space-y-6">
             {selectedCustomer && (
-              <MessageComposer customer={selectedCustomer} />
+              <MessageComposer customer={selectedCustomer} businessId={businessId} />
             )}
-            
             {messagesError ? (
               <Alert variant="destructive">
                 <AlertTitle>Error</AlertTitle>
@@ -69,10 +68,7 @@ export default function MessagesPage() {
                     <Loader2 className="h-8 w-8 animate-spin text-primary" />
                   </div>
                 )}
-                <MessageHistory
-                  customer={selectedCustomer}
-                  messages={messages}
-                />
+                <MessageHistory customer={selectedCustomer} messages={messages} />
               </div>
             )}
           </div>
