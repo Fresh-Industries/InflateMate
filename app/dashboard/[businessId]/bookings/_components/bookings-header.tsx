@@ -11,12 +11,58 @@ import {
 } from "@/components/ui/sheet";
 import { NewBookingForm } from "./new-booking-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { prisma } from "@/lib/prisma";
 
 interface BookingsHeaderProps {
   businessId: string;
 }
 
-export function BookingsHeader({ businessId }: BookingsHeaderProps) {
+type Booking = {
+  id: string;
+  startDate: Date;
+  // ... other booking fields
+};
+
+export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
+  const today = new Date();
+  const startOfDay = new Date(today.setHours(0,0,0,0));
+  const endOfDay = new Date(today.setHours(23,59,59,999));
+
+  const todaysBookings = await prisma.booking.count({
+    where: {
+      businessId,
+      eventDate: {
+        gte: startOfDay,
+        lt: endOfDay,
+      },
+    },
+  });
+
+  const upcomingBookings = await prisma.booking.count({
+    where: {
+      businessId,
+      eventDate: {
+        gte: new Date(),
+        lt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+      },
+      status: 'CONFIRMED',
+    },
+  });
+
+  const monthlyRevenue = await prisma.booking.aggregate({
+    where: {
+      businessId,
+      eventDate: {
+        gte: new Date(today.getFullYear(), today.getMonth(), 1),
+        lt: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+      },
+      status: 'CONFIRMED',
+    },
+    _sum: {
+      totalAmount: true,
+    },
+  });
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
@@ -62,12 +108,9 @@ export function BookingsHeader({ businessId }: BookingsHeaderProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">0</span>
+                <span className="text-2xl font-bold">{todaysBookings}</span>
               </div>
-              <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                <span>View</span>
-                <ChevronRight className="h-3 w-3" />
-              </Button>
+              
             </div>
           </CardContent>
         </Card>
@@ -81,12 +124,9 @@ export function BookingsHeader({ businessId }: BookingsHeaderProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">0</span>
+                <span className="text-2xl font-bold">{upcomingBookings}</span>
               </div>
-              <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                <span>View</span>
-                <ChevronRight className="h-3 w-3" />
-              </Button>
+              
             </div>
           </CardContent>
         </Card>
@@ -98,11 +138,9 @@ export function BookingsHeader({ businessId }: BookingsHeaderProps) {
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <span className="text-2xl font-bold">$0.00</span>
-              <Button variant="ghost" size="sm" className="gap-1 text-xs">
-                <span>Details</span>
-                <ChevronRight className="h-3 w-3" />
-              </Button>
+              <span className="text-2xl font-bold">
+                ${monthlyRevenue._sum.totalAmount?.toFixed(2) ?? "0.00"}
+              </span>
             </div>
           </CardContent>
         </Card>

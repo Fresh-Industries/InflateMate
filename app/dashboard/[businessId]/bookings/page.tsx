@@ -39,8 +39,9 @@ async function getInitialData(businessId: string) {
     cacheStrategy: { ttl: 240 },
   });
 
-  // Fetch bookings from the API endpoint instead of direct DB query
-  const response = await fetch(`${process.env.NEXT_PUBLIC_ROOT_DOMAIN}/api/businesses/${businessId}/bookings`, {
+  // Add origin for server-side requests
+  const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const response = await fetch(`${origin}/api/businesses/${businessId}/bookings`, {
     cache: 'no-store',
     next: { tags: ['bookings'] }
   });
