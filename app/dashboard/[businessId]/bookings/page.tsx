@@ -52,19 +52,13 @@ async function getInitialData(businessId: string) {
   }
   
   const bookings = await response.json();
-  console.log("Fetched bookings from API:", bookings);
-
   return {
     bounceHouses: bounceHouses as BounceHouse[],
     bookings,
   };
 }
 
-interface PageProps {
-  params: { businessId: string };
-}
-
-export default async function BookingsPage({ params }: PageProps) {
+export default async function BookingsPage({ params }: { params: Promise<{ businessId: string }> }) {
   const { businessId } = await params;
   const initialData = await getInitialData(businessId);
 

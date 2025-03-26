@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CalendarPlus, Calendar, ChevronRight, X } from "lucide-react";
+import { CalendarPlus, Calendar } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -16,12 +16,6 @@ import { prisma } from "@/lib/prisma";
 interface BookingsHeaderProps {
   businessId: string;
 }
-
-type Booking = {
-  id: string;
-  startDate: Date;
-  // ... other booking fields
-};
 
 export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
   const today = new Date();
@@ -53,8 +47,8 @@ export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
     where: {
       businessId,
       eventDate: {
-        gte: new Date(today.getFullYear(), today.getMonth(), 1),
-        lt: new Date(today.getFullYear(), today.getMonth() + 1, 0),
+        gte: new Date(today.getFullYear(), today.getMonth()),
+        lt: new Date(today.getFullYear(), today.getMonth() + 1, 1),
       },
       status: 'CONFIRMED',
     },
@@ -84,7 +78,7 @@ export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
               <div className="flex justify-between items-center">
                 <SheetTitle>Create New Booking</SheetTitle>
                 <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-muted">
-                  <X className="h-4 w-4" />
+                  
                 </SheetClose>
               </div>
               <SheetDescription>

@@ -14,7 +14,6 @@ export const metadata: Metadata = {
   description: "The ultimate platform for bounce house management",
 };
 
-export const revalidate = 3600 // Revalidate at most every hour
 
 export default function RootLayout({
   children,

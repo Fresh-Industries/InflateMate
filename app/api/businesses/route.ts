@@ -54,11 +54,9 @@ export async function POST(req: NextRequest) {
           }
         },
         // Set default business settings
-        depositRequired: true,
-        depositPercentage: 25.0,
         minAdvanceBooking: 24,
         maxAdvanceBooking: 90,
-        bufferTime: 60,
+        
       },
     });
 

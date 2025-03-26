@@ -17,8 +17,6 @@ export default clerkMiddleware(async (auth, req) => {
   // Get hostname of request (e.g. business-name.localhost:3000)
   const hostname = req.headers.get('host') || '';
   
-  console.log('Middleware processing URL:', url.toString());
-  console.log('Hostname:', hostname);
   
   // Extract domain without port for comparison
   const domainWithoutPort = hostname.split(':')[0];
@@ -28,10 +26,8 @@ export default clerkMiddleware(async (auth, req) => {
   
   // Check if this is the main app domain
   if (hostname === 'localhost:3000' || hostname === 'localhost') {
-    console.log('Main app domain detected');
     
     // For all other main app routes, continue with auth check
-    console.log('Main app route, continuing with auth check');
     
     // If it's not a public route, protect it
     if (!isPublicRoute(req)) {
@@ -49,20 +45,15 @@ export default clerkMiddleware(async (auth, req) => {
   // Handle both business name subdomains and custom domains
   // If it's a subdomain of localhost or any other domain
   if (domainWithoutPort !== 'localhost') {
-    console.log('Domain detected:', domainWithoutPort);
     
     // Check if it's a subdomain of localhost (for local development)
     if (domainWithoutPort.includes('.localhost')) {
-      const subdomain = domainWithoutPort.split('.')[0];
-      console.log('Localhost subdomain detected:', subdomain);
       
       // Rewrite to the dynamic domain route
-      console.log(`Rewriting to /${domainWithoutPort}${path}`);
       return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
     }
     
     // For any other domain, rewrite to the dynamic domain route
-    console.log(`Rewriting to /${domainWithoutPort}${path}`);
     return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
   }
   

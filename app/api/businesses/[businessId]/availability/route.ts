@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-
+import { createLocalDate, createLocalDateTime } from "@/lib/utils";
 // Schema for validating availability search parameters
 const availabilitySearchSchema = z.object({
   date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD format
@@ -47,35 +47,11 @@ export async function GET(
 
     console.log(`Checking availability for date ${date}, startTime ${startTime}, endTime ${endTime}, excluding booking ID: ${excludeBookingId || 'none'}`);
     
-    // Parse the date string to create a proper UTC date
-    const dateParts = date.split('-');
-    if (dateParts.length !== 3) {
-      return NextResponse.json({ error: "Invalid date format. Use YYYY-MM-DD" }, { status: 400 });
-    }
+    // Create date objects for the requested time range
+    const requestedStartTime = createLocalDateTime(date, startTime);
+    const requestedEndTime = createLocalDateTime(date, endTime);
     
-    const year = parseInt(dateParts[0]);
-    const month = parseInt(dateParts[1]) - 1; // JavaScript months are 0-indexed
-    const day = parseInt(dateParts[2]);
-    
-    // Create date objects for the start and end of the day in UTC
-    // If startTime and endTime are provided, use them to create more specific time ranges
-    let dayStart, dayEnd;
-    
-    if (startTime && startTime.match(/^\d{2}:\d{2}$/)) {
-      const [startHour, startMinute] = startTime.split(':').map(Number);
-      dayStart = new Date(Date.UTC(year, month, day, startHour, startMinute, 0));
-    } else {
-      dayStart = new Date(Date.UTC(year, month, day, 0, 0, 0));
-    }
-    
-    if (endTime && endTime.match(/^\d{2}:\d{2}$/)) {
-      const [endHour, endMinute] = endTime.split(':').map(Number);
-      dayEnd = new Date(Date.UTC(year, month, day, endHour, endMinute, 59));
-    } else {
-      dayEnd = new Date(Date.UTC(year, month, day, 23, 59, 59));
-    }
-    
-    console.log(`Date range for availability check: ${dayStart.toISOString()} to ${dayEnd.toISOString()}`);
+    console.log(`Date range for availability check: ${requestedStartTime.toISOString()} to ${requestedEndTime.toISOString()}`);
     
     // Get all inventory items for this business
     const allInventory = await prisma.inventory.findMany({
@@ -91,10 +67,10 @@ export async function GET(
               {
                 // Availability record that blocks this date
                 startTime: {
-                  lt: dayEnd,
+                  lt: requestedEndTime,
                 },
                 endTime: {
-                  gt: dayStart,
+                  gt: requestedStartTime,
                 },
                 isAvailable: false,
               },
@@ -106,17 +82,23 @@ export async function GET(
 
     console.log(`Found ${allInventory.length} total inventory items`);
     
-    // Find all bookings that would conflict with this date (entire day)
-    // We're now checking for any booking on the same day, regardless of time
+    // Find all bookings that would conflict with this date and time range
     const conflictingBookings = await prisma.booking.findMany({
       where: {
         businessId,
         id: excludeBookingId ? { not: excludeBookingId } : undefined, // Exclude the current booking if ID provided
-        eventDate: {
-          // Check if the booking is on the same day
-          gte: dayStart,
-          lt: dayEnd,
-        },
+        // Check for any booking that overlaps with the requested time range
+        OR: [
+          {
+            // Bookings that span across the requested time range
+            startTime: { lte: requestedEndTime },
+            endTime: { gte: requestedStartTime },
+          },
+          {
+            // Bookings on the same day (regardless of time)
+            eventDate: createLocalDate(date),
+          },
+        ],
         status: {
           in: ['PENDING', 'CONFIRMED'], // Only consider active bookings
         },

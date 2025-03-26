@@ -4,6 +4,7 @@ import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
 import { Resend } from "resend";
+import { createLocalDate, createLocalDateTime } from "@/lib/utils";
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: NextRequest) {
@@ -76,29 +77,8 @@ export async function POST(req: NextRequest) {
   }
 }
 
-// Add a helper function to create a UTC date
-const createUTCDate = (dateString: string) => {
-  const date = new Date(dateString);
-  return new Date(Date.UTC(
-    date.getFullYear(),
-    date.getMonth(),
-    date.getDate()
-  ));
-};
 
-// Add a helper function to create a UTC datetime
-const createUTCDateTime = (dateString: string, timeString: string) => {
-  // Parse the time string (format: HH:MM)
-  const [hours, minutes] = timeString.split(':').map(Number);
-  
-  // Create a UTC date from the date string
-  const date = createUTCDate(dateString);
-  
-  // Set the hours and minutes
-  date.setUTCHours(hours, minutes, 0, 0);
-  
-  return date;
-};
+
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent succeeded: ${paymentIntent.id}`);
@@ -184,24 +164,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         endTime: metadata.endTime
       });
       
-      // Create proper UTC Date objects to avoid timezone issues
-      const eventDate = createUTCDate(metadata.eventDate);
-      const startDateTime = createUTCDateTime(metadata.eventDate, metadata.startTime);
-      const endDateTime = createUTCDateTime(metadata.eventDate, metadata.endTime);
-
-      console.log("Creating booking with UTC dates:", {
-        eventDate: eventDate.toISOString(),
-        startDateTime: startDateTime.toISOString(),
-        endDateTime: endDateTime.toISOString(),
-        isValidEvent: !isNaN(eventDate.getTime()),
-        isValidStart: !isNaN(startDateTime.getTime()),
-        isValidEnd: !isNaN(endDateTime.getTime())
-      });
-
-      // Parse tax-related fields from metadata
+      // New – now treating these as local time values
+      const startDateTime = createLocalDateTime(metadata.eventDate, metadata.startTime);
+      const endDateTime = createLocalDateTime(metadata.eventDate, metadata.endTime);
+      const eventDate = createLocalDate(metadata.eventDate);
+      
       const subtotalAmount = parseFloat(metadata.subtotalAmount || '0') || 0;
       const taxAmount = parseFloat(metadata.taxAmount || '0') || 0;
-      const taxRate = parseFloat(metadata.taxRate || '0') || 0;
+      const taxRate = parseFloat(metadata.taxRate || '10') || 10;
 
       const bookingData = {
         id: metadata.bookingId || '',

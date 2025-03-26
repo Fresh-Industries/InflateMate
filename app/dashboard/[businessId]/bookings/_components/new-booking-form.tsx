@@ -125,40 +125,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     specialInstructions: "",
   });
 
-  // Debug logging for important state changes
-  useEffect(() => {
-    if (clientSecret) {
-      console.log("clientSecret set:", clientSecret.substring(0, 10) + "...");
-    }
-  }, [clientSecret]);
-
-  useEffect(() => {
-    if (businessData) {
-      console.log("businessData updated:", {
-        id: businessData.id,
-        hasStripeAccount: !!businessData.stripeConnectedAccountId,
-      });
-    }
-  }, [businessData]);
-
-  useEffect(() => {
-    if (pendingBookingData) {
-      console.log("pendingBookingData set:", {
-        customerEmail: pendingBookingData.customerEmail,
-        bounceHouseId: pendingBookingData.bounceHouseId,
-      });
-    }
-  }, [pendingBookingData]);
-
-  // For debugging payment form display conditions
-  useEffect(() => {
-    console.log("Payment form display conditions:", {
-      showPaymentForm,
-      hasClientSecret: !!clientSecret,
-      hasPendingBookingData: !!pendingBookingData,
-      allConditionsMet: showPaymentForm && !!clientSecret && !!pendingBookingData,
-    });
-  }, [showPaymentForm, clientSecret, pendingBookingData]);
 
   // Steps for progress indicator
   const steps = [
@@ -167,7 +133,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     { number: 3, title: "Review & Pay", icon: CreditCard },
   ];
 
-  // Fetch business data including tax settings
+
   useEffect(() => {
     const fetchBusinessData = async () => {
       try {
@@ -185,7 +151,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     };
     
     fetchBusinessData();
-  }, [businessId]);
+  }, []);
 
   // Search for available inventory
   const searchAvailability = async () => {
@@ -300,21 +266,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     return selectedItem ? selectedItem.price : 0;
   };
 
-  // Add a helper function to create a UTC date
-  const createUTCDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return new Date(Date.UTC(
-      date.getFullYear(),
-      date.getMonth(),
-      date.getDate()
-    ));
-  };
 
   // Modify the handleSubmit function to use UTC dates
   const handleSubmit = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
-    console.log("Starting submission...");
 
     try {
       const subtotal = calculateSubtotal();
@@ -322,20 +278,12 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       const total = calculateTotal();
       const amount = Math.round(total * 100); // convert to cents
       
-      console.log("Amount:", amount);
       if (isNaN(amount) || amount <= 0) throw new Error("Invalid total amount.");
 
-      // Create a UTC date to avoid timezone issues
-      const utcDate = createUTCDate(newBooking.eventDate);
-      const formattedEventDate = utcDate.toISOString().split('T')[0]; // YYYY-MM-DD format
-      
-      console.log("Original date:", newBooking.eventDate);
-      console.log("UTC date:", utcDate.toISOString());
-      console.log("Formatted date for booking:", formattedEventDate);
       
       const metadata: BookingMetadata = {
         bounceHouseId: newBooking.bounceHouseId,
-        eventDate: formattedEventDate,
+        eventDate: newBooking.eventDate,
         startTime: newBooking.startTime,
         endTime: newBooking.endTime,
         eventType: newBooking.eventType,
@@ -356,12 +304,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         businessId: businessId,
         bookingId: crypto.randomUUID(),
       };
-      console.log("Metadata prepared with keys:", Object.keys(metadata));
-      console.log("Critical metadata fields:", {
-        bounceHouseId: metadata.bounceHouseId,
-        businessId: metadata.businessId,
-        bookingId: metadata.bookingId
-      });
+      
 
       console.log("Sending request to:", `/api/businesses/${businessId}/bookings`);
       
@@ -371,23 +314,8 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       if (!businessResponse.ok) {
         throw new Error("Failed to fetch business data");
       }
-      const businessData = await businessResponse.json();
-      console.log("Business data fetched (full object):", JSON.stringify(businessData, null, 2));
-      console.log("Business data type:", typeof businessData);
+      const businessData = await businessResponse.json();      
       
-      // Check all properties available in the business data
-      console.log("Business data keys:", Object.keys(businessData));
-      
-      // Try to find any Stripe-related fields regardless of case
-      const allFields = Object.keys(businessData);
-      const stripeFields = allFields.filter(key => key.toLowerCase().includes('stripe'));
-      console.log("Stripe-related fields found:", stripeFields);
-      
-      // Direct check for the stripeConnectedAccountId with exact value
-      console.log("stripeConnectedAccountId exists:", 'stripeConnectedAccountId' in businessData);
-      console.log("stripeConnectedAccountId value:", businessData.stripeConnectedAccountId);
-      
-      // Ensure the businessData has the required info
       if (!businessData) {
         console.error("Business data is missing");
         throw new Error("Failed to load business data");
@@ -425,14 +353,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
 
       // Extract client secret from response - handle different response formats
       let clientSecret = null;
-      
-      // Log the structure of the payment data to help with debugging
-      console.log("Payment data structure:", {
-        hasClientSecret: 'clientSecret' in paymentData,
-        hasData: 'data' in paymentData,
-        topLevelKeys: Object.keys(paymentData)
-      });
-      
       // Try multiple possible locations for the client secret
       if (typeof paymentData.clientSecret === 'string') {
         clientSecret = paymentData.clientSecret;
@@ -447,14 +367,10 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         throw new Error("Missing client secret in API response");
       }
       
-      console.log("Client secret received with length:", clientSecret.length);
-      
       // Set clientSecret and pendingBookingData
       setClientSecret(clientSecret);
-      
-      console.log("Setting state values...");
+
       setPendingBookingData(metadata);
-      console.log("State should be updated now");
       setShowPaymentForm(true);
     } catch (error) {
       console.error("Submission error:", error);
