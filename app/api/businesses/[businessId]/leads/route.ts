@@ -98,14 +98,12 @@ export async function POST(
     }
     
     // Create the lead
-    const lead = await prisma.lead.create({
+    const lead = await prisma.user.create({
       data: {
         name: validatedData.name,
         email: validatedData.email,
         phone: validatedData.phone,
-        message: validatedData.message,
-        source: validatedData.source,
-        couponCode,
+        isLead: true,
         businessId: business.id,
       },
     });
@@ -226,9 +224,10 @@ export async function GET(
     const skip = (page - 1) * limit;
     
     // Get leads
-    const leads = await prisma.lead.findMany({
+    const leads = await prisma.user.findMany({
       where: {
         businessId,
+        isLead: true,
       },
       orderBy: {
         createdAt: "desc",
@@ -238,9 +237,10 @@ export async function GET(
     });
     
     // Get total count
-    const totalCount = await prisma.lead.count({
+    const totalCount = await prisma.user.count({
       where: {
         businessId,
+        isLead: true,
       },
     });
     

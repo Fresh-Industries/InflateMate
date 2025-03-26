@@ -209,15 +209,6 @@ export default async function MarketingPage({
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
-              
-              {activeFunnel && (
-                <Link href={`/dashboard/${params.businessId}/marketing/sales-funnels/embed`}>
-                  <Button variant="secondary">
-                    <Code className="mr-2 h-4 w-4" />
-                    Embed Code
-                  </Button>
-                </Link>
-              )}
             </CardFooter>
           </Card>
           

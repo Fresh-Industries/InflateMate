@@ -10,7 +10,7 @@ import { BookingsViewControls } from "./bookings-view-controls";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetTrigger } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, X } from "lucide-react";
+import { Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, X, Pencil as PencilIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
@@ -457,16 +457,29 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                         <Eye className="h-4 w-4 mr-2" />
                         <span>View</span>
                       </Button>
+                      
                       {booking.status !== "CANCELLED" && (
-                        <Button 
-                          onClick={() => handleCancelBooking(booking.id)}
-                          size="sm" 
-                          variant="outline" 
-                          className="w-full justify-between text-destructive hover:text-destructive"
-                        >
-                          <X className="h-4 w-4 mr-2" />
-                          <span>Cancel</span>
-                        </Button>
+                        <>
+                          <Button 
+                            onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}/edit`)}
+                            size="sm" 
+                            variant="outline" 
+                            className="w-full justify-between"
+                          >
+                            <PencilIcon className="h-4 w-4 mr-2" />
+                            <span>Edit</span>
+                          </Button>
+                          
+                          <Button 
+                            onClick={() => handleCancelBooking(booking.id)}
+                            size="sm" 
+                            variant="outline" 
+                            className="w-full justify-between text-destructive hover:text-destructive"
+                          >
+                            <X className="h-4 w-4 mr-2" />
+                            <span>Cancel</span>
+                          </Button>
+                        </>
                       )}
                     </div>
                   </div>
@@ -491,7 +504,19 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
           )}
           
           <SheetFooter className="mt-8">
-            <Button variant="outline" onClick={() => setIsViewSheetOpen(false)}>Close</Button>
+            <div className="flex w-full justify-between">
+              <Button variant="outline" onClick={() => setIsViewSheetOpen(false)}>Close</Button>
+              {selectedBooking && selectedBooking.status !== "CANCELLED" && (
+                <Button 
+                  onClick={() => {
+                    router.push(`/dashboard/${businessId}/bookings/${selectedBooking.id}/edit`);
+                    setIsViewSheetOpen(false);
+                  }}
+                >
+                  Edit Booking
+                </Button>
+              )}
+            </div>
           </SheetFooter>
         </SheetContent>
       </Sheet>

@@ -37,6 +37,8 @@ import {
   Mail,
   Phone,
   MoreVertical,
+  MapPin,
+  Eye,
 } from "lucide-react";
 import {
   Dialog,
@@ -74,6 +76,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 interface Customer {
   id: string;
@@ -90,6 +93,25 @@ interface Customer {
   lastBooking: string | null;
   status: "Active" | "Inactive";
   type: "Regular" | "VIP";
+  bookings?: CustomerBooking[];
+}
+
+interface CustomerBooking {
+  id: string;
+  eventDate: string;
+  startTime: string;
+  endTime: string;
+  status: string;
+  totalAmount: number;
+  eventType: string;
+  eventAddress: string;
+  eventCity: string;
+  eventState: string;
+  eventZipCode: string;
+  bounceHouse: {
+    id: string;
+    name: string;
+  };
 }
 
 interface CustomerFormData {
@@ -111,6 +133,7 @@ export default function CustomersPage() {
   const params = useParams();
   const businessId = params.businessId as string;
   const { toast } = useToast();
+  const router = useRouter();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -128,6 +151,11 @@ export default function CustomersPage() {
     phone: "",
     type: "Regular",
   });
+
+  // New state variables
+  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+  const [customerBookings, setCustomerBookings] = useState<CustomerBooking[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -295,6 +323,33 @@ export default function CustomersPage() {
         return matchesSearch;
     }
   });
+
+  // Add this new function to fetch a customer's bookings
+  const fetchCustomerBookings = async (customerId: string) => {
+    try {
+      setIsLoadingBookings(true);
+      const response = await fetch(`/api/businesses/${businessId}/customers/${customerId}/bookings`);
+      if (!response.ok) throw new Error("Failed to fetch customer bookings");
+      const data = await response.json();
+      setCustomerBookings(data);
+    } catch (error) {
+      console.error("Error fetching customer bookings:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load customer bookings",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoadingBookings(false);
+    }
+  };
+
+  // Add this function to open the customer details
+  const openCustomerDetails = (customer: Customer) => {
+    setSelectedCustomer(customer);
+    fetchCustomerBookings(customer.id);
+    setIsDetailsOpen(true);
+  };
 
   return (
     <div className="container mx-auto p-4 space-y-6">
@@ -556,6 +611,9 @@ export default function CustomersPage() {
                             >
                               Edit Details
                             </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => openCustomerDetails(customer)}>
+                              View Details
+                            </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
@@ -765,6 +823,211 @@ export default function CustomersPage() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Customer Details Dialog */}
+      <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
+        <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden">
+          <DialogHeader>
+            <DialogTitle>Customer Details</DialogTitle>
+            <DialogDescription>
+              View detailed information for {selectedCustomer?.name}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="max-h-[calc(95vh-10rem)] overflow-y-auto">
+            {selectedCustomer && (
+              <div className="space-y-6">
+                {/* Customer Information Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Customer Information</CardTitle>
+                  </CardHeader>
+                  <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="h-12 w-12">
+                          <AvatarFallback className="text-lg">
+                            {selectedCustomer.name
+                              .split(" ")
+                              .map((n) => n[0])
+                              .join("")}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div>
+                          <h3 className="text-xl font-semibold">{selectedCustomer.name}</h3>
+                          <Badge 
+                            variant={selectedCustomer.type === "VIP" ? "default" : "outline"}
+                          >
+                            {selectedCustomer.type}
+                          </Badge>
+                          <Badge 
+                            variant={selectedCustomer.status === "Active" ? "default" : "secondary"}
+                            className="ml-2"
+                          >
+                            {selectedCustomer.status}
+                          </Badge>
+                        </div>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedCustomer.email}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <span>{selectedCustomer.phone}</span>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div>
+                        <h4 className="font-medium mb-1">Address</h4>
+                        {selectedCustomer.address ? (
+                          <div>
+                            <p>{selectedCustomer.address}</p>
+                            <p>
+                              {selectedCustomer.city}, {selectedCustomer.state} {selectedCustomer.zipCode}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-muted-foreground">No address provided</p>
+                        )}
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <h4 className="font-medium mb-1">Total Bookings</h4>
+                          <p className="text-2xl font-bold">{selectedCustomer.bookingCount}</p>
+                        </div>
+                        <div>
+                          <h4 className="font-medium mb-1">Total Spent</h4>
+                          <p className="text-2xl font-bold">${selectedCustomer.totalSpent}</p>
+                        </div>
+                      </div>
+                      
+                      {selectedCustomer.notes && (
+                        <div>
+                          <h4 className="font-medium mb-1">Notes</h4>
+                          <p>{selectedCustomer.notes}</p>
+                        </div>
+                      )}
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                {/* Customer Bookings Card */}
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Booking History</CardTitle>
+                    <CardDescription>
+                      View all bookings for this customer
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    {isLoadingBookings ? (
+                      <div className="text-center py-8">
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                        <p className="mt-2 text-muted-foreground">Loading bookings...</p>
+                      </div>
+                    ) : customerBookings.length === 0 ? (
+                      <div className="text-center py-8">
+                        <div className="rounded-full bg-muted p-3 w-12 h-12 flex items-center justify-center mx-auto">
+                          <Calendar className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <h3 className="mt-4 text-lg font-medium">No bookings found</h3>
+                        <p className="mt-2 text-muted-foreground">
+                          This customer hasn't made any bookings yet.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-4">
+                        {customerBookings.map((booking) => (
+                          <Card key={booking.id} className="overflow-hidden">
+                            <div className="flex flex-col md:flex-row">
+                              <div className="flex-1 p-4">
+                                <div className="flex items-start justify-between">
+                                  <div>
+                                    <CardTitle className="text-lg">{booking.bounceHouse.name}</CardTitle>
+                                    <div className="flex items-center mt-1 space-x-1 text-sm text-muted-foreground">
+                                      <Calendar className="h-4 w-4" />
+                                      <span>{new Date(booking.eventDate).toLocaleDateString()}</span>
+                                    </div>
+                                  </div>
+                                  <Badge variant={getStatusBadgeVariant(booking.status)}>
+                                    {booking.status}
+                                  </Badge>
+                                </div>
+                                
+                                <div className="mt-4">
+                                  <h4 className="text-sm font-medium">Event Details</h4>
+                                  <div className="flex items-start mt-1">
+                                    <MapPin className="h-4 w-4 mr-1 text-muted-foreground mt-0.5" />
+                                    <p className="text-sm">{booking.eventAddress}, {booking.eventCity}, {booking.eventState} {booking.eventZipCode}</p>
+                                  </div>
+                                  <div className="text-sm text-muted-foreground mt-1">
+                                    Type: {booking.eventType}
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="border-t md:border-t-0 md:border-l bg-muted/50 p-4 flex flex-col justify-between gap-4 w-full md:w-48">
+                                <div>
+                                  <h4 className="text-sm font-medium">Amount</h4>
+                                  <p className="text-xl font-bold">${booking.totalAmount.toFixed(2)}</p>
+                                </div>
+                                
+                                <Button 
+                                  onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}`)}
+                                  size="sm" 
+                                  variant="outline" 
+                                  className="w-full justify-between"
+                                >
+                                  <Eye className="h-4 w-4 mr-2" />
+                                  <span>View</span>
+                                </Button>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              </div>
+            )}
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+              Close
+            </Button>
+            <Button 
+              onClick={() => {
+                setIsDetailsOpen(false);
+                openEditDialog(selectedCustomer!);
+              }}
+            >
+              Edit Customer
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
+
+// Helper function to determine badge variant based on booking status
+const getStatusBadgeVariant = (status: string) => {
+  switch (status) {
+    case "PENDING":
+      return "secondary";
+    case "CONFIRMED":
+      return "default";
+    case "CANCELLED":
+      return "destructive";
+    default:
+      return "secondary";
+  }
+};

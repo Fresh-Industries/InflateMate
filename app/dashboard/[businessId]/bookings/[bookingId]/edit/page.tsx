@@ -9,14 +9,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
-import { Loader2, ArrowLeft, Calendar, Clock, MapPin, User, Users, DollarSign, Info } from "lucide-react";
-import { Separator } from "@/components/ui/separator";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { 
+  Loader2, ArrowLeft, Calendar, MapPin, User,
+  Info, Clock, CalendarRange, CheckCircle 
+} from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface Booking {
   id: string;
   bounceHouseId: string;
-  packageId?: string | null;
   customerName: string;
   customerEmail: string;
   customerPhone: string;
@@ -44,6 +52,17 @@ interface Booking {
   };
 }
 
+const EVENT_TYPES = [
+  "Birthday Party",
+  "Corporate Event",
+  "School Event",
+  "Community Event",
+  "Church Event",
+  "Festival",
+  "Family Gathering",
+  "Other"
+];
+
 export default function EditBookingPage() {
   const params = useParams();
   const businessId = params.businessId as string;
@@ -57,7 +76,6 @@ export default function EditBookingPage() {
   const [formData, setFormData] = useState<Booking | null>(null);
   const [originalDate, setOriginalDate] = useState<string>('');
   const [isCheckingAvailability, setIsCheckingAvailability] = useState(false);
-  const [debugInfo, setDebugInfo] = useState<any>(null);
 
   // Fetch booking details
   useEffect(() => {
@@ -71,7 +89,6 @@ export default function EditBookingPage() {
         
         const bookingData = await response.json();
         console.log("Booking data:", bookingData);
-        setDebugInfo(bookingData);
         
         // Ensure bounceHouseId is set
         if (!bookingData.bounceHouseId && bookingData.bounceHouse?.id) {
@@ -89,7 +106,7 @@ export default function EditBookingPage() {
         }
         
         // Format the date properly
-        let formattedBooking = { ...bookingData };
+        const formattedBooking = { ...bookingData };
         
         // Ensure eventDate is in YYYY-MM-DD format for the input
         if (bookingData.eventDate) {
@@ -179,7 +196,7 @@ export default function EditBookingPage() {
       );
       
       if (!response.ok) {
-        const errorData = await response.json();
+        const errorData = await response.json() as { error?: string };
         console.error("Availability check failed:", errorData);
         return { available: false, error: errorData.error || "Failed to check availability" };
       }
@@ -189,7 +206,7 @@ export default function EditBookingPage() {
       
       // Check if the bounce house is in the available inventory
       const isAvailable = data.availableInventory.some(
-        (item: any) => item.id === bounceHouseId
+        (item: { id: string }) => item.id === bounceHouseId
       );
       
       if (!isAvailable) {
@@ -251,7 +268,9 @@ export default function EditBookingPage() {
       // Check if date has changed from original
       if (formData.eventDate !== originalDate) {
         console.log("Date has changed, checking availability");
+        setIsCheckingAvailability(true);
         const availabilityResult = await checkAvailability(formData.eventDate, bounceHouseId);
+        setIsCheckingAvailability(false);
         if (!availabilityResult.available) {
           console.log("Availability check failed");
           toast({
@@ -264,7 +283,7 @@ export default function EditBookingPage() {
       }
       
       // Prepare submission data - create a new object instead of mutating formData
-      const submissionData: any = {
+      const submissionData: Record<string, any> = {
         ...formData,
         bounceHouseId
       };
@@ -346,8 +365,11 @@ export default function EditBookingPage() {
 
   if (isLoading || !formData) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="flex justify-center items-center min-h-[70vh]">
+        <div className="text-center">
+          <Loader2 className="h-10 w-10 animate-spin text-primary mx-auto mb-4" />
+          <p className="text-muted-foreground">Loading booking details...</p>
+        </div>
       </div>
     );
   }
@@ -355,10 +377,14 @@ export default function EditBookingPage() {
   if (isError) {
     return (
       <div className="max-w-3xl mx-auto p-6">
-        <Card>
+        <Card className="border-destructive/20">
           <CardContent className="pt-6">
-            <div className="text-center text-destructive py-8">
-              <p className="mb-4">Failed to load booking details.</p>
+            <div className="text-center py-8 space-y-4">
+              <div className="bg-destructive/10 w-12 h-12 rounded-full flex items-center justify-center mx-auto">
+                <Info className="h-6 w-6 text-destructive" />
+              </div>
+              <h3 className="text-lg font-medium">Failed to load booking details</h3>
+              <p className="text-muted-foreground mb-4">There was a problem retrieving this booking&apos;s information.</p>
               <Button onClick={() => router.push(`/dashboard/${businessId}/bookings`)}>
                 Return to Bookings
               </Button>
@@ -369,307 +395,364 @@ export default function EditBookingPage() {
     );
   }
 
+  // Format time for display
+  const formatTimeForDisplay = (time: string | undefined) => {
+    if (!time) return '';
+    
+    // If it's already in HH:MM format, just return it
+    if (time.length === 5 && time.includes(':')) return time;
+    
+    // If it's in HH:MM:SS format, truncate the seconds
+    if (time.length === 8 && time.split(':').length === 3) {
+      return time.substring(0, 5);
+    }
+    
+    // Try to parse it as a date if it's in ISO format
+    if (time.includes('T')) {
+      try {
+        const date = new Date(time);
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+      } catch (e) {
+        console.error("Error parsing time:", e);
+      }
+    }
+    
+    return time;
+  };
+
   return (
-    <div className="max-w-3xl mx-auto p-6 space-y-4">
-      <Button 
-        variant="ghost" 
-        className="mb-4" 
-        onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
-      >
-        <ArrowLeft className="h-4 w-4 mr-2" /> Back to Bookings
-      </Button>
+    <div className="max-w-4xl mx-auto p-4 md:p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <Button 
+          variant="ghost" 
+          className="gap-2" 
+          onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
+        >
+          <ArrowLeft className="h-4 w-4" /> Back to Bookings
+        </Button>
+        
+        <div className="flex items-center gap-2">
+          <div className="bg-green-100 px-3 py-1 rounded-full flex items-center gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-green-500"></div>
+            <span className="text-green-700 text-xs font-medium">Active Booking</span>
+          </div>
+        </div>
+      </div>
       
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-2xl font-bold">Edit Booking</CardTitle>
-          <CardDescription>
-            {formData.bounceHouse?.name || "Bounce House"} - Booking #{formData.id.substring(0, 8)}
-          </CardDescription>
+      <Card className="border-none shadow-md">
+        <CardHeader className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-t-lg pb-3">
+          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-2">
+            <div>
+              <CardTitle className="text-2xl font-bold flex items-center gap-2">
+                Edit Booking
+                <span className="text-sm font-normal text-muted-foreground">#{formData.id.substring(0, 8)}</span>
+              </CardTitle>
+              <CardDescription className="font-medium text-primary">
+                {formData.bounceHouse?.name || "Bounce House"}
+              </CardDescription>
+            </div>
+            <div className="flex flex-col md:flex-row md:items-center gap-2 text-sm">
+              <div className="flex items-center gap-1">
+                <CalendarRange className="h-4 w-4 text-primary" />
+                <span>
+                  {formData.eventDate ? format(new Date(formData.eventDate), 'MMMM d, yyyy') : 'Date not set'}
+                </span>
+              </div>
+              {formData.startTime && (
+                <div className="flex items-center gap-1 ml-0 md:ml-4">
+                  <Clock className="h-4 w-4 text-primary" />
+                  <span>
+                    {formatTimeForDisplay(formData.startTime)} - {formatTimeForDisplay(formData.endTime)}
+                  </span>
+                </div>
+              )}
+            </div>
+          </div>
         </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Rental Period Note */}
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-md text-blue-700 mb-4">
-              <p className="font-medium">24-Hour Rental Period</p>
-              <p className="text-sm">All bookings are for a full day (24-hour rental). This gives our team time to deliver, set up, and clean the equipment.</p>
-            </div>
+        
+        <CardContent className="pt-6">
+          <Tabs defaultValue="details" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsTrigger value="details" className="flex items-center gap-1.5">
+                <Info className="h-4 w-4" />
+                <span>Event Details</span>
+              </TabsTrigger>
+              <TabsTrigger value="customer" className="flex items-center gap-1.5">
+                <User className="h-4 w-4" />
+                <span>Customer</span>
+              </TabsTrigger>
+              <TabsTrigger value="location" className="flex items-center gap-1.5">
+                <MapPin className="h-4 w-4" />
+                <span>Location</span>
+              </TabsTrigger>
+            </TabsList>
             
-            {/* Hidden field for bounceHouseId */}
-            <input 
-              type="hidden" 
-              name="bounceHouseId" 
-              value={formData?.bounceHouse?.id || formData?.bounceHouseId || ''} 
-            />
-            
-            {/* Event Details Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Event Details</h3>
-              </div>
+            <form onSubmit={handleSubmit}>
+              {/* Hidden field for bounceHouseId */}
+              <input 
+                type="hidden" 
+                name="bounceHouseId" 
+                value={formData?.bounceHouse?.id || formData?.bounceHouseId || ''} 
+              />
               
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div>
-                  <Label htmlFor="eventDate">Event Date</Label>
-                  <Input
-                    id="eventDate"
-                    type="date"
-                    value={formData?.eventDate || ''}
-                    onChange={(e) => handleChange("eventDate", e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="startTime">Delivery Time</Label>
-                  <Input
-                    id="startTime"
-                    type="time"
-                    value={formData?.startTime ? formData.startTime.substring(0, 5) : ''}
-                    onChange={(e) => handleChange("startTime", e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">24-hour rental starts at delivery</p>
-                </div>
-                <div>
-                  <Label htmlFor="endTime">Pickup Time</Label>
-                  <Input
-                    id="endTime"
-                    type="time"
-                    value={formData?.endTime ? formData.endTime.substring(0, 5) : ''}
-                    onChange={(e) => handleChange("endTime", e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                  <p className="text-xs text-muted-foreground mt-1">Next day pickup</p>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="eventType">Event Type</Label>
-                  <Input
-                    id="eventType"
-                    type="text"
-                    value={formData?.eventType || ''}
-                    onChange={(e) => handleChange("eventType", e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="totalAmount">Total Amount ($)</Label>
-                  <Input
-                    id="totalAmount"
-                    type="number"
-                    value={formData?.totalAmount || ''}
-                    onChange={(e) => handleChange("totalAmount", Number(e.target.value))}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Location Section */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <MapPin className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Event Location</h3>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="eventAddress">Street Address</Label>
-                  <Input
-                    id="eventAddress"
-                    type="text"
-                    value={formData?.eventAddress || ''}
-                    onChange={(e) => handleChange("eventAddress", e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="eventCity">City</Label>
-                    <Input
-                      id="eventCity"
-                      type="text"
-                      value={formData?.eventCity || ''}
-                      onChange={(e) => handleChange("eventCity", e.target.value)}
-                      required
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="eventState">State</Label>
-                    <Input
-                      id="eventState"
-                      type="text"
-                      value={formData?.eventState || ''}
-                      onChange={(e) => handleChange("eventState", e.target.value)}
-                      required
-                      className="mt-1"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="eventZipCode">ZIP Code</Label>
-                    <Input
-                      id="eventZipCode"
-                      type="text"
-                      value={formData?.eventZipCode || ''}
-                      onChange={(e) => handleChange("eventZipCode", e.target.value)}
-                      required
-                      className="mt-1"
-                    />
+              <TabsContent value="details" className="space-y-6">
+                {/* Notice at the top */}
+                <div className="p-4 bg-blue-50 border border-blue-100 rounded-lg text-blue-700 mb-6">
+                  <div className="flex gap-2">
+                    <Calendar className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />
+                    <div>
+                      <p className="font-semibold">24-Hour Rental Period</p>
+                      <p className="text-sm">All bookings are for a full day (24-hour rental) to ensure proper delivery, setup, and cleaning.</p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </div>
-            
-            <Separator />
-
-            {/* Customer Information */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <User className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Customer Information</h3>
-              </div>
+                
+                {/* Event Details */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="eventDate" className="text-sm font-medium">Event Date</Label>
+                      <div className="relative">
+                        <Input
+                          id="eventDate"
+                          type="date"
+                          value={formData?.eventDate || ''}
+                          onChange={(e) => handleChange("eventDate", e.target.value)}
+                          required
+                          className="pl-10"
+                        />
+                        <Calendar className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="eventType">Event Type</Label>
+                      <Select 
+                        value={formData?.eventType || ''}
+                        onValueChange={(value) => handleChange("eventType", value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select an event type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {EVENT_TYPES.map((type) => (
+                            <SelectItem key={type} value={type}>{type}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="participantCount">Number of Participants</Label>
+                        <Input
+                          id="participantCount"
+                          type="number"
+                          min={1}
+                          value={formData?.participantCount || ''}
+                          onChange={(e) => handleChange("participantCount", parseInt(e.target.value) || 0)}
+                          required
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="participantAge">Age Range</Label>
+                        <Input
+                          id="participantAge"
+                          value={formData?.participantAge || ''}
+                          onChange={(e) => handleChange("participantAge", e.target.value)}
+                          placeholder="e.g., 5-12 years"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="startTime">Delivery Time</Label>
+                        <div className="relative">
+                          <Input
+                            id="startTime"
+                            type="time"
+                            value={formatTimeForDisplay(formData?.startTime)}
+                            onChange={(e) => handleChange("startTime", e.target.value)}
+                            required
+                            className="pl-10"
+                          />
+                          <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">24-hour rental starts at delivery</p>
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="endTime">Pickup Time</Label>
+                        <div className="relative">
+                          <Input
+                            id="endTime"
+                            type="time"
+                            value={formatTimeForDisplay(formData?.endTime)}
+                            onChange={(e) => handleChange("endTime", e.target.value)}
+                            required
+                            className="pl-10"
+                          />
+                          <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                        </div>
+                        <p className="text-xs text-muted-foreground">Next day pickup</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 pt-2">
+                      <Label htmlFor="totalAmount">Total Amount</Label>
+                      <div className="relative">
+                        <Input
+                          id="totalAmount"
+                          type="number"
+                          min="0"
+                          step="0.01"
+                          value={formData?.totalAmount || ''}
+                          onChange={(e) => handleChange("totalAmount", Number(e.target.value))}
+                          required
+                          className="pl-10"
+                        />
+                        <span className="absolute left-3 top-2.5 text-muted-foreground">$</span>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2 pt-2">
+                      <Label htmlFor="specialInstructions">Special Instructions</Label>
+                      <Textarea
+                        id="specialInstructions"
+                        value={formData?.specialInstructions || ''}
+                        onChange={(e) => handleChange("specialInstructions", e.target.value)}
+                        placeholder="Any special requests or setup instructions"
+                        rows={3}
+                      />
+                    </div>
+                  </div>
+                </div>
+              </TabsContent>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="customerName">Name</Label>
-                  <Input
-                    id="customerName"
-                    value={formData?.customer?.name || formData.customerName || ''}
-                    onChange={(e) => handleChange('customerName', e.target.value)}
-                    required
-                    className="mt-1"
-                  />
+              <TabsContent value="customer" className="space-y-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <Label htmlFor="customerName">Customer Name</Label>
+                    <Input
+                      id="customerName"
+                      value={formData?.customer?.name || formData.customerName || ''}
+                      onChange={(e) => handleChange('customerName', e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="customerPhone">Phone Number</Label>
+                    <Input
+                      id="customerPhone"
+                      type="tel"
+                      value={formData?.customer?.phone || formData.customerPhone || ''}
+                      onChange={(e) => handleChange('customerPhone', e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2 sm:col-span-2">
+                    <Label htmlFor="customerEmail">Email Address</Label>
+                    <Input
+                      id="customerEmail"
+                      type="email"
+                      value={formData?.customer?.email || formData.customerEmail || ''}
+                      onChange={(e) => handleChange('customerEmail', e.target.value)}
+                      required
+                    />
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="customerEmail">Email</Label>
-                  <Input
-                    id="customerEmail"
-                    type="email"
-                    value={formData?.customer?.email || formData.customerEmail || ''}
-                    onChange={(e) => handleChange('customerEmail', e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="customerPhone">Phone</Label>
-                  <Input
-                    id="customerPhone"
-                    type="tel"
-                    value={formData?.customer?.phone || formData.customerPhone || ''}
-                    onChange={(e) => handleChange('customerPhone', e.target.value)}
-                    required
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Event Details */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Users className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Participants</h3>
-              </div>
+              </TabsContent>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="participantCount">Number of Participants</Label>
-                  <Input
-                    id="participantCount"
-                    type="number"
-                    min={1}
-                    value={formData?.participantCount || ''}
-                    onChange={(e) => handleChange("participantCount", parseInt(e.target.value) || 0)}
-                    required
-                    className="mt-1"
-                  />
+              <TabsContent value="location" className="space-y-6">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="eventAddress">Street Address</Label>
+                    <Input
+                      id="eventAddress"
+                      type="text"
+                      value={formData?.eventAddress || ''}
+                      onChange={(e) => handleChange("eventAddress", e.target.value)}
+                      required
+                    />
+                  </div>
+                  
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="eventCity">City</Label>
+                      <Input
+                        id="eventCity"
+                        type="text"
+                        value={formData?.eventCity || ''}
+                        onChange={(e) => handleChange("eventCity", e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="eventState">State</Label>
+                      <Input
+                        id="eventState"
+                        type="text"
+                        value={formData?.eventState || ''}
+                        onChange={(e) => handleChange("eventState", e.target.value)}
+                        required
+                      />
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="eventZipCode">ZIP Code</Label>
+                      <Input
+                        id="eventZipCode"
+                        type="text"
+                        value={formData?.eventZipCode || ''}
+                        onChange={(e) => handleChange("eventZipCode", e.target.value)}
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
-                <div>
-                  <Label htmlFor="participantAge">Age Range</Label>
-                  <Input
-                    id="participantAge"
-                    value={formData?.participantAge || ''}
-                    onChange={(e) => handleChange("participantAge", e.target.value)}
-                    placeholder="e.g., 5-12 years"
-                    className="mt-1"
-                  />
-                </div>
-              </div>
-            </div>
-            
-            <Separator />
-            
-            {/* Special Instructions */}
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Info className="h-5 w-5 text-primary" />
-                <h3 className="text-lg font-semibold">Special Instructions</h3>
-              </div>
+              </TabsContent>
               
-              <div className="space-y-2">
-                <Label htmlFor="specialInstructions">Additional Notes</Label>
-                <Textarea
-                  id="specialInstructions"
-                  value={formData?.specialInstructions || ''}
-                  onChange={(e) => handleChange("specialInstructions", e.target.value)}
-                  placeholder="Any special requests or setup instructions"
-                  rows={3}
-                  className="mt-1"
-                />
+              {/* Actions - always visible */}
+              <div className="flex justify-end gap-4 pt-8 mt-6 border-t">
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
+                >
+                  Cancel
+                </Button>
+                <Button 
+                  type="submit" 
+                  disabled={isSubmitting || isCheckingAvailability}
+                  className="min-w-[120px]"
+                >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : isCheckingAvailability ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Checking...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle className="mr-2 h-4 w-4" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
               </div>
-            </div>
-
-            {/* Debug Info (only in development) */}
-            {process.env.NODE_ENV === 'development' && debugInfo && (
-              <div className="mt-8 p-4 bg-gray-100 rounded-md">
-                <details>
-                  <summary className="cursor-pointer font-medium">Debug Information</summary>
-                  <pre className="mt-2 text-xs overflow-auto max-h-60">
-                    {JSON.stringify(debugInfo, null, 2)}
-                  </pre>
-                </details>
-              </div>
-            )}
-
-            <div className="flex justify-end gap-4 pt-4">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting || isCheckingAvailability}>
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Saving...
-                  </>
-                ) : isCheckingAvailability ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Checking Availability...
-                  </>
-                ) : (
-                  "Save Changes"
-                )}
-              </Button>
-            </div>
-          </form>
+            </form>
+          </Tabs>
         </CardContent>
       </Card>
     </div>
