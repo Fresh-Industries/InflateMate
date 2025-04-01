@@ -325,19 +325,38 @@ export function DomainLayoutClient({
             <div>
               <h3 className="text-xl font-bold mb-4">Service Areas</h3>
               <div className="flex flex-wrap gap-2">
-                {/* Example service areas - replace with actual data if available */}
-                {['New York', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'].map(city => (
-                  <span 
-                    key={city} 
-                    className="px-3 py-1 text-sm rounded-full"
-                    style={{ 
-                      backgroundColor: `${primaryColor}15`,
-                      color: primaryColor
-                    }}
-                  >
-                    {city}
-                  </span>
-                ))}
+                {business.serviceArea && Array.isArray(business.serviceArea) && business.serviceArea.length > 0 ? (
+                  business.serviceArea.map(area => {
+                    // Extract just the city name
+                    const cityName = area.split(',')[0].trim();
+                    return (
+                      <span 
+                        key={area} 
+                        className="px-3 py-1 text-sm rounded-full"
+                        style={{ 
+                          backgroundColor: `${primaryColor}15`,
+                          color: primaryColor
+                        }}
+                      >
+                        {cityName}
+                      </span>
+                    );
+                  })
+                ) : (
+                  // Fallback default service areas if none are defined
+                  ['New York', 'Brooklyn', 'Queens', 'Bronx', 'Staten Island'].map(city => (
+                    <span 
+                      key={city} 
+                      className="px-3 py-1 text-sm rounded-full"
+                      style={{ 
+                        backgroundColor: `${primaryColor}15`,
+                        color: primaryColor
+                      }}
+                    >
+                      {city}
+                    </span>
+                  ))
+                )}
               </div>
             </div>
           </div>

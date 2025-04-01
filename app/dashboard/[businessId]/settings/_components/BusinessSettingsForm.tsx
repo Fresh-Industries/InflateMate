@@ -1,4 +1,9 @@
-'use client';
+"use client";
+
+import React, { useState, useRef } from "react";
+import { useRouter } from "next/navigation";
+import Image from "next/image";
+import Autocomplete from "react-google-autocomplete";
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,18 +12,10 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useRouter } from "next/navigation";
-import { useState, useRef } from "react";
-import { useUploadThing } from "@/lib/uploadthing";
-import Image from "next/image";
-import { 
-  Loader2, Upload, X, UploadCloud, 
-  Facebook, Instagram, Twitter, 
-  Mail, Phone, MapPin, Clock, DollarSign, 
-  Settings, Home, PlusCircle, Save, Search, Info
-} from "lucide-react";
+import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
+import { useUploadThing } from "@/lib/uploadthing";
 
 interface BusinessSettings {
   id: string;
@@ -44,123 +41,97 @@ interface BusinessSettings {
   [key: string]: unknown;
 }
 
-// Create a custom TikTok icon component
-const TikTokIcon = () => {
-  return (
-    <svg 
-      xmlns="http://www.w3.org/2000/svg" 
-      viewBox="0 0 24 24" 
-      fill="currentColor" 
-      width="16" 
-      height="16"
-      className="text-black"
-    >
-      <path d="M19.321 5.562a5.122 5.122 0 0 1-.443-.258 6.228 6.228 0 0 1-1.138-.989c-1.35-1.489-1.401-3.34-1.401-3.342h-3.217v14.9c0 .77-.322 1.467-.945 1.961a3.035 3.035 0 0 1-1.864.624 3.071 3.071 0 0 1-2.818-1.875 3.033 3.033 0 0 1 2.893-4.121c.284.001.568.043.842.124v-3.344a6.611 6.611 0 0 0-.842-.052c-1.722 0-3.355.672-4.575 1.891-1.22 1.22-1.89 2.848-1.89 4.574 0 1.722.672 3.354 1.89 4.574 1.219 1.22 2.844 1.89 4.574 1.891h.024a6.587 6.587 0 0 0 4.55-1.891 6.564 6.564 0 0 0 1.89-4.574V8.588a9.58 9.58 0 0 0 5.146 1.5v-3.219c-.366 0-.737-.036-1.103-.108-.45-.087-.901-.235-1.329-.435l-.011-.005c-.406-.186-.803-.418-1.178-.691l-.043-.032-.1-.07Z"/>
-    </svg>
-  );
-};
+// Simple TikTok icon
+const TikTokIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    width="16" 
+    height="16"
+    className="text-black"
+  >
+    <path d="M19.321 5.562a5.122 5.122 0 0 1-.443-.258 6.228 6.228 0 0 1-1.138-.989c-1.35-1.489-1.401-3.34-1.401-3.342h-3.217v14.9c0 .77-.322 1.467-.945 1.961a3.035 3.035 0 0 1-1.864.624 3.071 3.071 0 0 1-2.818-1.875 3.033 3.033 0 0 1 2.893-4.121c.284.001.568.043.842.124v-3.344a6.611 6.611 0 0 0-.842-.052c-1.722 0-3.355.672-4.575 1.891-1.22 1.22-1.89 2.848-1.89 4.574 0 1.722.672 3.354 1.89 4.574 1.219 1.22 2.844 1.89 4.574 1.891h.024a6.587 6.587 0 0 0 4.55-1.891 6.564 6.564 0 0 0 1.89-4.574V8.588a9.58 9.58 0 0 0 5.146 1.5v-3.219c-.366 0-.737-.036-1.103-.108-.45-.087-.901-.235-1.329-.435l-.011-.005c-.406-.186-.803-.418-1.178-.691l-.043-.032-.1-.07Z"/>
+  </svg>
+);
 
 export default function BusinessSettingsForm({ business }: { business: BusinessSettings }) {
   const router = useRouter();
+  const { toast } = useToast();
+
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(business.logo || null);
   const [isUploading, setIsUploading] = useState(false);
+
   const { startUpload } = useUploadThing("logoUploader");
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const { toast } = useToast();
-  
-  // Service area state
-  const [serviceAreas, setServiceAreas] = useState<string[]>(business.serviceArea || []);
-  const [newServiceArea, setNewServiceArea] = useState('');
-  
-  // Social media state
-  const [socialMedia, setSocialMedia] = useState({
-    facebook: business.socialMedia?.facebook || '',
-    instagram: business.socialMedia?.instagram || '',
-    twitter: business.socialMedia?.twitter || '',
-    tiktok: business.socialMedia?.tiktok || ''
+
+  // Basic address fields (not autocompleted)
+  const [addressData, setAddressData] = useState({
+    streetAddress: business.address || "",
+    city: business.city || "",
+    state: business.state || "",
+    zipCode: business.zipCode || "",
   });
-  
-  // Add state for search results
-  const [citySearchResults, setCitySearchResults] = useState<string[]>([]);
-  const [isSearching, setIsSearching] = useState(false);
-  
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setSuccessMessage('');
-    
-    try {
-      const formData = new FormData(e.currentTarget);
-      formData.append('_method', 'PATCH');
-      
-      // Add the logo URL to form data if it exists
-      if (logoUrl) {
-        formData.append('logo', logoUrl);
-      }
-      
-      // Add service areas to form data
-      if (serviceAreas.length > 0) {
-        serviceAreas.forEach((area, index) => {
-          formData.append(`serviceArea[${index}]`, area);
-        });
-      }
-      
-      // Add social media to form data
-      const socialMediaData = JSON.stringify(socialMedia);
-      formData.append('socialMedia', socialMediaData);
-      
-      // Log the keys in the formData
-      console.log('Form data keys:', [...formData.keys()]);
-      
-      const response = await fetch(`/api/businesses/${business.id}`, {
-        method: 'POST',
-        body: formData,
+
+  // Service areas
+  const [serviceAreas, setServiceAreas] = useState<string[]>(business.serviceArea || []);
+
+  // Social media
+  const [socialMedia, setSocialMedia] = useState({
+    facebook: business.socialMedia?.facebook || "",
+    instagram: business.socialMedia?.instagram || "",
+    twitter: business.socialMedia?.twitter || "",
+    tiktok: business.socialMedia?.tiktok || ""
+  });
+
+  // Add a new service area
+  const addServiceArea = (area: string) => {
+    const trimmed = area.trim();
+    if (trimmed && !serviceAreas.includes(trimmed)) {
+      console.log("Adding service area:", trimmed);
+      console.log("Current service areas:", serviceAreas);
+      setServiceAreas(prevAreas => {
+        // Make sure we're using the most up-to-date state
+        if (!prevAreas.includes(trimmed)) {
+          return [...prevAreas, trimmed];
+        }
+        return prevAreas;
       });
-      
-      if (response.ok) {
-        setSuccessMessage('Settings saved successfully!');
-        toast({
-          title: "Success",
-          description: "Business settings updated",
-          variant: "default",
-        });
-        router.refresh();
-        
-        // Clear success message after 3 seconds
-        setTimeout(() => {
-          setSuccessMessage('');
-        }, 3000);
-      } else {
-        console.error('Failed to update settings');
-        toast({
-          title: "Error",
-          description: "Failed to update settings",
-          variant: "destructive",
-        });
-      }
-    } catch (error) {
-      console.error('Error updating settings:', error);
-      toast({
-        title: "Error",
-        description: "Error updating settings",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
     }
   };
-  
-  const handleRemoveLogo = () => {
-    setLogoUrl(null);
+
+  // Remove a service area
+  const removeServiceArea = (area: string) => {
+    setServiceAreas(serviceAreas.filter((a) => a !== area));
   };
-  
+
+  // Fallback manual add (for typed input)
+  const serviceAreaInputRef = useRef<HTMLInputElement>(null);
+  const handleManualAdd = () => {
+    // Get the input from the autocomplete field
+    const input = document.querySelector('input[placeholder="Enter a city or area"]') as HTMLInputElement;
+    if (input) {
+      const val = input.value.trim();
+      if (val) {
+        addServiceArea(val);
+        input.value = "";
+      }
+    }
+  };
+
+  // Social media change
+  const handleSocialMediaChange = (platform: keyof typeof socialMedia, value: string) => {
+    setSocialMedia({ ...socialMedia, [platform]: value });
+  };
+
+  // Logo file select
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
-    if (files.length === 0) return;
-    
-    // Validate file size (max 2MB)
+    if (!files.length) return;
+
+    // Max 2MB
     if (files[0].size > 2 * 1024 * 1024) {
       toast({
         title: "Error",
@@ -169,9 +140,9 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       });
       return;
     }
-    
+
     setIsUploading(true);
-    
+
     try {
       const uploadedFiles = await startUpload(files);
       if (uploadedFiles && uploadedFiles.length > 0) {
@@ -183,7 +154,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
         });
       }
     } catch (error) {
-      console.error('Upload error:', error);
+      console.error("Upload error:", error);
       toast({
         title: "Error",
         description: "Failed to upload logo",
@@ -193,71 +164,85 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       setIsUploading(false);
     }
   };
-  
-  const addServiceArea = () => {
-    if (newServiceArea.trim() && !serviceAreas.includes(newServiceArea.trim())) {
-      setServiceAreas([...serviceAreas, newServiceArea.trim()]);
-      setNewServiceArea('');
-    }
+
+  // Remove the logo
+  const handleRemoveLogo = () => {
+    setLogoUrl(null);
   };
-  
-  const removeServiceArea = (area: string) => {
-    setServiceAreas(serviceAreas.filter(a => a !== area));
-  };
-  
-  const handleSocialMediaChange = (platform: keyof typeof socialMedia, value: string) => {
-    setSocialMedia({ ...socialMedia, [platform]: value });
-  };
-  
-  // Add this function to handle city search
-  const handleCitySearch = async (query: string) => {
-    setNewServiceArea(query);
-    
-    if (query.length < 2) {
-      setCitySearchResults([]);
-      return;
-    }
-    
-    // In a real implementation, you would call an API here
-    // For now, we'll simulate results with some sample data
-    setIsSearching(true);
-    
+
+  // Submit the form
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsLoading(true);
+    setSuccessMessage("");
+
     try {
-      // This is where you would call your API
-      // const response = await fetch(`/api/city-search?query=${encodeURIComponent(query)}`);
-      // const data = await response.json();
-      // setCitySearchResults(data.results);
-      
-      // Simulated results for demonstration
-      setTimeout(() => {
-        const sampleCities = [
-          "New York, NY",
-          "Los Angeles, CA",
-          "Chicago, IL",
-          "Houston, TX",
-          "Phoenix, AZ",
-          "Philadelphia, PA",
-          "San Antonio, TX",
-          "San Diego, CA",
-          "Dallas, TX",
-          "San Jose, CA"
-        ];
-        
-        const filteredCities = sampleCities.filter(city => 
-          city.toLowerCase().includes(query.toLowerCase())
-        );
-        
-        setCitySearchResults(filteredCities);
-        setIsSearching(false);
-      }, 300);
+      const formData = new FormData(e.currentTarget);
+      formData.append("_method", "PATCH");
+
+      // Add logo
+      if (logoUrl) {
+        formData.append("logo", logoUrl);
+      }
+
+      // Add service areas
+      if (serviceAreas.length > 0) {
+        serviceAreas.forEach((area, index) => {
+          formData.append(`serviceArea[${index}]`, area);
+        });
+      }
+
+      // Add social media
+      formData.append("socialMedia", JSON.stringify(socialMedia));
+
+      // Add address fields
+      formData.append("address", addressData.streetAddress);
+      formData.append("city", addressData.city);
+      formData.append("state", addressData.state);
+      formData.append("zipCode", addressData.zipCode);
+
+      console.log("Form data keys:", [...formData.keys()]);
+
+      const response = await fetch(`/api/businesses/${business.id}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      if (response.ok) {
+        setSuccessMessage("Settings saved successfully!");
+        toast({
+          title: "Success",
+          description: "Business settings updated",
+          variant: "default",
+        });
+        router.refresh();
+        setTimeout(() => setSuccessMessage(""), 3000);
+      } else {
+        console.error("Failed to update settings");
+        toast({
+          title: "Error",
+          description: "Failed to update settings",
+          variant: "destructive",
+        });
+      }
     } catch (error) {
-      console.error('Error searching for cities:', error);
-      setIsSearching(false);
+      console.error("Error updating settings:", error);
+      toast({
+        title: "Error",
+        description: "Error updating settings",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
-  
+
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} onKeyDown={(e) => {
+      if (e.key === 'Enter' && e.target instanceof HTMLInputElement) {
+        e.preventDefault();
+      }
+    }}>
       <div className="space-y-6">
         <Tabs defaultValue="general" className="w-full">
           <div className="flex justify-between items-center mb-6">
@@ -279,7 +264,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                 <span>Booking</span>
               </TabsTrigger>
             </TabsList>
-            
+
             <div className="flex items-center gap-4">
               <Button 
                 type="submit" 
@@ -298,7 +283,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                   </>
                 )}
               </Button>
-              
+
               {successMessage && (
                 <Badge variant="success" className="text-sm py-1 px-3">
                   {successMessage}
@@ -306,14 +291,13 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
               )}
             </div>
           </div>
-          
+
+          {/* GENERAL TAB */}
           <TabsContent value="general" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl">Business Information</CardTitle>
-                <CardDescription>
-                  Your business name, logo, and description
-                </CardDescription>
+                <CardDescription>Your business name, logo, and description</CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-6">
@@ -321,13 +305,14 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                 <div className="space-y-4">
                   <Label className="text-base">Business Logo</Label>
                   <div className="flex flex-col sm:flex-row gap-4 items-start">
+                    {/* Existing logo display */}
                     {logoUrl ? (
                       <div className="relative rounded-lg overflow-hidden w-40 h-40 border">
                         <Image 
                           src={logoUrl} 
                           alt="Business logo"
                           fill
-                          style={{ objectFit: 'cover' }}
+                          style={{ objectFit: "cover" }}
                           sizes="160px"
                         />
                         <button 
@@ -348,34 +333,33 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                       </div>
                     )}
                     
+                    {/* Logo upload input */}
                     <div className="flex-1 space-y-2">
-                      <div className="flex flex-col gap-2">
-                        <div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer relative group border-gray-300 hover:border-primary transition-colors">
-                          <input
-                            type="file"
-                            ref={fileInputRef}
-                            onChange={handleFileSelect}
-                            accept="image/*"
-                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-                            disabled={isUploading}
-                          />
-                          <div className="flex flex-col items-center gap-2">
-                            <UploadCloud className="w-6 h-6 text-gray-500 group-hover:text-primary" />
-                            <div>
-                              {isUploading ? (
-                                <div className="flex items-center gap-2">
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                  <p className="text-sm font-medium">Uploading...</p>
-                                </div>
-                              ) : (
-                                <>
-                                  <p className="text-sm font-medium">
-                                    {logoUrl ? 'Change Logo' : 'Upload Logo'}
-                                  </p>
-                                  <p className="text-xs text-gray-500 mt-1">Max 2MB • PNG, JPG, WEBP</p>
-                                </>
-                              )}
-                            </div>
+                      <div className="border-2 border-dashed rounded-lg p-4 text-center cursor-pointer relative group border-gray-300 hover:border-primary transition-colors">
+                        <input
+                          type="file"
+                          ref={fileInputRef}
+                          onChange={handleFileSelect}
+                          accept="image/*"
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          disabled={isUploading}
+                        />
+                        <div className="flex flex-col items-center gap-2">
+                          <UploadCloud className="w-6 h-6 text-gray-500 group-hover:text-primary" />
+                          <div>
+                            {isUploading ? (
+                              <div className="flex items-center gap-2">
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                                <p className="text-sm font-medium">Uploading...</p>
+                              </div>
+                            ) : (
+                              <>
+                                <p className="text-sm font-medium">
+                                  {logoUrl ? "Change Logo" : "Upload Logo"}
+                                </p>
+                                <p className="text-xs text-gray-500 mt-1">Max 2MB • PNG, JPG, WEBP</p>
+                              </>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -385,7 +369,8 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                     </div>
                   </div>
                 </div>
-                
+
+                {/* Business Name & Description */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="name">Business Name</Label>
@@ -399,7 +384,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                     id="description" 
                     name="description" 
                     rows={4}
-                    defaultValue={business.description || ''} 
+                    defaultValue={business.description || ""} 
                     placeholder="Describe your business, services, and what makes you special"
                     className="resize-none"
                   />
@@ -408,16 +393,16 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
             </Card>
           </TabsContent>
           
+          {/* CONTACT TAB */}
           <TabsContent value="contact" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl">Contact Information</CardTitle>
-                <CardDescription>
-                  How your customers can reach you
-                </CardDescription>
+                <CardDescription>How your customers can reach you</CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-6">
+                {/* Email & Phone */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="email">Business Email</Label>
@@ -427,7 +412,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                         id="email" 
                         name="email" 
                         type="email" 
-                        defaultValue={business.email || ''} 
+                        defaultValue={business.email || ""} 
                         placeholder="email@example.com"
                         className="pl-9"
                       />
@@ -441,7 +426,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                       <Input 
                         id="phone" 
                         name="phone" 
-                        defaultValue={business.phone || ''} 
+                        defaultValue={business.phone || ""} 
                         placeholder="(555) 123-4567"
                         className="pl-9"
                       />
@@ -451,9 +436,9 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                 
                 <Separator />
                 
+                {/* Social Media */}
                 <div className="space-y-4">
                   <Label className="text-base">Social Media</Label>
-                  
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <Label htmlFor="facebook" className="flex items-center gap-2">
@@ -463,7 +448,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                       <Input 
                         id="facebook" 
                         value={socialMedia.facebook}
-                        onChange={(e) => handleSocialMediaChange('facebook', e.target.value)}
+                        onChange={(e) => handleSocialMediaChange("facebook", e.target.value)}
                         placeholder="https://facebook.com/yourbusiness"
                       />
                     </div>
@@ -476,7 +461,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                       <Input 
                         id="instagram" 
                         value={socialMedia.instagram}
-                        onChange={(e) => handleSocialMediaChange('instagram', e.target.value)}
+                        onChange={(e) => handleSocialMediaChange("instagram", e.target.value)}
                         placeholder="https://instagram.com/yourbusiness"
                       />
                     </div>
@@ -489,7 +474,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                       <Input 
                         id="twitter" 
                         value={socialMedia.twitter}
-                        onChange={(e) => handleSocialMediaChange('twitter', e.target.value)}
+                        onChange={(e) => handleSocialMediaChange("twitter", e.target.value)}
                         placeholder="https://twitter.com/yourbusiness"
                       />
                     </div>
@@ -502,7 +487,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                       <Input 
                         id="tiktok" 
                         value={socialMedia.tiktok}
-                        onChange={(e) => handleSocialMediaChange('tiktok', e.target.value)}
+                        onChange={(e) => handleSocialMediaChange("tiktok", e.target.value)}
                         placeholder="https://tiktok.com/@yourusername"
                       />
                     </div>
@@ -512,48 +497,70 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
             </Card>
           </TabsContent>
           
+          {/* LOCATIONS TAB */}
           <TabsContent value="locations" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl">Location & Service Areas</CardTitle>
-                <CardDescription>
-                  Your business address and the areas you serve
-                </CardDescription>
+                <CardDescription>Your business address and the areas you serve</CardDescription>
               </CardHeader>
               
               <CardContent className="space-y-6">
+                {/* Main address fields */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="space-y-2">
                     <Label htmlFor="address">Address</Label>
-                    <Input id="address" name="address" defaultValue={business.address || ''} />
+                    <Input 
+                      id="address" 
+                      name="address" 
+                      value={addressData.streetAddress}
+                      onChange={(e) => setAddressData({ ...addressData, streetAddress: e.target.value })}
+                    />
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="city">City</Label>
-                    <Input id="city" name="city" defaultValue={business.city || ''} />
+                    <Input 
+                      id="city" 
+                      name="city" 
+                      value={addressData.city}
+                      onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
+                    />
                   </div>
                   
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="state">State</Label>
-                      <Input id="state" name="state" defaultValue={business.state || ''} />
+                      <Input 
+                        id="state" 
+                        name="state" 
+                        value={addressData.state}
+                        onChange={(e) => setAddressData({ ...addressData, state: e.target.value })}
+                      />
                     </div>
                     
                     <div className="space-y-2">
                       <Label htmlFor="zipCode">Zip Code</Label>
-                      <Input id="zipCode" name="zipCode" defaultValue={business.zipCode || ''} />
+                      <Input 
+                        id="zipCode" 
+                        name="zipCode" 
+                        value={addressData.zipCode}
+                        onChange={(e) => setAddressData({ ...addressData, zipCode: e.target.value })}
+                      />
                     </div>
                   </div>
                 </div>
                 
                 <Separator />
                 
+                {/* Service Areas */}
                 <div className="space-y-4">
                   <Label className="text-base">Service Areas</Label>
                   <p className="text-sm text-muted-foreground">
                     Add cities, towns or regions where your business offers services
                   </p>
                   
+                  {/* Existing service areas */}
                   <div className="flex flex-wrap gap-2 mb-4">
                     {serviceAreas.length > 0 ? (
                       serviceAreas.map((area) => (
@@ -576,66 +583,49 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                     )}
                   </div>
                   
+                  {/* Autocomplete for service areas */}
                   <div className="relative">
                     <div className="flex gap-2">
                       <div className="relative flex-1">
-                        <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input 
-                          value={newServiceArea}
-                          onChange={(e) => handleCitySearch(e.target.value)}
-                          placeholder="Search for a city or town"
-                          className="pl-9"
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              e.preventDefault();
-                              if (newServiceArea.trim()) {
-                                addServiceArea();
-                                setCitySearchResults([]);
+                        <Autocomplete
+                          apiKey={process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}
+                          onPlaceSelected={(place) => {
+                            if (place && place.formatted_address) {
+                              // Add the area to the list
+                              addServiceArea(place.formatted_address);
+                              
+                              // Clear the input field immediately
+                              const input = document.querySelector('input[placeholder="Enter a city or area"]') as HTMLInputElement;
+                              if (input) {
+                                input.value = '';
                               }
                             }
                           }}
+                          options={{
+                            types: ["(cities)"],
+                            fields: ["formatted_address", "place_id"],
+                          }}
+                          className="w-full h-full px-3 py-2 border border-input rounded-md"
+                          libraries={["places"]}
+                          ref={serviceAreaInputRef}
+                          placeholder="Enter a city or area"
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              e.preventDefault();
+                            }
+                          }}
                         />
-                        {isSearching && (
-                          <div className="absolute right-3 top-2.5">
-                            <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                          </div>
-                        )}
                       </div>
                       <Button 
                         type="button" 
                         variant="outline" 
-                        onClick={() => {
-                          addServiceArea();
-                          setCitySearchResults([]);
-                        }}
+                        onClick={handleManualAdd}
                         className="gap-1"
                       >
                         <PlusCircle className="h-4 w-4" />
                         Add
                       </Button>
                     </div>
-                    
-                    {citySearchResults.length > 0 && (
-                      <div className="absolute z-10 mt-1 w-full bg-white rounded-md border border-gray-200 shadow-lg max-h-60 overflow-auto">
-                        <ul className="py-1">
-                          {citySearchResults.map((city, index) => (
-                            <li 
-                              key={index}
-                              className="px-3 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-2"
-                              onClick={() => {
-                                setNewServiceArea(city);
-                                setCitySearchResults([]);
-                                // Add after a small delay to allow the input to update
-                                setTimeout(() => addServiceArea(), 10);
-                              }}
-                            >
-                              <MapPin className="h-4 w-4 text-muted-foreground" />
-                              {city}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    )}
                   </div>
                   
                   <div className="mt-4 p-3 bg-blue-50 rounded-md border border-blue-100">
@@ -656,14 +646,13 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
               </CardContent>
             </Card>
           </TabsContent>
-          
+
+          {/* BOOKING TAB */}
           <TabsContent value="booking" className="space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle className="text-xl">Booking Settings</CardTitle>
-                <CardDescription>
-                  Configure booking rules and limitations
-                </CardDescription>
+                <CardDescription>Configure booking rules and limitations</CardDescription>
               </CardHeader>
               
               <CardContent>
@@ -727,4 +716,4 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       </div>
     </form>
   );
-} 
+}

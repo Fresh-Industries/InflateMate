@@ -64,6 +64,9 @@ export default async function DomainPage({ params }: { params: { domain: string 
     // Get the site configuration
     const siteConfig = business.siteConfig || {};
     const colors = siteConfig.colors || {};
+
+    // Extract service areas from business data with proper typing
+    const serviceAreas: string[] = Array.isArray(business.serviceArea) ? business.serviceArea : [];
     
     // Default modern, vibrant color scheme if none provided
     const primaryColor = colors.primary || '#4f46e5'; // Indigo
@@ -470,22 +473,33 @@ export default async function DomainPage({ params }: { params: { domain: string 
                   We proudly serve the following areas and surrounding communities:
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {['Phoenix', 'Scottsdale', 'Tempe', 'Mesa', 'Chandler', 'Gilbert', 'Glendale', 'Peoria'].map((city, index) => (
-                    <div 
-                      key={city} 
-                      className="px-4 py-3 rounded-xl text-center font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
-                      style={{ 
-                        backgroundColor: index % 3 === 0 ? `${primaryColor}15` : 
-                                        index % 3 === 1 ? `${accentColor}15` : 
-                                        `${tertiaryColor}15`,
-                        color: index % 3 === 0 ? primaryColor : 
-                              index % 3 === 1 ? accentColor : 
-                              tertiaryColor
-                      }}
-                    >
-                      {city}
+                  {serviceAreas.length > 0 ? (
+                    serviceAreas.map((area, index) => {
+                      // Extract just the city name from the service area string
+                      const cityName = area.split(',')[0].trim();
+                      
+                      return (
+                        <div 
+                          key={area} 
+                          className="px-4 py-3 rounded-xl text-center font-medium shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1"
+                          style={{ 
+                            backgroundColor: index % 3 === 0 ? `${primaryColor}15` : 
+                                            index % 3 === 1 ? `${accentColor}15` : 
+                                            `${tertiaryColor}15`,
+                            color: index % 3 === 0 ? primaryColor : 
+                                  index % 3 === 1 ? accentColor : 
+                                  tertiaryColor
+                          }}
+                        >
+                          {cityName}
+                        </div>
+                      );
+                    })
+                  ) : (
+                    <div className="col-span-3 text-center py-4 text-gray-500">
+                      No service areas defined yet.
                     </div>
-                  ))}
+                  )}
                 </div>
               </div>
             </div>

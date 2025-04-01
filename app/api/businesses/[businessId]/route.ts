@@ -171,6 +171,28 @@ async function patchWithFormData(
       }
     });
     
+    // Handle service areas (array field)
+    const serviceAreas: string[] = [];
+    formData.forEach((value, key) => {
+      if (key.startsWith('serviceArea[') && key.endsWith(']')) {
+        serviceAreas.push(value.toString());
+      }
+    });
+    
+    if (serviceAreas.length > 0) {
+      updateData.serviceArea = serviceAreas;
+    }
+    
+    // Handle socialMedia (JSON field)
+    const socialMediaStr = formData.get('socialMedia');
+    if (socialMediaStr) {
+      try {
+        updateData.socialMedia = JSON.parse(socialMediaStr.toString());
+      } catch (error) {
+        console.error("Error parsing socialMedia JSON:", error);
+      }
+    }
+    
     // Find the business by ID and verify ownership
     const business = await prisma.business.findFirst({
       where: {
