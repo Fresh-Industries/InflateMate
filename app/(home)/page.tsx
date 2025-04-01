@@ -90,14 +90,16 @@ export default function Home() {
               
               <div className="lg:w-1/2 relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-blue-600 to-purple-600 rounded-3xl blur-lg opacity-30 animate-pulse"></div>
-                <div className="relative w-full h-[400px] sm:h-[500px] rounded-3xl overflow-hidden shadow-2xl border border-white/50 bg-white/90 backdrop-blur-sm">
-                  <Image 
-                    src="/images/hero-dashboard.png" 
-                    alt="InflateMate Dashboard" 
-                    fill
-                    className="object-cover"
-                    priority
-                  />
+                <div className="relative w-full rounded-3xl overflow-hidden shadow-2xl border border-white/50 bg-white/90 backdrop-blur-sm flex items-center justify-center">
+                  <div className="w-full aspect-[580/375] relative max-w-[580px] mx-auto">
+                    <Image 
+                      src="/images/hero-dashboard.png" 
+                      alt="InflateMate Dashboard" 
+                      fill
+                      className="object-contain"
+                      priority
+                    />
+                  </div>
                   
                   {/* Floating UI Elements */}
                   <div className="absolute top-6 right-6 bg-white/90 backdrop-blur-sm rounded-xl shadow-lg p-4 z-20 transform hover:scale-105 transition-all duration-300 border border-blue-100">

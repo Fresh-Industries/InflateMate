@@ -54,9 +54,6 @@ async function AboutPage({ params }: PageProps) {
   const business = await getBusinessByDomain(domain);
   const siteConfig = business.siteConfig || {} as SiteConfig;
   
-  // Extract service areas from business data with proper typing
-  const serviceAreas: string[] = Array.isArray(business.serviceArea) ? business.serviceArea : [];
-  
   // Colors from site config
   const colors = {
     primary: siteConfig.colors?.primary || "#3b82f6", // Default blue
