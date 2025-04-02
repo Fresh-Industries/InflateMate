@@ -15,6 +15,7 @@ export async function generateMetadata(
     // Get the business data
     const business = await getBusinessByDomain(domain);
     
+    
     // Use business name as title
     const title = business.name;
     const description = business.description || 'Premium inflatable rentals for birthdays, events, and parties.';
@@ -34,7 +35,9 @@ export async function generateMetadata(
         description,
         images: business.coverImage ? [business.coverImage] : [],
       },
-      icons: business.logo ? [business.logo] : [],
+      icons: {
+        icon: [{ url: business.logo || '' }]
+      },
       metadataBase: new URL(`https://${domain}`),
     };
   } catch (error) {

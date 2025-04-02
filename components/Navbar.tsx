@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Menu, X, Sparkles, ChevronDown, Star, Zap, LifeBuoy } from "lucide-react";
+import { Menu, X, ChevronDown, Star, Zap, LifeBuoy } from "lucide-react";
 import { LogoutButton } from "./LogoutButton";
-import { useAuth, useUser } from "@clerk/nextjs";
+import { useAuth } from "@clerk/nextjs";
 
 interface Business {
   id: string;
@@ -36,7 +37,6 @@ export default function Navbar() {
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isLoaded, userId } = useAuth();
-  const { user } = useUser();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -75,7 +75,11 @@ export default function Navbar() {
   const isLoadingUser = !isLoaded || loading;
 
   return (
-    <nav className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 backdrop-blur-xl shadow-lg' : 'bg-transparent'}`}>
+    <nav
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white/90 backdrop-blur-xl shadow-lg' : 'bg-transparent'
+      }`}
+    >
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-20 items-center justify-between">
           {/* Logo */}
@@ -83,28 +87,28 @@ export default function Navbar() {
             <div className="relative flex items-center">
               <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full opacity-80 group-hover:opacity-100 blur-md transition-all duration-300"></div>
               <div className="relative flex items-center">
-                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mr-1">
-                  Inflate
-                </span>
-                <div className="bg-gradient-to-r from-blue-600 to-purple-600 rounded-full p-1.5 transform group-hover:rotate-12 transition-all duration-300">
-                  <Sparkles className="w-4 h-4 text-white" />
-                </div>
-                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-1">
-                  mate
+                <Image
+                  src="/images/inflatemate-logo.PNG"
+                  alt="InflateMate Logo"
+                  width={50}
+                  height={50}
+                />
+                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+                  InflateMate
                 </span>
               </div>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-1">
+          <div className="hidden lg:flex items-center space-x-8 text-sm font-medium">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative px-5 py-2 text-gray-700 hover:text-blue-600 font-medium group flex items-center gap-2"
+                className="relative px-5 py-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-2"
               >
-                <div className="absolute inset-0 w-full h-full bg-blue-50/0 group-hover:bg-blue-50/80 rounded-full transition-all duration-200"></div>
+                <div className="absolute inset-0 rounded-full transition-all duration-200 group-hover:bg-blue-50/80"></div>
                 <span className="relative z-10">{item.label}</span>
                 <span className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
                   {item.icon}
@@ -114,19 +118,19 @@ export default function Navbar() {
           </div>
 
           {/* Desktop Action Buttons */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden lg:flex items-center space-x-4">
             {isLoadingUser ? (
               <div className="h-10 w-24 bg-gradient-to-r from-blue-100 to-purple-100 animate-pulse rounded-full"></div>
             ) : userId ? (
               <>
                 <Link href={userBusinesses.length > 0 
                   ? `/dashboard/${userBusinesses[0].id}` 
-                  : "/onboarding"}>
+                  : "/onboarding"}
+                >
                   <Button variant="ghost" className="h-12 px-6 rounded-full hover:bg-blue-50 border border-blue-100/50 shadow-sm">
                     Dashboard
                   </Button>
                 </Link>
-                <LogoutButton />
               </>
             ) : (
               <>
@@ -136,11 +140,9 @@ export default function Navbar() {
                   </Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button className="h-12 px-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group">
-                    <span>Get Started</span>
-                    <div className="ml-2 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center transform group-hover:rotate-90 transition-all duration-300">
-                      <ChevronDown className="w-3 h-3 text-white" />
-                    </div>
+                  <Button className="h-12 px-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg transition-transform duration-300 transform hover:scale-105">
+                    Get Started
+                    <ChevronDown className="ml-2 w-4 h-4 text-white transition-transform duration-300 group-hover:rotate-90" />
                   </Button>
                 </Link>
               </>
@@ -148,7 +150,7 @@ export default function Navbar() {
           </div>
 
           {/* Mobile Menu Button */}
-          <div className="md:hidden">
+          <div className="lg:hidden">
             <button
               onClick={toggleMenu}
               className="p-2 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-colors shadow-sm"
@@ -165,7 +167,7 @@ export default function Navbar() {
 
       {/* Mobile Navigation */}
       {isMenuOpen && (
-        <div className="md:hidden bg-white/95 backdrop-blur-xl border-t border-blue-100 shadow-lg">
+        <div className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-blue-100 shadow-lg">
           <div className="container mx-auto px-4 py-6 space-y-5">
             {navItems.map((item) => (
               <Link
@@ -186,7 +188,8 @@ export default function Navbar() {
               ) : userId ? (
                 <Link href={userBusinesses.length > 0 
                   ? `/dashboard/${userBusinesses[0].id}` 
-                  : "/onboarding"}>
+                  : "/onboarding"}
+                >
                   <Button variant="ghost" className="w-full justify-center h-14 rounded-xl border border-blue-100 shadow-sm">
                     Dashboard
                   </Button>
@@ -201,9 +204,7 @@ export default function Navbar() {
                   <Link href="/sign-up">
                     <Button className="w-full justify-center h-14 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg">
                       Get Started
-                      <div className="ml-2 w-5 h-5 rounded-full bg-white/20 flex items-center justify-center">
-                        <ChevronDown className="w-3 h-3 text-white" />
-                      </div>
+                      <ChevronDown className="ml-2 w-4 h-4 text-white" />
                     </Button>
                   </Link>
                 </>

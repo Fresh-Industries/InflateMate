@@ -12,6 +12,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "InflateMate",
   description: "The ultimate platform for bounce house management",
+  icons: {
+    icon: [{ url: '/images/inflatemate-logo.PNG' }]
+  },
 };
 
 
