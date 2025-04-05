@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUser } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -19,8 +19,8 @@ const businessSchema = z.object({
 export async function POST(req: NextRequest) {
   try {
     // Get the current user
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUser();
+    if (!user) {
       return NextResponse.json(
         { message: "Unauthorized" },
         { status: 401 }
@@ -29,7 +29,7 @@ export async function POST(req: NextRequest) {
 
     // Check if user has any businesses
     const userWithBusinesses = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
+      where: { id: user.id },
       include: { businesses: true }
     });
 
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
     // Update user's onboarded status if this is their first business
     if (!userWithBusinesses.businesses.length) {
       await prisma.user.update({
-        where: { clerkUserId: userId },
+        where: { id: userWithBusinesses.id },
         data: { onboarded: true },
       });
     }
@@ -87,20 +87,21 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const { userId } = await auth();
+    const user = await getCurrentUser();
     
-    if (!userId) {
+    if (!user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId }
+    const userWithBusinesses = await prisma.user.findUnique({
+      where: { id: user.id },
+      include: { businesses: true }
     });
 
-    if (!user) {
+    if (!userWithBusinesses) {
       return NextResponse.json(
         { error: "User not found" },
         { status: 404 }
@@ -108,7 +109,7 @@ export async function GET() {
     }
 
     const businesses = await prisma.business.findMany({
-      where: { userId: user.id },
+      where: { user: { id: userWithBusinesses.id } },
       include: {
         inventory: true,
         bookings: {

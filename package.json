@@ -36,6 +36,7 @@
     "@radix-ui/react-toast": "^1.2.6",
     "@radix-ui/react-tooltip": "^1.1.8",
     "@react-google-maps/api": "^2.20.6",
+    "@react-pdf/renderer": "^4.3.0",
     "@stripe/connect-js": "^3.3.21",
     "@stripe/react-connect-js": "^3.3.20",
     "@stripe/react-stripe-js": "^3.1.1",

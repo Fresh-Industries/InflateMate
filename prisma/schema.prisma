@@ -22,47 +22,47 @@ model User {
 }
 
 model Business {
-  id                 String        @id @default(cuid())
-  name               String
-  description        String?
-  
-  // Contact info
-  address            String?
-  city               String?
-  state              String?
-  zipCode            String?
-  phone              String?
-  email              String?
-  serviceArea        String[]
-  // Brand assets
-  logo               String?
-  
-  // Core timestamps
-  createdAt          DateTime      @default(now())
-  updatedAt          DateTime      @updatedAt
+  id          String  @id @default(cuid())
+  name        String
+  description String?
 
-  
+  // Contact info
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  phone       String?
+  email       String?
+  serviceArea String[]
+  // Brand assets
+  logo        String?
+
+  // Core timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   // Booking settings
-  minAdvanceBooking  Int           @default(24)
-  maxAdvanceBooking  Int           @default(90)
-  minimumPurchase    Float         @default(0)  // New field for minimum booking amount
-  
+  minAdvanceBooking Int   @default(24)
+  maxAdvanceBooking Int   @default(90)
+  minimumPurchase   Float @default(0) // New field for minimum booking amount
+
   // Relationships & integrations
-  userId             String
-  stripeAccountId    String?
-  twilioSubAccountSid String?
-  socialMedia        Json?
-  customDomain       String?
-  siteConfig         Json?
-  
+  userId          String
+  stripeAccountId String?
+
+  socialMedia  Json?
+  customDomain String?
+  siteConfig   Json?
+
   // Relations
-  bookings           Booking[]
-  user               User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  customers          Customer[]
-  inventory          Inventory[]
-  payments           Payment[]
-  coupons            Coupon[]
-  salesFunnels       SalesFunnel[]
+  bookings     Booking[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customers    Customer[]
+  inventory    Inventory[]
+  payments     Payment[]
+  coupons      Coupon[]
+  salesFunnels SalesFunnel[]
+  waivers      Waiver[]
 
   @@index([userId])
 }
@@ -128,6 +128,7 @@ model Customer {
   status       String    @default("Active")
   type         String    @default("Regular")
   bookings     Booking[]
+  waivers      Waiver[]
   business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@unique([email, businessId])
@@ -156,6 +157,8 @@ model Booking {
   updatedAt           DateTime      @updatedAt
   businessId          String
   customerId          String
+  isCompleted         Boolean       @default(false)
+  isCancelled         Boolean       @default(false)
   specialInstructions String?
   subtotalAmount      Float         @default(0)
   taxAmount           Float         @default(0)
@@ -164,6 +167,7 @@ model Booking {
   customer            Customer      @relation(fields: [customerId], references: [id])
   inventoryItems      BookingItem[]
   payments            Payment[]
+  waivers             Waiver[]
 
   @@index([businessId])
   @@index([customerId])
@@ -243,6 +247,34 @@ model SalesFunnel {
   @@index([businessId])
 }
 
+model Waiver {
+  id                 String       @id @default(cuid())
+  businessId         String
+  customerId         String
+  bookingId          String
+  status             WaiverStatus @default(PENDING)
+  templateVersion    String
+  documentUrl        String
+  openSignDocumentId String       @unique
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([customerId])
+  @@index([bookingId])
+  @@index([status])
+}
+
+enum WaiverStatus {
+  PENDING
+  SIGNED
+  REJECTED
+  EXPIRED
+}
 
 enum InventoryStatus {
   AVAILABLE

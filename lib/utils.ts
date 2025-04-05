@@ -28,4 +28,17 @@ export const createLocalDateTime = (dateString: string, timeString: string) => {
   return new Date(year, month - 1, day, hours, minutes, 0);
 };
 
+export class FileEsque extends Blob {
+  name: string;
+  lastModified: number;
+  customId?: string | null;
+
+  constructor(parts: BlobPart[], filename: string, options?: BlobPropertyBag) {
+    super(parts, options);
+    this.name = filename;
+    this.lastModified = Date.now();
+    this.customId = null; // optional, if needed
+  }
+}
+
 

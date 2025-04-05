@@ -3,9 +3,11 @@ import { stripe } from "@/lib/stripe-server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import Stripe from "stripe";
-import { Resend } from "resend";
 import { createLocalDate, createLocalDateTime } from "@/lib/utils";
-const resend = new Resend(process.env.RESEND_API_KEY);
+import { sendSignatureEmail } from "@/lib/sendEmail";
+import { generateWaiverPDF } from "@/lib/generateWaiver";
+import { sendToOpenSign } from "@/lib/openSign";
+
 
 export async function POST(req: NextRequest) {
   const sig = (await headers()).get('stripe-signature');
@@ -76,9 +78,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Error processing webhook" }, { status: 500 });
   }
 }
-
-
-
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent succeeded: ${paymentIntent.id}`);
@@ -242,21 +241,71 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       throw paymentError;
     }
     
-    
-    const subject = 'Booking Confirmed';
-    const html = `
-    <p>Hello ${customer.name},</p>
-    <p>Your booking has been confirmed.</p>
-    <p>Booking ID: ${booking.id}</p>
-    <p>Event Date: ${booking.eventDate}</p>
-    `;
+   // Prepare data for PDF generation
+   const pdfData = {
+     customer: {
+       id: customer.id,
+       name: customer.name,
+       email: customer.email,
+       phone: customer.phone,
+     },
+     booking: {
+       id: booking.id,
+       eventDate: metadata.eventDate, 
+       eventAddress: metadata.eventAddress,
+       eventCity: metadata.eventCity,
+       eventState: metadata.eventState,
+       eventZipCode: metadata.eventZipCode,
+       participantCount: parseInt(metadata.participantCount) || 1,
+       participantAge: metadata.participantAge ? parseInt(metadata.participantAge) : undefined,
+     },
+     business: {
+       id: business?.id || '' ,
+       name: business?.name || '',
+       logo: business?.logo || null,
+       phone: business?.phone || null,
+       email: business?.email || null,
+     },
+     templateVersion: 'v1',
+   };
 
-    await resend.emails.send({
-      from: `Booking Confirmation ${business?.name} <${business?.email}>`,
-      to: email,
-      subject: subject,
-      html: html,
+   // Log the data being passed to generateWaiverPDF
+   console.log("Data for PDF generation:", JSON.stringify(pdfData, null, 2));
+
+   // Generate the waiver PDF
+   const pdfBuffer = await generateWaiverPDF(pdfData);
+    // Send the PDF to OpenSign to get a signing URL
+    const {url, documentId} = await sendToOpenSign(pdfBuffer, customer.email, business?.name || '', customer.name || '');
+    console.log("OpenSign URL:", url);
+    console.log("OpenSign Document ID:", documentId);
+
+    // Create a new waiver record in the database
+    await prisma.waiver.create({
+      data: {
+        businessId: metadata.businessId,
+        customerId: customer.id,
+        bookingId: booking.id,
+        status: 'PENDING',
+        templateVersion: 'v1',
+        documentUrl: url, 
+        openSignDocumentId: documentId
+      },
     });
+    console.log("Waiver record created.");
+
+    // Send the waiver email via Resend
+    const emailHtml = `
+      <p>Hello ${customer.name},</p>
+      <p>Please review and sign your waiver by clicking <a href="${url}">here</a>.</p>
+      <p>Thank you,</p>
+      <p>The Inflatemate Team</p>
+    `;
+    await sendSignatureEmail({
+      to: customer.email,
+      subject: 'Your Inflatemate Waiver is Ready for Signature',
+      html: emailHtml,
+    });
+    console.log(`Waiver email sent to ${customer.email}`);
 
     console.log(`Booking ${booking.id} confirmed successfully`);
   } catch (error) {
