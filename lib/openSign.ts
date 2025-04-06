@@ -38,6 +38,10 @@ export async function sendToOpenSign(pdfBuffer: Buffer, customerEmail: string, b
             options: {
               required: true,
               name: "date",
+              default: "04-30-2025", 
+              format: "mm-dd-yyyy",
+              color: "black",
+              fontsize: 12
             }
           },
           {
@@ -50,18 +54,24 @@ export async function sendToOpenSign(pdfBuffer: Buffer, customerEmail: string, b
             options: {
               required: true,
               name: "name",
+              color: "black",
+              fontsize: 12
             }
           },
           {
-            type: "text",
+            type: "textbox",
             page: 2,
             x: 315,
             y: 339,
             w: 150,
             h: 39,
             options: {
+              name: "number",
               required: true,
-              name: "Phone Number",
+              default: "1234567890",
+              hint: "Please enter your phone number",
+              color: "black",
+              fontsize: 12,
             }
           } 
         ],

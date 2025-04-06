@@ -94,30 +94,36 @@ export async function GET(
       include: {
         inventoryItems: {
           include: {
-            inventory: true
+            inventory: {
+              select: { id: true, name: true } // Only select necessary fields
+            }
           }
         },
-        customer: true,
+        customer: true, // Keep customer details
+        waivers: { // Include waivers related to this booking
+          select: {
+            id: true,
+            status: true, // Get the waiver status
+            openSignDocumentId: true // Include for potential linking/viewing
+          }
+        }
       },
       orderBy: {
         eventDate: 'asc',
       },
     });
     
-    // Transform bookings to match the expected format
+    // Transform bookings to include simplified bounceHouse and waiver status
     const formattedBookings = bookings.map(booking => {
-      const firstItem = booking.inventoryItems[0] || null;
+      // Use inventoryItems directly instead of creating a separate bounceHouse field
+      const hasSignedWaiver = booking.waivers.some(waiver => waiver.status === 'SIGNED');
       
       return {
         ...booking,
-        bounceHouseId: firstItem?.inventoryId || '',
-        bounceHouse: firstItem?.inventory ? {
-          id: firstItem.inventory.id,
-          name: firstItem.inventory.name,
-        } : {
-          id: '',
-          name: 'Unknown',
-        }
+        hasSignedWaiver, // Add a boolean flag for signed waiver
+        // Remove the old bounceHouse and bounceHouseId fields
+        bounceHouse: undefined,
+        bounceHouseId: undefined,
       };
     });
 

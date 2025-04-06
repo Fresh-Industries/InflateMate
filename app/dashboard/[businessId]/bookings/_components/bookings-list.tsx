@@ -1,26 +1,41 @@
 'use client';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { format } from "date-fns";
+import { format, isPast, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { BookingsViewControls } from "./bookings-view-controls";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, X, Pencil as PencilIcon } from "lucide-react";
+import { Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, X, Pencil as PencilIcon, CheckCircle, ShieldCheck, Package } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createLocalDate } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
+import { motion, AnimatePresence } from "framer-motion";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
-interface BounceHouse {
+interface InventoryItem {
   id: string;
   name: string;
+}
+
+interface BookingItem {
+  id: string;
+  quantity: number;
+  price: number;
+  inventory: InventoryItem;
+}
+
+interface Waiver {
+  id: string;
+  status: 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED';
+  openSignDocumentId?: string;
 }
 
 interface Booking {
@@ -28,12 +43,11 @@ interface Booking {
   eventDate: string;
   startTime: string;
   endTime: string;
-  status: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW' | 'WEATHER_HOLD';
   totalAmount: number;
   subtotalAmount?: number;
   taxAmount?: number;
   taxRate?: number;
-  bounceHouseId: string;
   depositAmount?: number;
   depositPaid?: boolean;
   eventType: string;
@@ -45,10 +59,9 @@ interface Booking {
     email: string;
     phone: string;
   };
-  bounceHouse: {
-    id: string;
-    name: string;
-  };
+  inventoryItems: BookingItem[];
+  waivers: Waiver[];
+  hasSignedWaiver: boolean;
   eventAddress: string;
   eventCity: string;
   eventState: string;
@@ -56,6 +69,12 @@ interface Booking {
   specialInstructions?: string;
   refundAmount?: number;
   refundReason?: string;
+  isCompleted?: boolean;
+}
+
+interface BounceHouse {
+  id: string;
+  name: string;
 }
 
 interface BookingsListProps {
@@ -69,7 +88,8 @@ interface BookingsListProps {
 export default function BookingsList({ businessId, initialData }: BookingsListProps) {
   const { toast } = useToast();
   const router = useRouter();
-  const [statusFilter, setStatusFilter] = useState("all");
+  const [bookings, setBookings] = useState<Booking[]>(initialData.bookings);
+  const [statusFilter, setStatusFilter] = useState("CONFIRMED");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isViewSheetOpen, setIsViewSheetOpen] = useState(false);
@@ -79,82 +99,126 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   const [fullRefund, setFullRefund] = useState(false);
   const [cancellationReason, setCancellationReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
-  
-  // New state for enhanced filters
+  const [isCompleting, setIsCompleting] = useState<string | null>(null);
+
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [sortField, setSortField] = useState<string>("eventDate");
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [eventType, setEventType] = useState<string>("");
+  const [showPastBookings, setShowPastBookings] = useState(false);
 
-  // Clear all filters function
+  useEffect(() => {
+    setBookings(initialData.bookings);
+  }, [initialData.bookings]);
+
   const clearAllFilters = () => {
     setSearchTerm("");
-    setStatusFilter("all");
+    setStatusFilter("CONFIRMED");
     setDateRange(undefined);
     setEventType("");
+    setShowPastBookings(false);
     // Keep sort settings as they are
   };
 
-  const filteredBookings = initialData.bookings
+  const filteredAndSortedBookings = bookings
     .filter((booking) => {
-      // Text search filter
-      const searchMatch = 
-        booking.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.eventAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        booking.bounceHouse.name.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      // Status filter
-      const statusMatch = statusFilter === "all" || booking.status === statusFilter;
-      
-      // Date range filter
-      let dateMatch = true;
-      if (dateRange?.from) {
-        const bookingDate = new Date(booking.eventDate);
-        dateMatch = bookingDate >= dateRange.from && 
-                    (!dateRange.to || bookingDate <= dateRange.to);
+      const bookingEventDate = startOfDay(new Date(booking.eventDate));
+
+      if (!showPastBookings && (isPast(bookingEventDate) || booking.status === 'COMPLETED')) {
+        if (statusFilter !== 'COMPLETED') {
+          return false;
+        }
       }
       
-      // Event type filter
+      const searchMatch = searchTerm
+        ? booking.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.eventAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          booking.inventoryItems.some(item => item.inventory.name.toLowerCase().includes(searchTerm.toLowerCase()))
+        : true;
+      
+      const statusMatch = statusFilter === "all" || booking.status === statusFilter;
+      
+      let dateMatch = true;
+      if (dateRange?.from) {
+        const fromDate = startOfDay(dateRange.from);
+        const toDate = dateRange.to ? startOfDay(dateRange.to) : fromDate;
+        dateMatch = bookingEventDate >= fromDate && bookingEventDate <= toDate;
+      }
+      
       const eventTypeMatch = !eventType || booking.eventType === eventType;
       
       return searchMatch && statusMatch && dateMatch && eventTypeMatch;
     })
     .sort((a, b) => {
-      // Handle sorting
+      let comparison = 0;
       if (sortField === "eventDate") {
-        const dateA = new Date(a.eventDate);
-        const dateB = new Date(b.eventDate);
-        return sortDirection === "asc" 
-          ? dateA.getTime() - dateB.getTime() 
-          : dateB.getTime() - dateA.getTime();
+        comparison = new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime();
       } else if (sortField === "totalAmount") {
-        return sortDirection === "asc" 
-          ? a.totalAmount - b.totalAmount 
-          : b.totalAmount - a.totalAmount;
+        comparison = a.totalAmount - b.totalAmount;
       } else if (sortField === "customerName") {
-        return sortDirection === "asc" 
-          ? a.customer.name.localeCompare(b.customer.name) 
-          : b.customer.name.localeCompare(a.customer.name);
+        comparison = a.customer.name.localeCompare(b.customer.name);
       }
-      return 0;
+      return sortDirection === "asc" ? comparison : comparison * -1;
     });
 
-  const getStatusBadgeVariant = (status: string) => {
+  const getStatusBadgeVariant = (status: Booking['status']) => {
     switch (status) {
       case "PENDING":
         return "secondary";
       case "CONFIRMED":
         return "default";
+      case "COMPLETED":
+        return "success";
       case "CANCELLED":
+      case "NO_SHOW":
+      case "WEATHER_HOLD":
         return "destructive";
       default:
-        return "secondary";
+        return "outline";
+    }
+  };
+  
+  const handleCompleteBooking = async (bookingId: string) => {
+    setIsCompleting(bookingId);
+    try {
+      const response = await fetch(`/api/businesses/${businessId}/bookings/${bookingId}/complete`, {
+        method: 'POST',
+      });
+      
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to complete booking');
+      }
+
+      const completedBooking = await response.json();
+      console.log("Booking completed" , completedBooking.customer)
+
+      setBookings(prevBookings => 
+        prevBookings.map(b => 
+          b.id === bookingId ? { ...b, status: 'COMPLETED', isCompleted: true } : b
+        )
+      );
+
+      toast({
+        title: "Booking Completed",
+        description: `Booking #${completedBooking.id}  marked as completed.`,
+      });
+
+    } catch (error) {
+      console.error("Error completing booking:", error);
+      toast({
+        title: "Error",
+        description: error instanceof Error ? error.message : "Failed to complete booking",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCompleting(null);
     }
   };
 
-  const handleCancelBooking = (bookingId: string) => {
-    const booking = initialData.bookings.find(b => b.id === bookingId);
+  const handleCancelBooking = async (bookingId: string) => {
+    const booking = bookings.find(b => b.id === bookingId);
     if (!booking) return;
     
     const now = new Date();
@@ -192,30 +256,22 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         throw new Error(result.error || 'Failed to cancel booking');
       }
       
-      // Update the booking in the UI
-      const updatedBookings = initialData.bookings.map(booking => 
-        booking.id === bookingToCancel 
-          ? { ...booking, status: 'CANCELLED' } 
-          : booking
+      setBookings(prevBookings => 
+        prevBookings.map(b => 
+          b.id === bookingToCancel ? { ...b, status: 'CANCELLED' } : b
+        )
       );
       
-      initialData.bookings = updatedBookings;
-      
-      // Show success message
       toast({
         title: "Booking Cancelled",
         description: result.refundAmount > 0 
-          ? `Refund of $${result.refundAmount.toFixed(2)} (${result.refundPercentage}%) has been processed.` 
+          ? `Refund of $${result.refundAmount.toFixed(2)} (${result.refundPercentage}%) processed.` 
           : "The booking has been cancelled.",
         variant: "default",
       });
       
-      // Close the dialog
       setIsCancelDialogOpen(false);
       setBookingToCancel(null);
-      
-      // Refresh the page to get updated data
-      router.refresh();
       
     } catch (error) {
       console.error("Error cancelling booking:", error);
@@ -231,129 +287,118 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
 
   const BookingDetails = ({ booking }: { booking: Booking }) => {
     return (
-      <div className="space-y-4">
+      <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">{booking.bounceHouse.name}</h3>
-            <Badge variant={getStatusBadgeVariant(booking.status)} className="mt-2">
+            <h3 className="text-lg font-semibold">Booking for {booking.customer.name}</h3>
+             <Badge variant={getStatusBadgeVariant(booking.status)} className="mt-1">
               {booking.status}
             </Badge>
           </div>
           <div className="text-right">
             <div className="text-lg font-semibold">${booking.totalAmount.toFixed(2)}</div>
-            {booking.depositAmount && (
-              <div className="text-sm text-muted-foreground">
-                Deposit: ${booking.depositAmount.toFixed(2)}
-                {booking.depositPaid ? " (Paid)" : " (Pending)"}
-              </div>
-            )}
           </div>
         </div>
 
         <Separator />
 
-        <div className="grid gap-3">
-          <div className="flex items-start gap-3">
-            <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">Event Date</div>
-              <div className="text-sm text-muted-foreground">
-                {format(booking.eventDate, "PPP")}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                <span className="font-medium">24-Hour Rental:</span> Delivery at {format(booking.startTime, "p")} - Pickup at {format(booking.endTime, "p")}
-              </div>
-            </div>
-          </div>
-
-          {booking.status === "CANCELLED" && (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="space-y-4">
             <div className="flex items-start gap-3">
-              <X className="h-5 w-5 text-destructive mt-0.5 flex-shrink-0" />
+              <CalendarIcon className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div>
-                <div className="font-medium text-destructive">Cancellation Information</div>
+                <div className="font-medium">Event Date & Time</div>
                 <div className="text-sm text-muted-foreground">
-                  This booking has been cancelled.
+                  {format(new Date(booking.eventDate), "PPP")} ({format(new Date(booking.startTime), "p")} - {format(new Date(booking.endTime), "p")})
                 </div>
-                {booking.refundAmount && (
-                  <div className="text-sm text-muted-foreground">
-                    Refund amount: ${booking.refundAmount.toFixed(2)}
-                  </div>
-                )}
-                {booking.refundReason && (
-                  <div className="text-sm text-muted-foreground">
-                    Reason: {booking.refundReason}
-                  </div>
-                )}
               </div>
             </div>
-          )}
-
-          <div className="flex items-start gap-3">
-            <Users className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">Event Details</div>
-              <div className="text-sm text-muted-foreground">
-                {booking.eventType || "Not specified"}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {booking.participantCount} participants
-                {booking.participantAge && ` • Average age: ${booking.participantAge}`}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-start gap-3">
-            <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">Event Location</div>
-              <div className="text-sm text-muted-foreground">
-                {booking.eventAddress}
-              </div>
-              <div className="text-sm text-muted-foreground">
-                {booking.eventCity}, {booking.eventState} {booking.eventZipCode}
-              </div>
-            </div>
-          </div>
-
-          <Separator />
-
-          <div className="flex items-start gap-3">
-            <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
-            <div>
-              <div className="font-medium">Customer Information</div>
-              <div className="text-sm text-muted-foreground">
-                {booking.customer.name}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Mail className="h-4 w-4" />
-                {booking.customer.email}
-              </div>
-              <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <Phone className="h-4 w-4" />
-                {booking.customer.phone}
-              </div>
-            </div>
-          </div>
-
-          {booking.specialInstructions && (
-            <>
-              <Separator />
+            <div className="flex items-start gap-3">
+              <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div>
-                <div className="font-medium">Special Instructions</div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {booking.specialInstructions}
+                <div className="font-medium">Event Location</div>
+                <div className="text-sm text-muted-foreground">
+                  {booking.eventAddress}, {booking.eventCity}, {booking.eventState} {booking.eventZipCode}
                 </div>
               </div>
-            </>
-          )}
+            </div>
+             <div className="flex items-start gap-3">
+              <Users className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="font-medium">Event Info</div>
+                <div className="text-sm text-muted-foreground">
+                  {booking.eventType || "N/A"} ({booking.participantCount} participants{booking.participantAge ? `, ~${booking.participantAge} yrs` : ''})
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            <div className="flex items-start gap-3">
+              <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="font-medium">Customer</div>
+                <div className="text-sm text-muted-foreground">{booking.customer.name}</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3"/> {booking.customer.email}</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3"/> {booking.customer.phone}</div>
+              </div>
+            </div>
+             <div className="flex items-start gap-3">
+              <Package className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="font-medium">Booked Items</div>
+                {booking.inventoryItems.length > 0 ? (
+                  <ul className="list-disc list-inside text-sm text-muted-foreground">
+                    {booking.inventoryItems.map(item => (
+                      <li key={item.id}>{item.inventory.name} (x{item.quantity})</li>
+                    ))}
+                  </ul>
+                ) : (
+                  <p className="text-sm text-muted-foreground">No items booked.</p>
+                )}
+              </div>
+            </div>
+             <div className="flex items-start gap-3">
+              <ShieldCheck className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+              <div>
+                <div className="font-medium">Waiver Status</div>
+                <p className={`text-sm ${booking.hasSignedWaiver ? 'text-green-600' : 'text-orange-600'}`}>
+                  {booking.hasSignedWaiver ? 'Signed' : 'Pending'}
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {booking.specialInstructions && (
+          <>
+            <Separator />
+            <div>
+              <div className="font-medium">Special Instructions</div>
+              <div className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">
+                {booking.specialInstructions}
+              </div>
+            </div>
+          </>
+        )}
+         {booking.status === "CANCELLED" && booking.refundReason && (
+           <>
+             <Separator />
+             <div>
+               <div className="font-medium text-destructive">Cancellation Reason</div>
+               <div className="mt-1 text-sm text-muted-foreground whitespace-pre-wrap">
+                 {booking.refundReason}
+               </div>
+             </div>
+           </>
+         )}
       </div>
     );
   };
 
   return (
+    <TooltipProvider>
     <div className="space-y-6">
-      {/* Add the enhanced filters component */}
       <BookingsViewControls 
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -367,117 +412,142 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         onSortDirectionChange={setSortDirection}
         eventType={eventType}
         onEventTypeChange={setEventType}
+        showPastBookings={showPastBookings}
+        onShowPastBookingsChange={setShowPastBookings}
         onClearFilters={clearAllFilters}
       />
 
-      {filteredBookings.length === 0 ? (
+      {filteredAndSortedBookings.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-8 flex flex-col items-center justify-center text-center">
             <div className="rounded-full bg-muted p-3 mb-3">
               <CalendarIcon className="h-6 w-6 text-muted-foreground" />
             </div>
-            <h3 className="text-lg font-medium mb-1">No bookings found</h3>
+            <h3 className="text-lg font-medium mb-1">No bookings match your filters</h3>
             <p className="text-muted-foreground text-sm mb-4">
-              {searchTerm || statusFilter !== "all" || dateRange?.from || eventType
-                ? "Try adjusting your filters to see more results."
-                : "Start by creating your first booking."}
+              Try adjusting your search or filter settings, or {showPastBookings ? 'hide past bookings' : 'show past bookings'}.
             </p>
-            <Sheet>
-              <SheetTrigger asChild>
-                <Button>Create New Booking</Button>
-              </SheetTrigger>
-              <SheetContent className="lg:max-w-xl overflow-y-auto">
-                {/* Reuse the NewBookingForm component here */}
-              </SheetContent>
-            </Sheet>
           </CardContent>
         </Card>
       ) : (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing {filteredBookings.length} {filteredBookings.length === 1 ? 'booking' : 'bookings'}
+              Showing {filteredAndSortedBookings.length} {filteredAndSortedBookings.length === 1 ? 'booking' : 'bookings'}
             </p>
           </div>
           
-          <div className="grid grid-cols-1 gap-4">
-            {filteredBookings.map((booking) => (
-              <Card key={booking.id} className="overflow-hidden">
+          <motion.div layout className="grid grid-cols-1 gap-4">
+            <AnimatePresence initial={false}>
+            {filteredAndSortedBookings.map((booking) => (
+              <motion.div
+                key={booking.id}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.3 } }}
+                transition={{ duration: 0.3 }}
+              >
+              <Card className="overflow-hidden transition-shadow hover:shadow-md">
                 <div className="flex flex-col md:flex-row">
-                  <div className="flex-1 p-6">
-                    <div className="flex items-start justify-between">
+                  <div className="flex-1 p-4 md:p-6">
+                    <div className="flex items-start justify-between mb-3">
                       <div>
-                        <CardTitle className="text-xl font-semibold">{booking.customer.name}</CardTitle>
+                        <CardTitle className="text-lg font-semibold leading-tight">{booking.customer.name}</CardTitle>
                         <div className="flex items-center mt-1 space-x-1 text-sm text-muted-foreground">
-                          <CalendarIcon className="h-4 w-4" />
-                          <span>{new Date(booking.eventDate).toLocaleDateString()}</span>
+                          <CalendarIcon className="h-4 w-4 flex-shrink-0" />
+                          <span>{format(new Date(booking.eventDate), "eee, MMM d")} • {format(new Date(booking.startTime), "p")}</span>
                         </div>
                       </div>
-                      <Badge variant={getStatusBadgeVariant(booking.status)}>
-                        {booking.status}
-                      </Badge>
+                      <div className="flex items-center gap-2">
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Badge 
+                              variant={booking.hasSignedWaiver ? 'success' : 'secondary'} 
+                              className="cursor-default"
+                             >
+                              <ShieldCheck className={`h-3.5 w-3.5 ${booking.hasSignedWaiver ? '' : 'text-orange-500'}`} />
+                            </Badge>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Waiver {booking.hasSignedWaiver ? 'Signed' : 'Pending'}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                        <Badge variant={getStatusBadgeVariant(booking.status)}>{booking.status}</Badge>
+                      </div>
                     </div>
                     
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
-                      <div>
-                        <h4 className="text-sm font-medium">Rental Details</h4>
-                        <p className="text-sm mt-1">{booking.bounceHouse.name}</p>
-                        <div className="flex items-center mt-2">
-                          <Users className="h-4 w-4 mr-1 text-muted-foreground" />
-                          <span className="text-sm">{booking.participantCount} participants</span>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
+                      <div className="flex items-start">
+                        <Package className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                        <div>
+                          <span className="font-medium">Items:</span> 
+                          <span className="text-muted-foreground ml-1">
+                            {booking.inventoryItems.map(item => item.inventory.name).join(', ') || 'N/A'}
+                          </span>
                         </div>
                       </div>
-                      
-                      <div>
-                        <h4 className="text-sm font-medium">Event Location</h4>
-                        <div className="flex items-start mt-1">
-                          <MapPin className="h-4 w-4 mr-1 text-muted-foreground mt-0.5" />
-                          <p className="text-sm">{booking.eventAddress}, {booking.eventCity}, {booking.eventState} {booking.eventZipCode}</p>
-                        </div>
+                       <div className="flex items-start">
+                        <MapPin className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
+                         <span className="text-muted-foreground truncate" title={`${booking.eventAddress}, ${booking.eventCity}`}>
+                            {booking.eventAddress}, {booking.eventCity}
+                          </span>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="border-t md:border-t-0 md:border-l bg-muted/50 p-6 flex flex-col justify-between gap-4 w-full md:w-48">
-                    <div>
-                      <h4 className="text-sm font-medium">Total Amount</h4>
-                      <p className="text-xl font-bold">${booking.totalAmount.toFixed(2)}</p>
+                  <div className="border-t md:border-t-0 md:border-l bg-muted/50 p-4 flex flex-row md:flex-col justify-between md:justify-between items-center md:items-stretch gap-2 md:w-48">
+                    <div className="text-left md:text-left">
+                      <h4 className="text-xs font-medium text-muted-foreground">Total</h4>
+                      <p className="text-lg font-bold">${booking.totalAmount.toFixed(2)}</p>
                     </div>
                     
-                    <div className="flex flex-col gap-2">
+                    <div className="flex flex-row md:flex-col gap-2 shrink-0">
                       <Button 
-                        onClick={() => {
-                          setSelectedBooking(booking);
-                          setIsViewSheetOpen(true);
-                        }}
+                        onClick={() => { setSelectedBooking(booking); setIsViewSheetOpen(true); }}
                         size="sm" 
-                        variant="outline" 
-                        className="w-full justify-between"
+                        variant="outline"
+                        className="flex-1 md:w-full"
                       >
-                        <Eye className="h-4 w-4 mr-2" />
-                        <span>View</span>
+                        <Eye className="h-4 w-4 md:mr-2" />
+                        <span className="hidden md:inline">View</span>
                       </Button>
                       
-                      {booking.status !== "CANCELLED" && (
+                      {booking.status !== "CANCELLED" && booking.status !== "COMPLETED" && (
                         <>
                           <Button 
                             onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}/edit`)}
                             size="sm" 
-                            variant="outline" 
-                            className="w-full justify-between"
+                            variant="outline"
+                             className="flex-1 md:w-full"
                           >
-                            <PencilIcon className="h-4 w-4 mr-2" />
-                            <span>Edit</span>
+                            <PencilIcon className="h-4 w-4 md:mr-2" />
+                             <span className="hidden md:inline">Edit</span>
                           </Button>
                           
+                          <Button 
+                            onClick={() => handleCompleteBooking(booking.id)}
+                            size="sm" 
+                            variant="outline" 
+                            className="flex-1 md:w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700 hover:text-green-800"
+                            disabled={isCompleting === booking.id}
+                          >
+                            {isCompleting === booking.id ? (
+                              <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
+                            ) : (
+                              <CheckCircle className="h-4 w-4 md:mr-2" />
+                            )}
+                            <span className="hidden md:inline">Complete</span>
+                          </Button>
+
                           <Button 
                             onClick={() => handleCancelBooking(booking.id)}
                             size="sm" 
                             variant="outline" 
-                            className="w-full justify-between text-destructive hover:text-destructive"
+                            className="flex-1 md:w-full text-destructive hover:text-destructive"
                           >
-                            <X className="h-4 w-4 mr-2" />
-                            <span>Cancel</span>
+                            <X className="h-4 w-4 md:mr-2" />
+                            <span className="hidden md:inline">Cancel</span>
                           </Button>
                         </>
                       )}
@@ -485,14 +555,15 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                   </div>
                 </div>
               </Card>
+              </motion.div>
             ))}
-          </div>
+            </AnimatePresence>
+          </motion.div>
         </div>
       )}
 
-      {/* View Booking Sheet */}
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto">
+        <SheetContent className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Booking Details</SheetTitle>
           </SheetHeader>
@@ -503,81 +574,68 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
             </div>
           )}
           
-          <SheetFooter className="mt-8">
-            <div className="flex w-full justify-between">
+          <SheetFooter className="mt-8 sticky bottom-0 bg-background py-4 border-t">
+            <div className="flex w-full justify-between gap-4">
               <Button variant="outline" onClick={() => setIsViewSheetOpen(false)}>Close</Button>
-              {selectedBooking && selectedBooking.status !== "CANCELLED" && (
-                <Button 
-                  onClick={() => {
-                    router.push(`/dashboard/${businessId}/bookings/${selectedBooking.id}/edit`);
-                    setIsViewSheetOpen(false);
-                  }}
-                >
-                  Edit Booking
-                </Button>
+              {selectedBooking && selectedBooking.status !== "CANCELLED" && selectedBooking.status !== "COMPLETED" && (
+                 <div className="flex gap-2">
+                   <Button 
+                      onClick={() => {
+                        router.push(`/dashboard/${businessId}/bookings/${selectedBooking.id}/edit`);
+                        setIsViewSheetOpen(false);
+                      }}
+                      variant="outline"
+                    >
+                      <PencilIcon className="h-4 w-4 mr-2" /> Edit
+                    </Button>
+                     <Button 
+                       onClick={() => handleCompleteBooking(selectedBooking.id)}
+                       disabled={isCompleting === selectedBooking.id}
+                       className="bg-green-600 hover:bg-green-700"
+                     >
+                       {isCompleting === selectedBooking.id ? (
+                         <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
+                       ) : (
+                         <CheckCircle className="h-4 w-4 mr-2" />
+                       )}
+                       Mark as Complete
+                     </Button>
+                 </div>
               )}
             </div>
           </SheetFooter>
         </SheetContent>
       </Sheet>
 
-      {/* Cancel Booking Dialog */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Cancel Booking</DialogTitle>
             <DialogDescription>
               {isWithin24Hours 
-                ? "This booking is within 24 hours of the event. Cancellation may affect refund policies."
-                : "Are you sure you want to cancel this booking?"}
+                ? "This booking is within 24 hours. Cancellation may affect refund policies." 
+                : "Confirm cancellation?"}
             </DialogDescription>
           </DialogHeader>
-          
           <div className="space-y-4 py-4">
             <div className="flex items-center space-x-2">
-              <Checkbox 
-                id="fullRefund" 
-                checked={fullRefund} 
-                onCheckedChange={(checked) => setFullRefund(checked as boolean)} 
-              />
+              <Checkbox id="fullRefund" checked={fullRefund} onCheckedChange={(checked) => setFullRefund(checked as boolean)} />
               <Label htmlFor="fullRefund">Process full refund</Label>
             </div>
-            
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason for cancellation</Label>
-              <Textarea 
-                id="reason" 
-                placeholder="Enter reason for cancellation" 
-                value={cancellationReason}
-                onChange={(e) => setCancellationReason(e.target.value)}
-              />
+              <Label htmlFor="reason">Reason for cancellation (optional)</Label>
+              <Textarea id="reason" placeholder="Enter reason..." value={cancellationReason} onChange={(e) => setCancellationReason(e.target.value)} />
             </div>
           </div>
-          
           <DialogFooter>
-            <Button 
-              variant="outline" 
-              onClick={() => setIsCancelDialogOpen(false)} 
-              disabled={isCancelling}
-            >
-              Keep Booking
-            </Button>
-            <Button 
-              variant="destructive" 
-              onClick={confirmCancellation} 
-              disabled={isCancelling}
-            >
-              {isCancelling ? (
-                <>
-                  <span className="mr-2">Cancelling...</span>
-                </>
-              ) : (
-                "Cancel Booking"
-              )}
+            <Button variant="outline" onClick={() => setIsCancelDialogOpen(false)} disabled={isCancelling}>Keep Booking</Button>
+            <Button variant="destructive" onClick={confirmCancellation} disabled={isCancelling}>
+              {isCancelling ? 'Cancelling...' : 'Confirm Cancellation'}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
+    </TooltipProvider>
   );
 } 

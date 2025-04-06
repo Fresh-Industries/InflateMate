@@ -17,6 +17,8 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { DateRange } from "react-day-picker";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface BookingsViewControlsProps {
   searchTerm: string;
@@ -31,6 +33,8 @@ interface BookingsViewControlsProps {
   onSortDirectionChange?: (direction: "asc" | "desc") => void;
   eventType?: string;
   onEventTypeChange?: (type: string) => void;
+  showPastBookings: boolean;
+  onShowPastBookingsChange: (checked: boolean) => void;
   onClearFilters?: () => void;
 }
 
@@ -47,18 +51,20 @@ export function BookingsViewControls({
   onSortDirectionChange,
   eventType,
   onEventTypeChange,
+  showPastBookings,
+  onShowPastBookingsChange,
   onClearFilters,
 }: BookingsViewControlsProps) {
   const [datePickerOpen, setDatePickerOpen] = useState(false);
   
-  const hasActiveFilters = searchTerm || statusFilter !== "all" || (dateRange?.from && dateRange?.to) || eventType;
+  const isAnyFilterActive = searchTerm || statusFilter !== "CONFIRMED" || dateRange?.from || eventType || showPastBookings;
   
   const handleClearFilters = () => {
     if (onClearFilters) {
       onClearFilters();
     } else {
       onSearchChange('');
-      onStatusFilterChange('all');
+      onStatusFilterChange('CONFIRMED');
       if (onDateRangeChange) onDateRangeChange(undefined);
       if (onEventTypeChange) onEventTypeChange('');
     }
@@ -103,6 +109,12 @@ export function BookingsViewControls({
               <div className="flex items-center gap-2">
                 <Badge variant="destructive" className="h-2 w-2 rounded-full p-0" />
                 Cancelled
+              </div>
+            </SelectItem>
+            <SelectItem value="COMPLETED">
+              <div className="flex items-center gap-2">
+                <Badge variant="success" className="h-2 w-2 rounded-full p-0" />
+                Completed
               </div>
             </SelectItem>
           </SelectContent>
@@ -260,8 +272,18 @@ export function BookingsViewControls({
           </DropdownMenuContent>
         </DropdownMenu>
         
+        {/* Show Past Bookings Toggle */}
+        <div className="flex items-center space-x-2">
+          <Switch 
+            id="show-past" 
+            checked={showPastBookings}
+            onCheckedChange={onShowPastBookingsChange}
+          />
+          <Label htmlFor="show-past" className="text-sm font-medium">Show Past</Label>
+        </div>
+        
         {/* Clear Filters Button */}
-        {hasActiveFilters && (
+        {isAnyFilterActive && (
           <Button 
             variant="ghost" 
             size="icon" 

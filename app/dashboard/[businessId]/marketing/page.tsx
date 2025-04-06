@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { ArrowRight, Code, Users, Percent, TrendingUp, BarChart3 } from "lucide-react";
+import { ArrowRight, Users, Percent, TrendingUp, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
@@ -70,32 +70,28 @@ export default async function MarketingPage({
           });
         }
         
-        // Count leads if model exists
-        if (prisma.lead) {
-          leadsCount = await prisma.lead.count({
+        // Count leads (Customers with isLead = true)
+        leadsCount = await prisma.customer.count({
+          where: {
+            businessId: params.businessId,
+            isLead: true, // Count customers marked as leads
+          },
+        });
+          
+        // Calculate conversion rate if there are leads
+        if (leadsCount > 0) {
+          // Count leads that have at least one booking
+          const convertedLeadsCount = await prisma.customer.count({
             where: {
               businessId: params.businessId,
+              isLead: true,
+              bookings: { // Check if the customer has any related bookings
+                some: {},
+              },
             },
           });
           
-          // Calculate conversion rate if there are leads
-          if (leadsCount > 0) {
-            // Try to calculate conversion rate if possible
-            try {
-              // Check if we can access conversions through leads
-              const conversionsCount = await prisma.lead.count({
-                where: {
-                  businessId: params.businessId,
-                  converted: true,
-                },
-              });
-              
-              conversionRate = Math.round((conversionsCount / leadsCount) * 100);
-            } catch (error) {
-              console.error("Error calculating conversion rate:", error);
-              // Keep default conversion rate
-            }
-          }
+          conversionRate = Math.round((convertedLeadsCount / leadsCount) * 100);
         }
       } catch (error) {
         console.error("Error fetching marketing data:", error);

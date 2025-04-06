@@ -301,6 +301,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       <p>The Inflatemate Team</p>
     `;
     await sendSignatureEmail({
+      from: business?.email || "onboarding@resend.dev",
       to: customer.email,
       subject: 'Your Inflatemate Waiver is Ready for Signature',
       html: emailHtml,

@@ -48,7 +48,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
       setIsSubmitting(true);
       setError(null);
       
-      const response = await fetch(`/api/businesses/${businessId}/leads`, {
+      const response = await fetch(`/api/businesses/${businessId}/customers/leads`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
