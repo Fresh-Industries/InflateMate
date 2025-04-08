@@ -1,35 +1,31 @@
 'use client';
 
-import { useState, useEffect } from "react";
-import { Card, CardContent, CardTitle } from "@/components/ui/card";
+import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { format, isPast, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { BookingsViewControls } from "./bookings-view-controls";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
-import { Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, X, Pencil as PencilIcon, CheckCircle, ShieldCheck, Package } from "lucide-react";
+import { Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, X, Pencil as PencilIcon, CheckCircle, ShieldCheck, Package, Cloud, Clock, List, CalendarDays } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { createLocalDate } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
-import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
-
-interface InventoryItem {
-  id: string;
-  name: string;
-}
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { BookingsCalendarView } from './bookings-calendar-view';
 
 interface BookingItem {
   id: string;
   quantity: number;
   price: number;
-  inventory: InventoryItem;
+  inventoryId: string;
+  bookingId: string;
 }
 
 interface Waiver {
@@ -100,6 +96,9 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   const [cancellationReason, setCancellationReason] = useState("");
   const [isCancelling, setIsCancelling] = useState(false);
   const [isCompleting, setIsCompleting] = useState<string | null>(null);
+  const [activeView, setActiveView] = useState<'list' | 'calendar'>('list');
+
+  const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
   const [dateRange, setDateRange] = useState<DateRange | undefined>(undefined);
   const [sortField, setSortField] = useState<string>("eventDate");
@@ -110,6 +109,14 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   useEffect(() => {
     setBookings(initialData.bookings);
   }, [initialData.bookings]);
+
+  const inventoryNameMap = useMemo(() => {
+    const map = new Map<string, string>();
+    initialData.bounceHouses.forEach(item => {
+      map.set(item.id, item.name);
+    });
+    return map;
+  }, [initialData.bounceHouses]);
 
   const clearAllFilters = () => {
     setSearchTerm("");
@@ -134,7 +141,10 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         ? booking.customer.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
           booking.eventAddress.toLowerCase().includes(searchTerm.toLowerCase()) ||
           booking.eventType.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          booking.inventoryItems.some(item => item.inventory.name.toLowerCase().includes(searchTerm.toLowerCase()))
+          booking.inventoryItems.some(item => {
+            const itemName = inventoryNameMap.get(item.inventoryId) || '';
+            return itemName.toLowerCase().includes(searchTerm.toLowerCase());
+          })
         : true;
       
       const statusMatch = statusFilter === "all" || booking.status === statusFilter;
@@ -163,19 +173,22 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
     });
 
   const getStatusBadgeVariant = (status: Booking['status']) => {
+    const baseClasses = "font-medium rounded-full px-2.5 py-0.5 text-xs inline-flex items-center gap-1.5";
     switch (status) {
       case "PENDING":
-        return "secondary";
+        return `${baseClasses} bg-yellow-50 text-yellow-700 border border-yellow-200`;
       case "CONFIRMED":
-        return "default";
+        return `${baseClasses} bg-blue-50 text-blue-700 border border-blue-200`;
       case "COMPLETED":
-        return "success";
+        return `${baseClasses} bg-green-50 text-green-700 border border-green-200`;
       case "CANCELLED":
+        return `${baseClasses} bg-red-50 text-red-700 border border-red-200`;
       case "NO_SHOW":
+        return `${baseClasses} bg-gray-50 text-gray-700 border border-gray-200`;
       case "WEATHER_HOLD":
-        return "destructive";
+        return `${baseClasses} bg-purple-50 text-purple-700 border border-purple-200`;
       default:
-        return "outline";
+        return `${baseClasses} bg-gray-50 text-gray-700 border border-gray-200`;
     }
   };
   
@@ -291,7 +304,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold">Booking for {booking.customer.name}</h3>
-             <Badge variant={getStatusBadgeVariant(booking.status)} className="mt-1">
+             <Badge className={`mt-1 ${getStatusBadgeVariant(booking.status)}`}>
               {booking.status}
             </Badge>
           </div>
@@ -350,7 +363,9 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                 {booking.inventoryItems.length > 0 ? (
                   <ul className="list-disc list-inside text-sm text-muted-foreground">
                     {booking.inventoryItems.map(item => (
-                      <li key={item.id}>{item.inventory.name} (x{item.quantity})</li>
+                      <li key={item.id}>
+                        {inventoryNameMap.get(item.inventoryId) || item.inventoryId} (x{item.quantity})
+                      </li>
                     ))}
                   </ul>
                 ) : (
@@ -396,8 +411,19 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
     );
   };
 
+  // Handler for selecting a booking (used by both list and calendar)
+  const handleSelectBooking = (booking: Booking) => {
+    setSelectedBooking(booking);
+    setIsViewSheetOpen(true);
+  };
+
+  // Handler for calendar navigation
+  const handleNavigate = (newDate: Date) => {
+    setCurrentCalendarDate(newDate);
+    // Optional: Fetch data for the new month/view if necessary
+  };
+
   return (
-    <TooltipProvider>
     <div className="space-y-6">
       <BookingsViewControls 
         searchTerm={searchTerm}
@@ -406,236 +432,297 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         onStatusFilterChange={setStatusFilter}
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
-        sortField={sortField}
-        onSortFieldChange={setSortField}
-        sortDirection={sortDirection}
-        onSortDirectionChange={setSortDirection}
         eventType={eventType}
         onEventTypeChange={setEventType}
         showPastBookings={showPastBookings}
         onShowPastBookingsChange={setShowPastBookings}
+        sortField={sortField}
+        onSortFieldChange={setSortField}
+        sortDirection={sortDirection}
+        onSortDirectionChange={setSortDirection}
         onClearFilters={clearAllFilters}
       />
 
-      {filteredAndSortedBookings.length === 0 ? (
-        <Card className="border-dashed">
-          <CardContent className="py-8 flex flex-col items-center justify-center text-center">
-            <div className="rounded-full bg-muted p-3 mb-3">
-              <CalendarIcon className="h-6 w-6 text-muted-foreground" />
-            </div>
-            <h3 className="text-lg font-medium mb-1">No bookings match your filters</h3>
-            <p className="text-muted-foreground text-sm mb-4">
-              Try adjusting your search or filter settings, or {showPastBookings ? 'hide past bookings' : 'show past bookings'}.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing {filteredAndSortedBookings.length} {filteredAndSortedBookings.length === 1 ? 'booking' : 'bookings'}
-            </p>
-          </div>
-          
-          <motion.div layout className="grid grid-cols-1 gap-4">
-            <AnimatePresence initial={false}>
-            {filteredAndSortedBookings.map((booking) => (
-              <motion.div
-                key={booking.id}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, height: 0, marginBottom: 0, transition: { duration: 0.3 } }}
-                transition={{ duration: 0.3 }}
-              >
-              <Card className="overflow-hidden transition-shadow hover:shadow-md">
-                <div className="flex flex-col md:flex-row">
-                  <div className="flex-1 p-4 md:p-6">
-                    <div className="flex items-start justify-between mb-3">
-                      <div>
-                        <CardTitle className="text-lg font-semibold leading-tight">{booking.customer.name}</CardTitle>
-                        <div className="flex items-center mt-1 space-x-1 text-sm text-muted-foreground">
-                          <CalendarIcon className="h-4 w-4 flex-shrink-0" />
-                          <span>{format(new Date(booking.eventDate), "eee, MMM d")} • {format(new Date(booking.startTime), "p")}</span>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Badge 
-                              variant={booking.hasSignedWaiver ? 'success' : 'secondary'} 
-                              className="cursor-default"
-                             >
-                              <ShieldCheck className={`h-3.5 w-3.5 ${booking.hasSignedWaiver ? '' : 'text-orange-500'}`} />
-                            </Badge>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Waiver {booking.hasSignedWaiver ? 'Signed' : 'Pending'}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        <Badge variant={getStatusBadgeVariant(booking.status)}>{booking.status}</Badge>
-                      </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-sm">
-                      <div className="flex items-start">
-                        <Package className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                        <div>
-                          <span className="font-medium">Items:</span> 
-                          <span className="text-muted-foreground ml-1">
-                            {booking.inventoryItems.map(item => item.inventory.name).join(', ') || 'N/A'}
-                          </span>
-                        </div>
-                      </div>
-                       <div className="flex items-start">
-                        <MapPin className="h-4 w-4 mr-2 mt-0.5 text-muted-foreground flex-shrink-0" />
-                         <span className="text-muted-foreground truncate" title={`${booking.eventAddress}, ${booking.eventCity}`}>
-                            {booking.eventAddress}, {booking.eventCity}
-                          </span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="border-t md:border-t-0 md:border-l bg-muted/50 p-4 flex flex-row md:flex-col justify-between md:justify-between items-center md:items-stretch gap-2 md:w-48">
-                    <div className="text-left md:text-left">
-                      <h4 className="text-xs font-medium text-muted-foreground">Total</h4>
-                      <p className="text-lg font-bold">${booking.totalAmount.toFixed(2)}</p>
-                    </div>
-                    
-                    <div className="flex flex-row md:flex-col gap-2 shrink-0">
-                      <Button 
-                        onClick={() => { setSelectedBooking(booking); setIsViewSheetOpen(true); }}
-                        size="sm" 
-                        variant="outline"
-                        className="flex-1 md:w-full"
-                      >
-                        <Eye className="h-4 w-4 md:mr-2" />
-                        <span className="hidden md:inline">View</span>
-                      </Button>
-                      
-                      {booking.status !== "CANCELLED" && booking.status !== "COMPLETED" && (
-                        <>
-                          <Button 
-                            onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}/edit`)}
-                            size="sm" 
-                            variant="outline"
-                             className="flex-1 md:w-full"
-                          >
-                            <PencilIcon className="h-4 w-4 md:mr-2" />
-                             <span className="hidden md:inline">Edit</span>
-                          </Button>
-                          
-                          <Button 
-                            onClick={() => handleCompleteBooking(booking.id)}
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1 md:w-full bg-green-50 hover:bg-green-100 border-green-200 text-green-700 hover:text-green-800"
-                            disabled={isCompleting === booking.id}
-                          >
-                            {isCompleting === booking.id ? (
-                              <span className="animate-spin h-4 w-4 border-2 border-current border-t-transparent rounded-full"></span>
-                            ) : (
-                              <CheckCircle className="h-4 w-4 md:mr-2" />
-                            )}
-                            <span className="hidden md:inline">Complete</span>
-                          </Button>
+      {/* View Switcher - Hidden below md breakpoint */}
+      <div className="flex justify-end mb-4">
+        <ToggleGroup 
+          type="single" 
+          value={activeView} 
+          onValueChange={(value) => { if (value) setActiveView(value as 'list' | 'calendar')}} 
+          aria-label="View mode"
+          className="bg-white rounded-lg border border-gray-200 shadow-sm p-1"
+        >
+          <ToggleGroupItem value="list" aria-label="List view" className="data-[state=on]:bg-blue-50 data-[state=on]:text-blue-600 px-3 py-1.5">
+            <List className="h-4 w-4 mr-2" />
+            List
+          </ToggleGroupItem>
+          {/* Hide Calendar toggle on small screens */}
+          <ToggleGroupItem 
+            value="calendar" 
+            aria-label="Calendar view" 
+            className="hidden md:inline-flex data-[state=on]:bg-blue-50 data-[state=on]:text-blue-600 px-3 py-1.5"
+          >
+            <CalendarDays className="h-4 w-4 mr-2" />
+            Calendar
+          </ToggleGroupItem>
+        </ToggleGroup>
+      </div>
 
-                          <Button 
-                            onClick={() => handleCancelBooking(booking.id)}
-                            size="sm" 
-                            variant="outline" 
-                            className="flex-1 md:w-full text-destructive hover:text-destructive"
+      {/* Conditional Rendering based on activeView */}
+      {/* Show List view always, or Calendar view only on md screens and up */}
+      {activeView === 'list' || typeof window !== 'undefined' && window.innerWidth < 768 ? (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b border-gray-100 bg-gray-50/50">
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Customer</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Event Details</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Items</th>
+                  <th className="text-left py-3 px-4 text-sm font-medium text-gray-600">Status</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Amount</th>
+                  <th className="text-right py-3 px-4 text-sm font-medium text-gray-600">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-100">
+                {filteredAndSortedBookings.length === 0 ? (
+                  <tr>
+                    <td colSpan={6} className="py-8">
+                      <div className="text-center">
+                        <CalendarIcon className="mx-auto h-12 w-12 text-gray-300" />
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">No bookings found</h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          No bookings match your current filters.
+                        </p>
+                        <div className="mt-6">
+                          <Button
+                            onClick={clearAllFilters}
+                            variant="outline"
+                            className="bg-white hover:bg-gray-50"
                           >
-                            <X className="h-4 w-4 md:mr-2" />
-                            <span className="hidden md:inline">Cancel</span>
+                            Clear all filters
                           </Button>
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </Card>
-              </motion.div>
-            ))}
-            </AnimatePresence>
-          </motion.div>
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  filteredAndSortedBookings.map((booking) => (
+                    <tr 
+                      key={booking.id}
+                      className="hover:bg-gray-50/50 transition-colors"
+                    >
+                      <td className="py-4 px-4">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">{booking.customer.name}</span>
+                          <span className="text-sm text-gray-500">{booking.customer.email}</span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex flex-col">
+                          <span className="font-medium text-gray-900">
+                            {format(new Date(booking.eventDate), 'MMM d, yyyy')}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {format(new Date(booking.startTime), 'h:mm a')} - 
+                            {format(new Date(booking.endTime), 'h:mm a')}
+                          </span>
+                          <span className="text-sm text-gray-500 flex items-center gap-1">
+                            <MapPin className="h-3 w-3" />
+                            {booking.eventCity}, {booking.eventState}
+                          </span>
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex flex-col gap-1">
+                          {booking.inventoryItems.map((item) => (
+                            <span key={item.id} className="text-sm text-gray-900">
+                              {inventoryNameMap.get(item.inventoryId) || item.inventoryId}
+                            </span>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <Badge className={getStatusBadgeVariant(booking.status)}>
+                          {booking.status === 'WEATHER_HOLD' && <Cloud className="h-3 w-3" />}
+                          {booking.status === 'NO_SHOW' && <X className="h-3 w-3" />}
+                          {booking.status === 'COMPLETED' && <CheckCircle className="h-3 w-3" />}
+                          {booking.status === 'CONFIRMED' && <ShieldCheck className="h-3 w-3" />}
+                          {booking.status === 'PENDING' && <Clock className="h-3 w-3" />}
+                          {booking.status === 'CANCELLED' && <X className="h-3 w-3" />}
+                          {booking.status}
+                        </Badge>
+                        {!booking.hasSignedWaiver && booking.status !== 'CANCELLED' && (
+                          <div className="mt-1">
+                            <Badge variant="outline" className="text-xs border-yellow-200 text-yellow-700 bg-yellow-50">
+                              Waiver Pending
+                            </Badge>
+                          </div>
+                        )}
+                      </td>
+                      <td className="py-4 px-4 text-right">
+                        <span className="font-medium text-gray-900">
+                          ${booking.totalAmount.toFixed(2)}
+                        </span>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="flex justify-end gap-2">
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 hover:bg-gray-100"
+                                  onClick={() => handleSelectBooking(booking)}
+                                >
+                                  <Eye className="h-4 w-4 text-gray-500" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>View Details</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 hover:bg-gray-100"
+                                  onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}`)}
+                                >
+                                  <PencilIcon className="h-4 w-4 text-gray-500" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Edit Booking</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+
+                          {booking.status === 'CONFIRMED' && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 hover:bg-green-100"
+                                    onClick={() => handleCompleteBooking(booking.id)}
+                                    disabled={isCompleting === booking.id}
+                                  >
+                                    <CheckCircle className="h-4 w-4 text-green-500" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Mark as Completed</TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+
+                          {(booking.status === 'CONFIRMED' || booking.status === 'PENDING') && (
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    className="h-8 w-8 p-0 hover:bg-red-100"
+                                    onClick={() => handleCancelBooking(booking.id)}
+                                  >
+                                    <X className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Cancel Booking</TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
+      ) : (
+        // Render Calendar View - Hidden below md breakpoint implicitly by the toggle button being hidden
+        // We could add an explicit hidden class here too for robustness if needed: className="hidden md:block"
+        <BookingsCalendarView 
+          bookings={filteredAndSortedBookings}
+          onSelectBooking={handleSelectBooking}
+          currentDate={currentCalendarDate}
+          onNavigateChange={handleNavigate}
+        />
       )}
 
+      {/* Booking Details Sheet */}
       <Sheet open={isViewSheetOpen} onOpenChange={setIsViewSheetOpen}>
-        <SheetContent className="w-full sm:max-w-lg md:max-w-2xl lg:max-w-3xl xl:max-w-4xl overflow-y-auto">
-          <SheetHeader>
-            <SheetTitle>Booking Details</SheetTitle>
+        <SheetContent className="sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto">
+          <SheetHeader className="pb-6 border-b">
+            <SheetTitle className="text-2xl font-bold text-gray-900">Booking Details</SheetTitle>
           </SheetHeader>
-          
-          {selectedBooking && (
-            <div className="mt-6">
-              <BookingDetails booking={selectedBooking} />
-            </div>
-          )}
-          
-          <SheetFooter className="mt-8 sticky bottom-0 bg-background py-4 border-t">
-            <div className="flex w-full justify-between gap-4">
-              <Button variant="outline" onClick={() => setIsViewSheetOpen(false)}>Close</Button>
-              {selectedBooking && selectedBooking.status !== "CANCELLED" && selectedBooking.status !== "COMPLETED" && (
-                 <div className="flex gap-2">
-                   <Button 
-                      onClick={() => {
-                        router.push(`/dashboard/${businessId}/bookings/${selectedBooking.id}/edit`);
-                        setIsViewSheetOpen(false);
-                      }}
-                      variant="outline"
-                    >
-                      <PencilIcon className="h-4 w-4 mr-2" /> Edit
-                    </Button>
-                     <Button 
-                       onClick={() => handleCompleteBooking(selectedBooking.id)}
-                       disabled={isCompleting === selectedBooking.id}
-                       className="bg-green-600 hover:bg-green-700"
-                     >
-                       {isCompleting === selectedBooking.id ? (
-                         <span className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full mr-2"></span>
-                       ) : (
-                         <CheckCircle className="h-4 w-4 mr-2" />
-                       )}
-                       Mark as Complete
-                     </Button>
-                 </div>
-              )}
-            </div>
-          </SheetFooter>
+          {selectedBooking && <BookingDetails booking={selectedBooking} />}
         </SheetContent>
       </Sheet>
 
+      {/* Cancel Booking Dialog */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-md">
           <DialogHeader>
-            <DialogTitle>Cancel Booking</DialogTitle>
-            <DialogDescription>
-              {isWithin24Hours 
-                ? "This booking is within 24 hours. Cancellation may affect refund policies." 
-                : "Confirm cancellation?"}
+            <DialogTitle className="text-xl font-semibold text-gray-900">Cancel Booking</DialogTitle>
+            <DialogDescription className="text-gray-500">
+              {isWithin24Hours ? (
+                "This booking is within 24 hours. A 10% cancellation fee will apply unless marked as full refund."
+              ) : (
+                "Are you sure you want to cancel this booking?"
+              )}
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="flex items-center space-x-2">
-              <Checkbox id="fullRefund" checked={fullRefund} onCheckedChange={(checked) => setFullRefund(checked as boolean)} />
-              <Label htmlFor="fullRefund">Process full refund</Label>
-            </div>
+            {isWithin24Hours && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="fullRefund"
+                  checked={fullRefund}
+                  onCheckedChange={(checked) => setFullRefund(checked as boolean)}
+                />
+                <Label htmlFor="fullRefund" className="text-sm text-gray-700">
+                  Process full refund (override cancellation fee)
+                </Label>
+              </div>
+            )}
             <div className="space-y-2">
-              <Label htmlFor="reason">Reason for cancellation (optional)</Label>
-              <Textarea id="reason" placeholder="Enter reason..." value={cancellationReason} onChange={(e) => setCancellationReason(e.target.value)} />
+              <Label htmlFor="reason" className="text-sm text-gray-700">
+                Cancellation Reason
+              </Label>
+              <Textarea
+                id="reason"
+                value={cancellationReason}
+                onChange={(e) => setCancellationReason(e.target.value)}
+                placeholder="Enter the reason for cancellation..."
+                className="resize-none"
+              />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCancelDialogOpen(false)} disabled={isCancelling}>Keep Booking</Button>
-            <Button variant="destructive" onClick={confirmCancellation} disabled={isCancelling}>
-              {isCancelling ? 'Cancelling...' : 'Confirm Cancellation'}
+            <Button
+              variant="outline"
+              onClick={() => setIsCancelDialogOpen(false)}
+              className="bg-white hover:bg-gray-50"
+            >
+              Keep Booking
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={confirmCancellation}
+              disabled={isCancelling}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isCancelling ? "Cancelling..." : "Cancel Booking"}
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
-    </TooltipProvider>
   );
 } 

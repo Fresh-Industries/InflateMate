@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronDown, Star, Zap, LifeBuoy } from "lucide-react";
-import { LogoutButton } from "./LogoutButton";
 import { useAuth } from "@clerk/nextjs";
 
 interface Business {

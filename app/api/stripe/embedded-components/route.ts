@@ -64,6 +64,12 @@ export async function GET(req: NextRequest) {
         },
         payouts: {
           enabled: true,
+          features: {
+            instant_payouts: true,
+            standard_payouts: true,
+            edit_payout_schedule: true,
+            external_account_collection: true,
+          },
         },
       },
     });

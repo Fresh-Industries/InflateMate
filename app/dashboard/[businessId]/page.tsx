@@ -26,8 +26,6 @@ import {
   CartesianGrid, 
   Tooltip as RechartsTooltip, 
   ResponsiveContainer,
-  BarChart,
-  Bar,
   PieChart as RechartsPieChart,
   Pie,
   Cell,
@@ -49,7 +47,7 @@ interface Booking {
     id: string;
     name: string;
   };
-  bookingItems?: Array<{
+  inventoryItems?: Array<{
     inventoryId: string;
     inventory: {
       name: string;
@@ -268,9 +266,9 @@ export default function DashboardPage() {
         console.log('Bookings data:', bookingsWithCustomers);
         
         bookingsWithCustomers.forEach((booking: Booking) => {
-          console.log('Processing booking:', booking.id, 'Booking items:', booking.bookingItems);
-          if (booking.bookingItems && booking.status !== 'CANCELLED') {
-            booking.bookingItems.forEach((item: { inventory?: { name: string } }) => {
+          console.log('Processing booking:', booking.id, 'Booking items:', booking.inventoryItems?.[0]);
+          if (booking.inventoryItems && booking.status !== 'CANCELLED') {
+            booking.inventoryItems.forEach((item: { inventory?: { name: string } }) => {
               console.log('Processing item:', item);
               const name = item.inventory?.name || 'Unknown Item';
               if (!inventoryBookingCounts[name]) {
@@ -639,65 +637,78 @@ export default function DashboardPage() {
             <CardTitle className="text-xl font-semibold text-[#1a1f36]">Top Inventory</CardTitle>
             <CardDescription className="text-gray-500">Most booked items</CardDescription>
           </CardHeader>
-          <CardContent className="h-[300px]">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={data.topInventory}
-                layout="vertical"
-                margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-              >
-                <defs>
-                  <linearGradient id="barGradient" x1="0" y1="0" x2="1" y2="0">
-                    <stop offset="0%" stopColor="#6366f1" stopOpacity={1}/>
-                    <stop offset="100%" stopColor="#818cf8" stopOpacity={1}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid 
-                  strokeDasharray="3 3" 
-                  stroke={chartColors.grid} 
-                  horizontal={false}
-                  opacity={0.3}
-                />
-                <XAxis 
-                  type="number"
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: chartColors.text, fontSize: 12 }}
-                  tickMargin={10}
-                />
-                <YAxis 
-                  dataKey="name" 
-                  type="category" 
-                  axisLine={false}
-                  tickLine={false}
-                  tick={{ fill: chartColors.text, fontSize: 12 }}
-                  width={120}
-                  tickMargin={10}
-                />
-                <RechartsTooltip
-                  cursor={{ fill: 'rgba(99, 102, 241, 0.1)' }}
-                  content={({ active, payload, label }) => {
-                    if (active && payload && payload.length) {
-                      return (
-                        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
-                          <p className="text-sm text-gray-600">{label}</p>
-                          <p className="text-lg font-semibold text-gray-900">
-                            {payload[0].value} bookings
-                          </p>
+          <CardContent>
+            {data.topInventory.length === 0 ? (
+              <div className="flex flex-col items-center justify-center h-[300px] text-center">
+                <Package className="h-12 w-12 text-gray-300 mb-3" />
+                <p className="text-gray-500 font-medium">No inventory data available</p>
+                <p className="text-sm text-gray-400">Start adding items to track their performance</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {data.topInventory.map((item, index) => (
+                  <div key={index} className="relative">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="flex items-center gap-3 flex-1">
+                        <div className={cn(
+                          "w-10 h-10 rounded-lg flex items-center justify-center",
+                          index === 0 ? "bg-blue-100 text-blue-600" :
+                          index === 1 ? "bg-purple-100 text-purple-600" :
+                          index === 2 ? "bg-pink-100 text-pink-600" :
+                          index === 3 ? "bg-orange-100 text-orange-600" :
+                          "bg-green-100 text-green-600"
+                        )}>
+                          <Package className="w-5 h-5" />
                         </div>
-                      );
-                    }
-                    return null;
-                  }}
-                />
-                <Bar 
-                  dataKey="bookings" 
-                  radius={[4, 4, 4, 4]}
-                  barSize={24}
-                  fill="url(#barGradient)"
-                />
-              </BarChart>
-            </ResponsiveContainer>
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900 truncate">{item.name}</p>
+                          <p className="text-sm text-gray-500">{item.bookings} bookings</p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <span className={cn(
+                          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
+                          index === 0 ? "bg-blue-50 text-blue-700" :
+                          index === 1 ? "bg-purple-50 text-purple-700" :
+                          index === 2 ? "bg-pink-50 text-pink-700" :
+                          index === 3 ? "bg-orange-50 text-orange-700" :
+                          "bg-green-50 text-green-700"
+                        )}>
+                          #{index + 1} Most Booked
+                        </span>
+                      </div>
+                    </div>
+                    {/* Progress bar */}
+                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                      <div 
+                        className={cn(
+                          "h-full rounded-full transition-all duration-500",
+                          index === 0 ? "bg-gradient-to-r from-blue-500 to-blue-600" :
+                          index === 1 ? "bg-gradient-to-r from-purple-500 to-purple-600" :
+                          index === 2 ? "bg-gradient-to-r from-pink-500 to-pink-600" :
+                          index === 3 ? "bg-gradient-to-r from-orange-500 to-orange-600" :
+                          "bg-gradient-to-r from-green-500 to-green-600"
+                        )}
+                        style={{ 
+                          width: `${(item.bookings / Math.max(...data.topInventory.map(i => i.bookings))) * 100}%` 
+                        }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+            {data.topInventory.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="w-full mt-6 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                onClick={() => router.push(`/dashboard/${businessId}/inventory`)}
+              >
+                View All Inventory
+                <ChevronRight className="ml-1 h-4 w-4" />
+              </Button>
+            )}
           </CardContent>
         </Card>
       </div>

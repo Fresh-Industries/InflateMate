@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button";
-import { CalendarPlus, Calendar } from "lucide-react";
+import { CalendarPlus, Calendar, DollarSign } from "lucide-react";
 import {
   Sheet,
   SheetContent,
@@ -12,6 +12,7 @@ import {
 import { NewBookingForm } from "./new-booking-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
+import { cn } from "@/lib/utils";
 
 interface BookingsHeaderProps {
   businessId: string;
@@ -58,30 +59,32 @@ export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
   });
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 p-6 bg-[#fafbff]">
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Bookings</h1>
-          <p className="text-muted-foreground mt-1">
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Bookings
+          </h1>
+          <p className="text-gray-500 mt-2 text-lg">
             Manage your bounce house bookings and reservations
           </p>
         </div>
         <Sheet>
           <SheetTrigger asChild>
-            <Button size="lg" className="gap-2">
+            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 gap-2 rounded-xl h-12">
               <CalendarPlus className="h-5 w-5" /> 
               <span>New Booking</span>
             </Button>
           </SheetTrigger>
           <SheetContent className="sm:max-w-md md:max-w-lg lg:max-w-xl overflow-y-auto p-0">
-            <SheetHeader className="p-6 pb-2">
+            <SheetHeader className="p-6 pb-2 bg-gradient-to-r from-blue-50 to-purple-50">
               <div className="flex justify-between items-center">
-                <SheetTitle>Create New Booking</SheetTitle>
-                <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-muted">
+                <SheetTitle className="text-2xl font-bold text-gray-800">Create New Booking</SheetTitle>
+                <SheetClose className="rounded-full h-8 w-8 flex items-center justify-center hover:bg-white/80 transition-colors">
                   
                 </SheetClose>
               </div>
-              <SheetDescription>
+              <SheetDescription className="text-gray-600">
                 Enter the booking details below
               </SheetDescription>
             </SheetHeader>
@@ -92,49 +95,56 @@ export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
         </Sheet>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all duration-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Today&apos;s Bookings</CardTitle>
-            <CardDescription>Scheduled for today</CardDescription>
+            <CardTitle className="text-sm font-medium text-gray-600">Today's Bookings</CardTitle>
+            <CardDescription className="text-gray-400">Scheduled for today</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{todaysBookings}</span>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-blue-50 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-blue-500" />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{todaysBookings}</span>
               </div>
-              
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all duration-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Upcoming Bookings</CardTitle>
-            <CardDescription>Next 7 days</CardDescription>
+            <CardTitle className="text-sm font-medium text-gray-600">Upcoming Bookings</CardTitle>
+            <CardDescription className="text-gray-400">Next 7 days</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-5 w-5 text-muted-foreground" />
-                <span className="text-2xl font-bold">{upcomingBookings}</span>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-purple-50 flex items-center justify-center">
+                  <Calendar className="h-5 w-5 text-purple-500" />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">{upcomingBookings}</span>
               </div>
-              
             </div>
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all duration-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-            <CardDescription>This month</CardDescription>
+            <CardTitle className="text-sm font-medium text-gray-600">Total Revenue</CardTitle>
+            <CardDescription className="text-gray-400">This month</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex items-center justify-between">
-              <span className="text-2xl font-bold">
-                ${monthlyRevenue._sum.totalAmount?.toFixed(2) ?? "0.00"}
-              </span>
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-lg bg-green-50 flex items-center justify-center">
+                  <DollarSign className="h-5 w-5 text-green-500" />
+                </div>
+                <span className="text-2xl font-bold text-gray-900">
+                  ${monthlyRevenue._sum.totalAmount?.toFixed(2) ?? "0.00"}
+                </span>
+              </div>
             </div>
           </CardContent>
         </Card>

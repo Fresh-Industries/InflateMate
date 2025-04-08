@@ -48,7 +48,7 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             <div className="flex flex-col lg:flex-row items-center gap-16">
               <div className="lg:w-1/2 space-y-8 text-center lg:text-left">
-                <Badge className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-700 hover:from-blue-500/20 hover:to-purple-500/20 px-4 py-2 text-sm rounded-full border border-blue-200/30 shadow-sm backdrop-blur-sm">
+                <Badge className="bg-gradient-to-r from-blue-500/10 to-purple-500/10 text-blue-700 px-4 py-2 text-sm rounded-full border border-blue-200/30 shadow-sm backdrop-blur-sm">
                   Introducing Inflatemate 1.0
                 </Badge>
                 
