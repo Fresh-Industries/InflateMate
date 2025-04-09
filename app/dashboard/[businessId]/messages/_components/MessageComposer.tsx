@@ -69,10 +69,7 @@ export function MessageComposer({ customer, businessId }: MessageComposerProps) 
     <Card className="w-full">
       <CardContent className="pt-6">
         <div className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <Label className="w-20">To:</Label>
-            <Input value={customer.phone} disabled className="bg-muted" />
-          </div>
+
           <Textarea
             placeholder="Type your message here..."
             className="min-h-[150px] resize-none"

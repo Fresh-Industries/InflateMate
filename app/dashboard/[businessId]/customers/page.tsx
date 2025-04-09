@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -76,7 +76,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useRouter } from "next/navigation";
+import { formatDistanceToNow } from "date-fns";
 
 interface Customer {
   id: string;
@@ -255,9 +255,7 @@ export default function CustomersPage() {
           method: "DELETE",
         }
       );
-      
       const data = await response.json();
-      
       if (!response.ok) {
         toast({
           title: "Error",
@@ -324,7 +322,7 @@ export default function CustomersPage() {
     }
   });
 
-  // Add this new function to fetch a customer's bookings
+  // Fetch customer bookings
   const fetchCustomerBookings = async (customerId: string) => {
     try {
       setIsLoadingBookings(true);
@@ -344,7 +342,7 @@ export default function CustomersPage() {
     }
   };
 
-  // Add this function to open the customer details
+  // Open customer details
   const openCustomerDetails = (customer: Customer) => {
     setSelectedCustomer(customer);
     fetchCustomerBookings(customer.id);
@@ -352,23 +350,25 @@ export default function CustomersPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
+    <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
         <div>
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">Customers</h1>
-          <p className="text-muted-foreground">
+          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+            Customers
+          </h1>
+          <p className="text-base text-muted-foreground mt-1">
             Manage your customer relationships and bookings
           </p>
         </div>
-        <Button className="gap-2 w-full sm:w-auto" onClick={openAddDialog}>
+        <Button className="gap-2 w-full sm:w-auto" variant="primary-gradient" onClick={openAddDialog}>
           <Plus className="h-4 w-4" /> Add Customer
         </Button>
       </div>
 
       {/* Stats Overview */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="border border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Total Customers</CardTitle>
             <Users className="h-4 w-4 text-muted-foreground" />
@@ -381,7 +381,7 @@ export default function CustomersPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">VIP Customers</CardTitle>
             <Star className="h-4 w-4 text-yellow-500" />
@@ -403,7 +403,7 @@ export default function CustomersPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Active Customers</CardTitle>
             <Calendar className="h-4 w-4 text-blue-500" />
@@ -416,20 +416,14 @@ export default function CustomersPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-blue-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium">Average Value</CardTitle>
             <TrendingUp className="h-4 w-4 text-green-500" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              $
-              {customers.length > 0
-                ? (
-                    customers.reduce((acc, c) => acc + c.totalSpent, 0) /
-                    customers.length
-                  ).toFixed(2)
-                : "0.00"}
+              ${customers.length > 0 ? (customers.reduce((acc, c) => acc + c.totalSpent, 0) / customers.length).toFixed(2) : "0.00"}
             </div>
             <p className="text-xs text-muted-foreground">Per customer</p>
           </CardContent>
@@ -440,25 +434,22 @@ export default function CustomersPage() {
       <Card>
         <CardHeader>
           <CardTitle>Customer List</CardTitle>
-          <CardDescription>
-            View and manage your customer database
-          </CardDescription>
         </CardHeader>
         <CardContent>
           {/* Filters */}
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
               <Input
                 placeholder="Search customers..."
-                className="pl-8 w-full"
+                className="pl-10"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
               />
             </div>
             <Select value={filterType} onValueChange={setFilterType}>
               <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="Customer Type" />
+                <SelectValue placeholder="Filter by..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all-customers">All Customers</SelectItem>
@@ -474,27 +465,27 @@ export default function CustomersPage() {
             <Table className="min-w-full">
               <TableHeader>
                 <TableRow>
-                  <TableHead className="w-[200px]">Customer</TableHead>
-                  <TableHead className="hidden md:table-cell w-[200px]">Contact</TableHead>
-                  <TableHead className="hidden lg:table-cell w-[200px]">Address</TableHead>
-                  <TableHead className="hidden sm:table-cell w-[100px]">Bookings</TableHead>
-                  <TableHead className="w-[100px]">Total Spent</TableHead>
-                  <TableHead className="hidden md:table-cell w-[150px]">Last Booking</TableHead>
-                  <TableHead className="w-[100px]">Status</TableHead>
-                  <TableHead className="hidden sm:table-cell w-[100px]">Type</TableHead>
-                  <TableHead className="text-right w-[80px]">Actions</TableHead>
+                  <TableHead className="w-[200px] text-xs uppercase text-muted-foreground">Customer</TableHead>
+                  <TableHead className="hidden md:table-cell w-[200px] text-xs uppercase text-muted-foreground">Contact</TableHead>
+                  <TableHead className="hidden lg:table-cell w-[200px] text-xs uppercase text-muted-foreground">Address</TableHead>
+                  <TableHead className="hidden sm:table-cell w-[100px] text-xs uppercase text-muted-foreground">Bookings</TableHead>
+                  <TableHead className="w-[100px] text-xs uppercase text-muted-foreground">Total Spent</TableHead>
+                  <TableHead className="hidden md:table-cell w-[150px] text-xs uppercase text-muted-foreground">Last Booking</TableHead>
+                  <TableHead className="w-[100px] text-xs uppercase text-muted-foreground">Status</TableHead>
+                  <TableHead className="hidden sm:table-cell w-[100px] text-xs uppercase text-muted-foreground">Type</TableHead>
+                  <TableHead className="text-right w-[80px] text-xs uppercase text-muted-foreground">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isLoading ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center h-24">
                       Loading customers...
                     </TableCell>
                   </TableRow>
                 ) : filteredCustomers.length === 0 ? (
                   <TableRow>
-                    <TableCell colSpan={9} className="text-center py-8">
+                    <TableCell colSpan={9} className="text-center h-24">
                       No customers found
                     </TableCell>
                   </TableRow>
@@ -503,15 +494,12 @@ export default function CustomersPage() {
                     <TableRow key={customer.id}>
                       <TableCell className="max-w-[180px]">
                         <div className="flex items-center gap-2 sm:gap-3">
-                          <Avatar className="h-7 w-7 sm:h-8 sm:w-8 flex-shrink-0">
-                            <AvatarFallback className="text-xs sm:text-sm">
-                              {customer.name
-                                .split(" ")
-                                .map((n) => n[0])
-                                .join("")}
+                          <Avatar className="h-8 w-8 sm:h-9 sm:w-9 flex-shrink-0">
+                            <AvatarFallback className="text-sm sm:text-base">
+                              {customer.name.split(" ").map((n) => n[0]).join("")}
                             </AvatarFallback>
                           </Avatar>
-                          <div className="min-w-0 overflow-hidden">
+                          <div className="min-w-0">
                             <div className="font-medium text-sm sm:text-base truncate">{customer.name}</div>
                             <div className="text-xs text-muted-foreground truncate">
                               ID: {customer.id.slice(0, 8)}
@@ -530,7 +518,7 @@ export default function CustomersPage() {
                             </div>
                             <div className="block md:hidden text-xs mt-1">
                               <div className="flex items-center gap-1 truncate">
-                                <Mail className="h-3 w-3 flex-shrink-0" />
+                                <Mail className="h-3 w-3" />
                                 <span className="truncate">{customer.email}</span>
                               </div>
                             </div>
@@ -540,11 +528,11 @@ export default function CustomersPage() {
                       <TableCell className="hidden md:table-cell max-w-[200px]">
                         <div className="flex flex-col gap-1">
                           <div className="flex items-center gap-2">
-                            <Mail className="h-3 w-3 flex-shrink-0" />
+                            <Mail className="h-3 w-3" />
                             <span className="text-sm truncate">{customer.email}</span>
                           </div>
                           <div className="flex items-center gap-2">
-                            <Phone className="h-3 w-3 flex-shrink-0" />
+                            <Phone className="h-3 w-3" />
                             <span className="text-sm truncate">{customer.phone}</span>
                           </div>
                         </div>
@@ -565,23 +553,21 @@ export default function CustomersPage() {
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">{customer.bookingCount}</TableCell>
                       <TableCell>${customer.totalSpent}</TableCell>
-                      <TableCell className="hidden md:table-cell">{customer.lastBooking || "Never"}</TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        {customer.lastBooking
+                          ? formatDistanceToNow(new Date(customer.lastBooking), { addSuffix: true })
+                          : "Never"}
+                      </TableCell>
                       <TableCell>
                         <Badge
-                          variant={
-                            customer.status === "Active" ? "default" : "secondary"
-                          }
+                          variant={customer.status === "Active" ? "default" : "secondary"}
                           className="whitespace-nowrap"
                         >
                           {customer.status}
                         </Badge>
                       </TableCell>
                       <TableCell className="hidden sm:table-cell">
-                        <Badge
-                          variant={
-                            customer.type === "VIP" ? "default" : "outline"
-                          }
-                        >
+                        <Badge variant={customer.type === "VIP" ? "success" : "secondary"}>
                           {customer.type}
                           {customer.type === "VIP" && (
                             <TooltipProvider>
@@ -606,9 +592,7 @@ export default function CustomersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuItem
-                              onClick={() => openEditDialog(customer)}
-                            >
+                            <DropdownMenuItem onClick={() => openEditDialog(customer)}>
                               Edit Details
                             </DropdownMenuItem>
                             <DropdownMenuItem onClick={() => openCustomerDetails(customer)}>
@@ -617,25 +601,20 @@ export default function CustomersPage() {
                             <DropdownMenuSeparator />
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
-                                <DropdownMenuItem
-                                  className="text-red-600"
-                                  onSelect={(e) => e.preventDefault()}
-                                >
+                                <DropdownMenuItem className="text-red-600" onSelect={(e) => e.preventDefault()}>
                                   Delete Customer
                                 </DropdownMenuItem>
                               </AlertDialogTrigger>
                               <AlertDialogContent>
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>
-                                    Are you sure?
-                                  </AlertDialogTitle>
+                                  <AlertDialogTitle>Are you sure?</AlertDialogTitle>
                                   <AlertDialogDescription className="space-y-2">
                                     This action cannot be undone. This will permanently delete the customer and all associated data.
                                     <div className="mt-2 text-sm bg-amber-50 border border-amber-200 p-3 rounded-md">
                                       <div className="font-medium text-amber-800">Important:</div>
                                       <ul className="list-disc pl-5 mt-1 text-amber-700">
                                         <li>Customers with upcoming bookings cannot be deleted</li>
-                                        <li>Customers with past bookings will be marked as inactive instead of deleted</li>
+                                        <li>Customers with past bookings will be marked inactive instead</li>
                                         <li>Only customers with no booking history will be permanently deleted</li>
                                       </ul>
                                     </div>
@@ -643,12 +622,7 @@ export default function CustomersPage() {
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    className="bg-red-600 hover:bg-red-700"
-                                    onClick={() =>
-                                      handleDeleteCustomer(customer.id)
-                                    }
-                                  >
+                                  <AlertDialogAction className="bg-red-600 hover:bg-red-700" onClick={() => handleDeleteCustomer(customer.id)}>
                                     Delete
                                   </AlertDialogAction>
                                 </AlertDialogFooter>
@@ -667,115 +641,59 @@ export default function CustomersPage() {
       </Card>
 
       {/* Add/Edit Customer Dialog */}
-      <Dialog open={dialogMode !== null} onOpenChange={closeDialog}>
-        <DialogContent className="sm:max-w-md md:max-w-lg max-h-[95vh] overflow-hidden">
+      <Dialog open={dialogMode !== null} onOpenChange={(isOpen) => !isOpen && closeDialog()}>
+        <DialogContent className="sm:max-w-md md:max-w-lg max-h-[95vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>
-              {dialogMode === "add" ? "Add New Customer" : "Edit Customer"}
-            </DialogTitle>
+            <DialogTitle>{dialogMode === "add" ? "Add New Customer" : "Edit Customer"}</DialogTitle>
             <DialogDescription>
               {dialogMode === "add"
                 ? "Add a new customer to your database"
                 : "Edit customer information"}
             </DialogDescription>
           </DialogHeader>
-          <div className="space-y-4 max-h-[calc(95vh-10rem)] overflow-y-auto px-1 pr-2">
+          <div className="space-y-4 px-1 pr-2">
             <div className="space-y-2">
-              <Label htmlFor="name">Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-              />
+              <Label htmlFor="name" className="text-sm">Name *</Label>
+              <Input id="name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={formData.email}
-                onChange={(e) =>
-                  setFormData({ ...formData, email: e.target.value })
-                }
-              />
+              <Label htmlFor="email" className="text-sm">Email *</Label>
+              <Input id="email" type="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="phone">Phone *</Label>
-              <Input
-                id="phone"
-                value={formData.phone}
-                onChange={(e) =>
-                  setFormData({ ...formData, phone: e.target.value })
-                }
-              />
+              <Label htmlFor="phone" className="text-sm">Phone *</Label>
+              <Input id="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="address">Address</Label>
-                <Input
-                  id="address"
-                  value={formData.address}
-                  onChange={(e) =>
-                    setFormData({ ...formData, address: e.target.value })
-                  }
-                />
+                <Input id="address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={formData.city}
-                  onChange={(e) =>
-                    setFormData({ ...formData, city: e.target.value })
-                  }
-                />
+                <Input id="city" value={formData.city} onChange={(e) => setFormData({ ...formData, city: e.target.value })} />
               </div>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  value={formData.state}
-                  onChange={(e) =>
-                    setFormData({ ...formData, state: e.target.value })
-                  }
-                />
+                <Input id="state" value={formData.state} onChange={(e) => setFormData({ ...formData, state: e.target.value })} />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="zipCode">Zip Code</Label>
-                <Input
-                  id="zipCode"
-                  value={formData.zipCode}
-                  onChange={(e) =>
-                    setFormData({ ...formData, zipCode: e.target.value })
-                  }
-                />
+                <Input id="zipCode" value={formData.zipCode} onChange={(e) => setFormData({ ...formData, zipCode: e.target.value })} />
               </div>
             </div>
             <div className="space-y-2">
               <Label htmlFor="notes">Notes</Label>
-              <Input
-                id="notes"
-                value={formData.notes}
-                onChange={(e) =>
-                  setFormData({ ...formData, notes: e.target.value })
-                }
-              />
+              <Input id="notes" value={formData.notes} onChange={(e) => setFormData({ ...formData, notes: e.target.value })} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="type">Customer Type *</Label>
+                <Label htmlFor="type" className="text-sm">Customer Type *</Label>
                 <Select
                   value={formData.type}
-                  onValueChange={(value) =>
-                    setFormData({
-                      ...formData,
-                      type: value as "Regular" | "VIP",
-                    })
-                  }
+                  onValueChange={(value) => setFormData({ ...formData, type: value as "Regular" | "VIP" })}
                 >
                   <SelectTrigger id="type">
                     <SelectValue placeholder="Select type" />
@@ -788,15 +706,10 @@ export default function CustomersPage() {
               </div>
               {dialogMode === "edit" && (
                 <div className="space-y-2">
-                  <Label htmlFor="status">Status *</Label>
+                  <Label htmlFor="status" className="text-sm">Status *</Label>
                   <Select
                     value={formData.status}
-                    onValueChange={(value) =>
-                      setFormData({
-                        ...formData,
-                        status: value as "Active" | "Inactive",
-                      })
-                    }
+                    onValueChange={(value) => setFormData({ ...formData, status: value as "Active" | "Inactive" })}
                   >
                     <SelectTrigger id="status">
                       <SelectValue placeholder="Select status" />
@@ -813,8 +726,8 @@ export default function CustomersPage() {
               Fields marked with * are required
             </div>
           </div>
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-            <Button variant="outline" onClick={closeDialog} className="sm:mr-2 w-full sm:w-auto order-1 sm:order-none">
+          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-end pt-4">
+            <Button variant="secondary" onClick={closeDialog} className="sm:mr-2 w-full sm:w-auto">
               Cancel
             </Button>
             <Button onClick={handleSubmitDialog} className="w-full sm:w-auto">
@@ -826,7 +739,7 @@ export default function CustomersPage() {
 
       {/* Customer Details Dialog */}
       <Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-hidden">
+        <DialogContent className="sm:max-w-4xl max-h-[95vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Customer Details</DialogTitle>
             <DialogDescription>
@@ -834,11 +747,11 @@ export default function CustomersPage() {
             </DialogDescription>
           </DialogHeader>
           
-          <div className="max-h-[calc(95vh-10rem)] overflow-y-auto">
+          <div className="py-4">
             {selectedCustomer && (
               <div className="space-y-6">
                 {/* Customer Information Card */}
-                <Card>
+                <Card className="border border-blue-200">
                   <CardHeader>
                     <CardTitle>Customer Information</CardTitle>
                   </CardHeader>
@@ -847,23 +760,15 @@ export default function CustomersPage() {
                       <div className="flex items-center gap-3">
                         <Avatar className="h-12 w-12">
                           <AvatarFallback className="text-lg">
-                            {selectedCustomer.name
-                              .split(" ")
-                              .map((n) => n[0])
-                              .join("")}
+                            {selectedCustomer.name.split(" ").map((n) => n[0]).join("")}
                           </AvatarFallback>
                         </Avatar>
                         <div>
                           <h3 className="text-xl font-semibold">{selectedCustomer.name}</h3>
-                          <Badge 
-                            variant={selectedCustomer.type === "VIP" ? "default" : "outline"}
-                          >
+                          <Badge variant={selectedCustomer.type === "VIP" ? "success" : "secondary"}>
                             {selectedCustomer.type}
                           </Badge>
-                          <Badge 
-                            variant={selectedCustomer.status === "Active" ? "default" : "secondary"}
-                            className="ml-2"
-                          >
+                          <Badge variant={selectedCustomer.status === "Active" ? "default" : "secondary"} className="ml-2">
                             {selectedCustomer.status}
                           </Badge>
                         </div>
@@ -871,11 +776,11 @@ export default function CustomersPage() {
                       
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <Mail className="h-4 w-4 text-muted-foreground" />
+                          <Mail className="h-4 w-4" />
                           <span>{selectedCustomer.email}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <Phone className="h-4 w-4 text-muted-foreground" />
+                          <Phone className="h-4 w-4" />
                           <span>{selectedCustomer.phone}</span>
                         </div>
                       </div>
@@ -918,17 +823,15 @@ export default function CustomersPage() {
                 </Card>
                 
                 {/* Customer Bookings Card */}
-                <Card>
+                <Card className="border border-blue-200">
                   <CardHeader>
                     <CardTitle>Booking History</CardTitle>
-                    <CardDescription>
-                      View all bookings for this customer
-                    </CardDescription>
+                    <CardDescription>View all bookings for this customer</CardDescription>
                   </CardHeader>
                   <CardContent>
                     {isLoadingBookings ? (
                       <div className="text-center py-8">
-                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-current border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]"></div>
+                        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-solid border-current border-r-transparent"></div>
                         <p className="mt-2 text-muted-foreground">Loading bookings...</p>
                       </div>
                     ) : customerBookings.length === 0 ? (
@@ -938,7 +841,7 @@ export default function CustomersPage() {
                         </div>
                         <h3 className="mt-4 text-lg font-medium">No bookings found</h3>
                         <p className="mt-2 text-muted-foreground">
-                          This customer hasn't made any bookings yet.
+                          This customer hasn&apos;t made any bookings yet.
                         </p>
                       </div>
                     ) : (
@@ -952,14 +855,15 @@ export default function CustomersPage() {
                                     <CardTitle className="text-lg">{booking.bounceHouse.name}</CardTitle>
                                     <div className="flex items-center mt-1 space-x-1 text-sm text-muted-foreground">
                                       <Calendar className="h-4 w-4" />
-                                      <span>{new Date(booking.eventDate).toLocaleDateString()}</span>
+                                      <span>
+                                          {new Date(booking.eventDate).toLocaleDateString()}, {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+                                      </span>
                                     </div>
                                   </div>
                                   <Badge variant={getStatusBadgeVariant(booking.status)}>
                                     {booking.status}
                                   </Badge>
                                 </div>
-                                
                                 <div className="mt-4">
                                   <h4 className="text-sm font-medium">Event Details</h4>
                                   <div className="flex items-start mt-1">
@@ -971,17 +875,15 @@ export default function CustomersPage() {
                                   </div>
                                 </div>
                               </div>
-                              
                               <div className="border-t md:border-t-0 md:border-l bg-muted/50 p-4 flex flex-col justify-between gap-4 w-full md:w-48">
                                 <div>
                                   <h4 className="text-sm font-medium">Amount</h4>
                                   <p className="text-xl font-bold">${booking.totalAmount.toFixed(2)}</p>
                                 </div>
-                                
-                                <Button 
+                                <Button
                                   onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}`)}
-                                  size="sm" 
-                                  variant="outline" 
+                                  size="sm"
+                                  variant="secondary"
                                   className="w-full justify-between"
                                 >
                                   <Eye className="h-4 w-4 mr-2" />
@@ -999,14 +901,16 @@ export default function CustomersPage() {
             )}
           </div>
           
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+          <DialogFooter className="pt-4 flex flex-col sm:flex-row gap-2 sm:justify-end">
+            <Button variant="secondary" onClick={() => setIsDetailsOpen(false)}>
               Close
             </Button>
-            <Button 
+            <Button
               onClick={() => {
                 setIsDetailsOpen(false);
-                openEditDialog(selectedCustomer!);
+                if (selectedCustomer) {
+                    openEditDialog(selectedCustomer);
+                }
               }}
             >
               Edit Customer
@@ -1018,13 +922,22 @@ export default function CustomersPage() {
   );
 }
 
+// Helper function to format time (HH:MM to AM/PM)
+const formatTime = (timeString: string): string => {
+  if (!timeString || !timeString.includes(':')) return '';
+  const [hours, minutes] = timeString.split(':').map(Number);
+  const period = hours >= 12 ? 'PM' : 'AM';
+  const adjustedHours = hours % 12 || 12;
+  return `${adjustedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+};
+
 // Helper function to determine badge variant based on booking status
-const getStatusBadgeVariant = (status: string) => {
-  switch (status) {
+const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "success" | "outline" => {
+  switch (status?.toUpperCase()) {
     case "PENDING":
       return "secondary";
     case "CONFIRMED":
-      return "default";
+      return "success";
     case "CANCELLED":
       return "destructive";
     default:

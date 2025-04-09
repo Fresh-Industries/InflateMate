@@ -21,10 +21,11 @@ import {
   Search,
   AlertTriangle,
   CheckCircle2,
-  History,
   LayoutGrid,
   List,
   Plus,
+  Package,
+  DollarSign
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { InventoryList } from "@/app/dashboard/[businessId]/inventory/_components/InventoryList";
@@ -128,15 +129,13 @@ export default function InventoryPage() {
     });
   }, [inventoryItems, statusFilter, typeFilter, searchQuery]);
 
+  const totalUnits = inventoryItems.length;
   const availableCount = inventoryItems.filter((item) => item.status === "AVAILABLE").length;
   const maintenanceCount = inventoryItems.filter((item) => item.status === "MAINTENANCE").length;
-  const totalBookings = inventoryItems.reduce(
-    (acc, item) => acc + (item.bookingCount || 0),
-    0
-  );
+  const totalValue = inventoryItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
-  // Returns a variant string for the Badge component based on status
-  const getStatusBadgeVariant = (status: string) => {
+  // Define badge variants based on status
+  const getStatusBadgeVariant = (status: InventoryItem['status']): 'default' | 'destructive' | 'secondary' => {
     switch (status) {
       case "AVAILABLE":
         return "default";
@@ -152,214 +151,255 @@ export default function InventoryPage() {
   // Returns a display name for inventory type
   const getInventoryTypeDisplay = (type: string) => {
     switch (type) {
-      case "BOUNCE_HOUSE":
-        return "Bounce House";
-      case "INFLATABLE":
-        return "Inflatable";
-      case "GAME":
-        return "Game";
-      case "OTHER":
-        return "Other";
-      default:
-        return type;
+      case "BOUNCE_HOUSE": return "Bounce House";
+      case "INFLATABLE": return "Inflatable";
+      case "GAME": return "Game";
+      case "OTHER": return "Other";
+      default: return type;
     }
   };
 
+  // Loading State Component
+  const LoadingSkeleton = () => (
+    <div className="text-center py-16">
+      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+      <p className="text-muted-foreground">Loading inventory...</p>
+    </div>
+  );
+
+  // Error State Component
+  const ErrorDisplay = ({ message }: { message: string }) => (
+    <Card className="bg-destructive/10 border-destructive/30 text-destructive text-center py-8 px-4 rounded-xl shadow-sm">
+      <AlertTriangle className="h-10 w-10 mx-auto mb-3 opacity-80" />
+      <p className="font-medium">Failed to load inventory</p>
+      <p className="text-sm opacity-90">{message}</p>
+    </Card>
+  );
+
+   // Empty State Component
+  const EmptyState = () => (
+    <Card className="text-center py-16 px-4 rounded-xl border-2 border-dashed border-muted-foreground/30 bg-muted/10">
+       <Package className="h-12 w-12 mx-auto mb-4 text-muted-foreground opacity-50" />
+       <h3 className="text-xl font-semibold mb-2">No Inventory Found</h3>
+       <p className="text-muted-foreground mb-6 max-w-md mx-auto">
+         It looks like there are no inventory items matching your current filters, or you haven&apos;t added any yet.
+       </p>
+       <Button onClick={() => router.push(`/dashboard/${businessId}/inventory/create`)} className="rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105">
+         <Plus className="mr-2 h-4 w-4" />
+         Add Your First Item
+       </Button>
+    </Card>
+  );
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 p-4 md:p-6 lg:p-8">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Inventory</h1>
-          <p className="text-muted-foreground">
-            Manage your inventory items and maintenance schedules
+          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Inventory
+          </h1>
+          <p className="text-muted-foreground mt-1">
+            Manage your inventory items and view their status.
           </p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
+            <Button className="rounded-full h-11 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 group">
+              <Plus className="mr-2 h-5 w-5" />
               Add Item
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=BOUNCE_HOUSE`)}>
+          <DropdownMenuContent align="end" className="rounded-lg shadow-lg border border-blue-200/30 mt-2 w-48">
+            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=BOUNCE_HOUSE`)}>
               Bounce House
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=INFLATABLE`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=INFLATABLE`)}>
               Inflatable
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=GAME`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=GAME`)}>
               Game
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=OTHER`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=OTHER`)}>
               Other
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* Stats Overview */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Available Units</CardTitle>
-            <CheckCircle2 className="h-4 w-4 text-green-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{availableCount}</div>
-            <p className="text-xs text-muted-foreground">Ready for booking</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">In Maintenance</CardTitle>
-            <AlertTriangle className="h-4 w-4 text-yellow-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{maintenanceCount}</div>
-            <p className="text-xs text-muted-foreground">Under repair or inspection</p>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Total Bookings</CardTitle>
-            <History className="h-4 w-4 text-blue-500" />
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{totalBookings}</div>
-            <p className="text-xs text-muted-foreground">All time</p>
-          </CardContent>
-        </Card>
+      {/* Stats Overview - Add subtle border and refined shadow/hover */}
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+        {[
+          { title: "Total Units", value: totalUnits, icon: Package, color: "blue", description: "All items in inventory" },
+          { title: "Available Now", value: availableCount, icon: CheckCircle2, color: "green", description: "Ready for booking" },
+          { title: "In Maintenance", value: maintenanceCount, icon: AlertTriangle, color: "yellow", description: "Under repair/inspection" },
+          { title: "Estimated Value", value: formatCurrency(totalValue), icon: DollarSign, color: "purple", description: "Total inventory worth" }
+        ].map((stat, index) => (
+          <Card key={index} className="rounded-xl border border-blue-200/30 bg-card text-card-foreground shadow-sm hover:shadow-lg transition-shadow duration-300 group p-5">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 p-0">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {stat.title}
+              </CardTitle>
+              <stat.icon className={`h-4 w-4 text-${stat.color}-500`} />
+            </CardHeader>
+            <CardContent className="p-0 mt-1">
+              <div className="text-2xl font-bold">{stat.value}</div>
+              <p className="text-xs text-muted-foreground">{stat.description}</p>
+            </CardContent>
+          </Card>
+        ))}
       </div>
 
-      {/* Filters */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Inventory List</CardTitle>
-          <CardDescription>View and manage your inventory items</CardDescription>
+      {/* Filters and Inventory List/Grid - Add border, consistent shadow */}
+      <Card className="rounded-xl shadow-sm overflow-hidden border border-blue-200/30">
+        <CardHeader className="border-b border-blue-200/30 bg-muted/30 p-4 md:p-5">
+             <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                <div>
+                    <CardTitle className="text-xl font-semibold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Your Inventory</CardTitle>
+                    <CardDescription className="mt-1 text-muted-foreground">Search, filter, and manage your items.</CardDescription>
+                </div>
+                <div className="flex items-center gap-1 border bg-background rounded-full p-1 shadow-inner">
+                <Button
+                    variant={viewMode === "grid" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="rounded-full w-9 h-9 transition-colors duration-200"
+                    onClick={() => setViewMode("grid")}
+                    aria-label="Grid view"
+                >
+                    <LayoutGrid className="h-5 w-5" />
+                </Button>
+                <Button
+                    variant={viewMode === "list" ? "secondary" : "ghost"}
+                    size="icon"
+                    className="rounded-full w-9 h-9 transition-colors duration-200"
+                    onClick={() => setViewMode("list")}
+                    aria-label="List view"
+                >
+                    <List className="h-5 w-5" />
+                </Button>
+                </div>
+            </div>
+             <div className="flex flex-col md:flex-row items-center gap-3 mt-4">
+                <div className="relative flex-grow w-full md:w-auto md:min-w-[250px]">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                    placeholder="Search by name..."
+                    className="pl-10 h-10 rounded-md shadow-sm border border-blue-200/50 focus:border-primary focus:ring-1 focus:ring-primary transition-colors w-full"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                />
+                </div>
+                <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-full md:w-[160px] h-10 rounded-md shadow-sm border border-blue-200/50 focus:ring-1 focus:ring-primary focus:border-primary transition-colors">
+                    <SelectValue placeholder="Status" />
+                </SelectTrigger>
+                <SelectContent className="rounded-lg shadow-lg border border-blue-200/30">
+                    <SelectItem value="all">All Status</SelectItem>
+                    <SelectItem value="AVAILABLE">Available</SelectItem>
+                    <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                    <SelectItem value="RETIRED">Retired</SelectItem>
+                </SelectContent>
+                </Select>
+                <Select value={typeFilter} onValueChange={setTypeFilter}>
+                <SelectTrigger className="w-full md:w-[160px] h-10 rounded-md shadow-sm border border-blue-200/50 focus:ring-1 focus:ring-primary focus:border-primary transition-colors">
+                    <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent className="rounded-lg shadow-lg border border-blue-200/30">
+                    <SelectItem value="all">All Types</SelectItem>
+                    <SelectItem value="BOUNCE_HOUSE">Bounce House</SelectItem>
+                    <SelectItem value="INFLATABLE">Inflatable</SelectItem>
+                    <SelectItem value="GAME">Game</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                </SelectContent>
+                </Select>
+            </div>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4 mb-6 flex-wrap">
-            <div className="relative flex-1 min-w-[200px]">
-              <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-              <Input
-                placeholder="Search inventory..."
-                className="pl-8"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Status</SelectItem>
-                <SelectItem value="AVAILABLE">Available</SelectItem>
-                <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
-                <SelectItem value="RETIRED">Retired</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={typeFilter} onValueChange={setTypeFilter}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Types</SelectItem>
-                <SelectItem value="BOUNCE_HOUSE">Bounce House</SelectItem>
-                <SelectItem value="INFLATABLE">Inflatable</SelectItem>
-                <SelectItem value="GAME">Game</SelectItem>
-                <SelectItem value="OTHER">Other</SelectItem>
-              </SelectContent>
-            </Select>
-            <div className="flex gap-2 border rounded-md p-1">
-              <Button
-                variant={viewMode === "grid" ? "secondary" : "ghost"}
-                size="icon"
-                onClick={() => setViewMode("grid")}
-              >
-                <LayoutGrid className="h-4 w-4" />
-              </Button>
-              <Button
-                variant={viewMode === "list" ? "secondary" : "ghost"}
-                size="icon"
-                onClick={() => setViewMode("list")}
-              >
-                <List className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-
-          {/* Error Display */}
-          {error && (
-            <div className="text-center text-destructive py-4">
-              {error}
-            </div>
-          )}
-
-          {/* Content */}
-          {isLoading ? (
-            <div className="text-center py-8">Loading...</div>
-          ) : filteredInventory.length === 0 ? (
-            <div className="text-center py-8">No inventory items found</div>
-          ) : viewMode === "grid" ? (
-            <InventoryList
-              inventoryItems={filteredInventory}
-              businessId={businessId}
-            />
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Price</TableHead>
-                    <TableHead>Capacity</TableHead>
-                    <TableHead>Dimensions</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInventory.map((item) => (
-                    <TableRow key={item.id}>
-                      <TableCell className="font-medium">
-                        {item.name}
-                      </TableCell>
-                      <TableCell>
-                        {getInventoryTypeDisplay(item.type)}
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(item.status)}>
-                          {item.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>{formatCurrency(item.price)}</TableCell>
-                      <TableCell>{item.capacity} people</TableCell>
-                      <TableCell>{item.dimensions}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(
-                              `/dashboard/${businessId}/inventory/${item.id}`
-                            )
-                          }
-                        >
-                          Edit Details
-                        </Button>
-                      </TableCell>
+        <CardContent className="p-0">
+            {isLoading ? (
+                <LoadingSkeleton />
+            ) : error ? (
+                <div className="p-6">
+                    <ErrorDisplay message={error} />
+                </div>
+            ) : filteredInventory.length === 0 ? (
+                <div className="p-6">
+                    <EmptyState />
+                </div>
+            ) : viewMode === "grid" ? (
+                <div className="p-4 md:p-6">
+                    <InventoryList
+                    inventoryItems={filteredInventory}
+                    businessId={businessId}
+                    />
+                </div>
+            ) : (
+                 /* Restyled Table View - ensure consistent padding/borders */
+                <div className="overflow-x-auto">
+                <Table className="min-w-full">
+                    <TableHeader className="bg-muted/30 border-b border-blue-200/30">
+                    <TableRow>
+                        <TableHead className="py-3 px-4 md:px-5">Name</TableHead>
+                        <TableHead className="py-3 px-4 md:px-5">Type</TableHead>
+                        <TableHead className="py-3 px-4 md:px-5">Status</TableHead>
+                        <TableHead className="py-3 px-4 md:px-5">Price</TableHead>
+                        <TableHead className="py-3 px-4 md:px-5">Capacity</TableHead>
+                        <TableHead className="py-3 px-4 md:px-5 hidden md:table-cell">Dimensions</TableHead>
+                        <TableHead className="py-3 px-4 md:px-5 hidden lg:table-cell">Quantity</TableHead>
+                        <TableHead className="py-3 px-4 md:px-5 text-right">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+                    </TableHeader>
+                    <TableBody>
+                    {filteredInventory.map((item) => (
+                        <TableRow
+                            key={item.id}
+                            className="hover:bg-muted/20 transition-colors cursor-pointer border-b border-blue-200/20 last:border-b-0"
+                            onClick={() => router.push(`/dashboard/${businessId}/inventory/${item.id}`)}
+                        >
+                        <TableCell className="font-medium py-3 px-4 md:px-5">
+                            <div className="flex items-center gap-3">
+                                {item.primaryImage ? (
+                                    <img src={item.primaryImage} alt={item.name} className="h-8 w-8 rounded-sm object-cover" />
+                                ) : item.images && item.images.length > 0 ? (
+                                    <img src={item.images[0]} alt={item.name} className="h-8 w-8 rounded-sm object-cover" />
+                                ) : (
+                                    <div className="h-8 w-8 rounded-sm bg-muted flex items-center justify-center">
+                                        <Package className="h-4 w-4 text-muted-foreground" />
+                                    </div>
+                                )}
+                                <span>{item.name}</span>
+                            </div>
+                        </TableCell>
+                        <TableCell className="py-3 px-4 md:px-5 text-muted-foreground">
+                            {getInventoryTypeDisplay(item.type)}
+                        </TableCell>
+                        <TableCell className="py-3 px-4 md:px-5">
+                            <Badge variant={getStatusBadgeVariant(item.status)} className="capitalize text-xs px-2 py-0.5">
+                                {item.status.toLowerCase()}
+                            </Badge>
+                        </TableCell>
+                        <TableCell className="py-3 px-4 md:px-5 text-muted-foreground">{formatCurrency(item.price)}</TableCell>
+                        <TableCell className="py-3 px-4 md:px-5 text-muted-foreground">{item.capacity} ppl</TableCell>
+                        <TableCell className="py-3 px-4 md:px-5 text-muted-foreground hidden md:table-cell">{item.dimensions}</TableCell>
+                        <TableCell className="py-3 px-4 md:px-5 text-muted-foreground hidden lg:table-cell">{item.quantity}</TableCell>
+                        <TableCell className="py-3 px-4 md:px-5 text-right">
+                            <Button
+                            variant="outline"
+                            size="sm"
+                            className="rounded-md border-blue-300/50 hover:bg-muted/50 focus:ring-1 focus:ring-primary"
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/dashboard/${businessId}/inventory/${item.id}`);
+                            }}
+                            >
+                             Edit
+                            </Button>
+                        </TableCell>
+                        </TableRow>
+                    ))}
+                    </TableBody>
+                </Table>
+                </div>
+            )}
         </CardContent>
       </Card>
     </div>

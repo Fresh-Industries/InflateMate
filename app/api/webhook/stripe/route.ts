@@ -124,6 +124,12 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             lastBooking: new Date(),
             bookingCount: { increment: 1 },
             totalSpent: { increment: paymentIntent.amount / 100 },
+            address: metadata.eventAddress || '',
+            city: metadata.eventCity || '',
+            state: metadata.eventState || '',
+            zipCode: metadata.eventZipCode || '',
+            status: 'Active',
+
           },
         });
         console.log("Customer updated successfully:", customer.id);

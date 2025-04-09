@@ -92,10 +92,6 @@ export function CustomerList({
                       </div>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <div className="flex items-center gap-1">
-                          <Mail className="h-3 w-3" />
-                          <span className="truncate">{customer.email}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
                           <Phone className="h-3 w-3" />
                           <span>{customer.phone}</span>
                         </div>
