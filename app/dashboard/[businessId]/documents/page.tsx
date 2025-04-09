@@ -84,6 +84,17 @@ export default function DocumentsPage() {
   };
 
   return (
+    <div className='flex flex-col gap-4'>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Documents
+          </h1>
+          <p className="text-base text-muted-foreground mt-1">
+            Manage liability waivers and rental agreements for your bounce house bookings
+          </p>
+        </div>
+      </div>
     <Card>
       <CardHeader>
         <CardTitle>Waiver Documents</CardTitle>
@@ -144,5 +155,6 @@ export default function DocumentsPage() {
         )}
       </CardContent>
     </Card>
+    </div>
   );
 }

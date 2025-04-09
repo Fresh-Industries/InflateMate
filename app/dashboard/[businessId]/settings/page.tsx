@@ -52,13 +52,10 @@ async function getBusinessData(businessId: string): Promise<BusinessSettings | n
 
 export default async function Settings({ 
   params,
-  searchParams 
 }: { 
   params: Promise<{ businessId: string }>, 
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }) {
   const resolvedParams = await params;
-  const resolvedSearchParams = await searchParams;
   
   const business = await getBusinessData(resolvedParams.businessId);
   
@@ -66,47 +63,23 @@ export default async function Settings({
     redirect("/dashboard");
   }
   
-  // Extract stripe status from query params
-  const stripeStatus = resolvedSearchParams.stripe as string | undefined;
-  
   return (
     <div className="container mx-auto py-8">
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="text-muted-foreground">Manage your business settings and integrations</p>
-        
-        {/* Display Stripe connection status notifications */}
-        {stripeStatus === 'success' && (
-          <div className="mt-4 p-4 rounded-md bg-green-50 border border-green-200 text-green-800">
-            Stripe account connected successfully!
-          </div>
-        )}
-        {stripeStatus === 'disconnected' && (
-          <div className="mt-4 p-4 rounded-md bg-amber-50 border border-amber-200 text-amber-800">
-            Stripe account disconnected successfully.
-          </div>
-        )}
-        {stripeStatus === 'error' && (
-          <div className="mt-4 p-4 rounded-md bg-red-50 border border-red-200 text-red-800">
-            There was an error with your Stripe account. Please try again.
-          </div>
-        )}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Settings</h1>
+          <p className="text-base text-muted-foreground mt-1">Manage your business settings and integrations</p>
+        </div>
+      </div>
+      <div className="mt-8">
+        <BusinessSettingsForm business={business} />
       </div>
       
-      <Tabs defaultValue="business" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="business">Business Settings</TabsTrigger>
-          <TabsTrigger value="stripe">Stripe Integration</TabsTrigger>
-        </TabsList>
+      
         
-        <TabsContent value="business">
-          <BusinessSettingsForm business={business} />
-        </TabsContent>
         
-        <TabsContent value="stripe">
-          <StripeSettingsForm business={business} />
-        </TabsContent>
-      </Tabs>
+        
+      
     </div>
   )
 }

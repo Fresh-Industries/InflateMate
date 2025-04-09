@@ -192,14 +192,14 @@ export default function InventoryPage() {
   );
 
   return (
-    <div className="space-y-8 p-4 md:p-6 lg:p-8">
+    <div className="space-y-8 p-6 bg-[#fafbff]">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Inventory
           </h1>
-          <p className="text-muted-foreground mt-1">
+          <p className="text-base text-muted-foreground mt-1">
             Manage your inventory items and view their status.
           </p>
         </div>

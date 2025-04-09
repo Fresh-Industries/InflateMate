@@ -1,6 +1,7 @@
 'use client'
 import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
 import {
   Calendar,
@@ -151,20 +152,33 @@ export default function DashboardLayout({
   ];
 
   const SidebarContent = ({ className }: { className?: string }) => (
-    <div className={cn("flex h-full flex-col bg-[#f5f5ff]", className)}>
+    <div className={cn("flex h-full flex-col bg-white", className)}>
       {/* Logo */}
       {
         !isMobileOpen && (
           <div className="p-6">
-            <Link href={`/`} className="flex items-center gap-2">
-              <span className="font-bold text-xl text-[#5056e0]">Inflate<span className="text-[#7a44f0]">mate</span></span>
+            <Link href="/" className="flex items-center gap-2 group">
+              <div className="relative flex items-center">
+                <div className="absolute -inset-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full opacity-80 group-hover:opacity-100 blur-md transition-all duration-300"></div>
+                <div className="relative flex items-center">
+                  <Image
+                    src="/images/inflatemate-logo.PNG"
+                    alt="InflateMate Logo"
+                    width={35}
+                    height={35}
+                  />
+                  <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-1">
+                    InflateMate
+                  </span>
+                </div>
+              </div>
             </Link>
           </div>
         )
       }
 
       {/* Navigation */}
-      <nav className="flex-1 space-y-2 p-4">
+      <nav className="flex-1 space-y-1.5 p-4">
         {sidebarItems.map((item) => {
           const isActive = pathname === item.href;
           return (
@@ -172,14 +186,17 @@ export default function DashboardLayout({
               key={item.href}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200",
-                isActive 
-                  ? "bg-[#5056e0] text-white shadow-md" 
-                  : "text-gray-700 hover:bg-[#eeeeff] hover:text-[#5056e0]"
+                "flex items-center gap-3 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-200 group",
+                isActive
+                  ? "bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md"
+                  : "text-gray-600 hover:bg-blue-50/80 hover:text-blue-600"
               )}
               onClick={() => setIsMobileOpen(false)}
             >
-              <item.icon className="h-5 w-5" />
+              <item.icon className={cn(
+                "h-5 w-5 transition-colors",
+                isActive ? "text-white" : "text-gray-500 group-hover:text-blue-600"
+               )} />
               {item.title}
             </Link>
           );
@@ -189,59 +206,72 @@ export default function DashboardLayout({
   );
 
   return (
-    <div className="min-h-screen flex bg-[#f9faff] overflow-hidden">
+    <div className="min-h-screen flex bg-[#fafbff]  overflow-hidden">
       {/* Mobile Sidebar */}
       <Sheet open={isMobileOpen} onOpenChange={setIsMobileOpen}>
-        <SheetContent side="left" className="p-0 w-[280px] bg-[#f5f5ff]">
-          <SheetHeader className="px-6 py-4">
+        <SheetContent side="left" className="p-0 w-[280px] bg-white">
+          <SheetHeader className="px-6 py-4 border-b border-gray-100">
             <SheetTitle>
-              <Link href={`/`} className="flex items-center gap-2">
-                <span className="font-bold text-xl text-[#5056e0]">Inflate<span className="text-[#7a44f0]">mate</span></span>
+              <Link href="/" className="flex items-center gap-2 group">
+                <div className="relative flex items-center">
+                  <div className="absolute -inset-2 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full opacity-80 group-hover:opacity-100 blur-md transition-all duration-300"></div>
+                  <div className="relative flex items-center">
+                    <Image
+                      src="/images/inflatemate-logo.PNG"
+                      alt="InflateMate Logo"
+                      width={35}
+                      height={35}
+                    />
+                    <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent ml-1">
+                      InflateMate
+                    </span>
+                  </div>
+                </div>
               </Link>
             </SheetTitle>
           </SheetHeader>
-          <div className="flex flex-col h-[calc(100vh-5rem)]">
+          <div className="flex flex-col h-[calc(100vh-4.5rem)]">
             <SidebarContent />
           </div>
         </SheetContent>
       </Sheet>
 
       {/* Desktop Sidebar */}
-      <aside className="hidden lg:block w-64 fixed left-0 top-0 h-screen z-30 bg-[#f5f5ff] shadow-sm">
+      <aside className="hidden lg:block w-64 fixed left-0 top-0 h-screen z-30 bg-white shadow-sm border-r border-gray-100">
         <SidebarContent />
       </aside>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:ml-64 relative">
-        {/* Top Bar with matching color scheme */}
-        <header className="bg-[#f5f5ff] border-b border-[#e5e5f0] fixed top-0 right-0 left-0 lg:left-64 z-20 h-16">
-          <div className="flex h-16 items-center gap-4 px-6">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="lg:hidden text-gray-700 hover:bg-[#eeeeff] hover:text-[#5056e0] rounded-full"
+        {/* Top Bar refinement */}
+        <header className="bg-white border-b border-gray-200/75 fixed top-0 right-0 left-0 lg:left-64 z-20 h-[68px] shadow-sm">
+          <div className="flex h-full items-center gap-4 px-8">
+            <Button
+              variant="ghost"
+              size="icon"
+              className="lg:hidden text-gray-700 hover:bg-blue-50/80 hover:text-blue-600 rounded-full"
               onClick={() => setIsMobileOpen(true)}
             >
               <Menu className="h-5 w-5" />
             </Button>
-            
-            <div className="flex flex-col">
+
+            <div className="flex flex-col justify-center">
               {isLoading ? (
                 <>
-                  <Skeleton className="h-6 w-48 mb-1" />
+                  <Skeleton className="h-5 w-48 mb-1.5" />
                   <Skeleton className="h-4 w-32" />
                 </>
               ) : (
                 <>
                   {/* Business name as a link to overview page */}
-                  <Link 
+                  <Link
                     href={`/dashboard/${businessId}`}
-                    className="text-xl font-semibold text-gray-800 hover:text-[#5056e0] transition-colors"
+                    className="text-lg font-semibold text-gray-800 hover:text-blue-600 transition-colors leading-tight"
                   >
                     {currentBusiness?.name || 'Dashboard'}
                   </Link>
                   {currentBusiness && (
-                    <p className="text-sm text-gray-500">
+                    <p className="text-sm text-gray-500 leading-tight">
                       {currentBusiness.city}, {currentBusiness.state}
                     </p>
                   )}
@@ -249,32 +279,30 @@ export default function DashboardLayout({
               )}
             </div>
             <div className="flex-1" />
-            
+
             {/* User controls in top bar */}
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-5">
               {/* Notification button */}
-              <button 
-                className="relative p-2 rounded-full hover:bg-[#eeeeff] transition-all duration-200"
+              <button
+                className="relative p-2 rounded-full hover:bg-blue-100/50 transition-colors duration-200 group"
                 aria-label="Notifications"
               >
-                <Bell className="h-5 w-5 text-gray-700" />
-                <span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-[#5056e0] text-[10px] font-medium text-white">
+                <Bell className="h-5 w-5 text-gray-500 group-hover:text-blue-600 transition-colors" />
+                <span className="absolute -right-0.5 -top-0.5 flex h-4 w-4 items-center justify-center rounded-full bg-blue-600 text-[9px] font-medium text-white ring-1 ring-white">
                   3
                 </span>
               </button>
-              
-      
-              
+
               {/* User Button */}
-              <div className="hover:bg-[#eeeeff] rounded-full transition-all duration-200 p-1">
-                <UserButton />
+              <div className="rounded-full transition-colors duration-200 hover:bg-blue-100/50 p-0.5">
+                <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-8 h-8" } }} />
               </div>
             </div>
           </div>
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 overflow-auto p-5 md:p-8 mt-16">
+        <main className="flex-1 overflow-auto p-5 md:p-8 mt-[68px]">
           <div className="max-w-7xl mx-auto">
             {children}
           </div>

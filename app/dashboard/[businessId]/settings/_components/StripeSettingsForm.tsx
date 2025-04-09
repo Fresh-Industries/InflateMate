@@ -7,6 +7,7 @@ import {
   ConnectComponentsProvider,
   ConnectAccountManagement,
 } from "@stripe/react-connect-js";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function PaymentsPage() {
   const params = useParams();
@@ -70,7 +71,13 @@ export default function PaymentsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Stripe Settings</h1>
+    <Card>
+      <CardHeader>
+        <CardTitle>Stripe Settings</CardTitle>
+        <CardDescription>Manage your Stripe account settings</CardDescription>
+      </CardHeader>
+      
+   <CardContent>
 
       {isLoading && (
         <div className="flex items-center justify-center py-10">
@@ -114,6 +121,9 @@ export default function PaymentsPage() {
            
           </div>
         )}
+
+        </CardContent>
+    </Card>
     </div>
   );
 }

@@ -12,10 +12,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info } from "lucide-react";
+import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info, CreditCard } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { useUploadThing } from "@/lib/uploadthing";
+import StripeSettingsForm from "./StripeSettingsForm";
 
 interface BusinessSettings {
   id: string;
@@ -246,7 +247,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       <div className="space-y-6">
         <Tabs defaultValue="general" className="w-full">
           <div className="flex justify-between items-center mb-6">
-            <TabsList className="grid grid-cols-4 w-[500px]">
+            <TabsList className="grid grid-cols-5 w-[500px]">
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
                 <span>General</span>
@@ -263,12 +264,17 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                 <Settings className="h-4 w-4" />
                 <span>Booking</span>
               </TabsTrigger>
+              <TabsTrigger value="stripe" className="flex items-center gap-2">
+                <CreditCard className="h-4 w-4" />
+                <span>Stripe</span>
+              </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-4">
               <Button 
                 type="submit" 
                 className="gap-2"
+                variant="primary-gradient"
                 disabled={isLoading || isUploading}
               >
                 {isLoading ? (
@@ -712,6 +718,9 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
               </CardContent>
             </Card>
           </TabsContent>
+          <TabsContent value="stripe">
+          <StripeSettingsForm business={business} />
+        </TabsContent>
         </Tabs>
       </div>
     </form>

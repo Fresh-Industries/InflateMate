@@ -12,7 +12,6 @@ import {
 import { NewBookingForm } from "./new-booking-form";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
-import { cn } from "@/lib/utils";
 
 interface BookingsHeaderProps {
   businessId: string;
@@ -60,18 +59,18 @@ export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
 
   return (
     <div className="space-y-6 p-6 bg-[#fafbff]">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
         <div>
           <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Bookings
           </h1>
-          <p className="text-gray-500 mt-2 text-lg">
+          <p className="text-base text-muted-foreground mt-1">
             Manage your bounce house bookings and reservations
           </p>
         </div>
         <Sheet>
           <SheetTrigger asChild>
-            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 gap-2 rounded-xl h-12">
+            <Button size="lg" className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200 gap-2 rounded-xl h-12 w-full sm:w-auto">
               <CalendarPlus className="h-5 w-5" /> 
               <span>New Booking</span>
             </Button>
@@ -98,7 +97,7 @@ export async function BookingsHeader({ businessId }: BookingsHeaderProps) {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all duration-200">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Today's Bookings</CardTitle>
+            <CardTitle className="text-sm font-medium text-gray-600">Today&apos;s Bookings</CardTitle>
             <CardDescription className="text-gray-400">Scheduled for today</CardDescription>
           </CardHeader>
           <CardContent>

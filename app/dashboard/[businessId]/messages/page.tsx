@@ -1,75 +1,89 @@
 "use client";
 
-import { useState } from "react";
-import { useParams } from "next/navigation";
-import { Loader2, MessagesSquare, ChevronLeft } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
+import { useState } from 'react';
+import { useParams } from 'next/navigation';
+import { Loader2, MessagesSquare, ChevronLeft } from 'lucide-react';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Button } from '@/components/ui/button';
 import { formatDistanceToNow } from 'date-fns';
-import { cn } from "@/lib/utils";
-import { CustomerList } from "./_components/CustomerList";
+import { cn } from '@/lib/utils';
+import { CustomerList } from './_components/CustomerList';
 import { MessageComposer } from "./_components/MessageComposer";
 import { useCustomers, useMessages, Customer, Message } from "./_components/useCustomers";
+import { MessageSidebar } from "./_components/message-sidebar";
+import { ChatArea } from "./_components/chat-area";
 
 export default function MessagesPage() {
   const params = useParams();
-  const businessId = params.businessId as string;
-  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
-
+  const businessId = params?.businessId as string;
   const { customers, loading: customersLoading, error: customersError } = useCustomers(businessId);
-  const { messages, loading: messagesLoading, error: messagesError }: { messages: Message[]; loading: boolean; error: string | null } = useMessages(
-    businessId,
-    selectedCustomer?.phone || null
-  );
+  const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
+  const {
+    messages, 
+    loading: messagesLoading, 
+    error: messagesError
+  } = useMessages(businessId, selectedCustomer?.id || null);
 
   const handleSelectCustomer = (customer: Customer) => {
     setSelectedCustomer(customer);
   };
 
-  if (customersError) {
-    return (
-      <div className="p-4 md:p-6 lg:p-8">
-        <Alert variant="destructive">
-          <AlertTitle>Error Loading Customers</AlertTitle>
-          <AlertDescription>{customersError}</AlertDescription>
-        </Alert>
-      </div>
-    );
-  }
-
-  const contentHeight = "h-[calc(100vh-theme(spacing.16))]";
+  // Dynamic height calculation (adjust as needed)
+  const contentHeight = 'h-[calc(100vh-180px)]'; // Example adjustment
 
   return (
-    <div className="flex h-screen flex-col overflow-hidden">
-      <div className="flex items-center flex-shrink-0 border-b p-3 md:p-4">
-        <h1 className="text-xl font-semibold tracking-tight ml-2">
-          Messages
-        </h1>
+    // Outer container for consistent page layout
+    <div className="space-y-8 p-6 bg-[#fafbff]">
+      {/* Header Section - Styled like other pages */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Messages
+          </h1>
+          <p className="text-base text-muted-foreground mt-1">
+            View and respond to customer messages.
+          </p>
+        </div>
+        {/* TODO: Add Action Button (e.g., New Message) here if needed */}
       </div>
 
-      <div className={`flex flex-grow overflow-hidden ${contentHeight}`}>
+      {/* Main Messages Content Area */}
+      <div className={cn("flex flex-grow overflow-hidden border rounded-lg shadow-sm bg-white", contentHeight)}>
+        {/* Customer List Sidebar */}
         <div
           className={cn(
             "flex flex-col w-full flex-shrink-0 bg-background md:w-72 md:border-r",
             selectedCustomer ? "hidden md:flex" : "flex"
           )}
         >
-          <CustomerList
-            customers={customers}
-            selectedCustomer={selectedCustomer}
-            onSelectCustomer={handleSelectCustomer}
-            isLoading={customersLoading}
-          />
+          {customersLoading ? (
+            <div className="flex items-center justify-center h-full">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : customersError ? (
+             <Alert variant="destructive" className="m-4">
+               <AlertTitle>Error Loading Customers</AlertTitle>
+               <AlertDescription>{customersError}</AlertDescription>
+             </Alert>
+          ) : (
+            <CustomerList
+              customers={customers}
+              selectedCustomer={selectedCustomer}
+              onSelectCustomer={handleSelectCustomer}
+            />
+          )}
         </div>
 
+        {/* Chat Area */}
         <div
           className={cn(
-            "flex-grow flex-col bg-background relative md:flex",
+            "flex-grow flex flex-col bg-background relative md:flex",
             selectedCustomer ? "flex" : "hidden md:flex"
           )}
         >
           {selectedCustomer ? (
             <>
+              {/* Chat Header */}
               <div className="flex items-center p-3 border-b flex-shrink-0 sticky top-0 z-10 bg-background/95 backdrop-blur-sm">
                 <Button
                   variant="ghost"
@@ -88,13 +102,14 @@ export default function MessagesPage() {
                 <div className="w-8 md:hidden"></div>
               </div>
 
+              {/* Message List */}
               <div className="flex-grow overflow-y-auto p-4 space-y-3 md:space-y-4">
-                {!messagesLoading && !messagesError && messages.map((message) => (
+                {!messagesLoading && !messagesError && messages.map((message: Message) => (
                   <div
                     key={message.id}
                     className={cn(
                       "flex flex-col max-w-[70%] md:max-w-[65%]",
-                      message.senderType === 'BUSINESS'
+                      message.senderType === 'BUSINESS' 
                         ? "ml-auto items-end"
                         : "mr-auto items-start"
                     )}
@@ -115,14 +130,23 @@ export default function MessagesPage() {
                   </div>
                 ))}
                 {messagesError && (
-                  <Alert variant="destructive" className="m-4">
-                    <AlertTitle>Error Loading Messages</AlertTitle>
-                    <AlertDescription>{messagesError}</AlertDescription>
-                  </Alert>
-                )}
-                <div className="h-2 flex-shrink-0"></div>
+                   <Alert variant="destructive" className="m-4">
+                     <AlertTitle>Error Loading Messages</AlertTitle>
+                     <AlertDescription>{messagesError}</AlertDescription>
+                   </Alert>
+                 )}
+                 <div className="h-2 flex-shrink-0"></div>
               </div>
+              
+              {/* Loading overlay for messages */}
+              {messagesLoading && (
+                 <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-20">
+                   <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+                   <p className="text-muted-foreground">Loading messages...</p>
+                 </div>
+              )}
 
+              {/* Message Composer */}
               <div className="flex-shrink-0 border-t p-3 md:p-4 bg-muted/50 mt-auto">
                 <MessageComposer customer={selectedCustomer} businessId={businessId} />
               </div>
@@ -133,13 +157,6 @@ export default function MessagesPage() {
               <p className="text-lg font-medium">Select a conversation</p>
               <p className="text-sm">Choose a customer from the list to start messaging.</p>
             </div>
-          )}
-
-          {messagesLoading && selectedCustomer && (
-             <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-20">
-               <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-               <p className="text-muted-foreground">Loading messages...</p>
-             </div>
           )}
         </div>
       </div>

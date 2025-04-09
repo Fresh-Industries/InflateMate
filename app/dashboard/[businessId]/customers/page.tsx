@@ -354,7 +354,7 @@ export default function CustomersPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
         <div>
-          <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
             Customers
           </h1>
           <p className="text-base text-muted-foreground mt-1">
@@ -730,7 +730,7 @@ export default function CustomersPage() {
             <Button variant="secondary" onClick={closeDialog} className="sm:mr-2 w-full sm:w-auto">
               Cancel
             </Button>
-            <Button onClick={handleSubmitDialog} className="w-full sm:w-auto">
+            <Button onClick={handleSubmitDialog} variant="primary-gradient" className="w-full sm:w-auto">
               {dialogMode === "add" ? "Add Customer" : "Save Changes"}
             </Button>
           </DialogFooter>
@@ -881,7 +881,7 @@ export default function CustomersPage() {
                                   <p className="text-xl font-bold">${booking.totalAmount.toFixed(2)}</p>
                                 </div>
                                 <Button
-                                  onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}`)}
+                                  onClick={() => router.push(`/dashboard/${businessId}/bookings?bookingId=${booking.id}`)}
                                   size="sm"
                                   variant="secondary"
                                   className="w-full justify-between"

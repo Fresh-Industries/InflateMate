@@ -44,10 +44,10 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
   };
   
   return (
-    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-4 border-b">
+    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
       <div>
-        <h1 className="text-2xl font-bold tracking-tight">Website Customization</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Website Customization</h1>
+        <p className="text-base text-muted-foreground mt-1">
           Customize your website appearance and content
         </p>
       </div>

@@ -44,7 +44,7 @@ export function CustomerList({
   };
 
   return (
-    <Card className="h-full">
+    <Card className="h-full bg-transparent border-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-lg font-medium">Customers</CardTitle>
         <div className="relative mt-2">

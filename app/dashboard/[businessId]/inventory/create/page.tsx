@@ -385,6 +385,14 @@ export default function CreateInventoryPage() {
                 <Label>Upload Images</Label>
                 <UploadButton
                   endpoint="imageUploader"
+                  appearance={{
+                    button:{
+                      background: 'transparent',
+                      color: '#2563eb',
+                      borderRadius: '9999px',
+                      border: '2px solid #2563eb',
+                    }
+                  }}
                   onClientUploadComplete={(res) => {
                     // Add the uploaded images to existing images
                     const newImages = res.map((file, index) => ({
@@ -454,7 +462,7 @@ export default function CreateInventoryPage() {
           >
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting} variant='primary-gradient'>
             {isSubmitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />

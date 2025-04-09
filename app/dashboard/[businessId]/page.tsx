@@ -339,6 +339,19 @@ export default function DashboardPage() {
   if (isLoading) {
     return (
       <div className="space-y-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Overview</h1>
+          <p className="text-base text-muted-foreground mt-1">
+            Get a quick glance at your business performance and key metrics.
+          </p>
+        </div>
+        {/* Date button as direct child of flex container */}
+        <Button variant="outline" className="bg-white shadow-sm border-gray-200 hover:bg-gray-50 w-full sm:w-auto">
+          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+          {format(new Date(), 'MMM dd, yyyy')}
+        </Button>
+      </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i}>
@@ -378,18 +391,22 @@ export default function DashboardPage() {
 
   return (
     <div className="p-8 bg-[#fafbff] min-h-screen">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl font-semibold text-[#1a1f36]">Dashboard Overview</h1>
-        <div className="flex items-center gap-4">
-          <Button variant="outline" className="bg-white shadow-sm border-none hover:bg-gray-50">
-            <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-            {format(new Date(), 'MMM dd, yyyy')}
-          </Button>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Overview</h1>
+          <p className="text-base text-muted-foreground mt-1">
+            Get a quick glance at your business performance and key metrics.
+          </p>
         </div>
+        {/* Date button as direct child of flex container */}
+        <Button variant="outline" className="bg-white shadow-sm border-gray-200 hover:bg-gray-50 w-full sm:w-auto">
+          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+          {format(new Date(), 'MMM dd, yyyy')}
+        </Button>
       </div>
       
       {/* Stats Overview */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8 mt-8">
         <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-gray-600">Monthly Revenue</CardTitle>

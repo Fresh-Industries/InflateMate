@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, Di
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Separator } from "@/components/ui/separator";
 import { Eye, MapPin, Phone, Mail, Users, Calendar as CalendarIcon, Info, X, Pencil as PencilIcon, CheckCircle, ShieldCheck, Package, Cloud, Clock, List, CalendarDays } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -84,6 +84,7 @@ interface BookingsListProps {
 export default function BookingsList({ businessId, initialData }: BookingsListProps) {
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [bookings, setBookings] = useState<Booking[]>(initialData.bookings);
   const [statusFilter, setStatusFilter] = useState("CONFIRMED");
   const [searchTerm, setSearchTerm] = useState("");
@@ -109,6 +110,18 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   useEffect(() => {
     setBookings(initialData.bookings);
   }, [initialData.bookings]);
+
+  useEffect(() => {
+    const bookingIdFromQuery = searchParams.get('bookingId');
+    if (bookingIdFromQuery && bookings.length > 0) {
+      const bookingToView = bookings.find(b => b.id === bookingIdFromQuery);
+      if (bookingToView) {
+        handleSelectBooking(bookingToView);
+        const currentPath = window.location.pathname;
+        router.replace(currentPath, { scroll: false });
+      }
+    }
+  }, [searchParams, bookings]);
 
   const inventoryNameMap = useMemo(() => {
     const map = new Map<string, string>();

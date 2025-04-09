@@ -122,10 +122,20 @@ export default async function MarketingPage({
   } = result.data || {};
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 p-6 bg-[#fafbff]">    
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Marketing
+          </h1>
+          <p className="text-base text-muted-foreground mt-1">
+            Manage your marketing campaigns and tools
+          </p>
+        </div>
+      </div>
+
       {/* Marketing Overview */}
       <div>
-        <h2 className="text-3xl font-bold tracking-tight mb-6">Marketing Dashboard</h2>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -180,6 +190,7 @@ export default async function MarketingPage({
           </Card>
         </div>
       </div>
+
       
       {/* Marketing Tools */}
       <div>

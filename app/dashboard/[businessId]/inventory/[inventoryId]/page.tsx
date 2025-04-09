@@ -439,6 +439,16 @@ export default function EditInventoryPage() {
                 <Label>Upload New Images</Label>
                 <UploadButton
                   endpoint="imageUploader"
+                  appearance={{
+                    button:{
+                      background: 'transparent',
+                      color: '#2563eb',
+                      borderRadius: '9999px',
+                      border: '2px solid #2563eb',
+                      boxShadow: '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
+                      transition: "all 300ms"
+                    },
+                  }}
                   onClientUploadComplete={(res) => {
                     const newImages = res.map((file, index) => {
                       const isPrimary =
@@ -520,7 +530,7 @@ export default function EditInventoryPage() {
           </Button>
           <Button 
             type="submit" 
-            className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transform transition-transform duration-300"
+            variant='primary-gradient'
             disabled={isSubmitting}
           >
             {isSubmitting ? (

@@ -85,7 +85,16 @@ export default function PaymentsPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <h1 className="text-3xl font-bold">Payments</h1>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+        <div>
+          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+            Payments
+          </h1>
+          <p className="text-base text-muted-foreground mt-1">
+            Manage your payments and payouts
+          </p>
+        </div>
+      </div>
 
       {isLoading && (
         <div className="flex items-center justify-center py-10">
