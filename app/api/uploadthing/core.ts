@@ -35,7 +35,36 @@ export const ourFileRouter = {
       // Return data relevant to the upload
       return { uploadedBy: metadata.userId, url: file.url };
     }),
-    
+  
+    videoUploader: f({
+      video: {
+        /**
+         * For full list of options and defaults, see the File Route API reference
+         * @see https://docs.uploadthing.com/file-routes#route-config
+         */
+        maxFileSize: "16MB",
+        maxFileCount: 1,
+      },
+    })
+      // Set permissions and file types for this FileRoute
+      .middleware(async () => {
+        // This code runs on your server before upload
+        const user = await getCurrentUser();
+  
+        // If you throw, the user will not be able to upload
+        if (!user) throw new Error("Unauthorized");
+  
+        // Return metadata to be stored with the file
+        return { userId: user.id };
+      })
+      .onUploadComplete(async ({ metadata, file }) => {
+        // This code RUNS ON YOUR SERVER after upload
+        console.log("Upload complete for userId:", metadata.userId);
+        console.log("file url:", file.url);
+  
+        // Return data relevant to the upload
+        return { uploadedBy: metadata.userId, url: file.url };
+      }),
   // Business logo uploader with different settings
   logoUploader: f({
     image: {

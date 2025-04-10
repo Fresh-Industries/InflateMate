@@ -10,6 +10,7 @@ import { Trash2, UploadCloud } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
+import AddSectionForm from "./AddSectionForm";
 
 interface HeroSettingsProps {
   hero: {
@@ -91,6 +92,7 @@ export default function LandingSettings({ hero, updateHero }: HeroSettingsProps)
   
   return (
     <div className="space-y-6">
+      
       <Card>
         <CardHeader>
           <CardTitle>Hero Section</CardTitle>

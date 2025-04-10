@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Users, Award, ThumbsUp, Heart } from "lucide-react";
 import { Metadata } from 'next';
+import SectionRenderer from '../_components/SectionRenderer';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,7 @@ async function AboutPage({ params }: PageProps) {
   const { domain } = params;
   const business = await getBusinessByDomain(domain);
   const siteConfig = business.siteConfig || {} as SiteConfig;
+  const aboutSections = siteConfig.about?.dynamicSections || [];
   
   // Colors from site config
   const colors = {
@@ -134,6 +136,12 @@ async function AboutPage({ params }: PageProps) {
           </div>
         </div>
       </section>
+
+      {aboutSections.map((section) => (
+        <section key={section.id} className="dynamic-section">
+          <SectionRenderer section={section} />
+        </section>
+      ))}
       
       {/* Why Choose Us Section */}
       <section className="py-16 bg-gray-50 dark:bg-gray-800">

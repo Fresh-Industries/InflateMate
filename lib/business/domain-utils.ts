@@ -1,17 +1,67 @@
-
 import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 
+// Define types for different section content structures
+export interface TextSectionContent {
+  title?: string;
+  text: string;
+}
+
+export interface ImageTextSectionContent {
+  title?: string;
+  text: string;
+  imageUrl: string;
+  imageKey?: string; // Optional key for deleting from UploadThing
+  imagePosition?: 'left' | 'right';
+}
+
+export interface VideoTextSectionContent {
+  title?: string;
+  text: string;
+  videoUrl: string;
+  videoPosition?: 'left' | 'right';
+}
+
+export interface TextCard {
+  id: string;
+  title: string;
+  description: string;
+  icon?: string; // e.g., Lucide icon name
+}
+
+export interface TextCardsSectionContent {
+  title?: string;
+  cards: TextCard[];
+}
+
+// Define the structure for a dynamic section
+export interface DynamicSection {
+  id: string; // Unique identifier for the section
+  type: 'text' | 'imageText' | 'videoText' | 'textCards';
+  page: 'landing' | 'about'; // Or other page identifiers
+  content: TextSectionContent | ImageTextSectionContent | VideoTextSectionContent | TextCardsSectionContent;
+}
+
+export interface Theme {
+  id: string;
+  name: string;
+}
+
 export interface SiteConfig {
+  themeName?: Theme;
   hero?: {
     title?: string;
     description?: string;
     imageUrl?: string;
   };
+  landing?: {
+    sections?: DynamicSection[];
+  };
   about?: {
     title?: string;
     description?: string;
+    dynamicSections?: DynamicSection[];
   };
   contact?: {
     title?: string;
@@ -27,7 +77,6 @@ export interface SiteConfig {
     accent?: string;
     background?: string;
   };
-  [key: string]: unknown;
 }
 
 export interface BusinessWithSiteConfig {

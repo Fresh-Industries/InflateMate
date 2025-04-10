@@ -1,0 +1,14 @@
+export const modern = {
+  id: "modern",
+  themeName: "modern",
+};
+
+export const playful = {
+  id: "playful",
+  themeName: "playful",
+};
+
+export const bouncy = {
+  id: "bouncy",
+  themeName: "bouncy",
+}; 

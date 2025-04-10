@@ -17,7 +17,6 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ArrowLeft } from "lucide-react";
@@ -76,7 +75,7 @@ export default function LeadsPage({ params }: { params: { businessId: string } }
   }, [params.businessId]);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
         
         <div className="flex items-center justify-between gap-4 border-b border-gray-200 pb-6">

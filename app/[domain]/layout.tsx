@@ -3,6 +3,7 @@ import { getBusinessByDomain } from '@/lib/business/domain-utils';
 import { DomainLayoutClient } from './layout-client';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
+import { SalesFunnel } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,15 +61,14 @@ export default async function DomainLayout({
   console.log('Domain layout rendered with domain:', domain);
   
   try {
-    // Use the domain utils to find the business by either custom domain or subdomain
     const business = await getBusinessByDomain(domain);
-    
-    // Get the site configuration
     const siteConfig = business.siteConfig || {};
-    const colors = siteConfig.colors || {};
+    const colors = {
+       primary: siteConfig.colors?.primary || '#3b82f6', 
+       secondary: siteConfig.colors?.secondary || '#6b7280', 
+    };
     
-    // Fetch active sales funnel if it exists
-    let activeFunnel = null;
+    let activeFunnel: SalesFunnel | null = null;
     try {
       activeFunnel = await prisma.salesFunnel.findFirst({
         where: {
@@ -80,20 +80,24 @@ export default async function DomainLayout({
       console.error("Error fetching active sales funnel:", error);
     }
 
-    // Return just the client component, not wrapped in html/body tags
     return (
       <DomainLayoutClient 
-        business={business as any} 
+        business={business}
         domain={domain} 
         siteConfig={siteConfig} 
         colors={colors}
-        activeFunnel={activeFunnel as any}
+        activeFunnel={activeFunnel || undefined}
       >
         {children}
       </DomainLayoutClient>
     );
   } catch (error) {
-    console.error('Error fetching business by domain:', error);
-    return notFound();
+    if (error instanceof Error && error.message.includes('notFound')) {
+        console.log(`Business not found for domain in layout: ${domain}`);
+        notFound();
+    } else {
+        console.error('Error fetching business in layout:', error);
+        return <html><body>Error loading site layout.</body></html>;
+    }
   }
 } 

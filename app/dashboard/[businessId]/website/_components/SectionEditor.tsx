@@ -1,0 +1,126 @@
+'use client';
+
+import React, { useState, useCallback } from 'react';
+import { BusinessWithSiteConfig, SiteConfig, DynamicSection } from '@/lib/business/domain-utils';
+import { Button } from '@/components/ui/button';
+import AddSectionForm from './AddSectionForm';
+import SectionList from './SectionList';
+import { useToast } from '@/hooks/use-toast';
+import { useRouter } from 'next/navigation';
+import { generateClientDropzoneAccept } from "uploadthing/client";
+import { useUploadThing } from "@/lib/uploadthing"; // Assuming useUploadThing hook exists
+import { deleteUploadThingFile } from '@/lib/actions/uploadthing.actions'; // Function to delete UT files
+import cuid from 'cuid'; // For generating unique IDs
+
+interface SectionEditorProps {
+  business: BusinessWithSiteConfig;
+}
+
+export default function SectionEditor({ business }: SectionEditorProps) {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [siteConfig, setSiteConfig] = useState<SiteConfig>(business.siteConfig || {});
+  const [isAdding, setIsAdding] = useState(false);
+  const [editingSection, setEditingSection] = useState<DynamicSection | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const sections = siteConfig.sections || [];
+
+  // Update Site Config and trigger API call
+  const updateAndSaveSiteConfig = useCallback(async (newConfig: SiteConfig) => {
+    setIsLoading(true);
+    setSiteConfig(newConfig);
+    
+    try {
+      const response = await fetch(`/api/businesses/${business.id}/website`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ siteConfig: newConfig }),
+      });
+
+      if (!response.ok) throw new Error("Failed to save changes");
+
+      toast({ title: "Success", description: "Website sections updated." });
+      router.refresh(); // Refresh server data
+    } catch (error) {
+      console.error("Error saving site config:", error);
+      toast({ title: "Error", description: "Could not save changes.", variant: "destructive" });
+      // Consider reverting state or notifying user
+    } finally {
+      setIsLoading(false);
+    }
+  }, [business.id, router, toast]);
+
+  const handleAddSection = (newSectionData: Omit<DynamicSection, 'id'>) => {
+    const newSection: DynamicSection = {
+      ...newSectionData,
+      id: cuid(), // Generate unique ID
+    };
+    const updatedSections = [...sections, newSection];
+    updateAndSaveSiteConfig({ ...siteConfig, sections: updatedSections });
+    setIsAdding(false); // Close the add form
+  };
+
+  const handleEditSection = (updatedSection: DynamicSection) => {
+    const updatedSections = sections.map(s => 
+      s.id === updatedSection.id ? updatedSection : s
+    );
+    updateAndSaveSiteConfig({ ...siteConfig, sections: updatedSections });
+    setEditingSection(null); // Close the edit form/modal
+  };
+
+  const handleDeleteSection = async (sectionId: string) => {
+    const sectionToDelete = sections.find(s => s.id === sectionId);
+    const updatedSections = sections.filter(s => s.id !== sectionId);
+    
+    // Optimistically update UI
+    setSiteConfig({ ...siteConfig, sections: updatedSections });
+    
+    // If it's an image section with a key, delete the image from UploadThing
+    if (sectionToDelete?.type === 'imageText' && sectionToDelete.content.imageKey) {
+      try {
+        await deleteUploadThingFile(sectionToDelete.content.imageKey);
+        toast({ title: "Image Deleted", description: "Associated image removed from storage." });
+      } catch (error) {
+        console.error("Failed to delete UploadThing file:", error);
+        toast({ title: "Warning", description: "Could not delete associated image from storage.", variant: "destructive" });
+        // Optional: Revert UI update or inform user more strongly
+      }
+    }
+    
+    // Save the updated sections list
+    await updateAndSaveSiteConfig({ ...siteConfig, sections: updatedSections });
+  };
+
+  return (
+    <div className="space-y-6">
+      <SectionList 
+        businessId={business.id}
+        sections={sections}
+        onDeleteSection={handleDeleteSection}
+        onEditSection={(section) => {
+          setEditingSection(section);
+          setIsAdding(true); // Reuse the form for editing
+        }}
+      />
+
+      {isAdding || editingSection ? (
+        <AddSectionForm
+          initialData={editingSection} // Pass section data if editing
+          onAddSection={handleAddSection}
+          onEditSection={handleEditSection} // Pass edit handler
+          onCancel={() => {
+             setIsAdding(false);
+             setEditingSection(null);
+          }}
+          businessId={business.id} 
+        />
+      ) : (
+        <Button onClick={() => setIsAdding(true)} disabled={isLoading}>
+          Add New Section
+        </Button>
+      )}
+      {/* We can add loading indicators based on `isLoading` state */} 
+    </div>
+  );
+} 
