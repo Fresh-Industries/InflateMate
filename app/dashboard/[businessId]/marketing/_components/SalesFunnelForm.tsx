@@ -370,7 +370,7 @@ export function SalesFunnelForm({ businessId, funnel, onSuccess, onCancel }: Sal
           <Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" variant="primary-gradient" disabled={isSubmitting}>
             {isSubmitting ? "Saving..." : funnel ? "Update Funnel" : "Create Funnel"}
           </Button>
         </div>

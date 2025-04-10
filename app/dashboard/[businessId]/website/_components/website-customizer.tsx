@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SiteConfig } from "@/lib/business/domain-utils";
 import { Save, Loader2 } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import AboutSettings from "./about-settings";
 import ContactSettings from "./contact-settings";
 import ColorSettings from "./color-settings";
@@ -116,87 +117,110 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   
   
   return (
-    <div className="space-y-6">
-      <div className="flex justify-end items-center mb-4">
-        <div className="flex items-center gap-2">
-          
-          
-          <Button 
-            onClick={handleSave}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                Saving...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Save Changes
-              </>
-            )}
-          </Button>
-        </div>
+    <div className="space-y-8">
+      <div className="flex justify-end mb-6">
+        <Button
+          onClick={handleSave}
+          disabled={isLoading}
+          className="bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all duration-300 px-6 py-2.5"
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+              Saving...
+            </>
+          ) : (
+            <>
+              <Save className="h-4 w-4 mr-2" />
+              Save Changes
+            </>
+          )}
+        </Button>
       </div>
       
       <Tabs defaultValue="landing" className="w-full">
-        <TabsList className="w-full bg-muted/50 p-0 h-auto">
-          <div className="flex w-full">
-            <TabsTrigger 
-              value="landing" 
-              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
-            >
-              Landing Page
-            </TabsTrigger>
-            <TabsTrigger 
-              value="about" 
-              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
-            >
-              About Page
-            </TabsTrigger>
-            <TabsTrigger 
-              value="contact" 
-              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
-            >
-              Contact Page
-            </TabsTrigger>
-            <TabsTrigger 
-              value="colors" 
-              className="flex-1 rounded-none py-3 data-[state=active]:bg-background"
-            >
-              Colors
-            </TabsTrigger>
-          </div>
+        <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto border-b rounded-none p-0">
+          <TabsTrigger
+            value="landing"
+            className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+          >
+            Landing Page
+          </TabsTrigger>
+          <TabsTrigger
+            value="about"
+            className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+          >
+            About Page
+          </TabsTrigger>
+          <TabsTrigger
+            value="contact"
+            className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+          >
+            Contact Page
+          </TabsTrigger>
+          <TabsTrigger
+            value="colors"
+            className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+          >
+            Colors
+          </TabsTrigger>
         </TabsList>
         
-        <div className="mt-6">
+        <div className="mt-8">
           <TabsContent value="landing" className="m-0">
-            <LandingSettings 
-              hero={siteConfig.hero || {}} 
-              updateHero={(data) => updateSiteConfig('hero', data)}
-            />
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold">Landing Page Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <LandingSettings 
+                  hero={siteConfig.hero || {}} 
+                  updateHero={(data) => updateSiteConfig('hero', data)}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="about" className="m-0">
-            <AboutSettings 
-              businessData={initialData} 
-              siteConfig={siteConfig} 
-              updateSiteConfig={(data) => updateSiteConfig('about', data)}
-            />
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold">About Page Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AboutSettings 
+                  businessData={initialData} 
+                  siteConfig={siteConfig} 
+                  updateSiteConfig={(data) => updateSiteConfig('about', data)}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="contact" className="m-0">
-          <ContactSettings 
-              businessData={initialData} 
-            />
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold">Contact Page Settings</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ContactSettings 
+                  businessData={initialData} 
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
           
           <TabsContent value="colors" className="m-0">
-          <ColorSettings 
-              colors={siteConfig.colors || {}} 
-              updateColors={(data) => updateSiteConfig('colors', data)}
-            />
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md hover:shadow-xl transition-all">
+              <CardHeader>
+                <CardTitle className="text-2xl font-semibold">Color Scheme</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ColorSettings 
+                  colors={siteConfig.colors || {}} 
+                  updateColors={(data) => updateSiteConfig('colors', data)}
+                />
+              </CardContent>
+            </Card>
           </TabsContent>
         </div>
       </Tabs>

@@ -3,6 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { PaymentType, PaymentStatus, Prisma } from "@prisma/client";
 
 // Schema for analytics query parameters
 const analyticsQuerySchema = z.object({
@@ -11,12 +12,13 @@ const analyticsQuerySchema = z.object({
   endDate: z.string().optional(),
 });
 
-// Type for monthly revenue data
-type MonthlyRevenueRow = {
+// Type for monthly revenue data from raw query
+type MonthlyDataRow = {
   month: string;
   year: string;
   revenue: string;
   refunds: string;
+  transaction_count: string; // Added transaction count
 };
 
 /**
@@ -102,6 +104,16 @@ export async function GET(
         ? { createdAt: { gte: start, lte: end } }
         : {};
       
+      const completedFilter = {
+        status: PaymentStatus.COMPLETED,
+        type: { in: [PaymentType.DEPOSIT, PaymentType.FULL_PAYMENT] },
+      };
+
+      const refundedFilter = {
+        status: PaymentStatus.COMPLETED,
+        type: PaymentType.REFUND,
+      };
+
       try {
         // Debug: fetch all payments using the filter
         const allPayments = await prisma.payment.findMany({
@@ -118,36 +130,52 @@ export async function GET(
         });
         console.log(`Found ${allPayments.length} payments for business ${businessId}`);
         
-        // Get total revenue (excluding refunds)
-        const revenue = await prisma.payment.aggregate({
+        // Get total revenue (only completed deposits/full payments)
+        const revenueAggregation = await prisma.payment.aggregate({
           where: {
             businessId,
-            type: { in: ["DEPOSIT", "FULL_PAYMENT"] },
-            status: "COMPLETED",
+            ...completedFilter,
             ...dateFilter,
           },
           _sum: { amount: true },
         });
         
-        // Get total refunds
-        const refunds = await prisma.payment.aggregate({
+        // Get total refunds (only completed refunds)
+        const refundAggregation = await prisma.payment.aggregate({
           where: {
             businessId,
-            type: "REFUND",
-            status: "COMPLETED",
+            ...refundedFilter,
             ...dateFilter,
           },
           _sum: { amount: true },
         });
         
-        // Get payment counts by status
-        const paymentCounts = await prisma.payment.groupBy({
+        // Get count of completed transactions (deposits/full payments)
+        const completedTransactionsCount = await prisma.payment.count({
+          where: {
+            businessId,
+            ...completedFilter,
+            ...dateFilter,
+          },
+        });
+        
+        // Get count of refund transactions
+        const refundedTransactionsCount = await prisma.payment.count({
+          where: {
+            businessId,
+            ...refundedFilter,
+            ...dateFilter,
+          },
+        });
+        
+        // Get payment counts by status (all types included for overview)
+        const paymentStatusCounts = await prisma.payment.groupBy({
           by: ["status"],
           where: { businessId, ...dateFilter },
           _count: { id: true },
         });
         
-        // Get payment counts by type
+        // Get payment counts by type (all statuses included for overview)
         const paymentTypeData = await prisma.payment.groupBy({
           by: ["type"],
           where: { businessId, ...dateFilter },
@@ -155,70 +183,79 @@ export async function GET(
           _sum: { amount: true },
         });
         
-        // Get monthly revenue using a raw SQL query
+        // Get monthly revenue and transaction counts using a raw SQL query
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
         
-        // Define the type for monthly data
+        // Define the type for processed monthly data
         type MonthlyDataItem = {
           month: string;
           year: number;
           revenue: number;
           refunds: number;
           netRevenue: number;
+          transactionCount: number; // Added count
         };
         
         let monthlyData: MonthlyDataItem[] = [];
         try {
-          const monthlyRevenue = await prisma.$queryRaw<MonthlyRevenueRow[]>`
-            SELECT 
-              EXTRACT(MONTH FROM "createdAt") as month,
-              EXTRACT(YEAR FROM "createdAt") as year,
-              SUM(CASE WHEN "type" IN ('DEPOSIT', 'FULL_PAYMENT') THEN CAST("amount" as FLOAT) ELSE 0 END) as revenue,
-              SUM(CASE WHEN "type" = 'REFUND' THEN CAST("amount" as FLOAT) ELSE 0 END) as refunds
+          // Corrected Raw SQL Query: Use EXTRACT with timestamptz and filter by status='COMPLETED'
+          // Added COUNT(*) for transaction counts, ensuring we only count relevant types.
+          const monthlyDataResult = await prisma.$queryRaw<MonthlyDataRow[]>`
+            SELECT
+              EXTRACT(MONTH FROM "createdAt"::timestamptz) as month,
+              EXTRACT(YEAR FROM "createdAt"::timestamptz) as year,
+              SUM(CASE WHEN "type" IN ('DEPOSIT', 'FULL_PAYMENT') AND "status" = 'COMPLETED' THEN CAST("amount" as FLOAT) ELSE 0 END) as revenue,
+              SUM(CASE WHEN "type" = 'REFUND' AND "status" = 'COMPLETED' THEN CAST("amount" as FLOAT) ELSE 0 END) as refunds,
+              COUNT(CASE WHEN "type" IN ('DEPOSIT', 'FULL_PAYMENT') AND "status" = 'COMPLETED' THEN 1 ELSE NULL END) as transaction_count -- Count only completed revenue transactions
             FROM "Payment"
-            WHERE 
+            WHERE
               "businessId" = ${businessId}
-              AND "status" = 'COMPLETED'
-              ${start ? `AND "createdAt" >= '${start.toISOString()}'` : ''}
-              ${start ? `AND "createdAt" <= '${end.toISOString()}'` : ''}
-            GROUP BY 
-              EXTRACT(MONTH FROM "createdAt"::timestamptz),
-              EXTRACT(YEAR FROM "createdAt"::timestamptz)
-            ORDER BY 
+              ${start ? Prisma.sql`AND "createdAt" >= ${start}` : Prisma.empty}
+              ${end ? Prisma.sql`AND "createdAt" <= ${end}` : Prisma.empty}
+            GROUP BY
+              EXTRACT(YEAR FROM "createdAt"::timestamptz),
+              EXTRACT(MONTH FROM "createdAt"::timestamptz)
+            ORDER BY
               year ASC, month ASC
           `;
           
           // Format the monthly data
-          monthlyData = monthlyRevenue.map(row => {
+          monthlyData = monthlyDataResult.map(row => {
             const monthIndex = parseInt(row.month) - 1;
+            const revenue = parseFloat(row.revenue) || 0;
+            const refunds = parseFloat(row.refunds) || 0; // Refunds are usually negative, Prisma handles sum correctly
             return {
               month: monthNames[monthIndex],
               year: parseInt(row.year),
-              revenue: parseFloat(row.revenue) || 0,
-              refunds: parseFloat(row.refunds) || 0,
-              netRevenue: (parseFloat(row.revenue) || 0) + (parseFloat(row.refunds) || 0),
+              revenue: revenue,
+              refunds: refunds, // Keep original sign if needed, or use Math.abs if displaying positive
+              netRevenue: revenue + refunds, // Since refunds sum is negative
+              transactionCount: parseInt(row.transaction_count) || 0,
             };
           });
         } catch (sqlError) {
-          console.error("SQL query error:", 
+          console.error("SQL query error:",
             sqlError ? (sqlError instanceof Error ? sqlError.message : String(sqlError)) : "Unknown error");
           // Continue with empty monthly data rather than failing the whole request
         }
         
         // Convert Decimal to numbers for revenue calculations
-        const totalRevenue = revenue._sum.amount ? parseFloat(revenue._sum.amount.toString()) : 0;
-        const totalRefunds = refunds._sum.amount ? parseFloat(refunds._sum.amount.toString()) : 0;
-        const netRevenue = totalRevenue + totalRefunds;
+        const totalRevenue = revenueAggregation._sum.amount ? parseFloat(revenueAggregation._sum.amount.toString()) : 0;
+        const totalRefunds = refundAggregation._sum.amount ? parseFloat(refundAggregation._sum.amount.toString()) : 0; // Already filtered for REFUND type, sum will be negative
+        const netRevenue = totalRevenue + totalRefunds; // '+' because totalRefunds sum is negative
         
         // Format status counts
         const statusCounts: { [key: string]: number } = {
           COMPLETED: 0,
           PENDING: 0,
           FAILED: 0,
-          REFUNDED: 0,
+          REFUNDED: 0, // May overlap with 'COMPLETED' if refunds are marked completed. Adjust logic if needed.
         };
-        paymentCounts.forEach(count => {
-          statusCounts[count.status] = count._count.id;
+        paymentStatusCounts.forEach(count => {
+          // Ensure status key exists before assignment
+          if (count.status in statusCounts) {
+             statusCounts[count.status] = count._count.id;
+          }
         });
         
         // Format type data
@@ -228,10 +265,13 @@ export async function GET(
           REFUND: { count: 0, amount: 0 },
         };
         paymentTypeData.forEach(data => {
-          typeData[data.type] = {
-            count: data._count.id,
-            amount: data._sum.amount ? parseFloat(data._sum.amount.toString()) : 0,
-          };
+           if (data.type in typeData) {
+             typeData[data.type] = {
+               count: data._count.id,
+               // Use Math.abs for display consistency if desired, but keep raw sum for calculations
+               amount: data._sum.amount ? parseFloat(data._sum.amount.toString()) : 0,
+             };
+           }
         });
         
         // Count unique bookings that have payments
@@ -240,9 +280,10 @@ export async function GET(
             businessId,
             payments: {
               some: {
-                status: "COMPLETED",
-                type: { in: ["DEPOSIT", "FULL_PAYMENT"] },
-                ...dateFilter,
+                status: PaymentStatus.COMPLETED,
+                type: { in: [PaymentType.DEPOSIT, PaymentType.FULL_PAYMENT] },
+                // Apply date filter to payments within bookings as well
+                createdAt: start ? { gte: start, lte: end } : undefined,
               },
             },
           },
@@ -251,17 +292,19 @@ export async function GET(
         return {
           summary: {
             totalRevenue,
-            totalRefunds,
+            totalRefunds, // This is the summed negative amount
             netRevenue,
-            totalBookings: bookingsWithPayments,
+            totalCompletedTransactions: completedTransactionsCount,
+            totalRefundedTransactions: refundedTransactionsCount, // Added count
+            totalBookings: bookingsWithPayments, // Or consider a different metric like unique customers
             period,
             startDate: start ? start.toISOString() : null,
             endDate: end.toISOString(),
           },
-          statusCounts,
-          typeData,
+          statusCounts, // Overall status distribution
+          typeData,     // Overall type distribution
           monthlyData,
-          debug: { paymentCount: allPayments.length },
+          debug: { }, // Removed payment count debug info unless needed
         };
       } catch (prismError) {
         // Fix error logging to handle null cases
@@ -280,11 +323,14 @@ export async function GET(
     // Add a fallback for undefined data
     if (!result.data) {
       console.error("Unexpected null data in analytics result");
-      return NextResponse.json({ 
-        summary: { 
-          totalRevenue: 0, 
-          totalRefunds: 0, 
+      // Provide default structure matching the expected return type
+      return NextResponse.json({
+        summary: {
+          totalRevenue: 0,
+          totalRefunds: 0,
           netRevenue: 0,
+          totalCompletedTransactions: 0,
+          totalRefundedTransactions: 0,
           totalBookings: 0,
           period,
           startDate: null,

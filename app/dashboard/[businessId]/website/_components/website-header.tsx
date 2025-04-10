@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
-import { Globe, ExternalLink, Eye } from "lucide-react";
+import { Globe, ExternalLink, Eye, Copy } from "lucide-react";
 import Link from "next/link";
 
 interface WebsiteHeaderProps {
@@ -20,7 +20,7 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
     .toLowerCase()
     .replace(/[^\w-]/g, '');
   
-  const domain = customDomain || `${formattedBusinessName}.localhost`;
+  const domain = customDomain || `${formattedBusinessName}.inflatemate.app`;
   
   
   const handlePreview = () => {
@@ -44,50 +44,51 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
   };
   
   return (
-    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 border-b pb-6 mb-8">
       <div>
-        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Website Customization</h1>
+        <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+          Website Customization
+        </h1>
         <p className="text-base text-muted-foreground mt-1">
-          Customize your website appearance and content
+          Customize your website appearance, content, and domain.
         </p>
       </div>
       
-      <div className="flex items-center gap-2">
-        <div className="flex items-center gap-2 bg-muted px-3 py-1 rounded-md text-sm">
-          <Globe className="h-4 w-4" />
-          <span className="font-medium">{domain}</span>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="h-6 w-6" 
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex items-center gap-2 border bg-secondary/50 px-3 py-1.5 rounded-md text-sm font-medium">
+          <Globe className="h-4 w-4 text-muted-foreground" />
+          <span>{domain}</span>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-6 w-6 text-muted-foreground hover:text-foreground"
             onClick={handleCopyDomain}
+            aria-label="Copy domain"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
-            </svg>
+            <Copy className="h-4 w-4" />
             <span className="sr-only">Copy domain</span>
           </Button>
         </div>
         
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-1"
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
           onClick={handlePreview}
         >
           <Eye className="h-4 w-4" />
-          Preview
+          Preview Site
         </Button>
         
-        <Button 
-          variant="outline" 
-          size="sm" 
-          className="gap-1"
+        <Button
+          variant="outline"
+          size="sm"
+          className="gap-1.5"
           asChild
         >
           <Link href={`/dashboard/${businessId}/website/domain`}>
             <ExternalLink className="h-4 w-4" />
-            Custom Domain
+            Manage Domain
           </Link>
         </Button>
       </div>

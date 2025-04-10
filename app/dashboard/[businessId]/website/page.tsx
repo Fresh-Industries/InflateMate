@@ -50,30 +50,45 @@ export default async function WebsitePage({ params }: PageProps) {
 function WebsiteCustomizerSkeleton() {
   return (
     <div className="space-y-8">
-      <div className="border rounded-lg p-6">
-        <Skeleton className="h-8 w-1/3 mb-6" />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-4">
-            <Skeleton className="h-4 w-1/2 mb-2" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-4 w-1/2 mb-2" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-          <div className="space-y-4">
-            <Skeleton className="h-4 w-1/2 mb-2" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-4 w-1/2 mb-2" />
-            <Skeleton className="h-10 w-full" />
-          </div>
-        </div>
+      {/* Skeleton for Save Button */}
+      <div className="flex justify-end mb-6">
+        <Skeleton className="h-10 w-32 rounded-full" />
       </div>
-      
-      <div className="border rounded-lg p-6">
-        <Skeleton className="h-8 w-1/3 mb-6" />
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <Skeleton className="h-40 w-full rounded-md" />
-          <Skeleton className="h-40 w-full rounded-md" />
-          <Skeleton className="h-40 w-full rounded-md" />
+
+      {/* Skeleton for Tabs */}
+      <div className="w-full">
+        {/* Skeleton for TabsList */}
+        <div className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto border-b">
+          <Skeleton className="h-12 w-full rounded-none" />
+          <Skeleton className="h-12 w-full rounded-none" />
+          <Skeleton className="h-12 w-full rounded-none" />
+          <Skeleton className="h-12 w-full rounded-none" />
+        </div>
+
+        {/* Skeleton for TabsContent wrapped in Card */}
+        <div className="mt-8">
+          <div className="rounded-xl border bg-card text-card-foreground shadow-md p-6 space-y-6"> {/* Mimic Card style */}
+            {/* Skeleton for CardHeader */}
+            <Skeleton className="h-7 w-1/3 mb-4" />
+            
+            {/* Skeleton for CardContent - example for a typical settings form */}
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+                <div className="space-y-2">
+                  <Skeleton className="h-4 w-1/4" />
+                  <Skeleton className="h-10 w-full" />
+                </div>
+              </div>
+              <div className="space-y-2">
+                <Skeleton className="h-4 w-1/5" />
+                <Skeleton className="h-20 w-full" />
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

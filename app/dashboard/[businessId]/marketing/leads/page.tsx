@@ -20,6 +20,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 // Define the shape of our data based on the API response
 // This matches the `select` statement in the GET route
@@ -74,100 +76,115 @@ export default function LeadsPage({ params }: { params: { businessId: string } }
   }, [params.businessId]);
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h2 className="text-3xl font-bold tracking-tight">Leads</h2>
-        <p className="text-muted-foreground">
-          View and manage leads captured from your sales funnels.
-        </p>
-      </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+        
+        <div className="flex items-center justify-between gap-4 border-b border-gray-200 pb-6">
+          <div className="flex items-center gap-4">
+             <Link href={`/dashboard/${params.businessId}/marketing`} passHref>
+               <Button variant="outline" size="icon" className="h-8 w-8">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back to Marketing</span>
+                </Button>
+             </Link>
+             <div>
+               <h1 className="text-3xl font-bold tracking-tight text-gray-900">Leads</h1>
+               <p className="text-base text-gray-500 mt-1">
+                 View and manage leads captured from your sales funnels.
+               </p>
+             </div>
+          </div>
+        </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Captured Leads</CardTitle>
-          <CardDescription>
-            A list of potential customers interested in your services.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="flex justify-center items-center py-10">
-              <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-            </div>
-          ) : error ? (
-            <div className="text-center py-10 text-destructive">
-              <p>Error loading leads: {error}</p>
-              <Button variant="outline" size="sm" className="mt-4" onClick={() => fetchData()}>
-                Retry
-              </Button>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-[100px]">Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Phone</TableHead>
-                    <TableHead>Date Captured</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {data && data.length > 0 ? (
-                    data.map((lead) => (
-                      <TableRow key={lead.id}>
-                        <TableCell className="font-medium capitalize">{lead.name}</TableCell>
-                        <TableCell className="lowercase">{lead.email}</TableCell>
-                        <TableCell>
-                          {lead.phone ? lead.phone : <span className="text-muted-foreground italic">Not provided</span>}
-                        </TableCell>
-                        <TableCell className="whitespace-nowrap">{formatDate(lead.createdAt)}</TableCell>
-                        <TableCell className="text-right">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Open menu</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => navigator.clipboard.writeText(lead.email)}
-                              >
-                                Copy Email
-                              </DropdownMenuItem>
-                              {lead.phone && (
-                                <DropdownMenuItem
-                                  onClick={() => navigator.clipboard.writeText(lead.phone!)}
+        <Card className="rounded-xl border border-gray-100 bg-white shadow-md hover:shadow-lg transition-all duration-300">
+          <CardHeader className="px-6 pt-6">
+            <CardTitle className="text-lg font-semibold text-gray-800">Captured Leads</CardTitle>
+            <CardDescription className="text-sm text-gray-500">
+              A list of potential customers interested in your services.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0">
+            {loading ? (
+              <div className="flex justify-center items-center py-16">
+                <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+              </div>
+            ) : error ? (
+              <div className="text-center py-16 px-6">
+                <p className="text-red-600 font-medium">Error loading leads: {error}</p>
+                <Button 
+                  size="sm" 
+                  className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all duration-300 px-4 py-2" 
+                  onClick={() => fetchData()}
+                >
+                  Retry Loading
+                </Button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-gray-50">
+                    <TableRow>
+                      <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-[150px]">Name</TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Phone</TableHead>
+                      <TableHead className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date Captured</TableHead>
+                      <TableHead className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody className="bg-white divide-y divide-gray-200">
+                    {data && data.length > 0 ? (
+                      data.map((lead) => (
+                        <TableRow key={lead.id} className="hover:bg-gray-50 transition-colors">
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 capitalize">{lead.name}</TableCell>
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 lowercase">{lead.email}</TableCell>
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            {lead.phone ? lead.phone : <span className="italic text-gray-400">Not provided</span>}
+                          </TableCell>
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{formatDate(lead.createdAt)}</TableCell>
+                          <TableCell className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0 text-gray-500 hover:text-gray-700">
+                                  <span className="sr-only">Open menu</span>
+                                  <MoreHorizontal className="h-5 w-5" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+                                <DropdownMenuLabel className="px-3 py-2 text-xs font-semibold text-gray-700 uppercase">Actions</DropdownMenuLabel>
+                                <DropdownMenuItem 
+                                  className="cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                  onClick={() => navigator.clipboard.writeText(lead.email)}
                                 >
-                                  Copy Phone
+                                  Copy Email
                                 </DropdownMenuItem>
-                              )}
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem disabled>Convert to Customer (TBD)</DropdownMenuItem>
-                              <DropdownMenuItem disabled className="text-destructive">
-                                Delete Lead (TBD)
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                                {lead.phone && (
+                                  <DropdownMenuItem
+                                    className="cursor-pointer px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                                    onClick={() => navigator.clipboard.writeText(lead.phone!)}
+                                  >
+                                    Copy Phone
+                                  </DropdownMenuItem>
+                                )}
+                                
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="px-6 py-16 text-center text-sm text-gray-500">
+                          No leads found. Looks like a great time to start a new campaign!
                         </TableCell>
                       </TableRow>
-                    ))
-                  ) : (
-                    <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        No leads found.
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 } 

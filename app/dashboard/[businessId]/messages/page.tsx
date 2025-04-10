@@ -10,8 +10,6 @@ import { cn } from '@/lib/utils';
 import { CustomerList } from './_components/CustomerList';
 import { MessageComposer } from "./_components/MessageComposer";
 import { useCustomers, useMessages, Customer, Message } from "./_components/useCustomers";
-import { MessageSidebar } from "./_components/message-sidebar";
-import { ChatArea } from "./_components/chat-area";
 
 export default function MessagesPage() {
   const params = useParams();

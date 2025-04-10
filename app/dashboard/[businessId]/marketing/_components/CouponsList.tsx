@@ -271,12 +271,7 @@ export default function CouponsList({ businessId }: CouponsListProps) {
                             Edit
                           </DropdownMenuItem>
                         </Link>
-                        <DropdownMenuItem
-                          onClick={() => copyToClipboard(coupon.code)}
-                        >
-                          <Copy className="mr-2 h-4 w-4" />
-                          Copy Code
-                        </DropdownMenuItem>
+                        
                         <DropdownMenuItem
                           onClick={() => onDeleteConfirm(coupon.id)}
                           className="text-destructive focus:text-destructive"
@@ -298,6 +293,7 @@ export default function CouponsList({ businessId }: CouponsListProps) {
                       <Switch
                         checked={coupon.isActive}
                         onCheckedChange={(checked) => toggleCouponStatus(coupon.id, checked)}
+                        className="data-[state=checked]:bg-blue-600"
                       />
                     </div>
                     <div className="flex items-center space-x-2">
@@ -330,11 +326,6 @@ export default function CouponsList({ businessId }: CouponsListProps) {
                   <div className="text-xs text-muted-foreground">
                     Created: {new Date(coupon.createdAt).toLocaleDateString()}
                   </div>
-                  <Link href={`/dashboard/${businessId}/marketing/coupons/${coupon.id}`}>
-                    <Button variant="outline" size="sm">
-                      Edit
-                    </Button>
-                  </Link>
                 </CardFooter>
               </Card>
             ))}

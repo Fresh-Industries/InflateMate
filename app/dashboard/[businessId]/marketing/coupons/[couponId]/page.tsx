@@ -6,6 +6,7 @@ import Link from "next/link";
 import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { CouponFormWrapper } from "../../_components/CouponFormWrapper";
+import { Card } from "@/components/ui/card";
 
 export const metadata: Metadata = {
   title: "Edit Coupon | Marketing",
@@ -52,27 +53,33 @@ export default async function EditCouponPage({
   const coupon = result.data?.coupon;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Link href={`/dashboard/${params.businessId}/marketing/coupons`}>
-            <Button variant="outline" size="sm">
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Back to Coupons
-            </Button>
-          </Link>
-          <h1 className="text-3xl font-bold tracking-tight">Edit Coupon</h1>
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+        
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+          <div className="flex items-center gap-4">
+             <Link href={`/dashboard/${params.businessId}/marketing/coupons`} passHref>
+               <Button variant="outline" size="icon" className="h-8 w-8">
+                  <ArrowLeft className="h-4 w-4" />
+                  <span className="sr-only">Back to Coupons</span>
+                </Button>
+             </Link>
+             <div>
+               <h1 className="text-3xl font-bold tracking-tight text-gray-900">Edit Coupon</h1>
+               <p className="text-base text-gray-500 mt-1">
+                 Update the details for coupon code: <span className="font-semibold text-gray-700">{coupon?.code}</span>
+               </p>
+             </div>
+          </div>
         </div>
-      </div>
-      
-      <div className="grid gap-6">
-        <div className="rounded-lg border p-6">
+        
+        <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-6 hover:shadow-lg transition-all duration-300">
           <CouponFormWrapper 
             businessId={params.businessId} 
             coupon={coupon}
             mode="edit"
           />
-        </div>
+        </Card>
       </div>
     </div>
   );

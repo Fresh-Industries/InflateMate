@@ -122,173 +122,154 @@ export default async function MarketingPage({
   } = result.data || {};
 
   return (
-    <div className="space-y-8 p-6 bg-[#fafbff]">    
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            Marketing
-          </h1>
-          <p className="text-base text-muted-foreground mt-1">
-            Manage your marketing campaigns and tools
-          </p>
-        </div>
-      </div>
-
-      {/* Marketing Overview */}
-      <div>
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Funnels</CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{funnelsCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                {activeFunnel ? "1 active funnel" : "No active funnels"}
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Active Coupons</CardTitle>
-              <Percent className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{couponsCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Discount codes available
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Total Leads</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{leadsCount}</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Captured from funnels
-              </p>
-            </CardContent>
-          </Card>
-          
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Conversion Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{conversionRate}%</div>
-              <p className="text-xs text-muted-foreground mt-1">
-                Lead to customer rate
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
-
-      
-      {/* Marketing Tools */}
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight mb-4">Marketing Tools</h2>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="border-l-4 border-l-blue-500">
-            <CardHeader>
-              <CardTitle>Sales Funnels</CardTitle>
-              <CardDescription>
-                Create and manage sales funnels with popups
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Create popups to capture leads and offer discounts to your customers. 
-                {activeFunnel ? " You have an active funnel ready to embed." : " Create your first funnel to start capturing leads."}
-              </p>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Link href={`/dashboard/${params.businessId}/marketing/sales-funnels`}>
-                <Button variant="outline">
-                  Manage Funnels
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
-          
-          <Card className="border-l-4 border-l-green-500">
-            <CardHeader>
-              <CardTitle>Coupons</CardTitle>
-              <CardDescription>
-                Create and manage discount coupons
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Create discount coupons to offer to your customers. Boost sales with limited-time offers and special promotions.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link href={`/dashboard/${params.businessId}/marketing/coupons`}>
-                <Button variant="outline">
-                  Manage Coupons
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
-          
-          <Card className="border-l-4 border-l-purple-500">
-            <CardHeader>
-              <CardTitle>Leads</CardTitle>
-              <CardDescription>
-                View and manage your leads
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                View and manage leads captured from your sales funnels. Convert leads into customers with targeted follow-ups.
-              </p>
-            </CardContent>
-            <CardFooter>
-              <Link href={`/dashboard/${params.businessId}/marketing/leads`}>
-                <Button variant="outline">
-                  View Leads
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              </Link>
-            </CardFooter>
-          </Card>
-        </div>
-      </div>
-      
-      {/* Quick Actions */}
-      {!activeFunnel && funnelsCount === 0 && (
-        <Card className="bg-muted/50">
-          <CardHeader>
-            <CardTitle>Get Started with Marketing</CardTitle>
-            <CardDescription>
-              Set up your first marketing campaign in minutes
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm">
-              You haven&apos;t created any sales funnels yet. Create your first funnel to start capturing leads and growing your business.
+    <div className="min-h-screen bg-gray-50">
+      <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-gray-200 pb-6">
+          <div>
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
+              Marketing Hub
+            </h1>
+            <p className="text-base text-gray-500 mt-1">
+              Manage your marketing campaigns, leads, and tools.
             </p>
-          </CardContent>
-          <CardFooter>
-            <Link href={`/dashboard/${params.businessId}/marketing/sales-funnels`}>
-              <Button>
-                Create First Funnel
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </Link>
-          </CardFooter>
-        </Card>
-      )}
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight mb-4 text-gray-800">Overview</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-4 hover:shadow-lg transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Funnels</CardTitle>
+                <BarChart3 className="h-5 w-5 text-blue-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900">{funnelsCount}</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {activeFunnel ? `1 active funnel` : "No active funnels"}
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-4 hover:shadow-lg transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">Active Coupons</CardTitle>
+                <Percent className="h-5 w-5 text-green-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900">{couponsCount}</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Discount codes available
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-4 hover:shadow-lg transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">Total Leads</CardTitle>
+                <Users className="h-5 w-5 text-purple-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900">{leadsCount}</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Captured from funnels
+                </p>
+              </CardContent>
+            </Card>
+            
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-4 hover:shadow-lg transition-all duration-300">
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium text-gray-600">Conversion Rate</CardTitle>
+                <TrendingUp className="h-5 w-5 text-yellow-500" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-gray-900">{conversionRate}%</div>
+                <p className="text-xs text-gray-500 mt-1">
+                  Lead to customer rate
+                </p>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight mb-4 text-gray-800">Marketing Tools</h2>
+          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-6 hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-800">Sales Funnels</CardTitle>
+                  <CardDescription className="text-sm text-gray-500">
+                    Create and manage automated sales funnels with popups.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Capture leads and guide visitors towards becoming customers.
+                    {activeFunnel ? " You have an active funnel ready to embed." : " Create your first funnel to get started."}
+                  </p>
+                </CardContent>
+              </div>
+              <CardFooter className="mt-4">
+                <Link href={`/dashboard/${params.businessId}/marketing/sales-funnels`} className="w-full">
+                  <Button variant="outline" className="w-full inline-flex items-center justify-center rounded-full border-2 border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 bg-transparent hover:bg-blue-50 transition-all duration-300">
+                    Manage Funnels
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+            
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-6 hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-800">Coupons</CardTitle>
+                  <CardDescription className="text-sm text-gray-500">
+                    Create and manage discount codes for your customers.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Boost sales with limited-time offers and special promotions.
+                  </p>
+                </CardContent>
+              </div>
+              <CardFooter className="mt-4">
+                <Link href={`/dashboard/${params.businessId}/marketing/coupons`} className="w-full">
+                  <Button variant="outline" className="w-full inline-flex items-center justify-center rounded-full border-2 border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 bg-transparent hover:bg-blue-50 transition-all duration-300">
+                    Manage Coupons
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+            
+            <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-6 hover:shadow-lg transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <CardHeader>
+                  <CardTitle className="text-lg font-semibold text-gray-800">Leads</CardTitle>
+                  <CardDescription className="text-sm text-gray-500">
+                    View and manage potential customers captured via funnels.
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-sm text-gray-600">
+                    Keep track of your leads and nurture them through the sales process.
+                  </p>
+                </CardContent>
+              </div>
+              <CardFooter className="mt-4">
+                <Link href={`/dashboard/${params.businessId}/marketing/leads`} className="w-full">
+                  <Button variant="outline" className="w-full inline-flex items-center justify-center rounded-full border-2 border-blue-600 px-4 py-2 text-sm font-medium text-blue-600 bg-transparent hover:bg-blue-50 transition-all duration-300">
+                    View Leads
+                    <ArrowRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </Link>
+              </CardFooter>
+            </Card>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

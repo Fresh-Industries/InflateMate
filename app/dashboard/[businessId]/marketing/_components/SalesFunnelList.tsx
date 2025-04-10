@@ -229,12 +229,7 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
                         <Pencil className="mr-2 h-4 w-4" />
                         Edit
                       </DropdownMenuItem>
-                      <DropdownMenuItem
-                        onClick={() => router.push(`/dashboard/${businessId}/marketing/sales-funnels/embed`)}
-                      >
-                        <Code className="mr-2 h-4 w-4" />
-                        Embed
-                      </DropdownMenuItem>
+                      
                       <DropdownMenuItem
                         onClick={() => onDeleteConfirm(funnel.id)}
                         className="text-destructive focus:text-destructive"
@@ -258,6 +253,7 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
                     <Switch
                       checked={funnel.isActive}
                       onCheckedChange={(checked) => toggleFunnelStatus(funnel.id, checked)}
+                      className="data-[state=checked]:bg-blue-600"
                     />
                   </div>
                   {funnel.coupon && (
@@ -272,11 +268,6 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
                 <div className="text-xs text-muted-foreground">
                   Created: {new Date(funnel.createdAt).toLocaleDateString()}
                 </div>
-                <Link href={`/dashboard/${businessId}/marketing/sales-funnels/${funnel.id}`}>
-                  <Button variant="outline" size="sm">
-                    Edit
-                  </Button>
-                </Link>
               </CardFooter>
             </Card>
           ))
