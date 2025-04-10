@@ -13,7 +13,7 @@ import {
   CarouselNext,
   CarouselPrevious,
 } from "@/components/ui/carousel";
-
+import Image from "next/image";
 interface InventoryItem {
   id: string;
   name: string;
@@ -78,10 +78,14 @@ export function InventoryList({ inventoryItems, businessId }: InventoryListProps
 
   // Function to get all available images, prioritizing primaryImage
   const getAllImages = (item: InventoryItem): string[] => {
+    console.log(`[${item.name}] Initial images:`, item.images);
+    console.log(`[${item.name}] Primary image:`, item.primaryImage);
     const allImages = item.images ? [...item.images] : [];
     if (item.primaryImage && !allImages.includes(item.primaryImage)) {
+      console.log(`[${item.name}] Prepending primary image.`);
       allImages.unshift(item.primaryImage);
     }
+    console.log(`[${item.name}] Final images for getAllImages:`, allImages);
     return allImages;
   };
 
@@ -89,6 +93,7 @@ export function InventoryList({ inventoryItems, businessId }: InventoryListProps
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {inventoryItems.map((item) => {
         const allItemImages = getAllImages(item);
+        console.log(`[${item.name}] Images passed to Carousel:`, allItemImages);
         const hasMultipleImages = allItemImages.length > 1;
         const statusVariant = getStatusBadgeVariant(item.status);
 
@@ -98,21 +103,22 @@ export function InventoryList({ inventoryItems, businessId }: InventoryListProps
             className="group overflow-hidden rounded-xl border shadow-sm hover:shadow-lg transition-all duration-300 flex flex-col cursor-pointer"
           >
             {/* Image Section */}
-            <div className="relative aspect-video overflow-hidden w-full bg-muted/50">
+            <div className="overflow-hidden w-full bg-muted/50">
               {allItemImages.length > 0 ? (
                 hasMultipleImages ? (
                   // Carousel for multiple images
                   <Carousel className="w-full h-full">
                     <CarouselContent>
-                    {allItemImages.map((imgSrc, index) => (
-                      <CarouselItem key={index}>
-                        <div className="w-full h-full">
-                          <img
-                            src={imgSrc}
-                            alt={`${item.name} - Image ${index + 1}`}
-                            className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
-                          />
-                        </div>
+                      {allItemImages.map((imgSrc, index) => (
+                        <CarouselItem key={index}>
+                          <div className="relative w-full h-60">
+                            <Image
+                              src={imgSrc}
+                              alt={`${item.name} - Image ${index + 1}`}
+                              fill
+                              className="object-contain transition-transform duration-300 group-hover:scale-105"
+                            />
+                          </div>
                       </CarouselItem>
                     ))}
                     </CarouselContent>

@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
-import { z } from "zod";
-import { InventoryType } from "@prisma/client";
+import { z, ZodError } from "zod";
 import { UTApi } from "uploadthing/server";
 
 // Initialize the UploadThing API client
@@ -99,7 +98,7 @@ export async function PATCH(
               primaryImageUrl &&
               validatedData.removedImages.includes(primaryImageUrl)
             ) {
-              primaryImageUrl = imageUrls.length > 0 ? imageUrls[0] : undefined;
+              primaryImageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
             }
           }
 
@@ -147,12 +146,12 @@ export async function PATCH(
           console.error("Error updating inventory item:", error);
           
           // Check for specific Prisma errors
-          if (error.code === 'P2025') {
+          if (error instanceof Error && error.message.includes('P2025')) {
             return { error: "Inventory item not found or already deleted." };
           }
           
           // Handle validation errors
-          if (error.name === 'ZodError') {
+          if (error instanceof ZodError) {
             return { error: "Invalid input data: " + JSON.stringify(error.errors) };
           }
           

@@ -62,6 +62,7 @@ export default function EditInventoryPage() {
   const [inventoryItem, setInventoryItem] = useState<InventoryItem | null>(null);
   const [selectedImages, setSelectedImages] = useState<ImageFile[]>([]);
   const [existingImages, setExistingImages] = useState<{ url: string; isPrimary: boolean }[]>([]);
+  const [initialImageUrls, setInitialImageUrls] = useState<string[]>([]);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
 
   // Fetch inventory item data
@@ -75,10 +76,11 @@ export default function EditInventoryPage() {
         }
         const data = await response.json();
         setInventoryItem(data);
+        setInitialImageUrls(data.images || []);
 
         // Transform existing images; ensure one primary image if available
         const uniqueUrls = new Set();
-        const images = data.images
+        const images = (data.images || [])
           .filter((url: string) => {
             if (uniqueUrls.has(url)) return false;
             uniqueUrls.add(url);
@@ -186,36 +188,58 @@ export default function EditInventoryPage() {
     setIsSubmitting(true);
 
     try {
-      const originalImageUrls = inventoryItem.images || [];
-      const currentImageUrls = existingImages.map(img => img.url);
-      const removedImageUrls = originalImageUrls.filter(url => !currentImageUrls.includes(url));
+      // Calculate changes
+      const currentImages = [...existingImages];
+      const currentImageUrls = currentImages.map(img => img.url);
 
-      const allImages = existingImages.map(img => ({ url: img.url, isPrimary: img.isPrimary }));
-      const primaryCount = allImages.filter(img => img.isPrimary).length;
+      // Ensure only one primary image is selected before sending
+      const primaryCount = currentImages.filter(img => img.isPrimary).length;
+      let primaryImageUrl: string | null = null;
+
       if (primaryCount > 1) {
-        let found = false;
-        allImages.forEach(img => {
+        // If multiple are marked primary (shouldn't happen with UI logic, but safeguard)
+        // Keep the first one found as primary
+        let foundPrimary = false;
+        currentImages.forEach(img => {
           if (img.isPrimary) {
-            if (found) {
-              img.isPrimary = false;
+            if (!foundPrimary) {
+              primaryImageUrl = img.url;
+              foundPrimary = true;
             } else {
-              found = true;
+              img.isPrimary = false; // Unmark others
             }
           }
         });
-      } else if (primaryCount === 0 && allImages.length > 0) {
-        allImages[0].isPrimary = true;
+      } else if (primaryCount === 1) {
+        primaryImageUrl = currentImages.find(img => img.isPrimary)?.url || null;
+      } else if (currentImages.length > 0) {
+        // If none are primary, make the first one primary
+        currentImages[0].isPrimary = true;
+        primaryImageUrl = currentImages[0].url;
       }
-      
+       // If primaryImageUrl is still null and there are images, default to first
+       if (!primaryImageUrl && currentImages.length > 0) {
+          primaryImageUrl = currentImages[0].url;
+       }
+
+      const removedImageUrls = initialImageUrls.filter(url => !currentImageUrls.includes(url));
+      const newImageUrls = currentImageUrls.filter(url => !initialImageUrls.includes(url));
+
+      // Construct payload with delta
+      const payload = {
+        ...inventoryItem,
+        newImages: newImageUrls,
+        removedImages: removedImageUrls,
+        primaryImage: primaryImageUrl,
+      };
+      delete payload.images;
+
       const response = await fetch(`/api/businesses/${businessId}/inventory/${inventoryId}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          ...inventoryItem,
-          images: allImages,
-          removedImages: removedImageUrls,
-        }),
+        body: JSON.stringify(payload),
       });
+
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to update inventory item');
       toast({ title: 'Success', description: 'Inventory item updated successfully' });
@@ -275,7 +299,7 @@ export default function EditInventoryPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
         <h2 className="text-2xl font-bold">Inventory Item Not Found</h2>
-        <p className="text-gray-600">The inventory item you're looking for doesn't exist or you don't have permission to view it.</p>
+        <p className="text-gray-600">The inventory item you\'re looking for doesn\'t exist or you don\'t have permission to view it.</p>
         <Button onClick={() => router.push(`/dashboard/${businessId}/inventory`)}>
           Back to Inventory
         </Button>
