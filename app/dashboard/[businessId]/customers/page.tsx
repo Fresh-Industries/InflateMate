@@ -76,7 +76,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { formatDistanceToNow } from "date-fns";
+import { createLocalDate } from "@/lib/utils";
 
 interface Customer {
   id: string;
@@ -348,6 +348,8 @@ export default function CustomersPage() {
     fetchCustomerBookings(customer.id);
     setIsDetailsOpen(true);
   };
+  console.log(customerBookings);
+  console.log(customers);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
@@ -555,7 +557,7 @@ export default function CustomersPage() {
                       <TableCell>${customer.totalSpent}</TableCell>
                       <TableCell className="hidden md:table-cell">
                         {customer.lastBooking
-                          ? formatDistanceToNow(new Date(customer.lastBooking), { addSuffix: true })
+                          ? (new Date(customer.lastBooking)).toLocaleDateString()
                           : "Never"}
                       </TableCell>
                       <TableCell>
@@ -856,7 +858,13 @@ export default function CustomersPage() {
                                     <div className="flex items-center mt-1 space-x-1 text-sm text-muted-foreground">
                                       <Calendar className="h-4 w-4" />
                                       <span>
-                                          {new Date(booking.eventDate).toLocaleDateString()}, {formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+                                        {(() => {
+                                          const date = createLocalDate(booking.eventDate);
+                                          const dateString = date instanceof Date && !isNaN(date.getTime()) 
+                                            ? date.toLocaleDateString() 
+                                            : "Invalid Date"; 
+                                          return `${dateString}, ${formatTime(booking.startTime)} - ${formatTime(booking.endTime)}`; 
+                                        })()}
                                       </span>
                                     </div>
                                   </div>
@@ -923,12 +931,23 @@ export default function CustomersPage() {
 }
 
 // Helper function to format time (HH:MM to AM/PM)
-const formatTime = (timeString: string): string => {
-  if (!timeString || !timeString.includes(':')) return '';
-  const [hours, minutes] = timeString.split(':').map(Number);
-  const period = hours >= 12 ? 'PM' : 'AM';
-  const adjustedHours = hours % 12 || 12;
-  return `${adjustedHours}:${minutes.toString().padStart(2, '0')} ${period}`;
+const formatTime = (dateTimeString: string): string => {
+  if (!dateTimeString) return '';
+  
+  try {
+    const date = new Date(dateTimeString);
+    // Check if the date object is valid
+    if (isNaN(date.getTime())) {
+      console.warn(`Invalid date/time string passed to formatTime: ${dateTimeString}`);
+      return ''; // Return empty string for invalid date
+    }
+    
+    // Use toLocaleTimeString to format the time according to locale and in AM/PM
+    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+  } catch (error) {
+    console.error(`Error formatting time for string: ${dateTimeString}`, error);
+    return ''; // Return empty string on error
+  }
 };
 
 // Helper function to determine badge variant based on booking status
