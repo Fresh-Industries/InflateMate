@@ -12,3 +12,11 @@ export const bouncy = {
   id: "bouncy",
   themeName: "bouncy",
 }; 
+
+export const retro = {
+  id: "retro",
+  themeName: "retro",
+};
+
+
+

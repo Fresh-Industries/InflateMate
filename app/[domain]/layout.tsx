@@ -8,9 +8,9 @@ import { SalesFunnel } from '@prisma/client';
 export const dynamic = 'force-dynamic';
 
 export async function generateMetadata(
-  { params }: { params: { domain: string } }
+  { params }: { params: Promise<{ domain: string }> }
 ): Promise<Metadata> {
-  const domain = decodeURIComponent(params.domain);
+  const domain = decodeURIComponent((await params).domain);
   
   try {
     // Get the business data
@@ -55,18 +55,21 @@ export default async function DomainLayout({
   params,
 }: {
   children: React.ReactNode;
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }) {
-  const domain = decodeURIComponent(params.domain);
+  const domain = decodeURIComponent((await params).domain);
   console.log('Domain layout rendered with domain:', domain);
   
   try {
     const business = await getBusinessByDomain(domain);
     const siteConfig = business.siteConfig || {};
     const colors = {
-       primary: siteConfig.colors?.primary || '#3b82f6', 
-       secondary: siteConfig.colors?.secondary || '#6b7280', 
+       primary: siteConfig.colors?.primary || '#3b82f6',
+       secondary: siteConfig.colors?.secondary || '#6b7280',
+       accent: siteConfig.colors?.accent || '#ef4444',
     };
+    const themeName = siteConfig.themeName?.name || 'modern';
+    
     
     let activeFunnel: SalesFunnel | null = null;
     try {
@@ -85,6 +88,7 @@ export default async function DomainLayout({
         business={business}
         domain={domain} 
         siteConfig={siteConfig} 
+        themeName={themeName as string}
         colors={colors}
         activeFunnel={activeFunnel || undefined}
       >

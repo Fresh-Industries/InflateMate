@@ -176,3 +176,26 @@ body {
     transform: translate(0px, 0px) scale(1);
   }
 }
+@layer components {
+  .theme-aware-button.theme-aware-button { 
+    background-color: transparent !important;
+    background-image: none !important;
+    color: inherit !important;
+
+    background: var(--btn-bg) !important;
+    color: var(--btn-text-color) !important;
+    border: var(--btn-border, none);
+    box-shadow: var(--btn-shadow, none);
+  }
+
+  .theme-aware-button.theme-aware-button:hover {
+    background-color: transparent !important;
+    background-image: none !important;
+    color: inherit !important;
+
+    background: var(--btn-hover-bg) !important;
+    color: var(--btn-hover-text-color, var(--btn-text-color)) !important;
+    border: var(--btn-hover-border, var(--btn-border, none));
+    box-shadow: var(--btn-hover-shadow, var(--btn-shadow, none));
+  }
+}

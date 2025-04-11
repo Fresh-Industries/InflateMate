@@ -105,15 +105,15 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
   const host = headersList.get('host') || '';
   const domainWithoutPort = host.split(':')[0];
   
-  console.log('Getting business by domain:', domainParam);
-  console.log('Host header:', host);
+  // console.log('Getting business by domain:', domainParam);
+  // console.log('Host header:', host);
   
   let business = null;
   
   // First check if this is a subdomain of localhost
   if (domainWithoutPort.includes('.localhost')) {
     const subdomain = domainWithoutPort.split('.')[0];
-    console.log('Checking subdomain:', subdomain);
+    // console.log('Checking subdomain:', subdomain);
     
     // Try to find by formatted business name
     business = await prisma.business.findFirst({
@@ -142,7 +142,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
     });
     
     if (business) {
-      console.log('Found business by subdomain:', business.name);
+      // console.log('Found business by subdomain:', business.name);
       return {
         ...business,
         siteConfig: business.siteConfig as SiteConfig || {},
@@ -159,7 +159,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
   });
   
   if (business) {
-    console.log('Found business by custom domain:', business.name);
+    // console.log('Found business by custom domain:', business.name);
     return {
       ...business,
       siteConfig: business.siteConfig as SiteConfig || {},
@@ -174,7 +174,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
   });
   
   if (business) {
-    console.log('Found business by domain parameter:', business.name);
+    // console.log('Found business by domain parameter:', business.name);
     return {
       ...business,
       siteConfig: business.siteConfig as SiteConfig || {},
@@ -211,7 +211,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
     });
     
     if (business) {
-      console.log('Found business by domain parameter subdomain:', business.name);
+      // console.log('Found business by domain parameter subdomain:', business.name);
       return {
         ...business,
         siteConfig: business.siteConfig as SiteConfig || {},

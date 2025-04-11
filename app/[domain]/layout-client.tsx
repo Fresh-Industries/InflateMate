@@ -1,34 +1,19 @@
 'use client';
 import { ReactNode, useState, useEffect } from 'react';
-import { SalesFunnel, SalesFunnelPopup } from '@/app/[domain]/_components/SalesFunnel';
+import { SalesFunnel as SalesFunnelType, SalesFunnelPopup } from '@/app/[domain]/_components/SalesFunnel';
 import Header from '@/app/[domain]/_components/Header';
 import Footer from '@/app/[domain]/_components/Footer';
-
-interface Business {
-  id: string;
-  name: string;
-  logo?: string;
-  [key: string]: unknown;
-}
-
-interface SiteConfig {
-  colors?: {
-    primary?: string;
-    secondary?: string;
-  };
-  [key: string]: unknown;
-}
+import { BusinessWithSiteConfig, SiteConfig } from '@/lib/business/domain-utils';
+import { themeConfig, ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/themeConfig';
 
 interface DomainLayoutClientProps {
   children: ReactNode;
-  business: Business;
+  business: BusinessWithSiteConfig;
   domain: string;
   siteConfig: SiteConfig;
-  colors: {
-    primary?: string;
-    secondary?: string;
-  };
-  activeFunnel?: SalesFunnel;
+  themeName: string;
+  colors: ThemeColors;
+  activeFunnel?: SalesFunnelType;
 }
 
 export function DomainLayoutClient({ 
@@ -36,9 +21,12 @@ export function DomainLayoutClient({
   business, 
   siteConfig,
   colors,
-  activeFunnel
+  activeFunnel,
+  themeName 
 }: DomainLayoutClientProps) {
   const [isMounted, setIsMounted] = useState(false);
+  
+  const selectedTheme: ThemeDefinition = themeConfig[themeName.toLowerCase()] || themeConfig.modern;
   
   useEffect(() => {
     setIsMounted(true);
@@ -46,23 +34,24 @@ export function DomainLayoutClient({
   
   return (
     <div className="flex flex-col min-h-screen">
-      <Header business={business} siteConfig={siteConfig} colors={colors} />
+      <Header 
+        business={business} 
+        siteConfig={siteConfig} 
+        colors={colors} 
+        theme={selectedTheme}
+      />
       
       <main className="flex-1">
         {children}
       </main>
       
-      <Footer business={business} siteConfig={siteConfig} colors={colors} />
+      <Footer business={business} theme={selectedTheme} colors={colors} />
       
-      {/* Sales Funnel Popup - Only render on client side */}
       {isMounted && activeFunnel && (
         <SalesFunnelPopup 
           businessId={business.id}
           funnel={activeFunnel}
-          colors={{
-            primary: colors.primary || "#3b82f6",
-            secondary: colors.secondary || "#6b7280",
-          }}
+          colors={colors}
         />
       )}
     </div>
