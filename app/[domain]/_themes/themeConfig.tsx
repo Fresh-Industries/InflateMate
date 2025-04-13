@@ -1,20 +1,42 @@
 // themeConfig.ts
 
 import React from 'react';
-import { PartyPopper } from 'lucide-react';
+
+// Helper to calculate contrast: returns "#000000" for light backgrounds, or "#ffffff" for dark backgrounds.
+export const getContrastColor = (hex: string): string => {
+  // Simplified hex validation and expansion
+  let color = (hex || '#ffffff').replace('#', '');
+  if (color.length === 3) {
+    color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
+  }
+  if (color.length !== 6) {
+    console.warn('Invalid hex color format for contrast calculation:', hex);
+    return '#000000'; // Default to black on error
+  }
+  const r = parseInt(color.substring(0, 2), 16);
+  const g = parseInt(color.substring(2, 4), 16);
+  const b = parseInt(color.substring(4, 6), 16);
+  const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+  return brightness > 128 ? "#000000" : "#ffffff";
+};
 
 export interface ThemeColors {
   primary: string;
   accent: string;
   secondary: string;
+  background: string;
 }
+
+// Standard transition for consistency
+const standardTransition = 'all 0.3s ease';
 
 export interface ThemeDefinition {
   // Header styles
   headerBg: (colors: ThemeColors, scrolled: boolean) => string;
+  headerTextColor: (colors: ThemeColors) => string;
   boxShadow: (colors: ThemeColors, scrolled: boolean) => string;
   extraBorderStyle: (colors: ThemeColors) => React.CSSProperties;
-  renderDecorations: (colors: ThemeColors) => React.ReactElement | null;
+
   // Button styles
   buttonStyles: {
     background: (colors: ThemeColors) => string;
@@ -26,14 +48,31 @@ export interface ThemeDefinition {
     hoverBorder?: (colors: ThemeColors) => string;
     hoverShadow?: (colors: ThemeColors) => string;
     transition?: string;
+    borderRadius?: string;
   };
+  secondaryButtonStyles?: {
+    background: (colors: ThemeColors) => string;
+    textColor: (colors: ThemeColors) => string;
+    border?: (colors: ThemeColors) => string;
+    shadow?: (colors: ThemeColors) => string;
+    borderRadius?: string;
+    transition?: string;
+    hoverBackground?: (colors: ThemeColors) => string;
+    hoverTextColor?: (colors: ThemeColors) => string;
+    hoverBorder?: (colors: ThemeColors) => string;
+    hoverShadow?: (colors: ThemeColors) => string;
+  };
+
   // Card styles
   cardStyles: {
     background: (colors: ThemeColors) => string;
     border: (colors: ThemeColors) => string;
     shadow: (colors: ThemeColors) => string;
     textColor: (colors: ThemeColors) => string;
+    // Optional: Add borderRadius if needed across themes
+    borderRadius?: string; 
   };
+
   // Footer styles
   footerStyles: {
     background: (colors: ThemeColors) => string;
@@ -42,11 +81,11 @@ export interface ThemeDefinition {
     linkHoverColor: (colors: ThemeColors) => string;
     borderColor: (colors: ThemeColors) => string;
   };
-  // New styles
+
+  // Section styles
   heroBackground?: (colors: ThemeColors) => string;
   heroTitleColor?: (colors: ThemeColors) => string;
   heroTextColor?: (colors: ThemeColors) => string;
-  // Feature section styles
   featureSectionStyles?: {
     titleColor: (colors: ThemeColors) => string;
     cardBackground: (colors: ThemeColors, index: number) => string;
@@ -54,20 +93,17 @@ export interface ThemeDefinition {
     cardTitleColor: (colors: ThemeColors, index: number) => string;
     cardTextColor: (colors: ThemeColors) => string;
   };
-  // Popular Rentals section styles
   popularRentalsStyles?: {
     background: (colors: ThemeColors) => string;
     titleColor: (colors: ThemeColors) => string;
     cardBackgroundGradient: (colors: ThemeColors) => string;
     priceColor: (colors: ThemeColors) => string;
   };
-  // CTA section styles
   ctaStyles?: {
     background: (colors: ThemeColors) => string;
     titleColor: (colors: ThemeColors) => string;
     textColor: (colors: ThemeColors) => string;
   };
-  // Contact section styles
   contactStyles?: {
     background: (colors: ThemeColors) => string;
     titleColor: (colors: ThemeColors) => string;
@@ -77,323 +113,335 @@ export interface ThemeDefinition {
     serviceAreaTagBackground: (colors: ThemeColors, index: number) => string;
     serviceAreaTagColor: (colors: ThemeColors, index: number) => string;
   };
+
+  // Link styles
+  linkStyles?: {
+    background: (colors: ThemeColors) => string;
+    textColor: (colors: ThemeColors) => string;
+    border: (colors: ThemeColors) => string;
+    shadow: (colors: ThemeColors) => string;
+    hoverBackground: (colors: ThemeColors) => string;
+    hoverTextColor: (colors: ThemeColors) => string;
+    hoverBorder: (colors: ThemeColors) => string;
+    hoverShadow: (colors: ThemeColors) => string;
+    transition: string;
+    active: (colors: ThemeColors) => string;
+    borderRadius: string;
+  };
+
+  // Image styles: Applied to key images like logo, hero, inventory cards
+  imageStyles: (colors: ThemeColors) => React.CSSProperties;
 }
 
 export const themeConfig: { [key: string]: ThemeDefinition } = {
   modern: {
-    // Minimal, neutral header with a subtle gradient and faint shadow on scroll
-    headerBg: (_colors, scrolled) =>
-      scrolled ? 'rgba(255,255,255,1)' : 'rgba(255,255,255,0.96)',
-    boxShadow: (_colors, scrolled) =>
-      scrolled ? '0 2px 4px rgba(0, 0, 0, 0.1)' : 'none',
-    extraBorderStyle: (_colors) => ({}),
-    // A single, crisp horizontal divider at the top center
-    renderDecorations: (colors) => (
-      <div
-        className="absolute left-1/2 top-0 transform -translate-x-1/2"
-        aria-hidden="true"
-      >
-        <hr style={{ width: '30%', borderTop: `1px solid ${colors.primary}` }} />
-      </div>
-    ),
+    // Header: Nearly white bg, minimal scroll shadow, thin bottom border
+    headerBg: (_colors, scrolled) => scrolled ? 'rgba(255, 255, 255, 0.95)' : 'rgba(255, 255, 255, 0.90)',
+    headerTextColor: (colors) => colors.primary,
+    boxShadow: (_colors, scrolled) => scrolled ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+    extraBorderStyle: (colors) => ({ borderBottom: `1px solid ${colors.primary}50` }),
+    
+    // Buttons: Primary bg, secondary hover, rounded, subtle shadow
     buttonStyles: {
-      // Smooth and refined gradient
-      background: (colors) =>
-        `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-      textColor: () => '#ffffff',
-      hoverBackground: (colors) =>
-        `linear-gradient(135deg, ${colors.secondary}, ${colors.primary})`,
-      transition: 'background 0.3s ease, box-shadow 0.3s ease',
+      background: (colors) => colors.primary,
+      textColor: (colors) => getContrastColor(colors.primary),
+      hoverBackground: (colors) => colors.secondary,
+      hoverTextColor: (colors) => getContrastColor(colors.secondary),
+      hoverShadow: (colors) => `0 4px 10px ${colors.primary}20`,
+      transition: standardTransition,
+      borderRadius: '12px'
     },
+    // Secondary Buttons: Transparent, primary border/text, subtle hover
+    secondaryButtonStyles: {
+      background: () => 'transparent',
+      textColor: (colors) => colors.primary,
+      border: (colors) => `1px solid ${colors.primary}`,
+      hoverBackground: (colors) => colors.primary + '15',
+      hoverTextColor: (colors) => colors.primary,
+      transition: standardTransition,
+      borderRadius: '12px'
+    },
+    // Cards: White, thin border, subtle shadow, rounded
     cardStyles: {
       background: () => '#ffffff',
-      border: (colors) => `1px solid ${colors.primary}30`,
-      shadow: () => '0 1px 4px rgba(0,0,0,0.08)',
-      textColor: () => '#111111',
+      border: (colors) => `1px solid ${colors.primary}33`,
+      shadow: () => '0 2px 5px rgba(0,0,0,0.08)',
+      textColor: () => '#333333',
+      borderRadius: '16px' // Added consistent rounding for modern cards
     },
+    // Footer: Standard light theme
     footerStyles: {
-      background: () => '#f3f4f6',
-      textColor: () => '#6b7280',
-      linkColor: () => '#4b5563',
-      linkHoverColor: (colors) => colors.primary,
-      borderColor: () => '#e5e7eb',
+      background: () => '#f8f9fa',
+      textColor: () => '#6c757d',
+      linkColor: (colors) => colors.primary,
+      linkHoverColor: (colors) => colors.secondary,
+      borderColor: () => '#e9ecef'
     },
+    // Sections: Gradients and clean lines
     heroBackground: (colors) => `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
-    heroTitleColor: () => '#ffffff',
-    heroTextColor: () => '#ffffff',
+    heroTitleColor: (colors) => getContrastColor(colors.primary),
+    heroTextColor: (colors) => getContrastColor(colors.secondary),
     featureSectionStyles: {
       titleColor: (colors) => colors.primary,
-      cardBackground: (colors, index) => [`${colors.primary}10`, `${colors.accent}10`, `${colors.secondary}10`][index % 3],
-      iconBackground: (colors, index) => [`${colors.primary}20`, `${colors.accent}20`, `${colors.secondary}20`][index % 3],
-      cardTitleColor: (colors, index) => [colors.primary, colors.accent, colors.secondary][index % 3],
-      cardTextColor: () => '#6b7280',
+      cardBackground: () => '#ffffff', // Use cardStyles background
+      iconBackground: (colors, index) => [ `${colors.primary}15`, `${colors.accent}15`, `${colors.secondary}15` ][index % 3],
+      cardTitleColor: (colors) => colors.primary,
+      cardTextColor: () => '#555555'
     },
     popularRentalsStyles: {
-      background: () => '#f8fafc',
+      background: (colors) => colors.background || '#f1f3f5',
       titleColor: (colors) => colors.primary,
-      cardBackgroundGradient: (colors) => `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
-      priceColor: (colors) => colors.primary,
+      cardBackgroundGradient: (colors) => `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`, // Gradient for card top
+      priceColor: (colors) => colors.accent
     },
     ctaStyles: {
-      background: (colors) => `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
-      titleColor: () => '#ffffff',
-      textColor: () => '#ffffff',
+      background: (colors) => `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`,
+      titleColor: (colors) => getContrastColor(colors.primary),
+      textColor: (colors) => getContrastColor(colors.secondary),
     },
     contactStyles: {
-      background: () => '#f3f4f6',
+      background: () => '#f8f9fa',
       titleColor: (colors) => colors.primary,
-      cardBackground: () => '#ffffff',
-      iconBackground: (colors, type) => ({ primary: `${colors.primary}20`, accent: `${colors.accent}20`, secondary: `${colors.secondary}20` }[type]),
-      textColor: () => '#6b7280',
-      serviceAreaTagBackground: (colors, index) => [`${colors.primary}15`, `${colors.accent}15`, `${colors.secondary}15`][index % 3],
-      serviceAreaTagColor: (colors, index) => [colors.primary, colors.accent, colors.secondary][index % 3],
-    }
+      cardBackground: () => '#ffffff', // Use cardStyles background
+      iconBackground: (colors, type) =>
+        ({ primary: `${colors.primary}20`, accent: `${colors.accent}20`, secondary: `${colors.secondary}20` }[type]),
+      textColor: () => '#555555',
+      serviceAreaTagBackground: (colors, index) => [ `${colors.primary}15`, `${colors.accent}15`, `${colors.secondary}15` ][index % 3],
+      serviceAreaTagColor: (colors, index) => [ colors.primary, colors.accent, colors.secondary ][index % 3]
+    },
+    // Links: Understated, subtle border, secondary hover
+    linkStyles: {
+      background: () => 'transparent',
+      textColor: (colors) => colors.primary,
+      border: (colors) => `1px solid ${colors.primary}`,
+      shadow: () => 'none',
+      hoverBackground: (colors) => colors.secondary + '20',
+      hoverTextColor: (colors) => colors.secondary,
+      hoverBorder: (colors) => `1px solid ${colors.secondary}`,
+      hoverShadow: () => 'none',
+      transition: standardTransition,
+      active: (colors) => colors.secondary + '30', // Subtle active background
+      borderRadius: '12px'
+    },
+    // Images: Subtle border, rounded corners, soft shadow
+    imageStyles: (colors) => ({
+      border: `1px solid ${colors.primary}33`,
+      borderRadius: '12px',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.08)',
+      transition: standardTransition
+    })
   },
-  playful: {
-    // Vibrant multi-tone header that shouts fun with a bold gradient
-    headerBg: (_colors, _scrolled) =>
-      `linear-gradient(90deg, #FF6B6B, #FECF57, #48DBFB)`,
-    boxShadow: (_colors, scrolled) =>
-      scrolled ? '0 4px 12px rgba(0,0,0,0.2)' : '0 2px 6px rgba(0,0,0,0.1)',
-    extraBorderStyle: (_colors) => ({ borderBottom: '3px dashed #FECF57' }),
-    // Lively decorative SVGs and animated icons invoke a playful spirit
-    renderDecorations: (_colors) => (
-      <>
-        {/* Rotating Star */}
-        <div className="absolute top-4 left-3 animate-spin-slow" aria-hidden="true">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            strokeWidth="2"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            style={{ color: '#FF6B6B' }}
-          >
-            <polygon points="12 2 15 8 22 9 17 14 18 21 12 18 6 21 7 14 2 9 9 8 12 2" />
-          </svg>
-        </div>
-        {/* Pulsing Party Popper */}
-        <div className="absolute bottom-3 right-4 animate-pulse" aria-hidden="true">
-          <PartyPopper className="h-6 w-6" style={{ color: '#FECF57' }} />
-        </div>
-      </>
-    ),
+
+  retro: {
+    // Header: Solid primary, thick accent border, heavy inset scroll shadow
+    headerBg: (colors) => colors.primary,
+    headerTextColor: (colors) => getContrastColor(colors.primary),
+    boxShadow: (colors, scrolled) => scrolled ? `inset 0 -12px 0 0 ${colors.accent}` : 'none', // Increased shadow
+    extraBorderStyle: (colors) => ({
+      borderBottom: `8px solid ${colors.accent}`, // Increased border
+      borderBottomLeftRadius: '0',
+      borderBottomRightRadius: '0'
+    }),
+    // Buttons: Accent bg, THICK secondary border/shadow, reversed hover
     buttonStyles: {
-      background: (_colors) =>
-        `linear-gradient(100deg, #FF6B6B, #FECF57)`,
-      textColor: () => '#ffffff',
-      border: () => `2px solid #48DBFB`,
-      shadow: () => '0 2px 4px rgba(0,0,0,0.15)',
-      hoverBackground: () =>
-        `linear-gradient(100deg, #FECF57, #FF6B6B)`,
-      hoverBorder: () => `2px solid #FF6B6B`,
-      hoverShadow: () => '0 4px 8px rgba(0,0,0,0.25)',
-      transition: 'all 0.3s ease',
+      background: (colors) => colors.accent,
+      textColor: (colors) => getContrastColor(colors.accent),
+      border: (colors) => `4px solid ${colors.secondary}`, // Increased border
+      shadow: (colors) => `8px 8px 0 ${colors.secondary}`, // Increased shadow
+      hoverBackground: (colors) => colors.secondary,
+      hoverTextColor: (colors) => getContrastColor(colors.secondary),
+      hoverBorder: (colors) => `4px solid ${colors.primary}`, // Increased border
+      hoverShadow: (colors) => `4px 4px 0 ${colors.primary}`, // Adjusted hover shadow
+      transition: standardTransition, // Consistent transition
+      borderRadius: '0px'
     },
+    // Secondary Buttons: Primary bg, consistent thick style
+    secondaryButtonStyles: {
+      background: (colors) => colors.primary,
+      textColor: (colors) => getContrastColor(colors.primary),
+      border: (colors) => `4px solid ${colors.secondary}`,
+      shadow: (colors) => `8px 8px 0 ${colors.secondary}`,
+      hoverBackground: (colors) => colors.secondary,
+      hoverTextColor: (colors) => getContrastColor(colors.secondary),
+      hoverBorder: (colors) => `4px solid ${colors.primary}`,
+      hoverShadow: (colors) => `4px 4px 0 ${colors.primary}`,
+      transition: standardTransition,
+      borderRadius: '0px'
+    },
+    // Cards: Tinted bg, THICK accent border, heavy secondary shadow, NO radius
     cardStyles: {
-      background: () => '#ffffff',
-      border: () => '1px solid #48DBFB80',
-      shadow: () => '0 4px 8px rgba(0,0,0,0.12)',
-      textColor: () => '#333333',
+      background: (colors) => colors.background || '#fffef8',
+      border: (colors) => `5px solid ${colors.accent}`, // Increased border
+      shadow: (colors) => `5px 5px 0 ${colors.secondary}`, // Increased shadow
+      textColor: (colors) => colors.primary,
+      borderRadius: '0px' // Explicitly no radius
     },
+    // Footer: Darker retro feel
     footerStyles: {
-      background: () =>
-        `linear-gradient(180deg, #FF6B6B20, #FECF5720)`,
-      textColor: () => '#333333',
-      linkColor: () => '#FF6B6B',
-      linkHoverColor: () => '#FECF57',
-      borderColor: () => '#48DBFB40',
+      background: (colors) => colors.secondary,
+      textColor: (colors) => getContrastColor(colors.secondary),
+      linkColor: (colors) => colors.accent,
+      linkHoverColor: (colors) => colors.primary,
+      borderColor: (colors) => colors.accent
     },
-    heroBackground: (colors) => `linear-gradient(135deg, ${colors.primary}, ${colors.accent})`,
-    heroTitleColor: () => '#ffffff',
-    heroTextColor: () => '#ffffff',
+    // Sections: Flat colors, raw look
+    heroBackground: (colors) => colors.primary, // FLAT color
+    heroTitleColor: (colors) => getContrastColor(colors.primary),
+    heroTextColor: (colors) => getContrastColor(colors.primary),
     featureSectionStyles: {
-      titleColor: () => '#FF6B6B',
-      cardBackground: (_colors, index) => ['#FF6B6B20', '#FECF5720', '#48DBFB20'][index % 3],
-      iconBackground: (_colors, index) => ['#FF6B6B40', '#FECF5740', '#48DBFB40'][index % 3],
-      cardTitleColor: (_colors, index) => ['#FF6B6B', '#FECF57', '#48DBFB'][index % 3],
-      cardTextColor: () => '#555',
+      titleColor: (colors) => colors.accent,
+      // Use cardStyles background, border, shadow implicitly via component structure
+      cardBackground: (colors, index) => [ `${colors.secondary}20`, `${colors.primary}20`, `${colors.accent}20` ][index % 3], // Keep variation for visual break
+      iconBackground: (colors, index) => [ `${colors.secondary}60`, `${colors.primary}60`, `${colors.accent}60` ][index % 3], // Bolder icons
+      cardTitleColor: (colors, index) => [ colors.accent, colors.primary, colors.secondary ][index % 3],
+      cardTextColor: () => '#444444'
     },
     popularRentalsStyles: {
-      background: () => '#FFF5F5',
-      titleColor: () => '#FF6B6B',
+      background: (colors) => colors.primary, // Use primary bg
+      titleColor: (colors) => colors.accent,
+      cardBackgroundGradient: (colors) => colors.accent, // FLAT accent color for card top
+      priceColor: (colors) => colors.secondary
+    },
+    ctaStyles: {
+      background: (colors) => colors.accent, // FLAT accent color
+      titleColor: (colors) => getContrastColor(colors.accent),
+      textColor: (colors) => getContrastColor(colors.accent)
+    },
+    contactStyles: {
+      background: () => '#fffef8',
+      titleColor: (colors) => colors.accent,
+      cardBackground: () => '#fffef8', // Use cardStyles background
+      iconBackground: (colors, type) =>
+        ({ primary: `${colors.primary}60`, accent: `${colors.accent}60`, secondary: `${colors.secondary}60` }[type]), // Bolder icons
+      textColor: () => '#444444',
+      serviceAreaTagBackground: (colors, index) => [ `${colors.accent}40`, `${colors.primary}40`, `${colors.secondary}40` ][index % 3], // Bolder tags
+      serviceAreaTagColor: (colors, index) => [ colors.accent, colors.primary, colors.secondary ][index % 3]
+    },
+    // Links: Mirror button styling
+    linkStyles: {
+      background: (colors) => colors.accent,
+      textColor: (colors) => getContrastColor(colors.accent),
+      border: (colors) => `4px solid ${colors.secondary}`,
+      shadow: (colors) => `8px 8px 0 ${colors.secondary}`,
+      hoverBackground: (colors) => colors.secondary,
+      hoverTextColor: (colors) => getContrastColor(colors.secondary),
+      hoverBorder: (colors) => `4px solid ${colors.primary}`,
+      hoverShadow: (colors) => `4px 4px 0 ${colors.primary}`,
+      transition: standardTransition,
+      active: (colors) => colors.secondary, // Use hover background for active state
+      borderRadius: '0px'
+    },
+    // Images: THICK accent border, NO radius, heavy secondary shadow
+    imageStyles: (colors) => ({
+      border: `4px solid ${colors.accent}`,
+      borderRadius: '0',
+      boxShadow: `8px 8px 0 ${colors.secondary}`, // Increased shadow
+      transition: standardTransition
+    })
+  },
+
+  playful: {
+    // Header: Accent bg, light shadow, dashed border
+    headerBg: (colors) => colors.accent,
+    headerTextColor: (colors) => getContrastColor(colors.accent),
+    boxShadow: (_, scrolled) => scrolled ? '0 4px 12px rgba(0,0,0,0.1)' : '0 2px 6px rgba(0,0,0,0.05)',
+    extraBorderStyle: (colors) => ({
+      borderBottom: `4px dashed ${colors.accent}`,
+    }),
+    // Buttons: Primary bg, dashed border, pill shape
+    buttonStyles: {
+      background: (colors) => colors.primary,
+      textColor: (colors) => getContrastColor(colors.primary),
+      border: (colors) => `2px dashed ${colors.secondary}`,
+      shadow: () => '0 2px 4px rgba(0,0,0,0.1)',
+      hoverBackground: (colors) => colors.secondary,
+      hoverTextColor: (colors) => getContrastColor(colors.secondary),
+      hoverBorder: (colors) => `2px dashed ${colors.primary}`,
+      hoverShadow: () => '0 4px 8px rgba(0,0,0,0.15)',
+      transition: standardTransition,
+      borderRadius: '9999px'
+    },
+    // Secondary Buttons: Dashed accent border, pill shape
+    secondaryButtonStyles: {
+      background: (colors) => colors.background || '#ffffff',
+      textColor: (colors) => colors.primary,
+      border: (colors) => `2px dashed ${colors.accent}`,
+      shadow: () => '0 2px 4px rgba(0,0,0,0.1)',
+      hoverBackground: (colors) => colors.accent + '20',
+      hoverTextColor: (colors) => colors.accent,
+      hoverBorder: (colors) => `2px dashed ${colors.secondary}`,
+      hoverShadow: () => '0 4px 8px rgba(0,0,0,0.15)',
+      transition: standardTransition,
+      borderRadius: '9999px'
+    },
+    // Cards: Dashed border, rounded
+    cardStyles: {
+      background: () => '#ffffff',
+      border: (colors) => `1px dashed ${colors.accent}`,
+      shadow: () => '0 4px 8px rgba(0,0,0,0.12)',
+      textColor: (colors) => colors.primary,
+      borderRadius: '20px' // Added consistent rounding for playful cards
+    },
+    // Footer: Playful gradient
+    footerStyles: {
+      background: (colors) => `linear-gradient(180deg, ${colors.primary}10, ${colors.accent}10)`,
+      textColor: (colors) => colors.primary,
+      linkColor: (colors) => colors.accent,
+      linkHoverColor: (colors) => colors.secondary,
+      borderColor: (colors) => colors.primary + '30'
+    },
+    // Sections: Gradients and vibrant colors
+    heroBackground: (colors) => `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
+    heroTitleColor: (colors) => getContrastColor(colors.primary),
+    heroTextColor: (colors) => getContrastColor(colors.secondary),
+    featureSectionStyles: {
+      titleColor: (colors) => colors.primary,
+      cardBackground: (colors, index) => [ `${colors.primary}10`, `${colors.accent}10`, `${colors.secondary}10` ][index % 3],
+      iconBackground: (colors, index) => [ `${colors.primary}20`, `${colors.accent}20`, `${colors.secondary}20` ][index % 3],
+      cardTitleColor: (colors, index) => [ colors.primary, colors.accent, colors.secondary ][index % 3],
+      cardTextColor: () => '#555555'
+    },
+    popularRentalsStyles: {
+      background: () => '#fffaf5',
+      titleColor: (colors) => colors.primary,
       cardBackgroundGradient: (colors) => `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-      priceColor: () => '#FECF57',
+      priceColor: (colors) => colors.accent
     },
     ctaStyles: {
       background: (colors) => `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})`,
-      titleColor: () => '#ffffff',
-      textColor: () => '#ffffff',
+      titleColor: (colors) => getContrastColor(colors.accent),
+      textColor: (colors) => getContrastColor(colors.secondary)
     },
     contactStyles: {
-      background: () => '#FFFDF5',
-      titleColor: () => '#FF6B6B',
+      background: () => '#fffdf5',
+      titleColor: (colors) => colors.primary,
       cardBackground: () => '#ffffff',
-      iconBackground: (_colors, type) => ({ primary: '#FF6B6B40', accent: '#FECF5740', secondary: '#48DBFB40' }[type]),
-      textColor: () => '#555',
-      serviceAreaTagBackground: (_colors, index) => ['#FF6B6B30', '#FECF5730', '#48DBFB30'][index % 3],
-      serviceAreaTagColor: (_colors, index) => ['#FF6B6B', '#FECF57', '#48DBFB'][index % 3],
-    }
-  },
-  retro: {
-    // A throwback header with an old-school, textured paper vibe
-    headerBg: (_colors, _scrolled) => '#F3E7D1',
-    boxShadow: (colors, scrolled) =>
-      scrolled ? `inset 0 -4px 0 0 ${colors.primary}` : 'none',
-    extraBorderStyle: (colors) => ({ borderBottom: `4px solid ${colors.primary}` }),
-    // Retro decoration using bold lines and an off-kilter accent block
-    renderDecorations: (colors) => (
-      <>
-        <div className="absolute top-0 left-0 w-full" aria-hidden="true">
-          <div style={{ height: '2px', backgroundColor: colors.primary }} />
-        </div>
-        <div className="absolute bottom-0 right-0 transform rotate-6" aria-hidden="true">
-          <div style={{ width: '40px', height: '4px', backgroundColor: colors.accent }} />
-        </div>
-      </>
-    ),
-    buttonStyles: {
+      iconBackground: (colors, type) =>
+        ({ primary: `${colors.primary}30`, accent: `${colors.accent}30`, secondary: `${colors.secondary}30` }[type]),
+      textColor: () => '#555555',
+      serviceAreaTagBackground: (colors, index) => [ `${colors.primary}20`, `${colors.accent}20`, `${colors.secondary}20` ][index % 3],
+      serviceAreaTagColor: (colors, index) => [ colors.primary, colors.accent, colors.secondary ][index % 3]
+    },
+    // Links: Pill shape, dashed border
+    linkStyles: {
       background: (colors) => colors.primary,
-      textColor: (colors) => colors.accent,
-      border: (colors) => `2px solid ${colors.secondary}`,
-      shadow: (colors) => `4px 4px 0 ${colors.secondary}`,
+      textColor: (colors) => getContrastColor(colors.primary),
+      border: (colors) => `2px dashed ${colors.secondary}`,
+      shadow: () => 'none',
       hoverBackground: (colors) => colors.secondary,
-      hoverTextColor: (colors) => colors.primary,
-      hoverBorder: (colors) => `2px solid ${colors.primary}`,
-      hoverShadow: (colors) => `2px 2px 0 ${colors.primary}`,
-      transition: 'all 0.25s ease',
+      hoverTextColor: (colors) => getContrastColor(colors.secondary),
+      hoverBorder: (colors) => `2px dashed ${colors.primary}`,
+      hoverShadow: () => 'none',
+      transition: standardTransition,
+      active: (colors) => colors.secondary, // Use hover background for active
+      borderRadius: '9999px'
     },
-    cardStyles: {
-      background: () => '#FFF8F0',
-      border: (colors) => `2px solid ${colors.primary}`,
-      shadow: () => '0 2px 6px rgba(0,0,0,0.1)',
-      textColor: () => '#333333',
-    },
-    footerStyles: {
-      background: (colors) => colors.accent,
-      textColor: (colors) => colors.secondary,
-      linkColor: (colors) => colors.primary,
-      linkHoverColor: (colors) => colors.secondary,
-      borderColor: (colors) => colors.primary,
-    },
-    heroBackground: (colors) => `linear-gradient(135deg, ${colors.accent}, ${colors.secondary})`,
-    heroTitleColor: (colors) => colors.primary,
-    heroTextColor: (colors) => colors.primary,
-    featureSectionStyles: {
-      titleColor: (colors) => colors.primary,
-      cardBackground: (colors, index) => [colors.accent+'20', colors.secondary+'20', colors.primary+'20'][index % 3],
-      iconBackground: (colors, index) => [colors.accent+'40', colors.secondary+'40', colors.primary+'40'][index % 3],
-      cardTitleColor: (colors, index) => [colors.accent, colors.secondary, colors.primary][index % 3],
-      cardTextColor: () => '#4a4a4a',
-    },
-    popularRentalsStyles: {
-      background: () => '#F3E7D1',
-      titleColor: (colors) => colors.primary,
-      cardBackgroundGradient: (colors) => `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-      priceColor: (colors) => colors.accent,
-    },
-    ctaStyles: {
-      background: (colors) => `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-      titleColor: (colors) => colors.accent,
-      textColor: (colors) => colors.accent,
-    },
-    contactStyles: {
-      background: () => '#FFF8F0',
-      titleColor: (colors) => colors.primary,
-      cardBackground: () => '#F3E7D1',
-      iconBackground: (colors, type) => ({ primary: colors.primary+'40', accent: colors.accent+'40', secondary: colors.secondary+'40' }[type]),
-      textColor: () => '#4a4a4a',
-      serviceAreaTagBackground: (colors, index) => [colors.primary+'30', colors.accent+'30', colors.secondary+'30'][index % 3],
-      serviceAreaTagColor: (colors, index) => [colors.primary, colors.accent, colors.secondary][index % 3],
-    }
-  },
-  bouncey: {
-    // A dynamic, energetic header with a bold, animated gradient and rounded edge flourish
-    headerBg: (colors, _scrolled) =>
-      `linear-gradient(145deg, ${colors.secondary}cc, ${colors.accent}cc)`,
-    boxShadow: (_colors, scrolled) =>
-      scrolled ? '0 5px 15px rgba(0,0,0,0.3)' : '0 3px 8px rgba(0,0,0,0.2)',
-    extraBorderStyle: (colors) => ({
-      borderBottom: `5px solid ${colors.primary}`,
-      borderBottomLeftRadius: '16px',
-      borderBottomRightRadius: '16px',
-    }),
-    // Bouncy decorations with animated circles that bring lively motion
-    renderDecorations: (colors) => (
-      <>
-        <div
-          className="absolute top-2 left-5 w-5 h-5 rounded-full animate-bounce"
-          style={{ backgroundColor: colors.primary }}
-          aria-hidden="true"
-        />
-        <div
-          className="absolute top-6 right-3 w-6 h-6 rounded-full animate-bounce animation-delay-2000"
-          style={{ backgroundColor: colors.accent }}
-          aria-hidden="true"
-        />
-        <div
-          className="absolute bottom-2 right-10 w-4 h-4 rounded-full animate-bounce"
-          style={{ backgroundColor: colors.secondary }}
-          aria-hidden="true"
-        />
-      </>
-    ),
-    buttonStyles: {
-      background: (colors) =>
-        `linear-gradient(160deg, ${colors.primary}, ${colors.accent})`,
-      textColor: () => '#ffffff',
-      shadow: () => '0 3px 6px rgba(0,0,0,0.1)',
-      hoverBackground: (colors) =>
-        `linear-gradient(160deg, ${colors.accent}, ${colors.primary})`,
-      hoverShadow: () => '0 5px 10px rgba(0,0,0,0.15)',
-      transition: 'all 0.3s ease',
-    },
-    cardStyles: {
-      background: () => '#ffffff',
-      border: (colors) => `1px solid ${colors.accent}80`,
-      shadow: () => '0 4px 10px rgba(0,0,0,0.12)',
-      textColor: () => '#222222',
-    },
-    footerStyles: {
-      background: (colors) => `${colors.secondary}20`,
-      textColor: (colors) => `${colors.primary}B0`,
-      linkColor: (colors) => colors.accent,
-      linkHoverColor: (colors) => colors.primary,
-      borderColor: (colors) => `${colors.accent}40`,
-    },
-    heroBackground: (colors) => `linear-gradient(145deg, ${colors.primary}, ${colors.accent})`,
-    heroTitleColor: () => '#ffffff',
-    heroTextColor: () => '#ffffff',
-    featureSectionStyles: {
-      titleColor: (colors) => colors.primary,
-      cardBackground: (colors, index) => [`${colors.primary}15`, `${colors.accent}15`, `${colors.secondary}15`][index % 3],
-      iconBackground: (colors, index) => [`${colors.primary}30`, `${colors.accent}30`, `${colors.secondary}30`][index % 3],
-      cardTitleColor: (colors, index) => [colors.primary, colors.accent, colors.secondary][index % 3],
-      cardTextColor: () => '#444',
-    },
-    popularRentalsStyles: {
-      background: () => '#f7faff',
-      titleColor: (colors) => colors.primary,
-      cardBackgroundGradient: (colors) => `linear-gradient(160deg, ${colors.primary}, ${colors.accent})`,
-      priceColor: (colors) => colors.accent,
-    },
-    ctaStyles: {
-      background: (colors) => `linear-gradient(160deg, ${colors.secondary}, ${colors.primary})`,
-      titleColor: () => '#ffffff',
-      textColor: () => '#ffffff',
-    },
-    contactStyles: {
-      background: () => '#fafbff',
-      titleColor: (colors) => colors.primary,
-      cardBackground: () => '#ffffff',
-      iconBackground: (colors, type) => ({ primary: `${colors.primary}30`, accent: `${colors.accent}30`, secondary: `${colors.secondary}30` }[type]),
-      textColor: () => '#444',
-      serviceAreaTagBackground: (colors, index) => [`${colors.primary}20`, `${colors.accent}20`, `${colors.secondary}20`][index % 3],
-      serviceAreaTagColor: (colors, index) => [colors.primary, colors.accent, colors.secondary][index % 3],
-    },
+    // Images: Soft rounded corners, accent border, elevated shadow
+    imageStyles: (colors) => ({
+      border: `2px solid ${colors.accent}`,
+      borderRadius: '20px',
+      boxShadow: `0 6px 10px ${colors.secondary}30`,
+      transition: standardTransition
+    })
   }
 };

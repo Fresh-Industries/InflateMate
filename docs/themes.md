@@ -1,83 +1,119 @@
-1. Modern Bounce
-Overview:
-A sleek, contemporary design that integrates playful interactions with a clear, intuitive layout. The template is ideal for families and event planners who value a modern and streamlined online experience.
+# Theme Descriptions for Inflatemate
 
-Key Features:
+This document outlines the design guidelines and aesthetics for the three themes in the Inflatemate app: **Modern/Minimalistic**, **Retro (Neobrutalism)**, and **Playful**. All components (headers, buttons, cards, images, and links) will draw their styling from the centralized theme configuration to ensure consistency across the application. Colors are chosen dynamically by users through their selected primary, accent, and secondary colors, with text color automatically set to either black or white based on contrast calculations.
 
-Typography:
+---
 
-Use rounded, modern sans-serif fonts for headings to evoke friendliness, paired with highly legible body text for clear communication.
+## 1. Modern / Minimalistic
 
-Layout & Navigation:
+### Overview
+The **Modern** theme is designed to be clean, refined, and understated. It emphasizes simplicity with a minimal color palette and subtle gradients. Components have crisp edges and well-balanced spacing. The goal is to create a polished, professional interface that feels light and uncluttered.
 
-Hero Section: A full-width banner showcasing dynamic visuals of the bounce house events, coupled with a playful, animated call-to-action (CTA) that gently “bounces” on hover.
+### Design Guidelines
 
-Modular Grid: Sections arranged in a card-based layout, ensuring that service descriptions, testimonials, and booking forms are easily accessible on both desktop and mobile.
+- **Header:**  
+  - Use a nearly white background with a subtle opacity.
+  - Minimal box-shadow that appears only when scrolled.
+  - A single, centered horizontal divider acts as a decorative element.
 
-Navigation: A sticky top menu that simplifies access to key areas of the site, with options for smooth scrolling and interactive micro-transitions.
+- **Buttons:**  
+  - Use a smooth gradient background (e.g., a blend between primary and secondary colors).
+  - Text is always set to pure white or black based on the contrast of the primary color.
+  - Hover effects include a gentle transition to a reversed gradient.
+  - Rounded corners with subtle curves are preferred.
 
-Interactive Elements:
+- **Cards:**  
+  - White background with a thin border (using a slight opacity of primary color).
+  - Subtle drop shadows give a clean layered effect.
+  - Text is dark (almost near black) to ensure readability.
 
-Subtle animations, such as icons and buttons that bounce or shift when hovered over or clicked, enhancing the fun factor without overwhelming the content.
+- **Images:**  
+  - Images have a subtle border and rounded corners.
+  - A soft box-shadow creates depth without drawing too much attention away from the content.
 
-Additional Components:
+- **Links:**  
+  - Simple and understated; transparent background with a subtle border.
+  - Hover states subtly change the background and border color using the secondary color.
+  - Transitions are smooth and unobtrusive.
 
-Booking Widget: An integrated, step-by-step booking process that guides users through reservations with intuitive, playful transitions.
+---
 
-Footer: A minimal footer that provides access to important links and social media channels with gentle animated effects on interaction.
+## 2. Retro (Neobrutalism)
 
-2. Carnival Bounce
-Overview:
-Drawing inspiration from the excitement of a carnival, this design infuses a sense of celebration and fun into the website experience. It’s perfect for engaging families looking for a day of thrilling activity.
+### Overview
+The **Retro (Neobrutalism)** theme is all about bold, raw, and unapologetic aesthetics. Inspired by the neobrutalist design movement, it embraces simple, flat elements with thick borders and heavy shadows. The design is aggressive and unrefined with a sense of architectural austerity.
 
-Key Features:
+### Design Guidelines
 
-Typography:
+- **Header:**  
+  - Use a solid color background (primary color) without gradients.
+  - A thick, prominent bottom border (6px) reinforces the raw, blocky aesthetic.
+  - When scrolled, an inset shadow with greater thickness is applied.
 
-Mix decorative, playful fonts for headlines reminiscent of vintage carnival posters with clean, simple body fonts for readability.
+- **Buttons & Links:**  
+  - Buttons and links have chunky, aggressive styling.
+  - Use bold, solid colors for backgrounds.
+  - Borders are significantly thicker (3px solid) and shadows have a larger offset (6px).
+  - Hover effects reverse the color order with thicker borders and more pronounced shadows.
+  - Text color is dynamically set to pure white or black for strong contrast.
 
-Layout & Navigation:
+- **Cards:**  
+  - Card backgrounds have a light tint (e.g., off-white) with a thick border (4px solid) to create a rugged separation between elements.
+  - Shadows are heavier to simulate a raw, unpolished look.
+  - Typography is bold with little to no feathering.
 
-Header: An engaging top section that may feature playful illustrations, banners, or even animated confetti elements to immediately set a festive tone.
+- **Images:**  
+  - Images take on a neobrutalist styling, with **no border-radius** and a heavy border (4px solid) using the accent color.
+  - Use larger, more pronounced shadows for a “cut-out” effect.
+  - Transitions should be straightforward and emphasize the raw nature of the design.
 
-Content Sections: Clear, segmented areas that highlight service details, customer testimonials, and an image gallery designed in the style of a digital carnival flyer.
+- **Decorative Elements:**  
+  - Use raw, geometric shapes (e.g., thick horizontal or diagonal blocks) placed off-center.
+  - Rotated elements add visual interest without mimicking overly polished designs.
 
-Navigation: A top menu or ticket booth–inspired overlay menu that is both inviting and easy to use, with dropdown options that add a playful twist.
+---
 
-Interactive Elements:
+## 3. Playful
 
-Booking buttons and forms that animate with bouncy or wiggly transitions on hover, reflecting the fun carnival spirit.
+### Overview
+The **Playful** theme is vibrant, bold, and creative. It combines colorful gradients, whimsical elements, and unexpected design choices to create a fun and engaging user experience. It’s designed to evoke a sense of joy and energy.
 
-Additional Components:
+### Design Guidelines
 
-Imagery & Icons: Integration of playful illustrations or hand-drawn elements that enhance the lively atmosphere.
+- **Header:**  
+  - Use a multi-color gradient that transitions between the primary, accent, and secondary colors.
+  - Light shadow effects make the header pop, and a subtle border detail (like a dashed line) adds to the hand-crafted feel.
 
-Footer: A vibrant footer section featuring links and social media icons styled with creative animations.
+- **Buttons & Links:**  
+  - Buttons and links use vivid gradients with a playful twist.
+  - Irregular, creative borders (such as dashed or slightly skewed) add character.
+  - Hover effects include smooth scaling and a shift in gradient direction for added dynamism.
+  - Text color is either pure black or white based on the background contrast, ensuring readability with a fun twist.
 
-3. Retro Bounce
-Overview:
-A nostalgic, retro-inspired design that combines the charm of classic bounce house attractions with modern usability. This template creates a memorable and inviting experience by blending vintage elements with contemporary functionality.
+- **Cards:**  
+  - Cards have a clean white background with playful accents using borders or background overlays that cycle through the user’s chosen colors.
+  - Shadows and rounded corners are used more liberally, evoking a handcrafted aesthetic.
+  - Typography is lively, combining bold headlines with light body text.
 
-Key Features:
+- **Images:**  
+  - Images in this theme feature soft, rounded corners and a gentle border.
+  - A slightly elevated shadow effect ensures that images feel integrated and playful.
+  - Transitions are smooth with subtle scaling effects on hover.
 
-Typography:
+- **Decorative Elements:**  
+  - Rotated or slightly skewed design accents create a sense of imperfection and charm.
+  - Colors change dynamically on hover to add a lively feel.
 
-Employ retro display fonts with character for headings, juxtaposed with straightforward, clean fonts for the main text to ensure clarity and readability.
+---
 
-Layout & Navigation:
+## Implementation Summary
 
-Hero Section: A bold introduction featuring vintage-styled bounce house imagery or a playful montage of events, enhanced with interactive “bounce” effects.
+- All theme styles are centralized in the **themeConfig** file.
+- Color values are based on user-selected primary, accent, and secondary colors.
+- Text contrast is calculated dynamically using the **getContrastColor** helper function to ensure readability.
+- Image styling can be applied by calling the `imageStyles` function from the theme (for example, within your inventory cards).
+- The components (headers, buttons, cards, images, and links) read these style definitions, making it easy to swap themes dynamically without modifying component code.
 
-Content Sections: Organized blocks resembling vintage flyers, with patterned dividers and creative animated transitions that evoke a sense of nostalgia.
+Use this document as a design reference when implementing or updating the components in Inflatemate. Adjust specific numeric values (e.g., border thickness, shadow offsets, border-radius) as needed to meet your final design requirements.
 
-Navigation: A fixed header featuring retro-styled navigation buttons that provide subtle, animated feedback on user interaction.
-
-Interactive Elements:
-
-An interactive booking form mimicking a retro ticket kiosk, complete with engaging animations and smooth transitional effects.
-
-Additional Components:
-
-Media Gallery: A carousel displaying event photos styled with vintage filters and playful overlays.
-
-Footer: A visually engaging footer that draws on retro themes, incorporating decorative icons and layouts reminiscent of classic signage.
+---

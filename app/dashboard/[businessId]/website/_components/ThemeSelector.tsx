@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { BusinessWithSiteConfig, Theme } from '@/lib/business/domain-utils';
-import { modern, playful, bouncy, retro } from '@/lib/config/themes';
+import { modern, playful, retro } from '@/lib/config/themes';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
@@ -11,7 +11,7 @@ interface ThemeSelectorProps {
   onChange: (theme: Theme) => void;
 }
 
-const themes: Theme[] = [modern, playful, bouncy, retro].map(t => ({ id: t.id, name: t.themeName }));
+const themes: Theme[] = [modern, playful, retro].map(t => ({ id: t.id, name: t.themeName }));
 
 export default function ThemeSelector({ business, onChange }: ThemeSelectorProps) {
   const [selectedTheme, setSelectedTheme] = useState<Theme>(
