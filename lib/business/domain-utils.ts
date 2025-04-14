@@ -76,6 +76,7 @@ export interface SiteConfig {
     secondary?: string;
     accent?: string;
     background?: string;
+    text?: string;
   };
 }
 

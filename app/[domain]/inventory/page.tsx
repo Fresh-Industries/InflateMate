@@ -26,6 +26,14 @@ export interface InventoryItem {
   [key: string]: unknown; // For any other properties
 }
 
+export interface ThemeColors {
+  primary: string;
+  accent: string;
+  secondary: string;
+  background: string;
+  text: string;
+}
+
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const domain = decodeURIComponent(params.domain);
   
@@ -72,11 +80,18 @@ export default async function InventoryPage({ params }: { params: { domain: stri
     
     // Get the site configuration
     const siteConfig = business.siteConfig || {};
-    const colors = siteConfig.colors || {};
     
-    // Set default colors if not provided
-    const primaryColor = colors.primary || "#3b82f6";
-    const secondaryColor = colors.secondary || "#6b7280";
+    // Get theme name
+    const themeName = (siteConfig.themeName?.name as string) || 'modern';
+    
+    // Define Colors (with fallbacks)
+    const colors: ThemeColors = {
+      primary: siteConfig.colors?.primary || '#4f46e5',
+      accent: siteConfig.colors?.accent || '#f97316',
+      secondary: siteConfig.colors?.secondary || '#06b6d4',
+      background: siteConfig.colors?.background || '#ffffff',
+      text: siteConfig.colors?.text || '#1f2937'
+    };
     
     // Fetch available inventory items for this business with all details
     const inventoryItems = await prisma.inventory.findMany({
@@ -90,8 +105,8 @@ export default async function InventoryPage({ params }: { params: { domain: stri
       <InventoryClient 
         inventoryItems={inventoryItems} 
         domain={domain} 
-        primaryColor={primaryColor} 
-        secondaryColor={secondaryColor} 
+        themeName={themeName}
+        colors={colors}
       />
     );
   } catch (error) {

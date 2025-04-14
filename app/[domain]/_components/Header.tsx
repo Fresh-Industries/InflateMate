@@ -46,16 +46,16 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
     const defaultBg = linkStyles.background(colors);
     const defaultTextColor = linkStyles.textColor(colors);
     const defaultBorder = linkStyles.border(colors);
-    const defaultShadow = linkStyles.shadow(colors);
+    const defaultShadow = linkStyles.boxShadow(colors);
     const hoverBorder = linkStyles.hoverBorder(colors);
-    const hoverShadow = linkStyles.hoverShadow(colors);
+    const hoverBoxShadowValue = linkStyles.hoverBoxShadow(colors);
 
     if (active) {
       return {
         background: activeBg,
         color: activeTextColor,
         border: hoverBorder, // Use hover state for border/shadow when active for consistency?
-        boxShadow: hoverShadow,
+        boxShadow: hoverBoxShadowValue,
         transition: linkStyles.transition,
         borderRadius: linkStyles.borderRadius
       };
@@ -71,8 +71,6 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
     }
   };
 
-  // Compute hover styles separately for applying via CSS or pseudo-classes if needed
-  // Or rely on transition property + direct style application for hover effect
   const getLinkHoverStyles = (): React.CSSProperties => {
     const linkStyles = theme.linkStyles;
     if (!linkStyles) return {};
@@ -80,7 +78,7 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
       background: linkStyles.hoverBackground(colors),
       color: linkStyles.hoverTextColor(colors),
       border: linkStyles.hoverBorder(colors),
-      boxShadow: linkStyles.hoverShadow(colors),
+      boxShadow: linkStyles.hoverBoxShadow(colors),
     };
   };
 
@@ -89,7 +87,7 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
     background: theme.secondaryButtonStyles?.background(colors) || theme.buttonStyles.background(colors),
     color: theme.secondaryButtonStyles?.textColor(colors) || theme.buttonStyles.textColor(colors),
     border: theme.secondaryButtonStyles?.border?.(colors) || theme.buttonStyles.border?.(colors) || 'none',
-    boxShadow: theme.secondaryButtonStyles?.shadow?.(colors) || theme.buttonStyles.shadow?.(colors) || 'none',
+    boxShadow: theme.secondaryButtonStyles?.boxShadow?.(colors) || theme.buttonStyles.boxShadow?.(colors) || 'none',
     transition: theme.secondaryButtonStyles?.transition || theme.buttonStyles.transition || 'transform 0.3s ease',
     borderRadius: theme.secondaryButtonStyles?.borderRadius || theme.buttonStyles.borderRadius || '12px'
   };
@@ -102,13 +100,12 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
     ...theme.extraBorderStyle(colors) // Includes borderBottom, etc.
   };
 
-  const logoStyle: React.CSSProperties = theme.imageStyles ? { ...theme.imageStyles(colors), height: '5rem', width: 'auto', objectFit: 'contain' } : { height: '5rem', width: 'auto', objectFit: 'contain' };
+  const logoStyle: React.CSSProperties = theme.imageStyles ? { ...theme.imageStyles(colors), height: '5rem', width: 'auto', objectFit: 'contain', borderRadius: theme.imageStyles(colors).borderRadius } : { height: '5rem', width: 'auto', objectFit: 'contain', borderRadius: '9999px' };
   const logoInitialStyle: React.CSSProperties = {
      background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
      borderRadius: theme.imageStyles ? theme.imageStyles(colors).borderRadius : '9999px', // Match image style rounding
      color: getContrastColor(colors.primary) // Ensure text contrast
   }
-
   return (
     <header
       className="sticky top-0 z-50 transition-all duration-300"
@@ -120,14 +117,12 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
             {business.logo ? (
               <div
                 className="relative overflow-hidden mr-2 transition-transform duration-300 group-hover:scale-105"
-                // Apply imageStyles directly if they include rounding/border/shadow
-                style={theme.imageStyles ? theme.imageStyles(colors) : { borderRadius: '9999px'}} // Default to round if no theme style
               >
                 <img
                   src={business.logo}
                   alt={`${business.name} Logo`}
-                  style={logoStyle} // Control size and fit here
-                  className="block" // Ensure img is block for proper styling application
+                  className="h-20 w-auto object-contain" // Ensure img is block for proper styling application
+                  
                 />
               </div>
             ) : (
@@ -152,22 +147,14 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
             ].map((item) => {
               const active = isActive(item.path);
               const style = computeLinkStyle(active);
-              const hoverStyle = getLinkHoverStyles(); // We might need to apply this via CSS :hover
               return (
                 <Link
                   key={item.path}
                   href={item.path}
-                  className="nav-link flex items-center px-3 py-1.5 text-sm font-medium transition-all duration-300"
+                  className="nav-link flex items-center px-3 py-1.5 text-sm font-medium transition-all duration-300 hover:scale-105"
                   style={style}
-                  // Example of inline hover (less ideal than CSS classes)
-                  onMouseEnter={(e) => {
-                    const target = e.currentTarget as HTMLAnchorElement;
-                    Object.assign(target.style, hoverStyle);
-                  }}
-                  onMouseLeave={(e) => {
-                     const target = e.currentTarget as HTMLAnchorElement;
-                     Object.assign(target.style, style); // Revert to base style
-                  }}
+                  
+                
                 >
                   {React.cloneElement(item.icon, { className: "h-4 w-4 mr-1.5" })}
                   {item.label}

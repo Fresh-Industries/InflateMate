@@ -59,13 +59,24 @@ const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'prim
   const styles = (type === 'secondary' && secondaryStyles) ? secondaryStyles : baseStyles;
   const fallbackStyles = baseStyles; // Always fallback to primary button styles
 
+  // For secondary buttons with transparent background, use the text color directly from the theme
+  if (type === 'secondary' && secondaryStyles && secondaryStyles.background(colors) === 'transparent') {
+    return {
+      background: styles?.background?.(colors) ?? fallbackStyles.background(colors),
+      border: styles?.border?.(colors) ?? fallbackStyles.border?.(colors) ?? 'none',
+      boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
+      borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
+      transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
+      color: styles.textColor(colors), // Use the theme's text color directly
+    };
+  }
+
   return {
     background: styles?.background?.(colors) ?? fallbackStyles.background(colors),
     border: styles?.border?.(colors) ?? fallbackStyles.border?.(colors) ?? 'none',
-    boxShadow: styles?.shadow?.(colors) ?? fallbackStyles.shadow?.(colors) ?? 'none',
-    borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px', // Default modern rounding
+    boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
+    borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
     transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
-    // Ensure text color uses contrast helper
     color: getContrastColor(styles?.background?.(colors) ?? fallbackStyles.background(colors)),
   };
 };
@@ -76,7 +87,7 @@ const getCardStyle = (theme: ThemeDefinition, colors: ThemeColors): React.CSSPro
   return {
     backgroundColor: styles.background(colors),
     border: styles.border(colors),
-    boxShadow: styles.shadow(colors),
+    boxShadow: styles.boxShadow(colors),
     color: styles.textColor(colors),
     borderRadius: styles.borderRadius || '16px', // Default modern rounding if not specified
   };
@@ -100,7 +111,8 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
       primary: siteConfig.colors?.primary || '#4f46e5',
       accent: siteConfig.colors?.accent || '#f97316',
       secondary: siteConfig.colors?.secondary || '#06b6d4',
-      background: siteConfig.colors?.background || '#ffffff'
+      background: siteConfig.colors?.background || '#ffffff',
+      text: siteConfig.colors?.text || '#333333'
     };
 
     // --- Pre-calculate Styles --- 
@@ -126,7 +138,7 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
         backgroundColor: featureStyles ? featureStyles.cardBackground(colors, index) : `${colors.primary}10`,
         borderRadius: cardStyle.borderRadius, // Use consistent card rounding
         border: cardStyle.border, // Use card border
-        boxShadow: cardStyle.shadow, // Use card shadow
+        boxShadow: cardStyle.boxShadow, // Ensure boxShadow is used
     });
     const getFeatureIconStyle = (index: number) => ({
       backgroundColor: featureStyles ? featureStyles.iconBackground(colors, index) : `${colors.primary}20`,
@@ -139,11 +151,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
 
     // Popular Rentals Section Styles
     const popularRentalsStyles = theme.popularRentalsStyles;
-    const popularRentalsBgStyle = { 
-      backgroundColor: popularRentalsStyles ? popularRentalsStyles.background(colors) : '#f8fafc',
-      // Subtle background pattern using theme colors
-      backgroundImage: `radial-gradient(circle at 20% 90%, ${colors.primary}0A, transparent 60%), radial-gradient(circle at 80% 40%, ${colors.accent}0A, transparent 60%)`
-    };
     const popularRentalsTitleStyle = { color: popularRentalsStyles ? popularRentalsStyles.titleColor(colors) : colors.primary };
     const popularCardTopStyle = { 
       background: popularRentalsStyles ? popularRentalsStyles.cardBackgroundGradient(colors) : `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
@@ -179,7 +186,7 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
       backgroundColor: contactStyles ? contactStyles.cardBackground(colors) : '#ffffff',
       borderRadius: cardStyle.borderRadius, // Consistent card rounding
       border: cardStyle.border, // Consistent border
-      boxShadow: cardStyle.shadow, // Consistent shadow
+      boxShadow: cardStyle.boxShadow, // Ensure boxShadow is used
     };
     const getContactIconStyle = (type: 'primary' | 'accent' | 'secondary') => ({
       backgroundColor: contactStyles ? contactStyles.iconBackground(colors, type) : `${colors.primary}20`,
@@ -238,10 +245,10 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
                   <Button
                     asChild
                     size="lg" 
-                    className="text-lg font-bold shadow-lg hover:shadow-xl transition-transform duration-300 hover:scale-105"
+                    className="text-lg font-bold shadow-lg"
                     style={primaryButtonStyle} // Applied pre-calculated style
                   >
-                    <Link href="/booking" className="flex items-center gap-2">
+                    <Link href="/booking" className="flex items-center gap-2 transition-all duration-300 hover:scale-105">
                       Book Now <ArrowRight className="h-5 w-5" />
                     </Link>
                   </Button>
@@ -249,8 +256,8 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
                   <Button 
                     asChild
                     size="lg" 
-                    variant="outline" // Base variant, style overrides appearance
-                    className="text-lg font-bold hover:scale-105 transition-transform duration-300" // Removed potentially conflicting classes
+                    
+                    className="text-lg font-bold transition-all duration-300 hover:scale-105" // Removed potentially conflicting classes
                     style={secondaryButtonStyle} // Applied pre-calculated style
                   >
                     <Link href="/inventory">View Inflatables</Link>
@@ -269,7 +276,7 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
                     alt="Bounce House Fun" 
                     // Apply matching border-radius to image itself
                     className="rounded-2xl w-full h-72 md:h-[450px] object-cover" 
-                    style={{ borderRadius: heroImageStyle.borderRadius }} 
+                    style={{ borderRadius: heroImageStyle.borderRadius}} 
                   />
                 </div>
               </div>
@@ -358,16 +365,16 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
         {/* DYNAMIC LANDING SECTIONS - Rendered via SectionRenderer */}
         {siteConfig.landing?.sections?.map((section) => (
           <section key={section.id} className="dynamic-section">
-            {/* SectionRenderer needs access to theme/colors if it does internal styling */}
-            <SectionRenderer section={section} theme={theme} colors={colors} /> 
+            {/* Removed theme and colors props */}
+            <SectionRenderer section={section} /> 
           </section>
         ))}
         
         {/* POPULAR RENTALS SECTION - Styles derived from theme */}
         <section 
           className="py-20 relative overflow-hidden"
-          // Popular rentals background style from theme
-          style={popularRentalsBgStyle} 
+          // Apply theme style conditionally
+          style={popularRentalsStyles ? popularRentalsStyles.background(colors) : {}} 
         >
           <div className="container mx-auto px-4 relative z-10">
             <h2 
@@ -477,8 +484,8 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
             <Button 
               asChild
               size="lg" 
-              className="text-xl font-bold shadow-xl hover:shadow-2xl transition-transform duration-300 hover:scale-105 px-10 py-7"
-              style={primaryButtonStyle} 
+              className="text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 px-10 py-7"
+              style={secondaryButtonStyle} 
             >
               <Link href="/booking" className="flex items-center gap-3">
                 Book Your Bounce House <ArrowRight className="h-6 w-6" />

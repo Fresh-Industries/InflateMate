@@ -13,6 +13,7 @@ interface ColorSettingsProps {
     secondary?: string;
     accent?: string;
     background?: string;
+    text?: string;
   };
   updateColors: (colors: any) => void;
 }
@@ -25,6 +26,7 @@ const colorPalettes = [
     secondary: "#6b7280",
     accent: "#f59e0b",
     background: "#f9fafb",
+    text: "#1f2937",
   },
   {
     name: "Green",
@@ -32,6 +34,7 @@ const colorPalettes = [
     secondary: "#6b7280",
     accent: "#f97316",
     background: "#f9fafb",
+    text: "#1f2937",
   },
   {
     name: "Purple",
@@ -39,6 +42,7 @@ const colorPalettes = [
     secondary: "#6b7280",
     accent: "#ec4899",
     background: "#f9fafb",
+    text: "#1f2937",
   },
   {
     name: "Red",
@@ -46,6 +50,7 @@ const colorPalettes = [
     secondary: "#6b7280",
     accent: "#3b82f6",
     background: "#f9fafb",
+    text: "#1f2937",
   },
   {
     name: "Orange",
@@ -53,6 +58,7 @@ const colorPalettes = [
     secondary: "#6b7280",
     accent: "#8b5cf6",
     background: "#f9fafb",
+    text: "#1f2937",
   },
 ];
 
@@ -61,6 +67,7 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
   const [secondaryColor, setSecondaryColor] = useState(colors.secondary || "#6b7280");
   const [accentColor, setAccentColor] = useState(colors.accent || "#f59e0b");
   const [backgroundColor, setBackgroundColor] = useState(colors.background || "#f9fafb");
+  const [textColor, setTextColor] = useState(colors.text || "#1f2937");
   
   // Update the colors in the parent component when they change
   useEffect(() => {
@@ -69,8 +76,9 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
       secondary: secondaryColor,
       accent: accentColor,
       background: backgroundColor,
+      text: textColor,
     });
-  }, [primaryColor, secondaryColor, accentColor, backgroundColor, updateColors]);
+  }, [primaryColor, secondaryColor, accentColor, backgroundColor, textColor, updateColors]);
   
   // Apply a predefined color palette
   const applyColorPalette = (palette: typeof colorPalettes[0]) => {
@@ -78,6 +86,7 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
     setSecondaryColor(palette.secondary);
     setAccentColor(palette.accent);
     setBackgroundColor(palette.background);
+    setTextColor(palette.text);
   };
   
   return (
@@ -86,17 +95,52 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
         <CardHeader>
           <CardTitle>Color Theme</CardTitle>
           <CardDescription>
-            Customize the colors for your website
+            Customize the colors for your website. Choose from presets or create your own unique color scheme.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
+          {/* Color Presets - Moved to top for better UX */}
+          <div className="space-y-2">
+            <Label className="text-lg">Quick Start with Presets</Label>
+            <div className="flex flex-wrap gap-2">
+              {colorPalettes.map((palette, index) => (
+                <Button
+                  key={index}
+                  variant="outline"
+                  className="flex items-center gap-2 p-4 hover:scale-105 transition-transform"
+                  onClick={() => applyColorPalette(palette)}
+                >
+                  <div className="flex">
+                    <div 
+                      className="w-5 h-5 rounded-full ring-2 ring-white"
+                      style={{ backgroundColor: palette.primary }}
+                    />
+                    <div 
+                      className="w-5 h-5 rounded-full -ml-2 ring-2 ring-white"
+                      style={{ backgroundColor: palette.accent }}
+                    />
+                    <div 
+                      className="w-5 h-5 rounded-full -ml-2 ring-2 ring-white"
+                      style={{ backgroundColor: palette.secondary }}
+                    />
+                  </div>
+                  {palette.name}
+                </Button>
+              ))}
+            </div>
+          </div>
+
           <div className="flex flex-col space-y-4">
+            <Label className="text-lg">Fine-Tune Your Colors</Label>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
-                <Label htmlFor="primaryColor">Primary Color</Label>
-                <div className="flex items-center space-x-2">
+                <Label htmlFor="primaryColor" className="flex items-center gap-2">
+                  Primary Color
+                  <span className="text-xs text-muted-foreground">(buttons, links, headings)</span>
+                </Label>
+                <div className="flex items-center space-x-2 group">
                   <div 
-                    className="w-8 h-8 rounded-md border"
+                    className="w-10 h-10 rounded-lg border shadow-sm group-hover:scale-105 transition-transform"
                     style={{ backgroundColor: primaryColor }}
                   />
                   <Input
@@ -110,19 +154,19 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
                     type="color"
                     value={primaryColor}
                     onChange={(e) => setPrimaryColor(e.target.value)}
-                    className="w-10 h-10 p-0 border-0"
+                    className="w-12 h-12 p-0 border-0 cursor-pointer hover:scale-105 transition-transform"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Used for buttons, links, and primary elements
-                </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="secondaryColor">Secondary Color</Label>
-                <div className="flex items-center space-x-2">
+                <Label htmlFor="secondaryColor" className="flex items-center gap-2">
+                  Secondary Color
+                  <span className="text-xs text-muted-foreground">(accents, subtle elements)</span>
+                </Label>
+                <div className="flex items-center space-x-2 group">
                   <div 
-                    className="w-8 h-8 rounded-md border"
+                    className="w-10 h-10 rounded-lg border shadow-sm group-hover:scale-105 transition-transform"
                     style={{ backgroundColor: secondaryColor }}
                   />
                   <Input
@@ -136,19 +180,19 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
                     type="color"
                     value={secondaryColor}
                     onChange={(e) => setSecondaryColor(e.target.value)}
-                    className="w-10 h-10 p-0 border-0"
+                    className="w-12 h-12 p-0 border-0 cursor-pointer hover:scale-105 transition-transform"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Used for secondary text and elements
-                </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="accentColor">Accent Color</Label>
-                <div className="flex items-center space-x-2">
+                <Label htmlFor="accentColor" className="flex items-center gap-2">
+                  Accent Color
+                  <span className="text-xs text-muted-foreground">(highlights, call-to-actions)</span>
+                </Label>
+                <div className="flex items-center space-x-2 group">
                   <div 
-                    className="w-8 h-8 rounded-md border"
+                    className="w-10 h-10 rounded-lg border shadow-sm group-hover:scale-105 transition-transform"
                     style={{ backgroundColor: accentColor }}
                   />
                   <Input
@@ -162,19 +206,45 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
                     type="color"
                     value={accentColor}
                     onChange={(e) => setAccentColor(e.target.value)}
-                    className="w-10 h-10 p-0 border-0"
+                    className="w-12 h-12 p-0 border-0 cursor-pointer hover:scale-105 transition-transform"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Used for highlights and accent elements
-                </p>
               </div>
               
               <div className="space-y-2">
-                <Label htmlFor="backgroundColor">Background Color</Label>
-                <div className="flex items-center space-x-2">
+                <Label htmlFor="textColor" className="flex items-center gap-2">
+                  Text Color
+                  <span className="text-xs text-muted-foreground">(main content text)</span>
+                </Label>
+                <div className="flex items-center space-x-2 group">
                   <div 
-                    className="w-8 h-8 rounded-md border"
+                    className="w-10 h-10 rounded-lg border shadow-sm group-hover:scale-105 transition-transform"
+                    style={{ backgroundColor: textColor }}
+                  />
+                  <Input
+                    id="textColor"
+                    type="text"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="flex-1"
+                  />
+                  <input
+                    type="color"
+                    value={textColor}
+                    onChange={(e) => setTextColor(e.target.value)}
+                    className="w-12 h-12 p-0 border-0 cursor-pointer hover:scale-105 transition-transform"
+                  />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="backgroundColor" className="flex items-center gap-2">
+                  Background Color
+                  <span className="text-xs text-muted-foreground">(page background)</span>
+                </Label>
+                <div className="flex items-center space-x-2 group">
+                  <div 
+                    className="w-10 h-10 rounded-lg border shadow-sm group-hover:scale-105 transition-transform"
                     style={{ backgroundColor: backgroundColor }}
                   />
                   <Input
@@ -188,57 +258,38 @@ export default function ColorSettings({ colors, updateColors }: ColorSettingsPro
                     type="color"
                     value={backgroundColor}
                     onChange={(e) => setBackgroundColor(e.target.value)}
-                    className="w-10 h-10 p-0 border-0"
+                    className="w-12 h-12 p-0 border-0 cursor-pointer hover:scale-105 transition-transform"
                   />
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  Used for page backgrounds
-                </p>
               </div>
             </div>
           </div>
           
-          <div className="space-y-2">
-            <Label>Color Presets</Label>
-            <div className="flex flex-wrap gap-2">
-              {colorPalettes.map((palette, index) => (
-                <Button
-                  key={index}
-                  variant="outline"
-                  className="flex items-center gap-2"
-                  onClick={() => applyColorPalette(palette)}
-                >
-                  <div className="flex">
-                    <div 
-                      className="w-4 h-4 rounded-full"
-                      style={{ backgroundColor: palette.primary }}
-                    />
-                    <div 
-                      className="w-4 h-4 rounded-full -ml-1"
-                      style={{ backgroundColor: palette.accent }}
-                    />
-                  </div>
-                  {palette.name}
-                </Button>
-              ))}
-            </div>
-          </div>
-          
-          <div className="p-4 border rounded-md">
-            <h3 className="font-medium mb-2">Preview</h3>
-            <div className="p-4 rounded-md" style={{ backgroundColor: backgroundColor }}>
-              <div className="space-y-4">
-                <h4 className="text-lg font-bold" style={{ color: primaryColor }}>
-                  Sample Heading
+          <div className="p-6 border rounded-lg shadow-sm">
+            <h3 className="font-medium mb-4 text-lg">Live Preview</h3>
+            <div className="p-6 rounded-lg transition-all" style={{ backgroundColor: backgroundColor }}>
+              <div className="space-y-6">
+                <h4 className="text-2xl font-bold" style={{ color: primaryColor }}>
+                  Welcome to Your Site
                 </h4>
-                <p style={{ color: secondaryColor }}>
-                  This is a sample paragraph showing how your colors will look on your website.
+                <p style={{ color: textColor }} className="text-lg">
+                  This is how your content will look. The main text uses your chosen text color for optimal readability.
                 </p>
-                <div className="flex gap-2">
-                  <Button style={{ backgroundColor: primaryColor, borderColor: primaryColor }}>
+                <p style={{ color: secondaryColor }} className="text-sm">
+                  Secondary text uses the secondary color for subtle hierarchy.
+                </p>
+                <div className="flex gap-3">
+                  <Button 
+                    style={{ backgroundColor: primaryColor, color: backgroundColor }}
+                    className="hover:scale-105 transition-transform"
+                  >
                     Primary Button
                   </Button>
-                  <Button variant="outline" style={{ color: accentColor, borderColor: accentColor }}>
+                  <Button 
+                    variant="outline" 
+                    style={{ color: accentColor, borderColor: accentColor }}
+                    className="hover:scale-105 transition-transform"
+                  >
                     Accent Button
                   </Button>
                 </div>
