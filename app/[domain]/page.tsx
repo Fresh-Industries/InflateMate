@@ -77,7 +77,7 @@ const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'prim
     boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
     borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
     transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
-    color: getContrastColor(styles?.background?.(colors) ?? fallbackStyles.background(colors)),
+    color: styles.textColor(colors) ?? fallbackStyles.textColor(colors),
   };
 };
 
@@ -115,12 +115,11 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
       text: siteConfig.colors?.text || '#333333'
     };
 
-    // --- Pre-calculate Styles --- 
-    // (Keeps JSX cleaner by deriving styles from theme here)
 
     // Button Styles
     const primaryButtonStyle = getButtonStyle(theme, colors, 'primary');
     const secondaryButtonStyle = getButtonStyle(theme, colors, 'secondary');
+    
 
     // Card Style
     const cardStyle = getCardStyle(theme, colors);
@@ -139,10 +138,13 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
         borderRadius: cardStyle.borderRadius, // Use consistent card rounding
         border: cardStyle.border, // Use card border
         boxShadow: cardStyle.boxShadow, // Ensure boxShadow is used
+        
     });
     const getFeatureIconStyle = (index: number) => ({
       backgroundColor: featureStyles ? featureStyles.iconBackground(colors, index) : `${colors.primary}20`,
       borderRadius: primaryButtonStyle.borderRadius === '0px' ? '0px' : '9999px', // Match button rounding (pill or square)
+      border: featureStyles ? featureStyles.iconBorder(colors, index) : cardStyle.border,
+      boxShadow: featureStyles ? featureStyles.iconBoxShadow(colors, index) : cardStyle.boxShadow,
     });
     const getFeatureCardTitleStyle = (index: number) => ({ 
       color: featureStyles ? featureStyles.cardTitleColor(colors, index) : colors.primary 
@@ -364,9 +366,9 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
         
         {/* DYNAMIC LANDING SECTIONS - Rendered via SectionRenderer */}
         {siteConfig.landing?.sections?.map((section) => (
-          <section key={section.id} className="dynamic-section">
+          <section key={section.id} className="dynamic-section" style={{ background: section.backgroundColor }}>
             {/* Removed theme and colors props */}
-            <SectionRenderer section={section} /> 
+            <SectionRenderer section={section} theme={theme} colors={colors} /> 
           </section>
         ))}
         

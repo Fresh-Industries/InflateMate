@@ -3,8 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   DynamicSection, 
-  TextCardsSectionContent,
-  TextCard 
+  TextCard
 } from '@/lib/business/domain-utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
@@ -16,32 +15,57 @@ import { UploadDropzone } from "@/lib/uploadthing";
 import { useToast } from '@/hooks/use-toast';
 import { X, PlusCircle, Loader2 } from 'lucide-react';
 
-
 // Define section types and pages
 const sectionTypes = ['text', 'imageText', 'videoText', 'textCards'] as const;
 type SectionType = typeof sectionTypes[number];
-const pageTypes = ['landing', 'about'] as const;
-type PageType = typeof pageTypes[number];
+type PageType = 'landing' | 'about';
+
+// Define a type alias for the content data expected by the parent/backend
+type ContentData = DynamicSection['content'];
+
+// Define an interface that includes ALL possible fields from different section types
+interface CommonContentFields {
+  title?: string;
+  text?: string;
+  imageUrl?: string;
+  imageKey?: string;
+  imagePosition?: 'left' | 'right';
+  videoUrl?: string;
+  videoPosition?: 'left' | 'right';
+  cards?: TextCard[];
+  // Note: backgroundColor is handled by a separate state
+}
 
 interface AddSectionFormProps {
   initialData: DynamicSection | null; // If editing, pass the section data
   onAddSection: (sectionData: Omit<DynamicSection, 'id'>) => void;
   onEditSection: (sectionData: DynamicSection) => void;
   onCancel: () => void;
-  businessId: string; // Needed for potential upload paths or context
+  businessId?: string; // Make businessId optional
+  // Added presetColors prop for color presets
+  presetColors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    background?: string;
+  };
+  page: PageType;
 }
 
 export default function AddSectionForm({ 
   initialData, 
   onAddSection, 
   onEditSection,
-  onCancel, 
-  businessId 
+  onCancel,
+  presetColors,
+  page: initialPage
 }: AddSectionFormProps) {
   const { toast } = useToast();
   const [sectionType, setSectionType] = useState<SectionType>(initialData?.type || 'text');
-  const [page, setPage] = useState<PageType>(initialData?.page || 'landing');
-  const [content, setContent] = useState<any>(initialData?.content || {}); 
+  const [content, setContent] = useState<CommonContentFields>(initialData?.content || {});
+  const [backgroundColor, setBackgroundColor] = useState<string>(initialData?.backgroundColor || '#ffffff');
+  const page = initialData?.page as PageType || initialPage;
+
   
   // Restore original loading states
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -53,32 +77,37 @@ export default function AddSectionForm({
     }
   }, [sectionType, initialData]);
 
-  const handleContentChange = (field: string, value: any) => {
-    setContent((prev: any) => ({ ...prev, [field]: value }));
+  const handleContentChange = (field: keyof CommonContentFields, value: unknown) => {
+    // Update the state, ensuring it conforms to CommonContentFields
+    setContent((prev) => ({ ...prev, [field]: value } as CommonContentFields));
   };
 
   // Specific handler for TextCards
   const handleCardChange = (cardId: string, field: keyof TextCard, value: string) => {
-    setContent((prev: TextCardsSectionContent) => ({
-      ...prev,
-      cards: (prev.cards || []).map(card => 
+    // Cast prev to CommonContentFields to safely access cards
+    setContent((prev) => {
+      const updatedCards = (prev.cards || []).map(card => 
         card.id === cardId ? { ...card, [field]: value } : card
-      )
-    }));
+      );
+      return { ...prev, cards: updatedCards } as CommonContentFields;
+    });
   };
 
   const addCard = () => {
-    setContent((prev: TextCardsSectionContent) => ({
-      ...prev,
-      cards: [...(prev.cards || []), { id: crypto.randomUUID(), title: '', description: '' }]
-    }));
+    // Cast prev to CommonContentFields
+    setContent((prev) => {
+      const newCard: TextCard = { id: crypto.randomUUID(), title: '', description: '' };
+      const updatedCards = [...(prev.cards || []), newCard];
+      return { ...prev, cards: updatedCards } as CommonContentFields;
+    });
   };
 
   const removeCard = (cardId: string) => {
-    setContent((prev: TextCardsSectionContent) => ({
-      ...prev,
-      cards: (prev.cards || []).filter(card => card.id !== cardId)
-    }));
+    // Cast prev to CommonContentFields
+    setContent((prev) => {
+      const updatedCards = (prev.cards || []).filter(card => card.id !== cardId);
+      return { ...prev, cards: updatedCards } as CommonContentFields;
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -97,21 +126,29 @@ export default function AddSectionForm({
       return;
     }
 
-    const sectionData = {
+    const finalSectionData: Omit<DynamicSection, 'id'> = {
       type: sectionType,
       page,
-      content,
+      content: content as ContentData, 
+      backgroundColor: backgroundColor,
     };
 
     if (initialData) {
-      onEditSection({ ...initialData, ...sectionData });
+      onEditSection({ 
+        ...initialData, 
+        type: sectionType, 
+        page,
+        content: content as ContentData, 
+        backgroundColor: backgroundColor,
+      });
     } else {
-      onAddSection(sectionData);
+      onAddSection(finalSectionData);
     }
   };
 
   // Render form fields based on selected section type
   const renderContentFields = () => {
+    // Directly use 'content' state object, properties are optional
     switch (sectionType) {
       case 'text':
         return (
@@ -251,6 +288,7 @@ export default function AddSectionForm({
           </>
         );
       case 'textCards':
+        const cards = (content.cards || []) as TextCard[];
         return (
           <>
              <div className="space-y-2">
@@ -259,7 +297,7 @@ export default function AddSectionForm({
             </div>
             <div className="space-y-4">
               <Label>Cards</Label>
-              {(content.cards || []).map((card: TextCard) => (
+              {cards.map((card: TextCard) => (
                 <Card key={card.id} className="relative p-4 pt-8">
                    <Button 
                     type="button"
@@ -293,47 +331,123 @@ export default function AddSectionForm({
     <Card>
       <CardHeader>
         <CardTitle>{initialData ? 'Edit Section' : 'Add New Section'}</CardTitle>
+        <div className="text-sm text-muted-foreground mt-1 flex items-center">
+          <span>Adding to: </span>
+          <span className="ml-1 font-medium capitalize bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
+            {page} page
+          </span>
+        </div>
       </CardHeader>
       <form onSubmit={handleSubmit}>
         <CardContent className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-             <div className="space-y-2">
-              <Label htmlFor="section-type">Section Type</Label>
-              <Select 
-                value={sectionType}
-                onValueChange={(value: SectionType) => setSectionType(value)}
-                disabled={!!initialData} // Don't allow changing type when editing
-              >
-                <SelectTrigger id="section-type">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {sectionTypes.map(type => (
-                    <SelectItem key={type} value={type} className="capitalize">{type.replace(/([A-Z])/g, ' $1')}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-             <div className="space-y-2">
-              <Label htmlFor="page-type">Page</Label>
-              <Select 
-                value={page}
-                onValueChange={(value: PageType) => setPage(value)}
-              >
-                <SelectTrigger id="page-type">
-                  <SelectValue placeholder="Select page" />
-                </SelectTrigger>
-                <SelectContent>
-                  {pageTypes.map(p => (
-                    <SelectItem key={p} value={p} className="capitalize">{p}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+          <div className="space-y-2">
+            <Label htmlFor="section-type">Section Type</Label>
+            <Select 
+              value={sectionType}
+              onValueChange={(value: SectionType) => setSectionType(value)}
+              disabled={!!initialData} // Don't allow changing type when editing
+            >
+              <SelectTrigger id="section-type">
+                <SelectValue placeholder="Select type" />
+              </SelectTrigger>
+              <SelectContent>
+                {sectionTypes.map(type => (
+                  <SelectItem key={type} value={type} className="capitalize">{type.replace(/([A-Z])/g, ' $1')}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
          
           {/* Render dynamic fields based on type */} 
           {renderContentFields()}
+          <div className="space-y-2">
+            <Label htmlFor="backgroundColor">Background Color</Label>
+            <Input 
+              id="backgroundColor"
+              type="color"
+              value={backgroundColor}
+              onChange={(e) => setBackgroundColor(e.target.value)}
+              className="w-full h-10 p-1"
+            />
+          </div>
+      
+            <div className="space-y-2">
+              <Label>Color Presets</Label>
+              <div className="flex flex-wrap gap-2">
+                {presetColors?.background && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    onClick={() => setBackgroundColor(presetColors.background || '#ffffff')}
+                  >
+                    <div 
+                      className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
+                      style={{ backgroundColor: presetColors.background || '#ffffff' }}
+                    />
+                    <span className="text-sm">Background</span> 
+                  </Button>
+                )}
+                
+                {presetColors?.primary && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    onClick={() => setBackgroundColor(presetColors.primary || '#3b82f6')}
+                  >
+                    <div 
+                      className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
+                      style={{ backgroundColor: presetColors.primary || '#3b82f6' }}
+                    />
+                    <span className="text-sm">Primary</span> 
+                  </Button>
+                )}
+                
+                {presetColors?.secondary && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    onClick={() => setBackgroundColor(presetColors.secondary || '#6b7280')}
+                  >
+                    <div 
+                      className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
+                      style={{ backgroundColor: presetColors.secondary || '#6b7280' }}
+                    />
+                    <span className="text-sm">Secondary</span> 
+                  </Button>
+                )}
+                
+                {presetColors?.accent && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    onClick={() => setBackgroundColor(presetColors.accent || '#f59e0b')}
+                  >
+                    <div 
+                      className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
+                      style={{ backgroundColor: presetColors.accent || '#f59e0b' }}
+                    />
+                    <span className="text-sm">Accent</span> 
+                  </Button>
+                )}
+                
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="flex items-center justify-start gap-2 p-2 h-auto"
+                  onClick={() => setBackgroundColor('#ffffff')}
+                >
+                  <div 
+                    className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
+                    style={{ backgroundColor: '#ffffff' }}
+                  />
+                  <span className="text-sm">White</span> 
+                </Button>
+              </div>
+            </div>
         </CardContent>
         <CardFooter className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isUploadingImage || isUploadingVideo}>Cancel</Button>

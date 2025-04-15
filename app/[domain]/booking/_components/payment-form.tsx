@@ -6,29 +6,24 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { ThemeColors, themeConfig } from "../../_themes/themeConfig";
+import { BookingMetadata } from "./customer-booking-form";
 
 interface PaymentFormProps {
-  amount: number;
-  bookingId: string;
-  customerEmail: string;
-  onSuccess: () => Promise<void>;
+  bookingData: BookingMetadata;
+  clientSecret: string;
+  onPaymentSuccess: () => Promise<void>;
+  themeName: string;
+  colors: ThemeColors;
   onError?: (error: string) => void;
-  businessId: string;
-  subtotal?: number;
-  taxAmount?: number;
-  taxRate?: number;
 }
 
 export function PaymentForm({
-  amount,
-  bookingId,
-  customerEmail,
-  onSuccess,
+  bookingData,
+  onPaymentSuccess,
+  themeName,
+  colors,
   onError = () => {},
-  businessId,
-  subtotal,
-  taxAmount,
-  taxRate,
 }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -37,7 +32,15 @@ export function PaymentForm({
   const { toast } = useToast();
   const router = useRouter();
 
-  // Check if Stripe is loaded
+  const theme = themeConfig[themeName] || themeConfig.modern;
+  const buttonStyles = theme.buttonStyles;
+  const bookingStyles = theme.bookingStyles;
+
+  const amount = parseFloat(bookingData.totalAmount) || 0;
+  const subtotal = parseFloat(bookingData.subtotalAmount) || undefined;
+  const taxAmount = parseFloat(bookingData.taxAmount) || undefined;
+  const taxRate = parseFloat(bookingData.taxRate) || undefined;
+
   useEffect(() => {
     if (!stripe) {
       console.log("Stripe not yet loaded");
@@ -50,8 +53,6 @@ export function PaymentForm({
     e.preventDefault();
 
     if (!stripe || !elements) {
-      // Stripe.js hasn't yet loaded.
-      // Make sure to disable form submission until Stripe.js has loaded.
       console.error("Stripe has not loaded yet");
       return;
     }
@@ -64,31 +65,27 @@ export function PaymentForm({
       const { error, paymentIntent } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: window.location.origin + `/dashboard/${businessId}/bookings`,
-          receipt_email: customerEmail,
+          return_url: window.location.origin + `/dashboard/${bookingData.businessId}/bookings`,
+          receipt_email: bookingData.customerEmail,
         },
         redirect: "if_required",
       });
 
       if (error) {
-        // Show error to your customer
         console.error("Payment confirmation error:", error);
         setErrorMessage(error.message || "An unexpected error occurred");
         onError(error.message || "Payment failed");
       } else if (paymentIntent && paymentIntent.status === "succeeded") {
-        // The payment has been processed!
         console.log("Payment succeeded:", paymentIntent);
         toast({
           title: "Payment Successful",
           description: "Your booking has been confirmed",
         });
         
-        // Redirect manually to ensure it happens
-        router.push(`/dashboard/${businessId}/bookings`);
+        router.push(`/dashboard/${bookingData.businessId}/bookings`);
         
-        await onSuccess();
+        await onPaymentSuccess();
       } else {
-        // Handle other paymentIntent statuses
         console.log("Payment status:", paymentIntent?.status);
         
         if (paymentIntent?.status === "processing") {
@@ -96,10 +93,8 @@ export function PaymentForm({
             title: "Payment Processing",
             description: "Your payment is processing. We'll update you when it's complete.",
           });
-          // Still redirect to bookings page
-          router.push(`/dashboard/${businessId}/bookings`);
+          router.push(`/dashboard/${bookingData.businessId}/bookings`);
         } else {
-          // Some other status
           setErrorMessage("Payment result unclear. Please check your email for confirmation.");
         }
       }
@@ -111,6 +106,31 @@ export function PaymentForm({
     } finally {
       setIsLoading(false);
     }
+  };
+  
+  const primaryButtonStyle: React.CSSProperties = {
+    backgroundColor: buttonStyles.background(colors),
+    color: buttonStyles.textColor(colors),
+    border: buttonStyles.border ? buttonStyles.border(colors) : undefined,
+    boxShadow: buttonStyles.boxShadow ? buttonStyles.boxShadow(colors) : undefined,
+    borderRadius: buttonStyles.borderRadius,
+    transition: buttonStyles.transition,
+  };
+
+  const primaryButtonHoverStyle: React.CSSProperties = {
+    backgroundColor: buttonStyles.hoverBackground(colors),
+    color: buttonStyles.hoverTextColor ? buttonStyles.hoverTextColor(colors) : buttonStyles.textColor(colors),
+    border: buttonStyles.hoverBorder ? buttonStyles.hoverBorder(colors) : (buttonStyles.border ? buttonStyles.border(colors) : undefined),
+    boxShadow: buttonStyles.hoverBoxShadow ? buttonStyles.hoverBoxShadow(colors) : (buttonStyles.boxShadow ? buttonStyles.boxShadow(colors) : undefined),
+  };
+  
+  const summaryStyle: React.CSSProperties = {
+      backgroundColor: bookingStyles.input.background(colors),
+      border: `1px solid ${bookingStyles.input.border(colors)}`,
+      color: bookingStyles.input.labelColor(colors),
+      padding: '1rem', 
+      borderRadius: '8px',
+      marginBottom: '1.5rem',
   };
 
   return (
@@ -125,43 +145,45 @@ export function PaymentForm({
         </div>
       )}
       
-      {/* Payment Summary */}
-      <div className="p-4 border rounded-md space-y-2 bg-muted/30">
-        <h3 className="font-medium">Payment Summary</h3>
+      <div style={summaryStyle}>
+        <h3 className="font-medium mb-3 text-lg">Payment Summary</h3>
         
         {subtotal !== undefined && (
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Subtotal:</span>
+          <div className="flex justify-between text-sm mb-1">
+            <span style={{ color: colors.text + 'aa' }}>Subtotal:</span>
             <span>${subtotal.toFixed(2)}</span>
           </div>
         )}
         
         {taxAmount !== undefined && taxRate !== undefined && (
-          <div className="flex justify-between text-sm">
-            <span className="text-muted-foreground">Tax ({taxRate}%):</span>
+          <div className="flex justify-between text-sm mb-2">
+             <span style={{ color: colors.text + 'aa' }}>Tax ({taxRate}%):</span>
             <span>${taxAmount.toFixed(2)}</span>
           </div>
         )}
         
-        <div className="flex justify-between font-medium pt-2 border-t">
+        <div className="flex justify-between font-semibold pt-2 border-t" style={{ borderColor: colors.secondary + '40' }}>
           <span>Total:</span>
           <span>${amount.toFixed(2)}</span>
         </div>
       </div>
       
       {stripe && elements ? (
-        <PaymentElement />
+        <PaymentElement options={{layout: "tabs"}} />
       ) : (
-        <div className="p-4 border border-gray-200 rounded-md flex items-center justify-center">
-          <Loader2 className="h-6 w-6 animate-spin mr-2" />
-          <span>Loading payment form...</span>
-        </div>
+         <div className="p-4 border border-gray-200 rounded-md flex items-center justify-center">
+           <Loader2 className="h-6 w-6 animate-spin mr-2" />
+           <span>Loading payment form...</span>
+         </div>
       )}
       
       <Button 
         type="submit" 
         disabled={!stripe || !elements || isLoading} 
         className="w-full"
+        style={primaryButtonStyle}
+        onMouseEnter={(e) => Object.assign(e.currentTarget.style, primaryButtonHoverStyle)}
+        onMouseLeave={(e) => Object.assign(e.currentTarget.style, primaryButtonStyle)}
       >
         {isLoading ? (
           <>

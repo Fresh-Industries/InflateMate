@@ -12,6 +12,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Gift, Mail, User, Phone, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { ThemeColors, ThemeDefinition, getContrastColor } from "@/app/[domain]/_themes/themeConfig";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -27,9 +28,40 @@ interface LeadCaptureFormProps {
   funnelId: string;
   onSuccess: (couponCode: string | null) => void;
   primaryColor: string;
+  theme: ThemeDefinition;
+  colors: ThemeColors;
 }
 
-export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor }: LeadCaptureFormProps) {
+// Helper function moved from page.tsx for consistency
+const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'primary' | 'secondary' = 'primary'): React.CSSProperties => {
+ const baseStyles = theme.buttonStyles;
+ const secondaryStyles = theme.secondaryButtonStyles;
+ const styles = (type === 'secondary' && secondaryStyles) ? secondaryStyles : baseStyles;
+ const fallbackStyles = baseStyles; // Always fallback to primary button styles
+
+ // For secondary buttons with transparent background, use the text color directly from the theme
+ if (type === 'secondary' && secondaryStyles && secondaryStyles.background(colors) === 'transparent') {
+   return {
+     background: styles?.background?.(colors) ?? fallbackStyles.background(colors),
+     border: styles?.border?.(colors) ?? fallbackStyles.border?.(colors) ?? 'none',
+     boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
+     borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
+     transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
+     color: styles.textColor(colors), // Use the theme's text color directly
+   };
+ }
+
+ return {
+   background: styles?.background?.(colors) ?? fallbackStyles.background(colors),
+   border: styles?.border?.(colors) ?? fallbackStyles.border?.(colors) ?? 'none',
+   boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
+   borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
+   transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
+   color: styles.textColor(colors) ?? fallbackStyles.textColor(colors),
+ };
+};
+
+export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor, theme, colors }: LeadCaptureFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
@@ -76,8 +108,15 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
     }
   };
   
-  // Generate a gradient based on the primary color
-  const gradientBg = `linear-gradient(135deg, ${primaryColor}dd, ${primaryColor}aa)`;
+  // --- Theme Styles ---
+  const inputStyles = theme.bookingStyles.input;
+  const labelColor = inputStyles.labelColor(colors);
+  const inputBg = inputStyles.background(colors);
+  const inputBorder = inputStyles.border(colors);
+  const inputFocusBorder = inputStyles.focusBorder(colors); // Store focus border color
+
+  const primaryButtonStyle = getButtonStyle(theme, colors, 'primary');
+  const buttonTextColor = getContrastColor(colors.primary);
   
   return (
     <Form {...form}>
@@ -100,7 +139,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
             name="name"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium flex items-center gap-2">
+                <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
                   <User className="h-4 w-4" style={{ color: primaryColor }} />
                   Your Name
                 </FormLabel>
@@ -113,10 +152,11 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
                       "focus-visible:ring-2 focus-visible:ring-offset-1",
                       "focus-visible:border-transparent"
                     )}
-                    style={{ 
-                      "--tw-ring-color": `${primaryColor}80`,
-                      borderColor: form.formState.errors.name ? "rgb(239 68 68)" : `${primaryColor}30`,
-                      boxShadow: form.formState.errors.name ? "none" : `0 2px 6px ${primaryColor}15`
+                    style={{
+                      backgroundColor: inputBg,
+                      borderColor: form.formState.errors.name ? "rgb(239 68 68)" : inputBorder,
+                      "--tw-ring-color": inputFocusBorder,
+                      boxShadow: `0 1px 2px ${colors.primary}10`,
                     } as React.CSSProperties}
                     disabled={isSubmitting}
                   />
@@ -131,7 +171,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
             name="email"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium flex items-center gap-2">
+                <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
                   <Mail className="h-4 w-4" style={{ color: primaryColor }} />
                   Your Email
                 </FormLabel>
@@ -145,10 +185,11 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
                       "focus-visible:ring-2 focus-visible:ring-offset-1",
                       "focus-visible:border-transparent"
                     )}
-                    style={{ 
-                      "--tw-ring-color": `${primaryColor}80`,
-                      borderColor: form.formState.errors.email ? "rgb(239 68 68)" : `${primaryColor}30`,
-                      boxShadow: form.formState.errors.email ? "none" : `0 2px 6px ${primaryColor}15`
+                    style={{
+                      backgroundColor: inputBg,
+                      borderColor: form.formState.errors.email ? "rgb(239 68 68)" : inputBorder,
+                      "--tw-ring-color": inputFocusBorder,
+                      boxShadow: `0 1px 2px ${colors.primary}10`,
                     } as React.CSSProperties}
                     disabled={isSubmitting}
                   />
@@ -170,7 +211,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
             name="phone"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium flex items-center gap-2">
+                <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
                   <Phone className="h-4 w-4" style={{ color: primaryColor }} />
                   Phone (Optional)
                 </FormLabel>
@@ -184,10 +225,11 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
                       "focus-visible:ring-2 focus-visible:ring-offset-1",
                       "focus-visible:border-transparent"
                     )}
-                    style={{ 
-                      "--tw-ring-color": `${primaryColor}80`,
-                      borderColor: form.formState.errors.phone ? "rgb(239 68 68)" : `${primaryColor}30`,
-                      boxShadow: form.formState.errors.phone ? "none" : `0 2px 6px ${primaryColor}15`
+                    style={{
+                      backgroundColor: inputBg,
+                      borderColor: form.formState.errors.phone ? "rgb(239 68 68)" : inputBorder,
+                      "--tw-ring-color": inputFocusBorder,
+                      boxShadow: `0 1px 2px ${colors.primary}10`,
                     } as React.CSSProperties}
                     disabled={isSubmitting}
                   />
@@ -202,7 +244,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
             name="message"
             render={({ field }) => (
               <FormItem>
-                <FormLabel className="text-sm font-medium flex items-center gap-2">
+                <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
                   <MessageSquare className="h-4 w-4" style={{ color: primaryColor }} />
                   Message (Optional)
                 </FormLabel>
@@ -216,10 +258,11 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
                       "focus-visible:ring-2 focus-visible:ring-offset-1",
                       "focus-visible:border-transparent"
                     )}
-                    style={{ 
-                      "--tw-ring-color": `${primaryColor}80`,
-                      borderColor: form.formState.errors.message ? "rgb(239 68 68)" : `${primaryColor}30`,
-                      boxShadow: form.formState.errors.message ? "none" : `0 2px 6px ${primaryColor}15`
+                    style={{
+                      backgroundColor: inputBg,
+                      borderColor: form.formState.errors.message ? "rgb(239 68 68)" : inputBorder,
+                      "--tw-ring-color": inputFocusBorder,
+                      boxShadow: `0 1px 2px ${colors.primary}10`,
                     } as React.CSSProperties}
                     rows={3}
                     disabled={isSubmitting}
@@ -241,15 +284,12 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor 
           <Button 
             type="submit" 
             className={cn(
-              "w-full mt-4 py-6 text-lg font-bold rounded-xl text-white shadow-lg",
+              "w-full mt-4 py-6 text-lg font-bold shadow-lg",
               "transition-all duration-200",
               "flex items-center justify-center gap-2"
             )}
             disabled={isSubmitting}
-            style={{ 
-              background: gradientBg,
-              boxShadow: `0 10px 15px -3px ${primaryColor}40`
-            }}
+            style={{ ...primaryButtonStyle, color: buttonTextColor }}
           >
             {isSubmitting ? (
               <>

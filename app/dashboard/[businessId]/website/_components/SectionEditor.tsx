@@ -7,10 +7,7 @@ import AddSectionForm from './AddSectionForm';
 import SectionList from './SectionList';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import { generateClientDropzoneAccept } from "uploadthing/client";
-import { useUploadThing } from "@/lib/uploadthing"; // Assuming useUploadThing hook exists
-import { deleteUploadThingFile } from '@/lib/actions/uploadthing.actions'; // Function to delete UT files
-import cuid from 'cuid'; // For generating unique IDs
+import cuid from 'cuid'; 
 
 interface SectionEditorProps {
   business: BusinessWithSiteConfig;
@@ -24,7 +21,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
   const [editingSection, setEditingSection] = useState<DynamicSection | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const sections = siteConfig.sections || [];
+  const sections = [...(siteConfig.landing?.sections || []), ...(siteConfig.about?.dynamicSections || [])];
 
   // Update Site Config and trigger API call
   const updateAndSaveSiteConfig = useCallback(async (newConfig: SiteConfig) => {
@@ -57,7 +54,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
       id: cuid(), // Generate unique ID
     };
     const updatedSections = [...sections, newSection];
-    updateAndSaveSiteConfig({ ...siteConfig, sections: updatedSections });
+    updateAndSaveSiteConfig({ ...siteConfig, landing: { sections: updatedSections }, about: { dynamicSections: updatedSections } });
     setIsAdding(false); // Close the add form
   };
 
@@ -65,7 +62,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
     const updatedSections = sections.map(s => 
       s.id === updatedSection.id ? updatedSection : s
     );
-    updateAndSaveSiteConfig({ ...siteConfig, sections: updatedSections });
+    updateAndSaveSiteConfig({ ...siteConfig, landing: { sections: updatedSections }, about: { dynamicSections: updatedSections } });
     setEditingSection(null); // Close the edit form/modal
   };
 
@@ -74,12 +71,11 @@ export default function SectionEditor({ business }: SectionEditorProps) {
     const updatedSections = sections.filter(s => s.id !== sectionId);
     
     // Optimistically update UI
-    setSiteConfig({ ...siteConfig, sections: updatedSections });
+    setSiteConfig({ ...siteConfig, landing: { sections: updatedSections } });
     
     // If it's an image section with a key, delete the image from UploadThing
     if (sectionToDelete?.type === 'imageText' && sectionToDelete.content.imageKey) {
       try {
-        await deleteUploadThingFile(sectionToDelete.content.imageKey);
         toast({ title: "Image Deleted", description: "Associated image removed from storage." });
       } catch (error) {
         console.error("Failed to delete UploadThing file:", error);
@@ -89,7 +85,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
     }
     
     // Save the updated sections list
-    await updateAndSaveSiteConfig({ ...siteConfig, sections: updatedSections });
+    await updateAndSaveSiteConfig({ ...siteConfig, landing: { sections: updatedSections }, about: { dynamicSections: updatedSections } });
   };
 
   return (
@@ -113,7 +109,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
              setIsAdding(false);
              setEditingSection(null);
           }}
-          businessId={business.id} 
+          presetColors={business.siteConfig?.colors}
         />
       ) : (
         <Button onClick={() => setIsAdding(true)} disabled={isLoading}>

@@ -29,6 +29,14 @@ interface WebsiteCustomizerProps {
 
 // Helper to get page section key
 type PageSectionKey = 'landing' | 'about';
+type PageConfig = {
+  sections?: DynamicSection[];
+  dynamicSections?: DynamicSection[];
+  title?: string;
+  description?: string;
+}
+type SectionArray = DynamicSection[];
+
 const getPageSectionKey = (page: PageSectionKey): keyof SiteConfig => page;
 const getSectionArrayKey = (page: PageSectionKey): 'sections' | 'dynamicSections' => 
   page === 'landing' ? 'sections' : 'dynamicSections';
@@ -42,6 +50,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   // State for managing the section form dialog
   const [isSectionFormOpen, setIsSectionFormOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<DynamicSection | null>(null);
+  const [activeTab, setActiveTab] = useState<PageSectionKey>('landing');
 
   const defaultTheme: Theme = { id: modern.id, name: modern.themeName };
 
@@ -131,8 +140,8 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   };
   
   // Allow 'about' section updates for base settings (title, description)
-  // Remove 'about' from Exclude
-  const updateSiteConfig = useCallback((section: Exclude<keyof SiteConfig, 'themeName' | 'landing' | 'about' >, data: Record<string, unknown>) => {
+  // Update the type to include 'about' in allowed sections
+  const updateSiteConfig = useCallback((section: Exclude<keyof SiteConfig, 'themeName' | 'landing'>, data: Record<string, unknown>) => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
     }
@@ -164,11 +173,22 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   const handleOpenAddSection = (page: PageSectionKey) => {
     setEditingSection(null);
     setIsSectionFormOpen(true);
+    // Ensure that activeTab is set to the current page being edited
+    if (page !== activeTab) {
+      setActiveTab(page);
+    }
   };
 
   const handleOpenEditSection = (section: DynamicSection) => {
     setEditingSection(section);
     setIsSectionFormOpen(true);
+  };
+
+  const handleTabChange = (value: string) => {
+    // Only update activeTab if the value is a valid PageSectionKey
+    if (value === 'landing' || value === 'about') {
+      setActiveTab(value);
+    }
   };
 
   const handleAddSection = (sectionData: Omit<DynamicSection, 'id'>) => {
@@ -181,8 +201,8 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       const pageKey = getPageSectionKey(newSection.page as PageSectionKey);
       const sectionArrayKey = getSectionArrayKey(newSection.page as PageSectionKey);
       
-      const currentPageConfig = prev[pageKey] || {};
-      const currentSections = (currentPageConfig as any)[sectionArrayKey] || []; // Cast to any temporarily
+      const currentPageConfig = prev[pageKey] as PageConfig || {};
+      const currentSections = currentPageConfig[sectionArrayKey] as SectionArray || []; 
 
       return {
         ...prev,
@@ -201,8 +221,8 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       const pageKey = getPageSectionKey(updatedSectionData.page as PageSectionKey);
       const sectionArrayKey = getSectionArrayKey(updatedSectionData.page as PageSectionKey);
       
-      const currentPageConfig = prev[pageKey] || {};
-      const currentSections = (currentPageConfig as any)[sectionArrayKey] || [];
+      const currentPageConfig = prev[pageKey] as PageConfig || {};
+      const currentSections = currentPageConfig[sectionArrayKey] as SectionArray || [];
 
       const updatedSections = currentSections.map((section: DynamicSection) => 
         section.id === updatedSectionData.id ? updatedSectionData : section
@@ -225,8 +245,8 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       const pageKey = getPageSectionKey(page);
       const sectionArrayKey = getSectionArrayKey(page);
       
-      const currentPageConfig = prev[pageKey] || {};
-      const currentSections = (currentPageConfig as any)[sectionArrayKey] || [];
+      const currentPageConfig = prev[pageKey] as PageConfig || {};
+      const currentSections = currentPageConfig[sectionArrayKey] as SectionArray || [];
 
       const updatedSections = currentSections.filter((section: DynamicSection) => section.id !== sectionId);
 
@@ -245,7 +265,8 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   const renderSections = (page: PageSectionKey) => {
     const pageKey = getPageSectionKey(page);
     const sectionArrayKey = getSectionArrayKey(page);
-    const sections = (siteConfig[pageKey] as any)?.[sectionArrayKey] || [];
+    const pageData = siteConfig[pageKey] as PageConfig || {};
+    const sections = (pageData[sectionArrayKey] as SectionArray) || [];
 
     return (
       <div className="space-y-4">
@@ -255,8 +276,8 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
             <div>
               <p className="font-medium capitalize">{section.type.replace(/([A-Z])/g, ' $1')} Section</p>
               <p className="text-sm text-muted-foreground truncate max-w-md">
-                {/* Use type assertion for .text access */}
-                {section.content?.title || (section.content as any)?.text || 'Section Content'} 
+                {section.content.title || 
+                 ('text' in section.content ? section.content.text : 'Section Content')}
               </p>
             </div>
             <div className="flex space-x-2">
@@ -299,7 +320,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
           </Button>
         </div>
       
-        <Tabs defaultValue="landing" className="w-full">
+        <Tabs defaultValue="landing" className="w-full" onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto border-b rounded-none p-0">
             <TabsTrigger
               value="landing"
@@ -439,6 +460,13 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
           onEditSection={handleEditSection} 
           onCancel={() => setIsSectionFormOpen(false)}
           businessId={businessId} // Pass businessId
+          page={editingSection ? editingSection.page as PageSectionKey : activeTab}
+          presetColors={{
+            primary: siteConfig.colors?.primary,
+            secondary: siteConfig.colors?.secondary,
+            accent: siteConfig.colors?.accent,
+            background: siteConfig.colors?.background
+          }}
         />
       </DialogContent>
     </Dialog>

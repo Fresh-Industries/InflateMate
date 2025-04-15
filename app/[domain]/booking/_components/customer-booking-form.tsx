@@ -31,7 +31,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -39,6 +38,7 @@ import { Separator } from "@/components/ui/separator";
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
+import { ThemeColors, themeConfig, getContrastColor } from "../../_themes/themeConfig";
 
 // Inventory item type
 type InventoryItem = {
@@ -64,8 +64,8 @@ type Business = {
   applyTaxToBookings?: boolean;
 };
 
-// Booking metadata type
-type BookingMetadata = {
+// Booking metadata type - Export this type
+export type BookingMetadata = {
   bounceHouseId: string;
   eventDate: string;
   startTime: string;
@@ -89,7 +89,13 @@ type BookingMetadata = {
   bookingId?: string;
 };
 
-export function NewBookingForm({ businessId }: { businessId: string }) {
+interface NewBookingFormProps {
+  businessId: string;
+  themeName: string;
+  colors: ThemeColors;
+}
+
+export function NewBookingForm({ businessId, themeName, colors }: NewBookingFormProps) {
   const { toast } = useToast();
   const router = useRouter();
   const [showPaymentForm, setShowPaymentForm] = useState(true);
@@ -106,6 +112,12 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [applyTax, setApplyTax] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   
+  // Get the current theme definition
+  const theme = themeConfig[themeName] || themeConfig.modern;
+  const bookingStyles = theme.bookingStyles;
+  const buttonStyles = theme.buttonStyles;
+  const secondaryButtonStyles = theme.secondaryButtonStyles;
+
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
     packageId: null,
@@ -257,25 +269,16 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     return true;
   };
 
-  const validateCustomerInfo = () => {
-    if (!newBooking.customerName || !newBooking.customerEmail || !newBooking.customerPhone) {
-      toast({ title: "Error", description: "Please complete all customer details.", variant: "destructive" });
-      return false;
-    }
-    if (!termsAccepted) {
-      toast({ title: "Error", description: "Please accept the terms of service.", variant: "destructive" });
-      return false;
-    }
-    return true;
-  };
-
   const handleNext = () => {
     if (currentStep === 1 && !validateEventDetails()) return;
-    if (currentStep === 2 && !validateCustomerInfo()) return;
-    if (currentStep === 3) {
-      handleSubmit();
-      return;
-    }
+    if (currentStep === 2) { 
+      // Basic validation before proceeding 
+      if (!newBooking.customerName || !newBooking.customerEmail || !newBooking.customerPhone || !newBooking.eventAddress || !newBooking.eventCity || !newBooking.eventState || !newBooking.eventZipCode) {
+          toast({ title: "Missing Information", description: "Please fill out all address and contact fields.", variant: "destructive" });
+          return; 
+      }
+    } 
+    // Check for step 3 removed from here - handled by button logic inside step 3 rendering
     setCurrentStep(prev => prev + 1);
   };
 
@@ -317,6 +320,15 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
 
   // Modify the handleSubmit function to use UTC dates
   const handleSubmit = async () => {
+    if (!termsAccepted) {
+      toast({
+        title: "Terms and Conditions",
+        description: "You must accept the terms and conditions to proceed.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     if (isSubmitting) return;
     setIsSubmitting(true);
     console.log("Starting submission...");
@@ -493,617 +505,545 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     setHasSearched(false);
   }, [newBooking.eventDate, newBooking.startTime, newBooking.endTime]);
 
-  // Show loading or error states when needed
-  if (showPaymentForm && isSubmitting) {
-    return (
-      <div className="space-y-4 text-center p-6 border rounded-lg">
-        <h2 className="text-2xl font-semibold">Preparing Payment...</h2>
-        <div className="flex justify-center">
-          <Loader2 className="h-8 w-8 animate-spin" />
-        </div>
-      </div>
-    );
-  }
+  // Apply theme styles dynamically
+  const formStyle = {
+    backgroundColor: bookingStyles.formBackground(colors),
+    border: bookingStyles.formBorder(colors),
+    boxShadow: bookingStyles.formShadow(colors),
+    color: bookingStyles.formTextColor(colors),
+  };
+  
+  const inputStyle = {
+    backgroundColor: bookingStyles.input.background(colors),
+    border: `1px solid ${bookingStyles.input.border(colors)}`,
+    color: bookingStyles.formTextColor(colors),
+    '::placeholder': {
+      color: bookingStyles.input.placeholderColor(colors),
+    },
+  };
 
-  if (showPaymentForm && clientSecret && pendingBookingData) {
-    // Make sure we have the business data with Stripe information
-    if (!businessData) {
-      return (
-        <div className="space-y-4 text-center p-6 border rounded-lg">
-          <h2 className="text-2xl font-semibold">Loading Business Data...</h2>
-          <div className="flex justify-center">
-            <Loader2 className="h-8 w-8 animate-spin" />
-          </div>
-          <Button variant="outline" onClick={() => setShowPaymentForm(false)}>
-            Back to Review
-          </Button>
-        </div>
-      );
-    }
+  const focusInputStyle = {
+    borderColor: bookingStyles.input.focusBorder(colors),
+    boxShadow: `0 0 0 2px ${bookingStyles.input.focusBorder(colors)}30`
+  };
 
-    // Get Stripe account ID from either field
-    const stripeAccountId = businessData.stripeAccountId || businessData.stripeConnectedAccountId;
-    
-    if (!stripeAccountId) {
-      return (
-        <div className="space-y-4 text-center p-6 border rounded-lg">
-          <h2 className="text-2xl font-semibold">Payment Setup Issue</h2>
-          <p className="text-red-500">
-            Stripe is not properly set up for this business. Please contact the business owner.
-          </p>
-          <Button variant="outline" onClick={() => setShowPaymentForm(false)}>
-            Back to Review
-          </Button>
-        </div>
-      );
-    }
+  const labelStyle: React.CSSProperties = {
+    color: bookingStyles.input.labelColor(colors),
+    display: 'block',
+    marginBottom: '0.375rem',
+  };
 
-    console.log("Initializing Stripe with account ID:", stripeAccountId);
-    console.log("Client secret:", clientSecret ? "Available" : "Missing");
-    
-    const stripePromise = getStripeInstance(stripeAccountId);
-    
-    if (!stripePromise) {
-      return (
-        <div className="space-y-4 text-center p-6 border rounded-lg">
-          <h2 className="text-2xl font-semibold">Stripe Configuration Error</h2>
-          <p className="text-red-500">
-            Unable to initialize Stripe. Please check your configuration.
-          </p>
-          <Button variant="outline" onClick={() => setShowPaymentForm(false)}>
-            Back to Review
-          </Button>
-        </div>
-      );
-    }
+  const summaryCardStyle = {
+    backgroundColor: bookingStyles.summaryCard.background(colors),
+    border: bookingStyles.summaryCard.border(colors),
+    boxShadow: bookingStyles.summaryCard.shadow(colors),
+  };
+  
+  const summaryHeaderStyle = {
+    backgroundColor: bookingStyles.summaryCard.headerBackground(colors),
+  };
 
-    return (
-      <div className="space-y-6">
-        <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-semibold">Payment</h2>
-          <Button variant="outline" onClick={() => setShowPaymentForm(false)} disabled={isSubmitting}>
-            Back to Review
-          </Button>
-        </div>
-        <div className="rounded-lg border p-4 space-y-4">
-          <div className="flex justify-between">
-            <span className="font-medium">Total Amount:</span>
-            <span className="text-lg font-semibold">${calculateTotal().toFixed(2)}</span>
-          </div>
-        </div>
-        <Elements
-          stripe={stripePromise}
-          options={{
-            clientSecret,
-            appearance: { theme: "stripe", variables: { colorPrimary: "#0F172A" } },
-          }}
-        >
-          <PaymentForm
-            amount={calculateTotal()}
-            bookingId={pendingBookingData.bookingId || ""}
-            customerEmail={pendingBookingData.customerEmail}
-            businessId={businessId}
-            subtotal={calculateSubtotal()}
-            taxAmount={calculateTaxAmount()}
-            taxRate={taxRate}
-            onSuccess={handlePaymentSuccess}
-            onError={(error) => {
-              toast({
-                title: "Payment Failed",
-                description: error,
-                variant: "destructive",
-              });
-            }}
-          />
-        </Elements>
-      </div>
-    );
-  }
+  const summaryRowStyle = (isAlternate: boolean) => ({
+    backgroundColor: bookingStyles.summaryCard.rowBackground(colors, isAlternate),
+  });
+
+  // --- Button Style Objects ---
+  const primaryButtonStyle: React.CSSProperties = {
+    backgroundColor: buttonStyles.background(colors),
+    color: buttonStyles.textColor(colors),
+    border: buttonStyles.border ? buttonStyles.border(colors) : undefined,
+    boxShadow: buttonStyles.boxShadow ? buttonStyles.boxShadow(colors) : undefined,
+    borderRadius: buttonStyles.borderRadius,
+    transition: buttonStyles.transition,
+    // Add other properties as needed
+  };
+
+  const primaryButtonHoverStyle: React.CSSProperties = {
+    backgroundColor: buttonStyles.hoverBackground(colors),
+    color: buttonStyles.hoverTextColor ? buttonStyles.hoverTextColor(colors) : buttonStyles.textColor(colors),
+    border: buttonStyles.hoverBorder ? buttonStyles.hoverBorder(colors) : (buttonStyles.border ? buttonStyles.border(colors) : undefined),
+    boxShadow: buttonStyles.hoverBoxShadow ? buttonStyles.hoverBoxShadow(colors) : (buttonStyles.boxShadow ? buttonStyles.boxShadow(colors) : undefined),
+  };
+
+  const secondaryButtonStyle: React.CSSProperties = secondaryButtonStyles ? {
+    backgroundColor: secondaryButtonStyles.background(colors),
+    color: secondaryButtonStyles.textColor(colors),
+    border: secondaryButtonStyles.border ? secondaryButtonStyles.border(colors) : undefined,
+    boxShadow: secondaryButtonStyles.boxShadow ? secondaryButtonStyles.boxShadow(colors) : undefined,
+    borderRadius: secondaryButtonStyles.borderRadius,
+    transition: secondaryButtonStyles.transition,
+  } : {}; // Provide empty object if secondary styles are not defined
+
+  const secondaryButtonHoverStyle: React.CSSProperties = secondaryButtonStyles ? {
+    backgroundColor: secondaryButtonStyles.hoverBackground ? secondaryButtonStyles.hoverBackground(colors) : secondaryButtonStyles.background(colors),
+    color: secondaryButtonStyles.hoverTextColor ? secondaryButtonStyles.hoverTextColor(colors) : secondaryButtonStyles.textColor(colors),
+    border: secondaryButtonStyles.hoverBorder ? secondaryButtonStyles.hoverBorder(colors) : (secondaryButtonStyles.border ? secondaryButtonStyles.border(colors) : undefined),
+    boxShadow: secondaryButtonStyles.hoverBoxShadow ? secondaryButtonStyles.hoverBoxShadow(colors) : (secondaryButtonStyles.boxShadow ? secondaryButtonStyles.boxShadow(colors) : undefined),
+  } : {};
 
   return (
-    <div className="space-y-8">
+    <div>
+      <div className="mb-8">
+        <h2 className="text-4xl font-semibold mb-6" style={{color: bookingStyles.formTextColor(colors)}}>Make a Reservation</h2>
+      </div>
+    <div style={formStyle} className="p-6 rounded-lg">
+      
       {/* Progress Steps */}
-      <div className="relative mb-12">
-        <div className="flex justify-between items-center z-10 relative">
-          {steps.map((step) => (
-            <div key={step.number} className="flex flex-col items-center">
+      <div className="mb-8 flex items-center justify-between">
+        {steps.map((step, index) => (
+          <React.Fragment key={step.number}>
+            <div className="flex flex-col items-center">
               <div
-                className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all ${
-                  currentStep >= step.number
-                    ? "bg-primary text-primary-foreground border-primary shadow-lg"
-                    : "border-gray-300 text-gray-300"
-                }`}
+                style={{
+                  backgroundColor: bookingStyles.stepBackground(colors, currentStep === step.number),
+                  border: bookingStyles.stepBorder(colors, currentStep === step.number),
+                  color: bookingStyles.stepIconColor(colors, currentStep === step.number),
+                }}
+                className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-colors duration-300`}
               >
                 <step.icon className="w-5 h-5" />
               </div>
-              <span
-                className={`mt-2 text-sm font-medium ${
-                  currentStep >= step.number ? "text-primary" : "text-gray-400"
+              <p
+                style={{ color: bookingStyles.stepTextColor(colors, currentStep === step.number) }}
+                className={`text-sm font-medium ${
+                  currentStep === step.number ? 'font-semibold' : 'text-gray-500'
                 }`}
               >
                 {step.title}
-              </span>
+              </p>
             </div>
-          ))}
-        </div>
-        <div className="absolute top-6 left-0 w-full h-[2px] bg-gray-200 -z-10"></div>
-        <div
-          className="absolute top-6 left-0 h-[2px] bg-primary -z-10 transition-all"
-          style={{ width: `${((currentStep - 1) * 100) / (steps.length - 1)}%` }}
-        ></div>
+            {index < steps.length - 1 && (
+              <Separator
+                style={{ borderColor: colors.secondary + '40' }}
+                className="flex-1 mx-4 h-0.5"
+              />
+            )}
+          </React.Fragment>
+        ))}
       </div>
 
-      {/* Step Content */}
-      <div className="mt-8 space-y-8">
-        {currentStep === 1 && (
-          <div className="space-y-6">
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-md text-blue-700 mb-4">
-              <p className="font-medium">24-Hour Rental Period</p>
-              <p className="text-sm">All bookings are for a full day (24-hour rental). This gives our team time to deliver, set up, and clean the equipment.</p>
-            </div>
-            
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Event Date</Label>
-                <Input
-                  type="date"
-                  value={newBooking.eventDate}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, eventDate: e.target.value })
-                  }
-                  min={format(new Date(), "yyyy-MM-dd")}
-                  required
-                />
-                <p className="text-xs text-muted-foreground">Select the date of your event</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Delivery/Setup Time</Label>
-                <Input
-                  type="time"
-                  value={newBooking.startTime}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, startTime: e.target.value })
-                  }
-                  required
-                />
-                <p className="text-xs text-muted-foreground">Standard delivery time: 9:00 AM</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Pickup Time</Label>
-                <Input
-                  type="time"
-                  value={newBooking.endTime}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, endTime: e.target.value })
-                  }
-                  required
-                />
-                <p className="text-xs text-muted-foreground">Standard pickup time: 5:00 PM next day</p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label>Event Type</Label>
-                <Select
-                  value={newBooking.eventType || undefined}
-                  onValueChange={(value) =>
-                    setNewBooking({ ...newBooking, eventType: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select event type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="BIRTHDAY">Birthday Party</SelectItem>
-                    <SelectItem value="CORPORATE">Corporate Event</SelectItem>
-                    <SelectItem value="SCHOOL">School Event</SelectItem>
-                    <SelectItem value="FESTIVAL">Festival</SelectItem>
-                    <SelectItem value="FAMILY">Family Gathering</SelectItem>
-                    <SelectItem value="OTHER">Other</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Check Availability */}
-            <div className="flex justify-center my-6">
-              <Button
-                onClick={searchAvailability}
-                disabled={
-                  isSearchingAvailability ||
-                  !newBooking.eventDate
-                }
-                className="w-full max-w-md"
-              >
-                {isSearchingAvailability ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Searching...
-                  </>
-                ) : (
-                  <>
-                    <Search className="mr-2 h-4 w-4" />
-                    Check Availability
-                  </>
-                )}
-              </Button>
-            </div>
-
-            {/* Available Inventory */}
-            {hasSearched && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">
-                  {availableInventory.length > 0
-                    ? "Available Bounce Houses"
-                    : "No bounce houses available for your selected time"}
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {availableInventory.map((item) => (
-                    <Card
-                      key={item.id}
-                      className={`cursor-pointer transition-all border-2 hover:shadow-lg ${
-                        selectedItem?.id === item.id
-                          ? "border-primary"
-                          : "border-gray-200"
-                      }`}
-                      onClick={() => selectInventoryItem(item)}
-                    >
-                      <CardHeader className="p-4 pb-2">
-                        <CardTitle className="text-md">{item.name}</CardTitle>
-                        <CardDescription>{item.type}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0">
-                        {item.primaryImage && (
-                          <div className="mb-2 relative h-40 w-full overflow-hidden rounded-md">
-                            <img
-                              src={item.primaryImage}
-                              alt={item.name}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div className="space-y-1 text-sm">
-                          <p>
-                            <span className="font-medium">Size:</span> {item.dimensions}
-                          </p>
-                          <p>
-                            <span className="font-medium">Capacity:</span> {item.capacity} people
-                          </p>
-                          <p>
-                            <span className="font-medium">Age Range:</span> {item.ageRange}
-                          </p>
-                          {item.description && <p className="line-clamp-2">{item.description}</p>}
-                        </div>
-                      </CardContent>
-                      <CardFooter className="p-4 pt-0 flex justify-between items-center">
-                        <p className="font-bold text-lg">${item.price.toFixed(2)}</p>
-                        <Button
-                          size="sm"
-                          variant={selectedItem?.id === item.id ? "default" : "outline"}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            selectInventoryItem(item);
-                          }}
-                        >
-                          {selectedItem?.id === item.id ? "Selected" : "Select"}
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {currentStep === 2 && (
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label>Full Name</Label>
-                <Input
-                  value={newBooking.customerName}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, customerName: e.target.value })
-                  }
-                  placeholder="Customer name"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input
-                  type="email"
-                  value={newBooking.customerEmail}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, customerEmail: e.target.value })
-                  }
-                  placeholder="customer@example.com"
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Phone</Label>
-                <Input
-                  type="tel"
-                  value={newBooking.customerPhone}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, customerPhone: e.target.value })
-                  }
-                  placeholder="(123) 456-7890"
-                  required
-                />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 gap-4">
-              <div className="space-y-2">
-                <Label>Event Address</Label>
-                <Input
-                  value={newBooking.eventAddress}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, eventAddress: e.target.value })
-                  }
-                  placeholder="123 Main St"
-                  required
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="space-y-2">
-                  <Label>City</Label>
-                  <Input
-                    value={newBooking.eventCity}
-                    onChange={(e) =>
-                      setNewBooking({ ...newBooking, eventCity: e.target.value })
-                    }
-                    placeholder="City"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>State</Label>
-                  <Input
-                    value={newBooking.eventState}
-                    onChange={(e) =>
-                      setNewBooking({ ...newBooking, eventState: e.target.value })
-                    }
-                    placeholder="State"
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Zip Code</Label>
-                  <Input
-                    value={newBooking.eventZipCode}
-                    onChange={(e) =>
-                      setNewBooking({ ...newBooking, eventZipCode: e.target.value })
-                    }
-                    placeholder="12345"
-                    required
-                  />
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Number of Participants</Label>
-                <Input
-                  type="number"
-                  min={1}
-                  value={newBooking.participantCount}
-                  onChange={(e) =>
-                    setNewBooking({
-                      ...newBooking,
-                      participantCount: parseInt(e.target.value) || 1,
-                    })
-                  }
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Age Range</Label>
-                <Input
-                  value={newBooking.participantAge}
-                  onChange={(e) =>
-                    setNewBooking({ ...newBooking, participantAge: e.target.value })
-                  }
-                  placeholder="e.g., 5-12 years"
-                />
-              </div>
-            </div>
-            <div className="space-y-2">
-              <Label>Special Instructions</Label>
-              <Textarea
-                value={newBooking.specialInstructions}
+      {/* Step 1: Event Details */}
+      {currentStep === 1 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4" style={{color: bookingStyles.formTextColor(colors)}}>Event Details</h3>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div>
+              <Label htmlFor="eventDate" style={labelStyle}>Event Date</Label>
+              <Input
+                id="eventDate"
+                type="date"
+                value={newBooking.eventDate}
                 onChange={(e) =>
-                  setNewBooking({ ...newBooking, specialInstructions: e.target.value })
+                  setNewBooking({ ...newBooking, eventDate: e.target.value })
                 }
-                placeholder="Any special requests or setup instructions"
-                rows={3}
+                required
+                style={inputStyle}
+                onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                onBlur={(e) => Object.assign(e.target.style, inputStyle)}
               />
             </div>
-
-            <div className="flex items-center space-x-2 pt-4 border-t">
-              <div className="flex items-start space-x-2">
-                <Checkbox 
-                  id="terms" 
-                  checked={termsAccepted}
-                  onCheckedChange={(checked) => setTermsAccepted(checked as boolean)}
-                  aria-required="true"
-                  className={!termsAccepted && "border-red-500"}
-                />
-                <div className="grid gap-1.5 leading-none">
-                  <label
-                    htmlFor="terms"
-                    className="text-sm leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                  >
-                    By checking this box, you agree to receive communications from us and accept our{" "}
-                    <Link href="/terms" className="text-primary hover:underline font-medium" target="_blank">
-                      Terms of Service
-                    </Link>
-                    , including consent to receive emails and SMS notifications about your booking.
-                    <span className="text-red-500 ml-1">*</span>
-                  </label>
-                  {!termsAccepted && (
-                    <p className="text-xs text-red-500">
-                      You must accept the terms to continue
-                    </p>
-                  )}
-                </div>
-              </div>
+            <div>
+              <Label htmlFor="startTime" style={labelStyle}>Start Time</Label>
+              <Input
+                id="startTime"
+                type="time"
+                value={newBooking.startTime}
+                onChange={(e) =>
+                  setNewBooking({ ...newBooking, startTime: e.target.value })
+                }
+                required
+                style={inputStyle}
+                onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="endTime" style={labelStyle}>End Time</Label>
+              <Input
+                id="endTime"
+                type="time"
+                value={newBooking.endTime}
+                onChange={(e) =>
+                  setNewBooking({ ...newBooking, endTime: e.target.value })
+                }
+                required
+                style={inputStyle}
+                onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+              />
             </div>
           </div>
-        )}
-
-        {currentStep === 3 && (
-          <div className="space-y-6">
-            <h3 className="text-lg font-semibold">Review Your Booking</h3>
-            {selectedItem && (
-              <Card className="mb-4">
-                <CardHeader>
-                  <CardTitle>Selected Bounce House</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col md:flex-row gap-4">
-                    {selectedItem.primaryImage && (
-                      <div className="h-32 w-32 min-w-[8rem] overflow-hidden rounded-md">
-                        <img
-                          src={selectedItem.primaryImage}
-                          alt={selectedItem.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div>
-                      <h4 className="text-md font-semibold">{selectedItem.name}</h4>
-                      <p className="text-muted-foreground">{selectedItem.type}</p>
-                      <div className="mt-2 space-y-1 text-sm">
-                        <p>
-                          <span className="font-medium">Size:</span> {selectedItem.dimensions}
-                        </p>
-                        <p>
-                          <span className="font-medium">Capacity:</span> {selectedItem.capacity} people
-                        </p>
-                        <p>
-                          <span className="font-medium">Price:</span> ${selectedItem.price.toFixed(2)}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-            <Card className="mb-4">
-              <CardHeader>
-                <CardTitle>Event Details</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <p>
-                      <span className="font-medium">Date:</span> {newBooking.eventDate}
-                    </p>
-                    <p>
-                      <span className="font-medium">Rental Period:</span> 24-Hour Rental
-                    </p>
-                    <p>
-                      <span className="font-medium">Delivery/Setup:</span> {newBooking.startTime}
-                    </p>
-                    <p>
-                      <span className="font-medium">Pickup:</span> {newBooking.endTime} (next day)
-                    </p>
-                    <p>
-                      <span className="font-medium">Event Type:</span> {newBooking.eventType}
-                    </p>
-                    <p>
-                      <span className="font-medium">Participants:</span> {newBooking.participantCount}
-                    </p>
-                    {newBooking.participantAge && (
-                      <p>
-                        <span className="font-medium">Age Range:</span> {newBooking.participantAge}
-                      </p>
-                    )}
-                  </div>
-                  <div>
-                    <p>
-                      <span className="font-medium">Location:</span> {newBooking.eventAddress}
-                    </p>
-                    <p>
-                      <span className="font-medium">City:</span> {newBooking.eventCity}
-                    </p>
-                    <p>
-                      <span className="font-medium">State:</span> {newBooking.eventState}
-                    </p>
-                    <p>
-                      <span className="font-medium">Zip Code:</span> {newBooking.eventZipCode}
-                    </p>
-                  </div>
-                </div>
-                {newBooking.specialInstructions && (
-                  <div className="mt-4">
-                    <p className="font-medium">Special Instructions:</p>
-                    <p>{newBooking.specialInstructions}</p>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader>
-                <CardTitle>Payment Summary</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between">
-                  <span>Subtotal:</span>
-                  <span>${calculateSubtotal().toFixed(2)}</span>
-                </div>
-                
-                {applyTax && taxRate > 0 && (
-                  <div className="flex justify-between text-muted-foreground">
-                    <span>Tax ({taxRate}%):</span>
-                    <span>${calculateTaxAmount().toFixed(2)}</span>
-                  </div>
-                )}
-                
-                <Separator />
-                
-                <div className="flex justify-between font-bold">
-                  <span>Total:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-      </div>
-
-      {/* Navigation Buttons */}
-      <div className="flex justify-between mt-8">
-        {currentStep > 1 ? (
-          <Button onClick={handleBack} variant="outline">
-            <ChevronLeft className="mr-2 h-4 w-4" /> Back
-          </Button>
-        ) : (
-          <div />
-        )}
-        <Button onClick={handleNext} disabled={isSubmitting}>
-          {isSubmitting ? (
-            <>
+          <Button 
+            onClick={searchAvailability} 
+            disabled={isSearchingAvailability} 
+            style={primaryButtonStyle} 
+            onMouseEnter={(e) => Object.assign(e.currentTarget.style, primaryButtonHoverStyle)}
+            onMouseLeave={(e) => Object.assign(e.currentTarget.style, primaryButtonStyle)}
+            className="mb-4"
+          >
+            {isSearchingAvailability ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : currentStep === 3 ? (
-            <>
-              Proceed to Payment
-              <CreditCard className="ml-2 h-4 w-4" />
-            </>
-          ) : (
-            <>
-              Continue
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </>
+            ) : (
+              <Search className="mr-2 h-4 w-4" />
+            )}
+            Check Availability
+          </Button>
+
+          {isSearchingAvailability && <p className="text-center my-4">Searching...</p>}
+          
+          {hasSearched && !isSearchingAvailability && (
+             <div className="mt-6">
+              <h4 className="text-md font-semibold mb-3" style={{color: bookingStyles.formTextColor(colors)}}>Select an Item:</h4>
+              {availableInventory.length > 0 ? (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {availableInventory.map((item) => {
+                  const isSelected = selectedItem?.id === item.id;
+                  const cardItemStyle = {
+                    backgroundColor: isSelected ? bookingStyles.availabilityCard.selectedBackground(colors) : bookingStyles.availabilityCard.background(colors),
+                    border: bookingStyles.availabilityCard.border(colors, isSelected),
+                    boxShadow: bookingStyles.availabilityCard.shadow(colors),
+                    transition: 'transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out',
+                    transform: isSelected ? 'scale(1.03)' : 'scale(1)',
+                  };
+                   const cardItemHoverStyle = {
+                     boxShadow: bookingStyles.availabilityCard.hoverShadow(colors),
+                     transform: isSelected ? 'scale(1.03)' : 'scale(1.02)',
+                   };
+
+                  return (
+                    <Card
+                      key={item.id}
+                      onClick={() => selectInventoryItem(item)}
+                      style={cardItemStyle}
+                       onMouseEnter={(e) => Object.assign(e.currentTarget.style, cardItemHoverStyle)}
+                       onMouseLeave={(e) => Object.assign(e.currentTarget.style, cardItemStyle)}
+                      className={`cursor-pointer overflow-hidden`}
+                    >
+                       <CardHeader className="p-0 relative">
+                        <div style={{ backgroundColor: bookingStyles.availabilityCard.imageContainer(colors) }} className="aspect-video w-full overflow-hidden">
+                           <img 
+                              src={item.primaryImage || '/placeholder.svg'} 
+                              alt={item.name} 
+                              className="object-cover w-full h-full" 
+                              style={theme.imageStyles(colors)}
+                           />
+                        </div>
+                          <div 
+                            style={{ 
+                                backgroundColor: bookingStyles.availabilityCard.priceTag.background(colors),
+                                color: bookingStyles.availabilityCard.priceTag.color(colors) 
+                            }} 
+                            className="absolute top-2 right-2 px-3 py-1 rounded-full text-sm font-semibold"
+                           >
+                              ${item.price.toFixed(2)}
+                          </div>
+                       </CardHeader>
+                       <CardContent className="p-4">
+                          <CardTitle className="text-lg mb-1" style={{color: bookingStyles.formTextColor(colors)}}>{item.name}</CardTitle>
+                          <CardDescription className="text-sm mb-3" style={{color: bookingStyles.formTextColor(colors) + 'aa'}}>
+                              {item.description?.substring(0, 60)}{item.description && item.description.length > 60 ? '...' : ''}
+                          </CardDescription>
+                          <div 
+                              style={{
+                                backgroundColor: bookingStyles.availabilityCard.specContainer.background(colors), 
+                                border: bookingStyles.availabilityCard.specContainer.border(colors)
+                              }} 
+                              className="flex justify-around text-xs p-2 rounded-md"
+                            >
+                                <span style={{color: bookingStyles.formTextColor(colors)}}>Type: {item.type}</span>
+                                <span style={{color: bookingStyles.formTextColor(colors)}}>Size: {item.dimensions}</span>
+                                <span style={{color: bookingStyles.formTextColor(colors)}}>Cap: {item.capacity}</span>
+                          </div>
+                       </CardContent>
+                    </Card>
+                  );
+                })}
+              </div>
+              ) : (
+                 <p className="text-center text-gray-500">No items available for the selected date and time. Please try adjusting your search.</p>
+              )}
+             </div>
           )}
-        </Button>
-      </div>
+
+           <div className="mt-6 flex justify-end">
+             <Button 
+                onClick={handleNext} 
+                disabled={!newBooking.bounceHouseId} 
+                style={primaryButtonStyle}
+                onMouseEnter={(e) => Object.assign(e.currentTarget.style, primaryButtonHoverStyle)}
+                onMouseLeave={(e) => Object.assign(e.currentTarget.style, primaryButtonStyle)}
+             >
+               Next <ChevronRight className="ml-2 h-4 w-4" />
+             </Button>
+           </div>
+        </div>
+      )}
+
+      {/* Step 2: Customer Info */}
+      {currentStep === 2 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4" style={{color: bookingStyles.formTextColor(colors)}}>Customer Information</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-5 mb-4">
+            <div>
+              <Label htmlFor="customerName" style={labelStyle}>Full Name</Label>
+              <Input
+                id="customerName"
+                value={newBooking.customerName}
+                onChange={(e) =>
+                  setNewBooking({ ...newBooking, customerName: e.target.value })
+                }
+                required
+                style={inputStyle}
+                onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="customerEmail" style={labelStyle}>Email</Label>
+              <Input
+                id="customerEmail"
+                type="email"
+                value={newBooking.customerEmail}
+                onChange={(e) =>
+                  setNewBooking({ ...newBooking, customerEmail: e.target.value })
+                }
+                required
+                style={inputStyle}
+                onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+              />
+            </div>
+            <div>
+              <Label htmlFor="customerPhone" style={labelStyle}>Phone Number</Label>
+              <Input
+                id="customerPhone"
+                type="tel"
+                value={newBooking.customerPhone}
+                onChange={(e) =>
+                  setNewBooking({ ...newBooking, customerPhone: e.target.value })
+                }
+                required
+                style={inputStyle}
+                onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+              />
+            </div>
+             <div>
+               <Label htmlFor="eventType" style={labelStyle}>Event Type</Label>
+               <Select
+                 value={newBooking.eventType}
+                 onValueChange={(value) => setNewBooking({ ...newBooking, eventType: value })}
+               >
+                 <SelectTrigger 
+                    style={inputStyle} 
+                    onFocus={(e) => Object.assign(e.target.style, focusInputStyle)} 
+                    onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+                 >
+                   <SelectValue placeholder="Select event type" />
+                 </SelectTrigger>
+                 <SelectContent>
+                   <SelectItem value="BIRTHDAY">Birthday Party</SelectItem>
+                   <SelectItem value="CORPORATE">Corporate Event</SelectItem>
+                   <SelectItem value="SCHOOL">School Function</SelectItem>
+                   <SelectItem value="CHURCH">Church Event</SelectItem>
+                   <SelectItem value="COMMUNITY">Community Festival</SelectItem>
+                   <SelectItem value="PRIVATE">Private Party</SelectItem>
+                   <SelectItem value="OTHER">Other</SelectItem>
+                 </SelectContent>
+               </Select>
+             </div>
+          </div>
+          <div className="mb-4">
+            <Label htmlFor="eventAddress" style={labelStyle}>Event Street Address</Label>
+            <Input
+              id="eventAddress"
+              value={newBooking.eventAddress}
+              onChange={(e) =>
+                setNewBooking({ ...newBooking, eventAddress: e.target.value })
+              }
+              required
+              style={inputStyle}
+              onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+              onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+            />
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-x-4 gap-y-5 mb-4">
+             <div>
+               <Label htmlFor="eventCity" style={labelStyle}>City</Label>
+               <Input
+                 id="eventCity"
+                 value={newBooking.eventCity}
+                 onChange={(e) => setNewBooking({ ...newBooking, eventCity: e.target.value })}
+                 required
+                 style={inputStyle}
+                 onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                 onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+               />
+             </div>
+             <div>
+               <Label htmlFor="eventState" style={labelStyle}>State</Label>
+               <Input
+                 id="eventState"
+                 value={newBooking.eventState}
+                 onChange={(e) => setNewBooking({ ...newBooking, eventState: e.target.value })}
+                 required
+                 style={inputStyle}
+                 onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                 onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+               />
+             </div>
+             <div>
+               <Label htmlFor="eventZipCode" style={labelStyle}>Zip Code</Label>
+               <Input
+                 id="eventZipCode"
+                 value={newBooking.eventZipCode}
+                 onChange={(e) => setNewBooking({ ...newBooking, eventZipCode: e.target.value })}
+                 required
+                 style={inputStyle}
+                 onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+                 onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+               />
+             </div>
+           </div>
+          <div className="mb-4">
+            <Label htmlFor="specialInstructions" style={labelStyle}>Special Instructions</Label>
+            <Textarea
+              id="specialInstructions"
+              value={newBooking.specialInstructions}
+              onChange={(e) =>
+                setNewBooking({
+                  ...newBooking,
+                  specialInstructions: e.target.value,
+                })
+              }
+              placeholder="Any specific requests or details about the setup location?"
+              style={inputStyle}
+              onFocus={(e) => Object.assign(e.target.style, focusInputStyle)}
+              onBlur={(e) => Object.assign(e.target.style, inputStyle)}
+            />
+          </div>
+          <div className="mb-6 mt-4 flex items-center space-x-2">
+            <Checkbox 
+              id="terms" 
+              checked={termsAccepted} 
+              onCheckedChange={(checked) => setTermsAccepted(Boolean(checked))}
+              className="border-gray-400 data-[state=checked]:bg-blue-500"
+            />
+            <Label htmlFor="terms" style={labelStyle} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+              I accept the <Link href="/terms" target="_blank" className="underline" style={{color: colors.primary}}>terms and conditions</Link>.
+            </Label>
+          </div>
+          <div className="flex justify-between mt-6">
+            <Button 
+                onClick={handleBack} 
+                variant="outline" 
+                style={secondaryButtonStyle}
+                onMouseEnter={(e) => Object.assign(e.currentTarget.style, secondaryButtonHoverStyle)}
+                onMouseLeave={(e) => Object.assign(e.currentTarget.style, secondaryButtonStyle)}
+             >
+              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+            </Button>
+            <Button 
+                onClick={handleNext} 
+                style={primaryButtonStyle}
+                onMouseEnter={(e) => Object.assign(e.currentTarget.style, primaryButtonHoverStyle)}
+                onMouseLeave={(e) => Object.assign(e.currentTarget.style, primaryButtonStyle)}
+            >
+              Next <ChevronRight className="ml-2 h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Step 3: Review & Pay */}
+      {currentStep === 3 && (
+        <div>
+          <h3 className="text-lg font-semibold mb-4" style={{color: bookingStyles.formTextColor(colors)}}>Review & Pay</h3>
+          
+          {/* Booking Summary Card */}
+          <Card style={summaryCardStyle} className="mb-6 overflow-hidden">
+            <CardHeader style={summaryHeaderStyle} className="p-4">
+              <CardTitle style={{color: getContrastColor(summaryHeaderStyle.backgroundColor)}} className="text-lg">Booking Summary</CardTitle>
+            </CardHeader>
+            <CardContent className="p-0">
+               <div style={summaryRowStyle(false)} className="px-4 py-3 border-b border-gray-200">
+                  <p><strong>Item:</strong> {selectedItem?.name}</p>
+               </div>
+               <div style={summaryRowStyle(true)} className="px-4 py-3 border-b border-gray-200">
+                  <p><strong>Date:</strong> {format(createUTCDate(newBooking.eventDate), 'PPP')}</p>
+               </div>
+               <div style={summaryRowStyle(false)} className="px-4 py-3 border-b border-gray-200">
+                  <p><strong>Time:</strong> {newBooking.startTime} - {newBooking.endTime}</p>
+               </div>
+               <div style={summaryRowStyle(true)} className="px-4 py-3 border-b border-gray-200">
+                  <p><strong>Address:</strong> {newBooking.eventAddress}, {newBooking.eventCity}, {newBooking.eventState} {newBooking.eventZipCode}</p>
+               </div>
+               <div style={summaryRowStyle(false)} className="px-4 py-3 border-b border-gray-200 font-semibold">
+                  <p>Subtotal: ${calculateSubtotal().toFixed(2)}</p>
+               </div>
+                {applyTax && taxRate > 0 && (
+                 <div style={summaryRowStyle(true)} className="px-4 py-3 border-b border-gray-200 font-semibold">
+                   <p>Tax ({taxRate}%): ${calculateTaxAmount().toFixed(2)}</p>
+                 </div>
+               )}
+               <div style={summaryRowStyle(false)} className="px-4 py-3 font-bold text-lg">
+                  <p>Total: ${calculateTotal().toFixed(2)}</p>
+               </div>
+            </CardContent>
+          </Card>
+
+          {/* Payment Form - Rendered only when clientSecret is available */}
+          {clientSecret && pendingBookingData && businessData?.stripeConnectedAccountId ? (
+            <Elements
+              stripe={getStripeInstance(businessData.stripeConnectedAccountId)}
+              options={{ clientSecret }} 
+            >
+              <PaymentForm
+                bookingData={pendingBookingData} 
+                clientSecret={clientSecret} 
+                onPaymentSuccess={handlePaymentSuccess}
+                themeName={themeName} 
+                colors={colors}
+              />
+            </Elements>
+          ) : (
+             // Show loading or trigger submission button if clientSecret isn't ready yet
+             <div className="text-center space-y-4">
+                 {isSubmitting ? (
+                    <div className="flex justify-center items-center flex-col">
+                        <Loader2 className="h-8 w-8 animate-spin text-gray-500 mb-2" />
+                        <span>Processing request...</span>
+                    </div>
+                 ) : (
+                    <Button 
+                        onClick={handleSubmit} // Button to initiate the submission process
+                        style={primaryButtonStyle}
+                        onMouseEnter={(e) => Object.assign(e.currentTarget.style, primaryButtonHoverStyle)}
+                        onMouseLeave={(e) => Object.assign(e.currentTarget.style, primaryButtonStyle)}
+                        disabled={isSubmitting}
+                    >
+                        {isSubmitting ? 'Processing...' : 'Proceed to Payment'}
+                    </Button>
+                 )}
+                 {!isSubmitting && <p className="text-xs text-gray-500">Click to prepare secure payment.</p>}
+             </div>
+          )}
+
+          {/* Only show Back button here now */}
+          <div className="flex justify-start mt-6"> {/* Changed to justify-start */}
+            <Button 
+                onClick={handleBack} 
+                variant="outline" 
+                style={secondaryButtonStyle}
+                onMouseEnter={(e) => Object.assign(e.currentTarget.style, secondaryButtonHoverStyle)}
+                onMouseLeave={(e) => Object.assign(e.currentTarget.style, secondaryButtonStyle)}
+             >
+              <ChevronLeft className="mr-2 h-4 w-4" /> Back
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
     </div>
   );
 }

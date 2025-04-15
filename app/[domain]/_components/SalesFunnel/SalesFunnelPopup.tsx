@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { LeadCaptureForm } from "./LeadCaptureForm";
 import { ThankYouMessage } from "./ThankYouMessage";
 import { motion, AnimatePresence } from "framer-motion";
+import { ThemeColors, ThemeDefinition, getContrastColor } from '@/app/[domain]/_themes/themeConfig';
+
 
 export interface SalesFunnel {
   id: string;
@@ -18,18 +20,46 @@ export interface SalesFunnel {
   thankYouMessage: string;
   couponId: string | null;
   isActive: boolean;
+  theme: ThemeDefinition;
 }
 
 export interface SalesFunnelPopupProps {
   businessId: string;
   funnel: SalesFunnel;
-  colors: {
-    primary: string;
-    secondary: string;
-  };
+  colors: ThemeColors;
+  theme: ThemeDefinition;
 }
 
-export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopupProps) {
+const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'primary' | 'secondary' = 'primary'): React.CSSProperties => {
+  const baseStyles = theme.buttonStyles;
+  const secondaryStyles = theme.secondaryButtonStyles;
+  const styles = (type === 'secondary' && secondaryStyles) ? secondaryStyles : baseStyles;
+  const fallbackStyles = baseStyles; // Always fallback to primary button styles
+
+  // For secondary buttons with transparent background, use the text color directly from the theme
+  if (type === 'secondary' && secondaryStyles && secondaryStyles.background(colors) === 'transparent') {
+    return {
+      background: styles?.background?.(colors) ?? fallbackStyles.background(colors),
+      border: styles?.border?.(colors) ?? fallbackStyles.border?.(colors) ?? 'none',
+      boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
+      borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
+      transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
+      color: styles.textColor(colors), // Use the theme's text color directly
+    };
+  }
+
+  return {
+    background: styles?.background?.(colors) ?? fallbackStyles.background(colors),
+    border: styles?.border?.(colors) ?? fallbackStyles.border?.(colors) ?? 'none',
+    boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
+    borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
+    transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
+    color: styles.textColor(colors) ?? fallbackStyles.textColor(colors),
+  };
+};
+
+
+export function SalesFunnelPopup({ businessId, funnel, colors, theme }: SalesFunnelPopupProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -91,12 +121,34 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
   
   if (!isVisible) return null;
   
-  // Generate gradients and colors
-  const gradientBg = `linear-gradient(135deg, ${colors.primary} 0%, ${colors.secondary} 100%)`;
-  const lightPrimaryBg = `${colors.primary}10`;
-  const mainTextColor = "#333333";
-  const secondaryTextColor = "#666666";
-  
+  // --- Generate Theme Styles ---
+  const imageStyles = theme.imageStyles(colors);
+  const headerStyles = theme.headerBg(colors, false);
+  const headerTextColor = getContrastColor(colors.primary); // Use contrast based on primary color for header text/icons
+
+  // Button Styles
+  const primaryButtonStyle = getButtonStyle(theme, colors, 'primary');
+  const primaryButtonTextColor = getContrastColor(colors.primary); // Use contrast based on primary color for button text
+
+  // Text Colors
+  const primaryTextColor = colors.primary;
+  const secondaryTextColor = colors.secondary;
+  const mainTextColor = colors.text;
+
+  // Background Colors
+  const lightPrimaryBg = `${colors.primary}1A`; // 10% opacity primary
+  const lightSecondaryBg = `${colors.secondary}1A`; // 10% opacity secondary
+  const cardBackgroundColor = theme.cardStyles.background(colors); // Use card background from theme
+
+  // Card Styles (for main popup body)
+  const cardStyle = {
+    backgroundColor: cardBackgroundColor,
+    border: theme.cardStyles.border(colors),
+    boxShadow: theme.cardStyles.boxShadow(colors),
+    borderRadius: theme.cardStyles.borderRadius || '16px',
+    color: theme.cardStyles.textColor(colors), // Default text color inside card
+  };
+
   return (
     <div className="fixed bottom-6 left-6 z-50 pointer-events-none">
       <AnimatePresence>
@@ -111,15 +163,12 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
             <button
               onClick={handleMaximize}
               className="flex items-center gap-3 pl-4 pr-5 py-3 rounded-full shadow-xl"
-              style={{ 
-                background: gradientBg,
-                boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)"
-              }}
+              style={primaryButtonStyle}
             >
               <div className="flex items-center justify-center w-8 h-8 bg-white bg-opacity-20 rounded-full">
-                <Gift className="h-4 w-4 text-white" />
+                <Gift className="h-4 w-4" style={{ color: primaryButtonTextColor }} />
               </div>
-              <span className="font-semibold text-white text-sm whitespace-nowrap">Spring Sale - Get 20% Off!</span>
+              <span className="font-semibold text-sm whitespace-nowrap" style={{ color: primaryButtonTextColor }}>{funnel.popupTitle || funnel.name || "Special Offer!"}</span>
             </button>
           </motion.div>
         ) : (
@@ -132,32 +181,34 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
             className="pointer-events-auto"
             style={{ filter: "drop-shadow(0 20px 50px rgba(0, 0, 0, 0.15))" }}
           >
-            <div className="w-[600px] max-w-[95vw] bg-white rounded-2xl overflow-hidden">
+            <div className="w-[600px] max-w-[95vw] overflow-hidden" style={cardStyle}>
               {/* Header */}
               <div 
                 className="h-14 flex items-center justify-between px-6"
-                style={{ background: gradientBg }}
+                style={{ background: headerStyles }}
               >
                 <div className="flex items-center gap-3">
                   <div className="w-6 h-6 bg-white bg-opacity-20 rounded-full flex items-center justify-center">
-                    <Sparkles className="h-3 w-3 text-white" />
+                    <Sparkles className="h-3 w-3" style={{ color: headerTextColor }} />
                   </div>
-                  <h4 className="font-semibold text-white">{funnel.name || "Spring Sale"}</h4>
+                  <h4 className="font-semibold" style={{ color: headerTextColor }}>{funnel.name || "Spring Sale"}</h4>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={handleMinimize}
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                    style={{ color: headerTextColor }}
                     aria-label="Minimize"
                   >
-                    <ChevronUp className="h-4 w-4 text-white" />
+                    <ChevronUp className="h-4 w-4" />
                   </button>
                   <button
                     onClick={handleClose}
                     className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-white/10 transition-colors"
+                    style={{ color: headerTextColor }}
                     aria-label="Close"
                   >
-                    <X className="h-4 w-4 text-white" />
+                    <X className="h-4 w-4" />
                   </button>
                 </div>
               </div>
@@ -177,7 +228,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                               fill
                               sizes="(max-width: 768px) 100vw, 240px"
                               priority
-                              style={{ objectFit: 'cover' }}
+                              style={imageStyles}
                               className="transition-transform duration-700"
                             />
                           </div>
@@ -185,10 +236,10 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                           <div className="aspect-square bg-gradient-to-br from-gray-100 to-gray-200 rounded-xl flex items-center justify-center">
                             <div 
                               className="w-24 h-24 rounded-full flex items-center justify-center"
-                              style={{ background: lightPrimaryBg }}
+                              style={{ background: lightSecondaryBg }}
                             >
                               <Gift 
-                                style={{ color: colors.primary }}
+                                style={{ color: primaryTextColor }}
                                 className="h-12 w-12"
                               />
                             </div>
@@ -201,14 +252,14 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                         <div className="mb-auto">
                           <h2 
                             className="text-3xl font-bold mb-3"
-                            style={{ color: colors.primary }}
+                            style={{ color: primaryTextColor }}
                           >
                             {funnel.popupTitle || "Spring Sale"}
                           </h2>
                           
                           <p 
                             className="mb-6 leading-relaxed text-base"
-                            style={{ color: secondaryTextColor }}
+                            style={{ color: mainTextColor }}
                           >
                             {funnel.popupText || "Come jump into Spring with our special seasonal discounts on all inflatables!"}
                           </p>
@@ -221,7 +272,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                                   className="flex-shrink-0 w-5 h-5 rounded-full flex items-center justify-center"
                                   style={{ background: lightPrimaryBg }}
                                 >
-                                  <Check className="h-3 w-3" style={{ color: colors.primary }} />
+                                  <Check className="h-3 w-3" style={{ color: primaryTextColor }} />
                                 </div>
                                 <span style={{ color: mainTextColor }}>{benefit}</span>
                               </div>
@@ -239,9 +290,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                             <Button 
                               onClick={handleShowDiscountForm}
                               className="w-full py-4 rounded-xl text-white font-semibold text-base relative overflow-hidden group"
-                              style={{ 
-                                background: gradientBg,
-                              }}
+                              style={{ ...primaryButtonStyle, color: primaryButtonTextColor }}
                             >
                               <span className="relative z-10 flex items-center justify-center gap-2">
                                 Get Your Special Discount
@@ -277,11 +326,11 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                           <div className="text-sm flex items-center justify-center gap-1.5">
                             <Sparkles 
                               className="h-3.5 w-3.5"
-                              style={{ color: colors.secondary }} 
+                              style={{ color: secondaryTextColor }} 
                             />
                             <span 
                               className="text-center"
-                              style={{ color: colors.secondary }}
+                              style={{ color: secondaryTextColor }}
                             >
                               Limited time offer! Don&apos;t miss out!
                             </span>
@@ -298,7 +347,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                       <div className="md:w-1/3 mb-6 md:mb-0">
                         <h3 
                           className="text-2xl font-bold mb-4"
-                          style={{ color: colors.primary }}
+                          style={{ color: primaryTextColor }}
                         >
                           {funnel.formTitle || "Get Your Special Discount"}
                         </h3>
@@ -314,7 +363,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                             >
                               <Sparkles 
                                 className="h-4 w-4"
-                                style={{ color: colors.primary }}
+                                style={{ color: primaryTextColor }}
                               />
                             </div>
                             <p style={{ color: mainTextColor }}>
@@ -330,6 +379,8 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                           funnelId={funnel.id}
                           onSuccess={handleFormSuccess}
                           primaryColor={colors.primary}
+                          theme={theme}
+                          colors={colors}
                         />
                       </div>
                     </div>
@@ -353,7 +404,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors }: SalesFunnelPopu
                         >
                           <PartyPopper 
                             className="h-20 w-20"
-                            style={{ color: colors.primary }} 
+                            style={{ color: primaryTextColor }} 
                           />
                         </motion.div>
                       </div>

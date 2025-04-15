@@ -52,6 +52,7 @@ export function DomainLayoutClient({
           businessId={business.id}
           funnel={activeFunnel}
           colors={colors}
+          theme={selectedTheme}
         />
       )}
     </div>

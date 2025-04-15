@@ -1,13 +1,16 @@
 'use client';
 
 import React from 'react';
-import { TextCardsSectionContent, TextCard } from '@/lib/business/domain-utils';
+import { TextCardsSectionContent, TextCard, DynamicSection } from '@/lib/business/domain-utils';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Assuming usage of shadcn/ui
 // Import Lucide icons dynamically or select specific ones
 import { CheckCircle, Zap, ShieldCheck } from 'lucide-react'; 
+import { ThemeDefinition, ThemeColors } from '../../_themes/themeConfig';
 
 interface TextCardsSectionProps {
-  content: TextCardsSectionContent;
+  section: DynamicSection;
+  theme: ThemeDefinition;
+  colors: ThemeColors;
 }
 
 // Map icon names (if used) to actual components
@@ -19,36 +22,59 @@ const iconMap: { [key: string]: React.ElementType } = {
 };
 
 // Basic component to render text cards
-export default function TextCardsSection({ content }: TextCardsSectionProps) {
-  const { title, cards } = content;
+export default function TextCardsSection({ section, theme, colors }: TextCardsSectionProps) {
+  // Pre-compute styles based on theme
+  const cardStyle = {
+    background: theme.cardStyles.background(colors),
+    border: theme.cardStyles.border(colors),
+    boxShadow: theme.cardStyles.boxShadow(colors),
+    color: theme.cardStyles.textColor(colors),
+    borderRadius: theme.cardStyles.borderRadius || '16px',
+  };
+
+  const sectionStyle = {
+    background: theme.cardStyles.background(colors),
+    color: theme.cardStyles.textColor(colors),
+  };
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      {title && <h2 className="text-2xl md:text-3xl font-bold text-center mb-8">{title}</h2>}
-      {cards && cards.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {cards.map((card) => {
-            // Dynamically select icon component based on name (if provided)
-            const IconComponent = card.icon ? iconMap[card.icon] : null; 
-
-            return (
-              <Card key={card.id} className="text-center shadow-md hover:shadow-lg transition-shadow duration-200">
-                <CardHeader>
-                  {IconComponent && (
-                    <div className="flex justify-center mb-4">
-                      <IconComponent className="h-10 w-10 text-primary" />
-                    </div>
-                  )}
-                  {card.title && <CardTitle>{card.title}</CardTitle>}
-                </CardHeader>
-                <CardContent>
-                  {card.description && <p className="text-muted-foreground">{card.description}</p>}
-                </CardContent>
-              </Card>
-            );
-          })}
+    <section className="py-16" style={sectionStyle}>
+      <div className="container mx-auto px-4">
+        {section.title && (
+          <h2 
+            className="text-3xl font-bold text-center mb-12"
+            style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary }}
+          >
+            {section.title}
+          </h2>
+        )}
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {section.cards?.map((card, index) => (
+            <div 
+              key={index}
+              className="p-6 transition-all hover:shadow-xl hover:-translate-y-1"
+              style={cardStyle}
+            >
+              {card.title && (
+                <h3 
+                  className="text-xl font-bold mb-4"
+                  style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, index) || colors.primary }}
+                >
+                  {card.title}
+                </h3>
+              )}
+              {card.content && (
+                <div 
+                  className="prose max-w-none"
+                  style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text }}
+                  dangerouslySetInnerHTML={{ __html: card.content }}
+                />
+              )}
+            </div>
+          ))}
         </div>
-      )}
-    </div>
+      </div>
+    </section>
   );
 } 

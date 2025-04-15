@@ -14,6 +14,7 @@ export interface ImageTextSectionContent {
   imageUrl: string;
   imageKey?: string; // Optional key for deleting from UploadThing
   imagePosition?: 'left' | 'right';
+  backgroundColor?: string;
 }
 
 export interface VideoTextSectionContent {
@@ -21,6 +22,7 @@ export interface VideoTextSectionContent {
   text: string;
   videoUrl: string;
   videoPosition?: 'left' | 'right';
+  backgroundColor?: string;
 }
 
 export interface TextCard {
@@ -28,11 +30,13 @@ export interface TextCard {
   title: string;
   description: string;
   icon?: string; // e.g., Lucide icon name
+  backgroundColor?: string;
 }
 
 export interface TextCardsSectionContent {
   title?: string;
   cards: TextCard[];
+  backgroundColor?: string;
 }
 
 // Define the structure for a dynamic section
@@ -41,6 +45,7 @@ export interface DynamicSection {
   type: 'text' | 'imageText' | 'videoText' | 'textCards';
   page: 'landing' | 'about'; // Or other page identifiers
   content: TextSectionContent | ImageTextSectionContent | VideoTextSectionContent | TextCardsSectionContent;
+  backgroundColor?: string;
 }
 
 export interface Theme {
