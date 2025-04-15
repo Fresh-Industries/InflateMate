@@ -66,6 +66,8 @@ export default function AddSectionForm({
   const [backgroundColor, setBackgroundColor] = useState<string>(initialData?.backgroundColor || '#ffffff');
   const page = initialData?.page as PageType || initialPage;
 
+  console.log('page',page)
+
   
   // Restore original loading states
   const [isUploadingImage, setIsUploadingImage] = useState(false);
@@ -434,24 +436,13 @@ export default function AddSectionForm({
                   </Button>
                 )}
                 
-                <Button
-                  type="button"
-                  variant="outline"
-                  className="flex items-center justify-start gap-2 p-2 h-auto"
-                  onClick={() => setBackgroundColor('#ffffff')}
-                >
-                  <div 
-                    className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
-                    style={{ backgroundColor: '#ffffff' }}
-                  />
-                  <span className="text-sm">White</span> 
-                </Button>
+                
               </div>
             </div>
         </CardContent>
         <CardFooter className="flex justify-end space-x-2">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isUploadingImage || isUploadingVideo}>Cancel</Button>
-          <Button type="submit" disabled={isUploadingImage || isUploadingVideo}>
+          <Button type="submit" disabled={isUploadingImage || isUploadingVideo} variant="primary-gradient">
             {(isUploadingImage || isUploadingVideo) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             {initialData ? 'Save Changes' : 'Add Section'}
           </Button>

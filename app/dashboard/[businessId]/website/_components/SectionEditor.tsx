@@ -110,6 +110,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
              setEditingSection(null);
           }}
           presetColors={business.siteConfig?.colors}
+          
         />
       ) : (
         <Button onClick={() => setIsAdding(true)} disabled={isLoading}>
