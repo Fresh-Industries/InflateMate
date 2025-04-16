@@ -5,19 +5,19 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BusinessWithSiteConfig, SiteConfig } from '@/lib/business/domain-utils';
+import { BusinessWithSiteConfig /*, SiteConfig */ } from '@/lib/business/domain-utils';
 import { Menu, X, Home, Package, Info, Phone, ChevronRight } from 'lucide-react';
 import { ThemeColors, ThemeDefinition } from '@/app/[domain]/_themes/themeConfig';
 import { getContrastColor } from '@/app/[domain]/_themes/themeConfig';
 
 interface HeaderProps {
   business: BusinessWithSiteConfig;
-  siteConfig: SiteConfig;
+  // siteConfig: SiteConfig; // No longer needed for conditional links
   colors: ThemeColors;
   theme: ThemeDefinition;
 }
 
-export default function Header({ business, siteConfig, colors, theme }: HeaderProps) {
+export default function Header({ business, /* siteConfig, */ colors, theme }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
@@ -71,17 +71,6 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
     }
   };
 
-  const getLinkHoverStyles = (): React.CSSProperties => {
-    const linkStyles = theme.linkStyles;
-    if (!linkStyles) return {};
-    return {
-      background: linkStyles.hoverBackground(colors),
-      color: linkStyles.hoverTextColor(colors),
-      border: linkStyles.hoverBorder(colors),
-      boxShadow: linkStyles.hoverBoxShadow(colors),
-    };
-  };
-
   // Styles for the primary action button (Book Now)
   const secondaryButtonStyle: React.CSSProperties = {
     background: theme.secondaryButtonStyles?.background(colors) || theme.buttonStyles.background(colors),
@@ -100,7 +89,6 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
     ...theme.extraBorderStyle(colors) // Includes borderBottom, etc.
   };
 
-  const logoStyle: React.CSSProperties = theme.imageStyles ? { ...theme.imageStyles(colors), height: '5rem', width: 'auto', objectFit: 'contain', borderRadius: theme.imageStyles(colors).borderRadius } : { height: '5rem', width: 'auto', objectFit: 'contain', borderRadius: '9999px' };
   const logoInitialStyle: React.CSSProperties = {
      background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
      borderRadius: theme.imageStyles ? theme.imageStyles(colors).borderRadius : '9999px', // Match image style rounding
@@ -139,11 +127,11 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
           </Link>
 
           <nav className="hidden md:flex items-center space-x-3">
-            {[ // Dynamically build nav items based on available business info
+            {[ // Always show these links
               { path: '/', label: 'Home', icon: <Home /> },
               { path: '/inventory', label: 'Inventory', icon: <Package /> },
-              ...(siteConfig?.about?.description || business.description ? [{ path: '/about', label: 'About', icon: <Info /> }] : []),
-              ...(business.phone || business.email || business.address ? [{ path: '/contact', label: 'Contact', icon: <Phone /> }] : [])
+              { path: '/about', label: 'About', icon: <Info /> }, 
+              { path: '/contact', label: 'Contact', icon: <Phone /> }
             ].map((item) => {
               const active = isActive(item.path);
               const style = computeLinkStyle(active);
@@ -197,11 +185,11 @@ export default function Header({ business, siteConfig, colors, theme }: HeaderPr
             className="md:hidden pb-4 pt-2 animate-in slide-in-from-top-5 duration-300"
             style={{ backgroundColor: theme.headerBg(colors, true) }} // Use scrolled bg for contrast
           >
-            {[ // Use same dynamic logic for mobile nav items
+            {[ // Always show these links in mobile too
               { path: '/', label: 'Home', icon: <Home /> },
               { path: '/inventory', label: 'Inventory', icon: <Package /> },
-              ...(siteConfig?.about?.description || business.description ? [{ path: '/about', label: 'About', icon: <Info /> }] : []),
-              ...(business.phone || business.email || business.address ? [{ path: '/contact', label: 'Contact', icon: <Phone /> }] : [])
+              { path: '/about', label: 'About', icon: <Info /> }, 
+              { path: '/contact', label: 'Contact', icon: <Phone /> }
             ].map((item) => {
               const active = isActive(item.path);
               const style = computeLinkStyle(active);

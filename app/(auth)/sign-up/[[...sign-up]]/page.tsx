@@ -5,12 +5,7 @@ import { SignUp } from "@clerk/nextjs";
 export default function SignUpPage() {
     return (
         <div className="flex flex-col items-center max-w-md mx-auto">
-            <div className="mb-8 animate-float">
-                <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">
-                    InflateMate
-                </h1>
-                <p className="text-center text-gray-600 mt-2">Create your bounce house business account</p>
-            </div>
+
                 <SignUp 
                     fallbackRedirectUrl="/callback" 
                     signInFallbackRedirectUrl="/sign-in"

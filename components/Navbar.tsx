@@ -51,6 +51,9 @@ export default function Navbar() {
         setLoading(false);
         return;
       }
+
+      console.log("Fetching user businesses for user:", userId);
+
       
       try {
         const response = await fetch('/api/businesses');

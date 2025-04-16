@@ -5,6 +5,7 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
@@ -88,24 +89,10 @@ model Inventory {
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @updatedAt
   quantity            Int             @default(1)
-  availability        Availability[]
   bookingItems        BookingItem[]
   business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
-}
-
-model Availability {
-  id          String    @id @default(cuid())
-  startTime   DateTime
-  endTime     DateTime
-  isAvailable Boolean   @default(true)
-  reason      String?
-  inventoryId String
-  inventory   Inventory @relation(fields: [inventoryId], references: [id], onDelete: Cascade)
-
-  @@index([inventoryId])
-  @@index([startTime, endTime])
 }
 
 model Customer {

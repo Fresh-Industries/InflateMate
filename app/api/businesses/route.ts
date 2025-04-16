@@ -88,16 +88,16 @@ export async function POST(req: NextRequest) {
 export async function GET() {
   try {
     const user = await getCurrentUser();
-    
+    console.log("user", user);
     if (!user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
-
+    console.log("user", user);
     const userWithBusinesses = await prisma.user.findUnique({
-      where: { id: user.id },
+      where: { id: user.id  },
       include: { businesses: true }
     });
 

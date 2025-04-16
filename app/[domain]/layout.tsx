@@ -20,6 +20,7 @@ export async function generateMetadata(
     // Use business name as title
     const title = business.name;
     const description = business.description || 'Premium inflatable rentals for birthdays, events, and parties.';
+    const businessLogo = business.logo; // Get logo URL
     
     return {
       title,
@@ -36,9 +37,12 @@ export async function generateMetadata(
         description,
         images: business.coverImage ? [business.coverImage] : [],
       },
-      icons: {
-        icon: [{ url: business.logo || '' }]
-      },
+      // Conditionally add icons only if logo exists
+      icons: businessLogo ? {
+        icon: [{ url: businessLogo }],
+        // Optionally add apple-touch-icon etc. if you have them
+        // apple: [{ url: businessLogo }], 
+      } : null, // Set to null if no logo
       metadataBase: new URL(`https://${domain}`),
     };
   } catch (error) {

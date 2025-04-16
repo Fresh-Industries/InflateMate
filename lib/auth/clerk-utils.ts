@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma";
 export async function getCurrentUser() {
   // Get the Clerk user
   const { userId } = await auth();
+
+  console.log("userId", userId);
   
   if (!userId) {
     return null;
@@ -15,39 +17,16 @@ export async function getCurrentUser() {
       where: { clerkUserId: userId },
     });
     
-    // If the user doesn't exist in your database yet, fetch from Clerk and create
     if (!user) {
       const clerkUser = await currentUser();
-      
       if (!clerkUser) {
         return null;
       }
-      
-      // Get the primary email
-      const emailObject = clerkUser.emailAddresses[0];
-      const email = emailObject ? emailObject.emailAddress : null;
-      
-      // Combine first and last name for the full name
-      const name = [clerkUser.firstName, clerkUser.lastName].filter(Boolean).join(' ');
-      
-      // Create the user in your database
-      const newUser = await prisma.user.create({
-        data: {
-          clerkUserId: userId,
-          name: name || null,
-          email: email || null,
-          image: clerkUser.imageUrl || null,
-          createdAt: new Date(),
-          updatedAt: new Date(),
-        },
-      });
-      
-      return newUser;
+      return user;
     }
-    
     return user;
   } catch (error) {
-    console.error("Error getting current user:", error);
+    console.error("Error fetching user:", error);
     return null;
   }
 }

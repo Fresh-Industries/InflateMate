@@ -36,7 +36,6 @@ async function getInitialData(businessId: string) {
       price: true,
       status: true,
     },
-    cacheStrategy: { ttl: 240 },
   });
 
   // Add origin for server-side requests
