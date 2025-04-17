@@ -2,160 +2,93 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { createLocalDate, createLocalDateTime } from "@/lib/utils";
+
 // Schema for validating availability search parameters
 const availabilitySearchSchema = z.object({
-  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD format
-  startTime: z.string().regex(/^\d{2}:\d{2}$/),  // HH:MM format
-  endTime: z.string().regex(/^\d{2}:\d{2}$/),    // HH:MM format
-  excludeBookingId: z.string().optional(),       // Optional booking ID to exclude
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/), // YYYY-MM-DD
+  startTime: z.string().regex(/^\d{2}:\d{2}$/),  // HH:MM
+  endTime: z.string().regex(/^\d{2}:\d{2}$/),    // HH:MM
+  excludeBookingId: z.string().optional(),         // for edits
 });
 
 export async function GET(
   req: NextRequest,
   { params }: { params: Promise<{ businessId: string }> }
 ) {
+  // parse businessId
+  const { businessId } = await params;
+  if (!businessId) {
+    return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
+  }
+
+  // parse & validate query params
+  const url = new URL(req.url);
+  const date = url.searchParams.get("date");
+  const startTime = url.searchParams.get("startTime");
+  const endTime = url.searchParams.get("endTime");
+  const excludeBookingId = url.searchParams.get("excludeBookingId") || undefined;
+
+  if (!date || !startTime || !endTime) {
+    return NextResponse.json(
+      { error: "Missing required parameters: date, startTime, endTime" },
+      { status: 400 }
+    );
+  }
+
   try {
-    const businessId  = (await params).businessId;
-    if (!businessId) {
-      return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
+    availabilitySearchSchema.parse({ date, startTime, endTime, excludeBookingId });
+  } catch (err) {
+    if (err instanceof z.ZodError) {
+      return NextResponse.json(
+        { error: "Invalid parameters format", details: err.errors },
+        { status: 400 }
+      );
     }
+  }
 
-    // Parse search parameters
-    const url = new URL(req.url);
-    const date = url.searchParams.get('date');
-    const startTime = url.searchParams.get('startTime');
-    const endTime = url.searchParams.get('endTime');
-    const excludeBookingId = url.searchParams.get('excludeBookingId') || undefined;
+  // build local Date objects
+  const eventDay = createLocalDate(date);
+  const requestedStart = createLocalDateTime(date, startTime);
+  const requestedEnd = createLocalDateTime(date, endTime);
 
-    if (!date || !startTime || !endTime) {
-      return NextResponse.json({ 
-        error: "Missing required parameters: date, startTime, endTime" 
-      }, { status: 400 });
+  // fetch all AVAILABLE inventory
+  const allInventory = await prisma.inventory.findMany({
+    where: { businessId, status: 'AVAILABLE' },
+  });
+
+  // fetch bookings that overlap the requested window
+  const overlapping = await prisma.booking.findMany({
+    where: {
+      businessId,
+      id: excludeBookingId ? { not: excludeBookingId } : undefined,
+      status: { in: ['PENDING', 'CONFIRMED'] },
+      OR: [
+        { startTime: { lt: requestedEnd }, endTime: { gt: requestedStart } },
+        { eventDate: eventDay },
+      ],
+    },
+    include: { inventoryItems: true },
+  });
+
+  // collect booked inventory IDs
+  const bookedIds = new Set<string>();
+  overlapping.forEach(b => {
+    b.inventoryItems.forEach(item => bookedIds.add(item.inventoryId));
+  });
+
+  // identify current item if editing
+  let editingId: string | null = null;
+  if (excludeBookingId) {
+    const edit = overlapping.find(b => b.id === excludeBookingId);
+    if (edit && edit.inventoryItems.length) {
+      editingId = edit.inventoryItems[0].inventoryId;
     }
+  }
 
-    try {
-      // Validate parameters
-      availabilitySearchSchema.parse({ date, startTime, endTime, excludeBookingId });
-    } catch (error) {
-      if (error instanceof z.ZodError) {
-        return NextResponse.json({ 
-          error: "Invalid parameters format", 
-          details: error.errors 
-        }, { status: 400 });
-      }
-    }
-
-    console.log(`Checking availability for date ${date}, startTime ${startTime}, endTime ${endTime}, excluding booking ID: ${excludeBookingId || 'none'}`);
-    
-    // Create date objects for the requested time range
-    const requestedStartTime = createLocalDateTime(date, startTime);
-    const requestedEndTime = createLocalDateTime(date, endTime);
-    
-    console.log(`Date range for availability check: ${requestedStartTime.toISOString()} to ${requestedEndTime.toISOString()}`);
-    
-    // Get all inventory items for this business
-    const allInventory = await prisma.inventory.findMany({
-      where: {
-        businessId,
-        status: 'AVAILABLE', // Only available inventory
-      },
-      include: {
-        availability: {
-          where: {
-            // Find any blocking availability records that overlap with the requested date
-            OR: [
-              {
-                // Availability record that blocks this date
-                startTime: {
-                  lt: requestedEndTime,
-                },
-                endTime: {
-                  gt: requestedStartTime,
-                },
-                isAvailable: false,
-              },
-            ],
-          },
-        },
-      },
-    });
-
-    console.log(`Found ${allInventory.length} total inventory items`);
-    
-    // Find all bookings that would conflict with this date and time range
-    const conflictingBookings = await prisma.booking.findMany({
-      where: {
-        businessId,
-        id: excludeBookingId ? { not: excludeBookingId } : undefined, // Exclude the current booking if ID provided
-        // Check for any booking that overlaps with the requested time range
-        OR: [
-          {
-            // Bookings that span across the requested time range
-            startTime: { lte: requestedEndTime },
-            endTime: { gte: requestedStartTime },
-          },
-          {
-            // Bookings on the same day (regardless of time)
-            eventDate: createLocalDate(date),
-          },
-        ],
-        status: {
-          in: ['PENDING', 'CONFIRMED'], // Only consider active bookings
-        },
-      },
-      include: {
-        inventoryItems: true,
-      },
-    });
-
-    console.log(`Found ${conflictingBookings.length} conflicting bookings`);
-
-    // Extract IDs of inventory items that are already booked
-    const bookedInventoryIds = new Set<string>();
-    conflictingBookings.forEach(booking => {
-      booking.inventoryItems.forEach(item => {
-        bookedInventoryIds.add(item.inventoryId);
-      });
-    });
-
-    console.log(`Booked inventory IDs: ${Array.from(bookedInventoryIds).join(', ') || 'none'}`);
-
-    // If we're editing a booking, we need to get the bounce house ID for that booking
-    let editingBounceHouseId = null;
-    if (excludeBookingId) {
-      const editingBooking = await prisma.booking.findUnique({
-        where: { id: excludeBookingId },
-        include: { inventoryItems: true },
-      });
-      
-      if (editingBooking && editingBooking.inventoryItems.length > 0) {
-        editingBounceHouseId = editingBooking.inventoryItems[0].inventoryId;
-        console.log(`Editing booking with bounce house ID: ${editingBounceHouseId}`);
-      }
-    }
-
-    // Filter out inventory that has blocking availability or is already booked
-    const availableInventory = allInventory.filter(item => {
-      // If item has blocking availabilities, it's not available
-      if (item.availability.length > 0) {
-        console.log(`Item ${item.id} has blocking availability`);
-        return false;
-      }
-      
-      // If item is in booked inventory, it's not available UNLESS it's the one we're editing
-      if (bookedInventoryIds.has(item.id) && item.id !== editingBounceHouseId) {
-        console.log(`Item ${item.id} is already booked`);
-        return false;
-      }
-      
-      // If we're editing a booking and this is the same bounce house, always include it
-      if (editingBounceHouseId && item.id === editingBounceHouseId) {
-        console.log(`Including item ${item.id} because it's the one being edited`);
-        return true;
-      }
-      
-      return true;
-    }).map(item => ({
+  // filter out booked items (unless editing)
+  const availableInventory = allInventory
+    .filter(item => !bookedIds.has(item.id) || item.id === editingId)
+    .map(item => ({
       id: item.id,
       name: item.name,
       type: item.type,
@@ -165,17 +98,8 @@ export async function GET(
       capacity: item.capacity,
       ageRange: item.ageRange,
       primaryImage: item.primaryImage,
+      quantity: item.quantity,
     }));
 
-    console.log(`Returning ${availableInventory.length} available inventory items`);
-    console.log(`Available inventory IDs: ${availableInventory.map(item => item.id).join(', ') || 'none'}`);
-
-    return NextResponse.json({ availableInventory }, { status: 200 });
-  } catch (error) {
-    console.error("Error searching availability:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
-      { status: 500 }
-    );
-  }
-} 
+  return NextResponse.json({ availableInventory }, { status: 200 });
+}

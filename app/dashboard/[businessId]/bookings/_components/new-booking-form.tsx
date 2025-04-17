@@ -26,11 +26,13 @@ import {
   User,
   CreditCard,
   Search,
+  X,
+  Minus,
+  Plus,
 } from "lucide-react";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
@@ -50,6 +52,7 @@ type InventoryItem = {
   capacity: number;
   ageRange: string;
   primaryImage: string | null;
+  quantity: number;
 };
 
 // Business type definition
@@ -88,6 +91,56 @@ type BookingMetadata = {
   bookingId?: string;
 };
 
+type SelectedItem = {
+  item: InventoryItem;
+  quantity: number;
+};
+
+const ITEMS_PER_PAGE = 4;
+
+// Pagination controls component
+const PaginationControls = ({ total, currentPage, setCurrentPage }: { 
+  total: number;
+  currentPage: number;
+  setCurrentPage: (page: number) => void;
+}) => {
+  const totalPages = Math.ceil(total / ITEMS_PER_PAGE);
+  
+  return (
+    <div className="flex items-center justify-center gap-2 mt-6">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
+        disabled={currentPage === 1}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      <div className="flex items-center gap-2">
+        {Array.from({ length: totalPages }, (_, i) => (
+          <Button
+            key={i + 1}
+            variant={currentPage === i + 1 ? "default" : "outline"}
+            size="sm"
+            onClick={() => setCurrentPage(i + 1)}
+            className="w-8 h-8"
+          >
+            {i + 1}
+          </Button>
+        ))}
+      </div>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
+        disabled={currentPage === totalPages}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+};
+
 export function NewBookingForm({ businessId }: { businessId: string }) {
   const { toast } = useToast();
   const router = useRouter();
@@ -99,7 +152,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [availableInventory, setAvailableInventory] = useState<InventoryItem[]>([]);
   const [isSearchingAvailability, setIsSearchingAvailability] = useState(false);
   const [hasSearched, setHasSearched] = useState(false);
-  const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
+  const [selectedItems, setSelectedItems] = useState<Map<string, SelectedItem>>(new Map());
   const [businessData, setBusinessData] = useState<Business | null>(null);
   const [taxRate, setTaxRate] = useState(0);
   const [applyTax, setApplyTax] = useState(false);
@@ -107,8 +160,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
-    packageId: null,
-    addOnIds: [],
+    
     customerName: "",
     customerEmail: "",
     customerPhone: "",
@@ -125,6 +177,8 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     specialInstructions: "",
   });
 
+  // Add pagination state
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Steps for progress indicator
   const steps = [
@@ -201,20 +255,37 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   };
 
   // Select an inventory item
-  const selectInventoryItem = (item: InventoryItem) => {
-    setSelectedItem(item);
-    setNewBooking({
-      ...newBooking,
-      bounceHouseId: item.id
+  const selectInventoryItem = (item: InventoryItem, quantity: number = 1) => {
+    setSelectedItems(prev => {
+      const newMap = new Map(prev);
+      if (quantity <= 0) {
+        newMap.delete(item.id);
+      } else {
+        newMap.set(item.id, { item, quantity });
+      }
+      return newMap;
     });
+  };
+
+  // Update quantity of selected item
+  const updateQuantity = (item: InventoryItem, delta: number) => {
+    const currentSelection = selectedItems.get(item.id);
+    const newQuantity = (currentSelection?.quantity || 0) + delta;
+    
+    // Ensure quantity doesn't exceed inventory quantity and isn't negative
+    if (newQuantity > 0 && newQuantity <= item.quantity) {
+      selectInventoryItem(item, newQuantity);
+    } else if (newQuantity <= 0) {
+      selectInventoryItem(item, 0); // Remove item
+    }
   };
 
   // Validate steps before progressing
   const validateEventDetails = () => {
-    if (!newBooking.eventDate || !newBooking.startTime || !newBooking.endTime || !newBooking.bounceHouseId) {
+    if (!newBooking.eventDate || !newBooking.startTime || !newBooking.endTime || selectedItems.size === 0) {
       toast({ 
         title: "Error", 
-        description: "Please complete all event details and select an inventory item.", 
+        description: "Please complete all event details and select at least one item.", 
         variant: "destructive" 
       });
       return false;
@@ -237,33 +308,46 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       handleSubmit();
       return;
     }
-    setCurrentStep(prev => prev + 1);
+    setCurrentStep((prev) => Math.min(3, prev + 1));
   };
 
   const handleBack = () => {
-    if (currentStep > 1) setCurrentStep(prev => prev - 1);
+    setCurrentStep((prev) => Math.max(1, prev - 1));
   };
 
   // Calculate total with tax
   const calculateTotal = () => {
-    if (!selectedItem) return 0;
-    
-    const subtotal = selectedItem.price;
-    if (!applyTax || taxRate <= 0) return subtotal;
-    
-    const taxAmount = subtotal * (taxRate / 100);
-    return subtotal + taxAmount;
+    let total = 0;
+    selectedItems.forEach(({ item, quantity }) => {
+      const subtotal = item.price;
+      if (!applyTax || taxRate <= 0) {
+        total += subtotal * quantity;
+      } else {
+        const taxAmount = subtotal * (taxRate / 100) * quantity;
+        total += subtotal + taxAmount;
+      }
+    });
+    return total;
   };
   
   // Calculate tax amount
   const calculateTaxAmount = () => {
-    if (!selectedItem || !applyTax || taxRate <= 0) return 0;
-    return selectedItem.price * (taxRate / 100);
+    let taxAmount = 0;
+    selectedItems.forEach(({ item, quantity }) => {
+      if (!applyTax || taxRate <= 0) return;
+      const subtotal = item.price;
+      taxAmount += subtotal * (taxRate / 100) * quantity;
+    });
+    return taxAmount;
   };
   
   // Calculate subtotal (pre-tax amount)
   const calculateSubtotal = () => {
-    return selectedItem ? selectedItem.price : 0;
+    let subtotal = 0;
+    selectedItems.forEach(({ item, quantity }) => {
+      subtotal += item.price * quantity;
+    });
+    return subtotal;
   };
 
 
@@ -280,9 +364,16 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       
       if (isNaN(amount) || amount <= 0) throw new Error("Invalid total amount.");
 
+      // Create an array of selected items with their details
+      const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: quantity
+      }));
       
       const metadata: BookingMetadata = {
-        bounceHouseId: newBooking.bounceHouseId,
+        bounceHouseId: selectedItemsArray.map(item => item.id).join(','),
         eventDate: newBooking.eventDate,
         startTime: newBooking.startTime,
         endTime: newBooking.endTime,
@@ -338,7 +429,10 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         body: JSON.stringify({
           amount,
           customerEmail: newBooking.customerEmail,
-          metadata,
+          metadata: {
+            ...metadata,
+            selectedItems: selectedItemsArray
+          },
         }),
       });
       
@@ -404,7 +498,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   // Clear availability when date/time changes
   useEffect(() => {
     setAvailableInventory([]);
-    setSelectedItem(null);
+    setSelectedItems(new Map());
     setNewBooking(prev => ({ ...prev, bounceHouseId: "" }));
     setHasSearched(false);
   }, [newBooking.eventDate, newBooking.startTime, newBooking.endTime]);
@@ -528,7 +622,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
               <div
                 className={`w-12 h-12 rounded-full border-2 flex items-center justify-center transition-all ${
                   currentStep >= step.number
-                    ? "bg-primary text-primary-foreground border-primary shadow-lg"
+                    ? "bg-gradient-to-r from-blue-600 to-purple-600 text-primary-foreground shadow-lg"
                     : "border-gray-300 text-gray-300"
                 }`}
               >
@@ -633,6 +727,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                   !newBooking.eventDate
                 }
                 className="w-full max-w-md"
+                variant="outline"
               >
                 {isSearchingAvailability ? (
                   <>
@@ -651,65 +746,124 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
             {/* Available Inventory */}
             {hasSearched && (
               <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-4">
+                <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
+                  <Search className="h-5 w-5" />
                   {availableInventory.length > 0
                     ? "Available Bounce Houses"
                     : "No bounce houses available for your selected time"}
                 </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  {availableInventory.map((item) => (
-                    <Card
-                      key={item.id}
-                      className={`cursor-pointer transition-all border-2 hover:shadow-lg ${
-                        selectedItem?.id === item.id
-                          ? "border-primary"
-                          : "border-gray-200"
-                      }`}
-                      onClick={() => selectInventoryItem(item)}
-                    >
-                      <CardHeader className="p-4 pb-2">
-                        <CardTitle className="text-md">{item.name}</CardTitle>
-                        <CardDescription>{item.type}</CardDescription>
-                      </CardHeader>
-                      <CardContent className="p-4 pt-0">
-                        {item.primaryImage && (
-                          <div className="mb-2 relative h-40 w-full overflow-hidden rounded-md">
-                            <img
-                              src={item.primaryImage}
-                              alt={item.name}
-                              className="h-full w-full object-cover"
-                            />
-                          </div>
-                        )}
-                        <div className="space-y-1 text-sm">
-                          <p>
-                            <span className="font-medium">Size:</span> {item.dimensions}
-                          </p>
-                          <p>
-                            <span className="font-medium">Capacity:</span> {item.capacity} people
-                          </p>
-                          <p>
-                            <span className="font-medium">Age Range:</span> {item.ageRange}
-                          </p>
-                          {item.description && <p className="line-clamp-2">{item.description}</p>}
-                        </div>
-                      </CardContent>
-                      <CardFooter className="p-4 pt-0 flex justify-between items-center">
-                        <p className="font-bold text-lg">${item.price.toFixed(2)}</p>
-                        <Button
-                          size="sm"
-                          variant={selectedItem?.id === item.id ? "default" : "outline"}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            selectInventoryItem(item);
-                          }}
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {availableInventory
+                    .slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE)
+                    .map((item) => {
+                      const isSelected = selectedItems.has(item.id);
+                      const quantity = selectedItems.get(item.id)?.quantity || 0;
+                      
+                      return (
+                        <Card
+                          key={item.id}
+                          className={`group overflow-hidden transition-all duration-300 ${
+                            isSelected
+                              ? "ring-2 ring-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+                              : "hover:border-primary/50 hover:shadow-md"
+                          }`}
                         >
-                          {selectedItem?.id === item.id ? "Selected" : "Select"}
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))}
+                          <div className="relative">
+                            {item.primaryImage ? (
+                              <div className="relative aspect-video w-full overflow-hidden">
+                                <img
+                                  src={item.primaryImage}
+                                  alt={item.name}
+                                  className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+                                />
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                              </div>
+                            ) : (
+                              <div className="relative aspect-video w-full bg-gradient-to-br from-primary/20 to-primary/10" />
+                            )}
+                            
+                            <div className="absolute bottom-0 left-0 right-0 p-4 text-white">
+                              <h4 className="text-2xl font-bold tracking-tight mb-1">{item.name}</h4>
+                              <div className="flex items-center gap-2">
+                                <span className="text-lg font-semibold">${item.price.toFixed(2)}</span>
+                                <span className="text-sm text-white/80">per day</span>
+                              </div>
+                            </div>
+                          </div>
+
+                          <CardContent className="p-4">
+                            <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm">
+                              <div>
+                                <span className="text-muted-foreground">Capacity:</span>{" "}
+                                <span className="font-medium">{item.capacity} people</span>
+                              </div>
+                              <div>
+                                <span className="text-muted-foreground">Age:</span>{" "}
+                                <span className="font-medium">{item.ageRange}</span>
+                              </div>
+                            </div>
+                          </CardContent>
+
+                          <CardFooter className="p-4 pt-0">
+                            {isSelected ? (
+                              <div className="flex w-full items-center gap-2">
+                                {item.quantity > 1 ? (
+                                  <>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => updateQuantity(item, -1)}
+                                      className="h-10 w-10"
+                                      disabled={quantity <= 1}
+                                    >
+                                      <Minus className="h-4 w-4" />
+                                    </Button>
+                                    <div className="w-12 text-center font-medium">
+                                      {quantity}
+                                    </div>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      onClick={() => updateQuantity(item, 1)}
+                                      className="h-10 w-10"
+                                      disabled={quantity >= item.quantity}
+                                    >
+                                      <Plus className="h-4 w-4" />
+                                    </Button>
+                                  </>
+                                ) : null}
+                                <Button
+                                  variant="destructive"
+                                  className="flex-1"
+                                  onClick={() => selectInventoryItem(item, 0)}
+                                >
+                                  Remove
+                                </Button>
+                              </div>
+                            ) : (
+                              <Button
+                                className="w-full"
+                                onClick={() => selectInventoryItem(item, 1)}
+                                disabled={item.quantity < 1}
+                                variant="outline"
+                              >
+                                {item.quantity > 0 ? "Add to Booking" : "Out of Stock"}
+                              </Button>
+                            )}
+                          </CardFooter>
+                        </Card>
+                      );
+                    })}
                 </div>
+                
+                {availableInventory.length > ITEMS_PER_PAGE && (
+                  <PaginationControls 
+                    total={availableInventory.length} 
+                    currentPage={currentPage}
+                    setCurrentPage={setCurrentPage}
+                  />
+                )}
               </div>
             )}
           </div>
@@ -846,38 +1000,53 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         {currentStep === 3 && (
           <div className="space-y-6">
             <h3 className="text-lg font-semibold">Review Your Booking</h3>
-            {selectedItem && (
+            {selectedItems.size > 0 && (
               <Card className="mb-4">
                 <CardHeader>
-                  <CardTitle>Selected Bounce House</CardTitle>
+                  <CardTitle>Selected Items</CardTitle>
                 </CardHeader>
-                <CardContent>
-                  <div className="flex flex-col md:flex-row gap-4">
-                    {selectedItem.primaryImage && (
-                      <div className="h-32 w-32 min-w-[8rem] overflow-hidden rounded-md">
-                        <img
-                          src={selectedItem.primaryImage}
-                          alt={selectedItem.name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div>
-                      <h4 className="text-md font-semibold">{selectedItem.name}</h4>
-                      <p className="text-muted-foreground">{selectedItem.type}</p>
-                      <div className="mt-2 space-y-1 text-sm">
-                        <p>
-                          <span className="font-medium">Size:</span> {selectedItem.dimensions}
-                        </p>
-                        <p>
-                          <span className="font-medium">Capacity:</span> {selectedItem.capacity} people
-                        </p>
-                        <p>
-                          <span className="font-medium">Price:</span> ${selectedItem.price.toFixed(2)}
-                        </p>
+                <CardContent className="space-y-4">
+                  {Array.from(selectedItems.values()).map(({ item, quantity }) => (
+                    <div key={item.id} className="border-b pb-4 last:border-0">
+                      <div className="flex items-start gap-4">
+                        {item.primaryImage && (
+                          <div className="h-24 w-24 flex-shrink-0 overflow-hidden rounded-md">
+                            <img
+                              src={item.primaryImage}
+                              alt={item.name}
+                              className="h-full w-full object-cover"
+                            />
+                          </div>
+                        )}
+                        <div className="flex-1">
+                          <h4 className="font-semibold">{item.name}</h4>
+                          <p className="text-muted-foreground">{item.type}</p>
+                          <div className="mt-2 grid grid-cols-2 gap-2 text-sm">
+                            <div>
+                              <span className="font-medium">Size:</span> {item.dimensions}
+                            </div>
+                            <div>
+                              <span className="font-medium">Capacity:</span> {item.capacity} people
+                            </div>
+                            <div>
+                              <span className="font-medium">Quantity:</span> {quantity}
+                            </div>
+                            <div>
+                              <span className="font-medium">Price:</span> ${(item.price * quantity).toFixed(2)}
+                            </div>
+                          </div>
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="flex-shrink-0"
+                          onClick={() => selectInventoryItem(item, 0)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                  </div>
+                  ))}
                 </CardContent>
               </Card>
             )}
@@ -973,7 +1142,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         ) : (
           <div />
         )}
-        <Button onClick={handleNext} disabled={isSubmitting}>
+        <Button onClick={handleNext} disabled={isSubmitting} variant="primary-gradient">
           {isSubmitting ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

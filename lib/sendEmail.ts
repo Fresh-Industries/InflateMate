@@ -17,10 +17,10 @@ interface EmailParams {
   from: string;
 }
 
-export async function sendSignatureEmail({ to, subject, html, from }: EmailParams): Promise<CreateEmailResponse | undefined> {
+export async function sendSignatureEmail({ to, subject, html  }: EmailParams): Promise<CreateEmailResponse | undefined> {
   try {
     return await resend.emails.send({
-      from,
+      from: 'InflateMate <onboarding@resend.dev>',
       to,
       subject,
       html,
@@ -42,7 +42,7 @@ interface CouponEmailParams {
 }
 
 // Function specifically for sending coupon emails
-export async function sendCouponEmail({ to, subject, couponCode, businessName, htmlContent, from }: CouponEmailParams): Promise<CreateEmailResponse | undefined> {
+export async function sendCouponEmail({ to, subject, couponCode, businessName, htmlContent }: CouponEmailParams): Promise<CreateEmailResponse | undefined> {
   const defaultHtml = `
     <div>
       <h1>Here\'s your discount from ${businessName}!</h1>
@@ -56,7 +56,7 @@ export async function sendCouponEmail({ to, subject, couponCode, businessName, h
 
   try {
     return await resend.emails.send({
-      from,
+      from: 'InflateMate <onboarding@resend.dev>',
       to,
       subject,
       html: finalHtml,
