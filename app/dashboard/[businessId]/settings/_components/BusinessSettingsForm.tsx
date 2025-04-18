@@ -719,7 +719,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
             </Card>
           </TabsContent>
           <TabsContent value="stripe">
-          <StripeSettingsForm business={business} />
+          <StripeSettingsForm />
         </TabsContent>
         </Tabs>
       </div>

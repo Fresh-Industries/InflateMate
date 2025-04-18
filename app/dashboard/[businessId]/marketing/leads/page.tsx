@@ -75,6 +75,7 @@ export default function LeadsPage(props: { params: Promise<{ businessId: string 
     fetchData();
   }, [params.businessId]);
 
+
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
@@ -111,13 +112,6 @@ export default function LeadsPage(props: { params: Promise<{ businessId: string 
             ) : error ? (
               <div className="text-center py-16 px-6">
                 <p className="text-red-600 font-medium">Error loading leads: {error}</p>
-                <Button 
-                  size="sm" 
-                  className="mt-4 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all duration-300 px-4 py-2" 
-                  onClick={() => fetchData()}
-                >
-                  Retry Loading
-                </Button>
               </div>
             ) : (
               <div className="overflow-x-auto">

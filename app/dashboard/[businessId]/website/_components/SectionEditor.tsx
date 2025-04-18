@@ -7,7 +7,7 @@ import AddSectionForm from './AddSectionForm';
 import SectionList from './SectionList';
 import { useToast } from '@/hooks/use-toast';
 import { useRouter } from 'next/navigation';
-import cuid from 'cuid'; 
+import { createId } from '@paralleldrive/cuid2';
 
 interface SectionEditorProps {
   business: BusinessWithSiteConfig;
@@ -51,7 +51,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
   const handleAddSection = (newSectionData: Omit<DynamicSection, 'id'>) => {
     const newSection: DynamicSection = {
       ...newSectionData,
-      id: cuid(), // Generate unique ID
+      id: createId(), // Generate unique ID with cuid2
     };
     const updatedSections = [...sections, newSection];
     updateAndSaveSiteConfig({ ...siteConfig, landing: { sections: updatedSections }, about: { dynamicSections: updatedSections } });
@@ -74,7 +74,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
     setSiteConfig({ ...siteConfig, landing: { sections: updatedSections } });
     
     // If it's an image section with a key, delete the image from UploadThing
-    if (sectionToDelete?.type === 'imageText' && sectionToDelete.content.imageKey) {
+    if (sectionToDelete?.type === 'imageText' && 'imageKey' in sectionToDelete.content && sectionToDelete.content.imageKey) {
       try {
         toast({ title: "Image Deleted", description: "Associated image removed from storage." });
       } catch (error) {
@@ -91,7 +91,6 @@ export default function SectionEditor({ business }: SectionEditorProps) {
   return (
     <div className="space-y-6">
       <SectionList 
-        businessId={business.id}
         sections={sections}
         onDeleteSection={handleDeleteSection}
         onEditSection={(section) => {
@@ -102,6 +101,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
 
       {isAdding || editingSection ? (
         <AddSectionForm
+          page="landing"
           initialData={editingSection} // Pass section data if editing
           onAddSection={handleAddSection}
           onEditSection={handleEditSection} // Pass edit handler

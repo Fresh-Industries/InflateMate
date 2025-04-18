@@ -43,13 +43,14 @@ interface Booking {
   startTime: string;
   endTime: string;
   customerId: string;
+  createdAt?: string;
   customer?: {
     id: string;
     name: string;
   };
-  inventoryItems?: Array<{
+  bookingItems?: Array<{
     inventoryId: string;
-    inventory: {
+    inventory?: {
       name: string;
     };
     quantity: number;
@@ -266,9 +267,9 @@ export default function DashboardPage() {
         console.log('Bookings data:', bookingsWithCustomers);
         
         bookingsWithCustomers.forEach((booking: Booking) => {
-          console.log('Processing booking:', booking.id, 'Booking items:', booking.inventoryItems?.[0]);
-          if (booking.inventoryItems && booking.status !== 'CANCELLED') {
-            booking.inventoryItems.forEach((item: { inventory?: { name: string } }) => {
+          console.log('Processing booking:', booking.id, 'Booking items:', booking.bookingItems?.[0]);
+          if (booking.bookingItems && booking.status !== 'CANCELLED') {
+            booking.bookingItems.forEach((item: { inventory?: { name: string } }) => {
               console.log('Processing item:', item);
               const name = item.inventory?.name || 'Unknown Item';
               if (!inventoryBookingCounts[name]) {

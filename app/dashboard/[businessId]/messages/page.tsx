@@ -5,11 +5,11 @@ import { useParams } from 'next/navigation';
 import { Loader2, MessagesSquare, ChevronLeft } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { formatDistanceToNow } from 'date-fns';
+// import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { CustomerList } from './_components/CustomerList';
 import { MessageComposer } from "./_components/MessageComposer";
-import { useCustomers, useMessages, Customer, Message } from "./_components/useCustomers";
+import { useCustomers, useMessages, Customer } from "./_components/useCustomers";
 
 export default function MessagesPage() {
   const params = useParams();
@@ -17,9 +17,9 @@ export default function MessagesPage() {
   const { customers, loading: customersLoading, error: customersError } = useCustomers(businessId);
   const [selectedCustomer, setSelectedCustomer] = useState<Customer | null>(null);
   const {
-    messages, 
+   
     loading: messagesLoading, 
-    error: messagesError
+    
   } = useMessages(businessId, selectedCustomer?.id || null);
 
   const handleSelectCustomer = (customer: Customer) => {
@@ -100,7 +100,7 @@ export default function MessagesPage() {
                 <div className="w-8 md:hidden"></div>
               </div>
 
-              {/* Message List */}
+              {/* Message List
               <div className="flex-grow overflow-y-auto p-4 space-y-3 md:space-y-4">
                 {!messagesLoading && !messagesError && messages.map((message: Message) => (
                   <div
@@ -123,7 +123,7 @@ export default function MessagesPage() {
                       <p className="text-sm break-words">{message.content}</p>
                     </div>
                     <span className="text-xs text-muted-foreground mt-1 px-1">
-                      {formatDistanceToNow(new Date(message.timestamp || Date.now()), { addSuffix: true })}
+                      {formatDistanceToNow(new Date(message.createdAt || Date.now()), { addSuffix: true })}
                     </span>
                   </div>
                 ))}
@@ -134,7 +134,7 @@ export default function MessagesPage() {
                    </Alert>
                  )}
                  <div className="h-2 flex-shrink-0"></div>
-              </div>
+              </div> */}
               
               {/* Loading overlay for messages */}
               {messagesLoading && (
