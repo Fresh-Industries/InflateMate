@@ -27,7 +27,7 @@ export async function PUT(
     }
 
     // Use withBusinessAuth to ensure the user has access to this business
-    const result = await withBusinessAuth(businessId, userId, async (business) => {
+    const result = await withBusinessAuth(businessId, userId, async () => {
       // Update the business with the new site configuration
       const updatedBusiness = await prisma.business.update({
         where: {

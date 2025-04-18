@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Users, Award, ThumbsUp, Heart } from "lucide-react";
 import { Metadata } from 'next';
 import SectionRenderer from '../_components/SectionRenderer';
-import { ThemeColors, ThemeDefinition, themeConfig, getContrastColor } from '../_themes/themeConfig';
+import { ThemeColors, themeConfig, getContrastColor } from '../_themes/themeConfig';
 
 export const dynamic = 'force-dynamic';
 

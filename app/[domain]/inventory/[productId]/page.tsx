@@ -6,9 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { 
   Calendar, 
   Package, 
-  Truck, 
   Clock, 
-  Check, 
   Info, 
   ArrowLeft, 
   Star, 
@@ -105,7 +103,6 @@ export default async function ProductDetailPage({ params }: PageProps) {
     // Set default colors if not provided
     const primaryColor = colors.primary || "#3b82f6";
     const secondaryColor = colors.secondary || "#6b7280";
-    const accentColor = colors.accent || "#f59e0b";
     
     // Get the product data
     const product = await prisma.inventory.findUnique({

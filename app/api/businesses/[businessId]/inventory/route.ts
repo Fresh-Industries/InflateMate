@@ -100,18 +100,25 @@ export async function POST(
           name: validatedData.name,
           description: validatedData.description || "",
           dimensions: validatedData.dimensions as string || "",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           capacity: (validatedData as any).capacity || 1,
           price: validatedData.price,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           setupTime: (validatedData as any).setupTime || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           teardownTime: (validatedData as any).teardownTime || 0,
           images: imageUrls,
           primaryImage: primaryImageUrl,
           status: validatedData.status as InventoryStatus,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           minimumSpace: (validatedData as any).minimumSpace || "",
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           weightLimit: (validatedData as any).weightLimit || 0,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           ageRange: (validatedData as any).ageRange || "",
           businessId: business.id,
           type: validatedData.type as InventoryType,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           weatherRestrictions: (validatedData as any).weatherRestrictions || [],
           quantity: validatedData.quantity,
         },

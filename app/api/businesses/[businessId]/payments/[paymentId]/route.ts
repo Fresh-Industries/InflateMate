@@ -51,9 +51,11 @@ export async function GET(
       
       // If this is a refund, get the original payment
       let originalPayment = null;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       if (payment.type === "REFUND" && payment.metadata && (payment.metadata as any).originalPaymentId) {
         originalPayment = await prisma.payment.findUnique({
           where: {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             id: (payment.metadata as any).originalPaymentId,
           },
         });

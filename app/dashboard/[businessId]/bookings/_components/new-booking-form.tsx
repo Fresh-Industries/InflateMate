@@ -592,7 +592,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         >
           <PaymentForm
             amount={calculateTotal()}
-            bookingId={pendingBookingData.bookingId || ""}
             customerEmail={pendingBookingData.customerEmail}
             businessId={businessId}
             subtotal={calculateSubtotal()}

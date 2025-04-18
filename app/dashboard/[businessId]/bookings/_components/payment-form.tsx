@@ -9,7 +9,6 @@ import { useRouter } from "next/navigation";
 
 interface PaymentFormProps {
   amount: number;
-  bookingId: string;
   customerEmail: string;
   onSuccess: () => Promise<void>;
   onError?: (error: string) => void;
@@ -21,7 +20,6 @@ interface PaymentFormProps {
 
 export function PaymentForm({
   amount,
-  bookingId,
   customerEmail,
   onSuccess,
   onError = () => {},

@@ -20,7 +20,7 @@ export async function PUT(
     const { customDomain } = body;
 
     // Use withBusinessAuth to ensure the user has access to this business
-    const result = await withBusinessAuth(businessId, userId, async (business) => {
+    const result = await withBusinessAuth(businessId, userId, async () => {
       // Check if domain is already in use by another business
       if (customDomain) {
         const existingBusiness = await prisma.business.findFirst({
@@ -164,7 +164,7 @@ export async function POST(
 
 // Helper function to simulate DNS verification
 // In a real implementation, this would check actual DNS records
-async function simulateDnsVerification(domain: string, businessId: string): Promise<boolean> {
+async function simulateDnsVerification(domain: string): Promise<boolean> {
   // Simulate a network request to check DNS records
   await new Promise(resolve => setTimeout(resolve, 1000));
   

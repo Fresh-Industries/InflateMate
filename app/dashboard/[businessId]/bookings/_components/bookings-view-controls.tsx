@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Filter, Search, CalendarRange, SlidersHorizontal, X, SortAsc, SortDesc, CheckCircle2, Clock, XCircle, CheckCircle } from "lucide-react";
+import { Filter, Search, CalendarRange, X, SortAsc, SortDesc, CheckCircle2, Clock, XCircle, CheckCircle } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,7 +32,6 @@ interface BookingsViewControlsProps {
   sortDirection?: "asc" | "desc";
   onSortDirectionChange?: (direction: "asc" | "desc") => void;
   eventType?: string;
-  onEventTypeChange?: (type: string) => void;
   showPastBookings: boolean;
   onShowPastBookingsChange: (checked: boolean) => void;
   onClearFilters?: () => void;
@@ -51,7 +49,6 @@ export function BookingsViewControls({
   sortDirection = "asc",
   onSortDirectionChange,
   eventType,
-  onEventTypeChange,
   showPastBookings,
   onShowPastBookingsChange,
   onClearFilters,

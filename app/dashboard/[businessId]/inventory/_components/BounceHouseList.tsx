@@ -1,6 +1,5 @@
 'use client';
 
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,6 +8,7 @@ import { Edit } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 
 interface BounceHouseListProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   bounceHouses: any[];
   businessId: string;
 }

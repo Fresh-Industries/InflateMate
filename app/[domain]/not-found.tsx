@@ -5,7 +5,7 @@ export default function TenantNotFound() {
     <div className="flex flex-col items-center justify-center min-h-[60vh] px-4 text-center">
       <h1 className="text-4xl font-bold mb-4">Page Not Found</h1>
       <p className="text-lg mb-8">
-        Sorry, the page you are looking for doesn't exist or has been moved.
+        Sorry, the page you are looking for doesn&apos;t exist or has been moved.
       </p>
       <Link
         href="/"

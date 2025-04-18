@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
 import { ThemeDefinition, ThemeColors } from '../_themes/themeConfig';
-import { FaFacebook, FaInstagram, FaTwitter, FaYoutube, FaLinkedin, FaTiktok, FaPinterest, FaSnapchat, FaReddit, FaTelegram, FaTwitch, FaDiscord, FaGithub, FaGitlab, FaBitbucket } from 'react-icons/fa';
+import { FaFacebook, FaInstagram, FaTwitter, FaTiktok } from 'react-icons/fa';
 
 interface FooterProps {
   business: BusinessWithSiteConfig;

@@ -232,7 +232,8 @@ export default function EditInventoryPage() {
         removedImages: removedImageUrls,
         primaryImage: primaryImageUrl,
       };
-      delete payload.images;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      delete (payload as any).images;
 
       const response = await fetch(`/api/businesses/${businessId}/inventory/${inventoryId}`, {
         method: 'PATCH',
@@ -299,7 +300,7 @@ export default function EditInventoryPage() {
     return (
       <div className="flex flex-col items-center justify-center h-[60vh] text-center space-y-4">
         <h2 className="text-2xl font-bold">Inventory Item Not Found</h2>
-        <p className="text-gray-600">The inventory item you\'re looking for doesn\'t exist or you don\'t have permission to view it.</p>
+        <p className="text-gray-600">The inventory item you&apos;re looking for doesn&apos;t exist or you don&apos;t have permission to view it.</p>
         <Button onClick={() => router.push(`/dashboard/${businessId}/inventory`)}>
           Back to Inventory
         </Button>

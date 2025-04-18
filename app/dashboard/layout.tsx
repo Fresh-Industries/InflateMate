@@ -311,7 +311,7 @@ export default function DashboardLayout({
                   <div className="flex flex-col items-center justify-center py-12 px-4">
                     <Bell className="h-12 w-12 text-gray-300 mb-3" />
                     <p className="text-gray-500 text-center">No new notifications</p>
-                    <p className="text-gray-400 text-sm text-center">We'll notify you when something arrives</p>
+                    <p className="text-gray-400 text-sm text-center">We&apos;ll notify you when something arrives</p>
                   </div>
                 ) : (
                   notifications.map((n) => (
@@ -327,7 +327,8 @@ export default function DashboardLayout({
                       <div className="flex-1 min-w-0">
                         <p className="font-medium text-gray-900 mb-0.5">{n.title}</p>
                         <p className="text-sm text-gray-600 line-clamp-2">{n.description}</p>
-                        <p className="text-xs text-gray-400 mt-1">{n.timestamp || '1m ago'}</p>
+                        
+                      
                       </div>
                       <button
                         onClick={(e) => {

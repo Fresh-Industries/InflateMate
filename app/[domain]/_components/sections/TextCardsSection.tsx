@@ -1,10 +1,7 @@
 'use client';
 
 import React from 'react';
-import { TextCardsSectionContent, TextCard, DynamicSection } from '@/lib/business/domain-utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Assuming usage of shadcn/ui
-// Import Lucide icons dynamically or select specific ones
-import { CheckCircle, Zap, ShieldCheck } from 'lucide-react'; 
+import { DynamicSection } from '@/lib/business/domain-utils';// Assuming usage of shadcn/ui
 import { ThemeDefinition, ThemeColors } from '../../_themes/themeConfig';
 
 interface TextCardsSectionProps {
@@ -13,13 +10,6 @@ interface TextCardsSectionProps {
   colors: ThemeColors;
 }
 
-// Map icon names (if used) to actual components
-const iconMap: { [key: string]: React.ElementType } = {
-  check: CheckCircle,
-  zap: Zap,
-  shield: ShieldCheck,
-  // Add more icons as needed
-};
 
 // Basic component to render text cards
 export default function TextCardsSection({ section, theme, colors }: TextCardsSectionProps) {

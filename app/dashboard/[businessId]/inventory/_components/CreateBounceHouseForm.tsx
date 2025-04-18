@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useRef } from "react";
-import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -68,9 +67,7 @@ export function CreateBounceHouseForm({
   onCancel,
   onFormDataChange,
   onSubmit,
-  isSubmitting,
 }: CreateBounceHouseFormProps) {
-  const params = useParams();
   const { toast } = useToast();
   const { startUpload } = useUploadThing("imageUploader");
   const [selectedFiles, setSelectedFiles] = useState<ImageFile[]>([]);

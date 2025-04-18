@@ -142,6 +142,7 @@ async function patchWithFormData(
     }
     
     // Extract business data from form
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const updateData: Record<string, any> = {};
     
     // Text fields

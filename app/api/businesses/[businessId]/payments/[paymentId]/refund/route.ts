@@ -52,7 +52,7 @@ export async function POST(
       }
       
       // Calculate refund amount
-      let refundAmount = fullRefund 
+      const refundAmount = fullRefund 
         ? Number(paymentToRefund.amount) 
         : (amount || 0);
         

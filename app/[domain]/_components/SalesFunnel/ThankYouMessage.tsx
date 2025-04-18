@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Check, Copy, PartyPopper, Confetti } from "lucide-react";
+import { Check, Copy, PartyPopper } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
 
@@ -172,7 +172,7 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
             </motion.div>
           </div>
           <p className="text-sm text-gray-500 mt-3">
-            We've also sent this code to your email!
+            We&apos;ve also sent this code to your email!
           </p>
         </motion.div>
       )}

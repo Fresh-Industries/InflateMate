@@ -34,6 +34,7 @@ export async function GET(
     const { startDate, endDate, status, type, page, limit } = query;
     
     const result = await withBusinessAuth(businessId, userId, async () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const where: any = { businessId };
       
       // Apply filters

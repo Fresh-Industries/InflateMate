@@ -49,8 +49,8 @@ export async function GET(
         return { error: "Booking not found" };
       }
       
-      // Ensure bounceHouseId is set in the response
-      let responseData: any = { ...booking };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const responseData: any = { ...booking };
       
       // If there's an inventory item, set the bounceHouseId
       if (booking.inventoryItems && booking.inventoryItems.length > 0) {

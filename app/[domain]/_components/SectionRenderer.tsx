@@ -31,8 +31,8 @@ export default function SectionRenderer({ section, theme, colors }: SectionRende
     return null; // Or render a placeholder/error
   }
 
-  // Pass the specific content object to the matched component
-  const content = section.content as any; // Cast might be needed depending on exact types
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const content = section.content as any; 
 
   return (
     <Suspense fallback={<div>Loading section...</div>}>

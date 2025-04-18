@@ -283,6 +283,7 @@ export default function EditBookingPage() {
       }
       
       // Prepare submission data - create a new object instead of mutating formData
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const submissionData: Record<string, any> = {
         ...formData,
         bounceHouseId

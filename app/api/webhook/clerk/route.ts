@@ -80,10 +80,11 @@ export async function POST(req: Request) {
       );
     }
     return NextResponse.json({ message: 'Received' })
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("[WEBHOOK_ERROR]", error);
     // Log more details about the request
-    console.error("[WEBHOOK_HEADERS]", Object.fromEntries(headers().entries()));
+  
     return NextResponse.json(
       { message: "Webhook processing failed", error: error.message },
       { status: 500 }

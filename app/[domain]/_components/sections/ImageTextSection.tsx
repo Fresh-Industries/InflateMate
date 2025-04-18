@@ -1,7 +1,7 @@
 import React from 'react';
 import Image from 'next/image'; // Use Next.js Image for optimization
 import { ImageTextSectionContent } from '@/lib/business/domain-utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; 
+import { Card, CardContent, CardTitle } from '@/components/ui/card'; 
 import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/themeConfig';
 
 interface ImageTextSectionProps {
