@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Mail, Phone } from "lucide-react";
+import { Search, Phone } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";

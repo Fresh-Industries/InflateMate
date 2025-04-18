@@ -106,7 +106,7 @@ export default function PaymentsList({ businessId }: PaymentsListProps) {
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to load payments",
@@ -199,8 +199,8 @@ export default function PaymentsList({ businessId }: PaymentsListProps) {
           setBusinessHasStripeAccount(true);
           setBusinessStripeAccountId(business.stripeAccountId);
         }
-      } catch (error) {
-        console.error("Error checking business Stripe account:", error);
+      } catch {
+        console.error("Error checking business Stripe account:");
       }
     };
     

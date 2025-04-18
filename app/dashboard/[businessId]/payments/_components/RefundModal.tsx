@@ -101,7 +101,7 @@ export default function RefundModal({
           variant: "destructive",
         });
       }
-    } catch (error) {
+    } catch {
       toast({
         title: "Error",
         description: "Failed to process refund",

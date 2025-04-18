@@ -124,7 +124,7 @@ export async function POST(
     }
 
     // Use withBusinessAuth to ensure the user has access to this business
-    const result = await withBusinessAuth(businessId, userId, async (business) => {
+    const result = await withBusinessAuth(businessId, userId, async () => {
       // In a real implementation, you would:
       // 1. Check DNS records for verification TXT record
       // 2. Verify CNAME records point to your service
@@ -134,7 +134,7 @@ export async function POST(
       // In production, you would implement actual DNS checks
       
       // Simulate DNS verification
-      const isVerified = await simulateDnsVerification(domain, businessId);
+      const isVerified = await simulateDnsVerification(domain);
       
       if (!isVerified) {
         return {

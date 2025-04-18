@@ -2,7 +2,6 @@
 
 import React from 'react';
 import { VideoTextSectionContent } from '@/lib/business/domain-utils';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'; // Assuming usage of shadcn/ui
 
 interface VideoTextSectionProps {
   content: VideoTextSectionContent;

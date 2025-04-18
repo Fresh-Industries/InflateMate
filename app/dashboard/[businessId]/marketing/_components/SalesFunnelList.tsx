@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { useToast } from "@/hooks/use-toast";
-import { MoreHorizontal, Pencil, Trash, Code } from "lucide-react";
+import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
