@@ -1,21 +1,19 @@
 'use client';
 
 import React from 'react';
-import { BusinessWithSiteConfig, SiteConfig, DynamicSection } from '@/lib/business/domain-utils';
+import { DynamicSection } from '@/lib/business/domain-utils';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trash2 } from 'lucide-react';
 
 interface SectionListProps {
-  businessId: string;
   sections: DynamicSection[];
   onDeleteSection: (sectionId: string) => void;
   onEditSection: (section: DynamicSection) => void; // To trigger editing
   // Add onReorderSection later if needed
-}
+} 
 
 export default function SectionList({ 
-  businessId, 
   sections, 
   onDeleteSection, 
   onEditSection 

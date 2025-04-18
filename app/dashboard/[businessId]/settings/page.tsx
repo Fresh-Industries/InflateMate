@@ -1,10 +1,8 @@
 import React from 'react'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
 import { getCurrentUser } from "@/lib/auth/clerk-utils"
 import BusinessSettingsForm from "@/app/dashboard/[businessId]/settings/_components/BusinessSettingsForm"
-import StripeSettingsForm from "@/app/dashboard/[businessId]/settings/_components/StripeSettingsForm"
 
 // Business interface for settings form
 interface BusinessSettings {

@@ -53,7 +53,7 @@ export async function PATCH(
     const result = await withBusinessAuth(
       businessId,
       user.id,
-      async (business) => {
+      async () => {
         try {
           const body = await req.json();
           const validatedData = updateInventorySchema.parse(body);
@@ -203,7 +203,7 @@ export async function DELETE(
     const result = await withBusinessAuth(
       businessId,
       user.id,
-      async (business) => {
+      async () => {
         try {
           // Get the inventory item to delete its images
           const inventoryItem = await prisma.inventory.findUnique({
@@ -261,11 +261,11 @@ export async function DELETE(
           console.error("Error in inventory deletion:", error);
           
           // Check for specific Prisma errors
-          if (error.code === 'P2003') {
+          if (error instanceof Error && error.message.includes('P2003')) {
             return { error: "This inventory item cannot be deleted because it is referenced by other records in the system." };
           }
           
-          if (error.code === 'P2025') {
+          if (error instanceof Error && error.message.includes('P2025')) {
             return { error: "Inventory item not found or already deleted." };
           }
           
@@ -304,12 +304,12 @@ export async function GET(
     const result = await withBusinessAuth(
       businessId,
       user.id,
-      async (business) => {
+      async () => {
         try {
           const inventoryItem = await prisma.inventory.findFirst({
             where: {
               id: inventoryId,
-              businessId: business.id,
+              businessId: businessId,
             },
             include: {
               bookingItems: true

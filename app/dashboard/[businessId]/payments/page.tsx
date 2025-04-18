@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
-// Import the Connect.js initializer function
 import { loadConnectAndInitialize } from "@stripe/connect-js";
 import {
   Tabs,
@@ -24,6 +23,7 @@ export default function PaymentsPage() {
   const businessId = params.businessId as string;
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

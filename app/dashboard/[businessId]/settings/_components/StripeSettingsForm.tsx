@@ -14,6 +14,7 @@ export default function PaymentsPage() {
   const businessId = params.businessId as string;
   const [stripeAccountId, setStripeAccountId] = useState<string | null>(null);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

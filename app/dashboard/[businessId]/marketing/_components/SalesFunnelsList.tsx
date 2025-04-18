@@ -1,18 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { Plus, Edit, Trash2, Eye } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { SalesFunnelForm } from "./SalesFunnelForm";
 
-interface SalesFunnel {
+interface SalesFunnel {       
   id: string;
   name: string;
   isActive: boolean;
@@ -37,7 +36,6 @@ export function SalesFunnelsList({ businessId }: SalesFunnelsListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [editingFunnel, setEditingFunnel] = useState<SalesFunnel | null>(null);
   const [deletingFunnelId, setDeletingFunnelId] = useState<string | null>(null);
-  const router = useRouter();
   const { toast } = useToast();
 
   const fetchSalesFunnels = async () => {

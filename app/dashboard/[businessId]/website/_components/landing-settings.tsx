@@ -10,7 +10,6 @@ import { Trash2, UploadCloud } from "lucide-react";
 import Image from "next/image";
 import { useToast } from "@/hooks/use-toast";
 import { useUploadThing } from "@/lib/uploadthing";
-import AddSectionForm from "./AddSectionForm";
 
 interface HeroSettingsProps {
   hero: {
