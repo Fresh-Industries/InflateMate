@@ -9,15 +9,12 @@ import { ThemeColors, themeConfig, getContrastColor } from '../_themes/themeConf
 
 export const dynamic = 'force-dynamic';
 
-type PageProps = {
-  params: {
-    domain: string;
-  };
-  searchParams?: { [key: string]: string | string[] | undefined };
+interface PageProps {
+  params: { domain: string };
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { domain } = params;
+  const domain = decodeURIComponent(params.domain);
   
   try {
     // Get the business data
@@ -52,8 +49,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-async function AboutPage({ params }: PageProps) {
-  const { domain } = params;
+async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
+  const domain = decodeURIComponent((await params).domain);
   const business = await getBusinessByDomain(domain);
   const siteConfig = business.siteConfig || {} as SiteConfig;
   const aboutSections = siteConfig.about?.dynamicSections || [];
