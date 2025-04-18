@@ -23,11 +23,17 @@ export default clerkMiddleware(async (auth, req) => {
   // Get the pathname of the request (e.g. /, /about, /contact)
   const path = url.pathname;
   
+  // Use environment variables for domain configuration
   const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
-  const LOCALHOST_DOMAIN = 'localhost:3000';
+  const ROOT_DOMAIN_WITHOUT_PORT = ROOT_DOMAIN.split(':')[0];
+  
+  // Skip rewriting for all /api requests
+  if (path.startsWith('/api')) {
+    return NextResponse.next();
+  }
   
   // Check if this is the main app domain
-  if (hostname === LOCALHOST_DOMAIN || hostname === ROOT_DOMAIN) {
+  if (hostname === ROOT_DOMAIN || domainWithoutPort === ROOT_DOMAIN_WITHOUT_PORT) {
     // For main app routes, continue with auth check
     if (!isPublicRoute(req)) {
       await auth.protect();
@@ -36,17 +42,14 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
   
-  // Skip rewriting for all /api requests
-  if (path.startsWith('/api')) {
-    return NextResponse.next();
-  }
-  
   // Handle subdomains and custom domains
   const isLocalSubdomain = domainWithoutPort.includes('.localhost');
+  const isProductionSubdomain = domainWithoutPort.includes('.' + ROOT_DOMAIN_WITHOUT_PORT) && 
+                               !domainWithoutPort.includes('localhost');
   const isDevelopmentDomain = hostname.includes('localhost');
-  const isProductionDomain = !isDevelopmentDomain && domainWithoutPort !== ROOT_DOMAIN.split(':')[0];
+  const isCustomDomain = !isDevelopmentDomain && domainWithoutPort !== ROOT_DOMAIN_WITHOUT_PORT;
   
-  if (isLocalSubdomain || isProductionDomain) {
+  if (isLocalSubdomain || isProductionSubdomain || isCustomDomain) {
     // Rewrite to the dynamic domain route with proper path handling
     // This maps domain.com/page -> /domain.com/page in the Next.js router
     return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
