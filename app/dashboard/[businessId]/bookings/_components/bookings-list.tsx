@@ -446,7 +446,6 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
         eventType={eventType}
-        onEventTypeChange={setEventType}
         showPastBookings={showPastBookings}
         onShowPastBookingsChange={setShowPastBookings}
         sortField={sortField}
