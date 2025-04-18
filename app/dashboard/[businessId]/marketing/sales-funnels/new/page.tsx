@@ -6,11 +6,12 @@ import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { SalesFunnelFormWrapper } from "../../_components/SalesFunnelFormWrapper";
 import { Card } from "@/components/ui/card";
 
-export default async function NewSalesFunnelPage({
-  params,
-}: {
-  params: { businessId: string };
-}) {
+export default async function NewSalesFunnelPage(
+  props: {
+    params: Promise<{ businessId: string }>;
+  }
+) {
+  const params = await props.params;
   const user = await getCurrentUser();
 
   if (!user) {

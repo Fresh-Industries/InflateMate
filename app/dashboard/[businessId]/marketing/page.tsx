@@ -14,11 +14,12 @@ interface SalesFunnel {
   [key: string]: unknown;
 }
 
-export default async function MarketingPage({
-  params,
-}: {
-  params: { businessId: string };
-}) {
+export default async function MarketingPage(
+  props: {
+    params: Promise<{ businessId: string }>;
+  }
+) {
+  const params = await props.params;
   const user = await getCurrentUser();
 
   if (!user) {

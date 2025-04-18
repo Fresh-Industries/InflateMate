@@ -17,8 +17,9 @@ const refundPaymentSchema = z.object({
  */
 export async function POST(
   req: NextRequest,
-  { params }: { params: { businessId: string; paymentId: string } }
+  props: { params: Promise<{ businessId: string; paymentId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { userId } = await auth();
     if (!userId) {

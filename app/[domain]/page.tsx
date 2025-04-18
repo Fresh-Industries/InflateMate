@@ -14,12 +14,13 @@ import { Button } from '@/components/ui/button';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const domain = decodeURIComponent(params.domain);
-  
+
   try {
     const business = await getBusinessByDomain(domain);
     const title = business.name;
@@ -218,7 +219,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
     return (
       // Base background color from theme or default white
       <div className="min-h-screen" style={{ background: colors.background || '#ffffff' }}>
-        
         {/* HERO SECTION - Styles derived from theme */}
         <section 
           className="py-20 md:py-28 overflow-hidden relative"
@@ -285,7 +285,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
             </div>
           </div>
         </section>
-        
         {/* TRUST INDICATORS SECTION - Using theme colors */}
         <section className="py-8" style={{ background: colors.background }}>
           <div className="container mx-auto px-4">
@@ -314,7 +313,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
             </div>
           </div>
         </section>
-        
         {/* FEATURES SECTION - Styles derived from theme */}
         <section className="py-20" style={{ background: colors.background }}>
           <div className="container mx-auto px-4">
@@ -363,7 +361,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
             </div>
           </div>
         </section>
-        
         {/* DYNAMIC LANDING SECTIONS - Rendered via SectionRenderer */}
         {siteConfig.landing?.sections?.map((section) => (
           <section key={section.id} className="dynamic-section" style={{ background: section.backgroundColor }}>
@@ -371,7 +368,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
             <SectionRenderer section={section} theme={theme} colors={colors} /> 
           </section>
         ))}
-        
         {/* POPULAR RENTALS SECTION - Styles derived from theme */}
         <section 
           className="py-20 relative overflow-hidden"
@@ -460,7 +456,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
           <div className="absolute -bottom-20 -right-20 w-96 h-96 rounded-full opacity-20" style={{ background: `radial-gradient(circle, ${colors.primary}1A, transparent 70%)` }}></div>
           <div className="absolute -top-20 -left-20 w-96 h-96 rounded-full opacity-20" style={{ background: `radial-gradient(circle, ${colors.accent}1A, transparent 70%)` }}></div>
         </section>
-        
         {/* CTA SECTION - Styles derived from theme */}
         <section 
           className="py-20 relative overflow-hidden"
@@ -498,7 +493,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
           <div className="absolute top-0 right-0 w-80 h-80 bg-white/10 rounded-full -mr-40 -mt-40 opacity-20"></div>
           <div className="absolute bottom-0 left-0 w-96 h-96 bg-white/10 rounded-full -ml-48 -mb-48 opacity-20"></div>
         </section>
-        
         {/* CONTACT SECTION - Styles derived from theme */}
         <section 
           className="py-20 relative overflow-hidden"

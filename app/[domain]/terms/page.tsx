@@ -5,12 +5,13 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const domain = decodeURIComponent(params.domain);
-  
+
   try {
     const business = await getBusinessByDomain(domain);
     return {
@@ -25,9 +26,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-export default async function TermsPage({ params }: { params: { domain: string } }) {
+export default async function TermsPage(props: { params: Promise<{ domain: string }> }) {
+  const params = await props.params;
   const domain = decodeURIComponent(params.domain);
-  
+
   try {
     const business = await getBusinessByDomain(domain);
     const siteConfig = business.siteConfig || {};

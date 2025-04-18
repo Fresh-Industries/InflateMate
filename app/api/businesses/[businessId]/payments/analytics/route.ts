@@ -24,10 +24,8 @@ type MonthlyDataRow = {
 /**
  * GET payment analytics for a business
  */
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { businessId: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+  const params = await props.params;
   try {
     // Authentication check
     const authResult = await auth();

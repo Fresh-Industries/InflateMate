@@ -7,7 +7,7 @@ import InventoryClient from './inventory-client';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: { domain: string };
+  params: Promise<{ domain: string }>;
 }
 
 // Define inventory item type for export
@@ -34,9 +34,10 @@ export interface ThemeColors {
   text: string;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const domain = decodeURIComponent(params.domain);
-  
+
   try {
     // Get the business data
     const business = await getBusinessByDomain(domain);
@@ -71,9 +72,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 // Server component
-export default async function InventoryPage({ params }: { params: { domain: string } }) {
+export default async function InventoryPage(props: { params: Promise<{ domain: string }> }) {
+  const params = await props.params;
   const domain = decodeURIComponent(params.domain);
-  
+
   try {
     // Use the domain utils to find the business by either custom domain or subdomain
     const business = await getBusinessByDomain(domain);

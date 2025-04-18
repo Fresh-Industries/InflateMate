@@ -9,14 +9,15 @@ import { ThemeColors, themeConfig, getContrastColor } from '../_themes/themeConf
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: {
+  params: Promise<{
     domain: string;
-  };
+  }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const { domain } = params;
-  
+
   try {
     // Get the business data
     const business = await getBusinessByDomain(domain);
@@ -49,14 +50,15 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-async function ContactPage({ params }: PageProps) {
+async function ContactPage(props: PageProps) {
+  const params = await props.params;
   const { domain } = params;
   const business = await getBusinessByDomain(domain);
   const siteConfig = business.siteConfig || {} as SiteConfig;
-  
+
   // Extract service areas from business data with proper typing
   const serviceAreas: string[] = Array.isArray(business.serviceArea) ? business.serviceArea : [];
-  
+
   // Colors from site config
   const colors: ThemeColors = {
     primary: siteConfig.colors?.primary || "#3b82f6",
@@ -108,7 +110,7 @@ async function ContactPage({ params }: PageProps) {
     background: `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
     color: getContrastColor(colors.primary),
   };
-  
+
   return (
     <div className="min-h-screen" style={{ background: colors.background }}>
       {/* Hero Section */}

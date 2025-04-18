@@ -12,11 +12,12 @@ export const metadata: Metadata = {
   description: "Create a new discount coupon for your customers",
 };
 
-export default async function NewCouponPage({
-  params,
-}: {
-  params: { businessId: string };
-}) {
+export default async function NewCouponPage(
+  props: {
+    params: Promise<{ businessId: string }>;
+  }
+) {
+  const params = await props.params;
   const user = await getCurrentUser();
 
   if (!user) {

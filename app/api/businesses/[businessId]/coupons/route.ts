@@ -34,10 +34,8 @@ const couponSchema = z.object({
 });
 
 // GET /api/businesses/[businessId]/coupons
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { businessId: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+  const params = await props.params;
   try {
     const { businessId } = params;
     const user = await getCurrentUser();
@@ -81,10 +79,8 @@ export async function GET(
 }
 
 // POST /api/businesses/[businessId]/coupons
-export async function POST(
-  req: NextRequest,
-  { params }: { params: { businessId: string } }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+  const params = await props.params;
   try {
     const { businessId } = params;
     const user = await getCurrentUser();

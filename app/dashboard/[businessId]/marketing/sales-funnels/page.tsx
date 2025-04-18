@@ -11,11 +11,12 @@ export const metadata: Metadata = {
   description: "Create and manage sales funnels to capture leads and offer discounts",
 };
 
-export default async function SalesFunnelsPage({
-  params,
-}: {
-  params: { businessId: string };
-}) {
+export default async function SalesFunnelsPage(
+  props: {
+    params: Promise<{ businessId: string }>;
+  }
+) {
+  const params = await props.params;
   const user = await getCurrentUser();
 
   if (!user) {

@@ -13,11 +13,12 @@ export const metadata: Metadata = {
   description: "Edit an existing discount coupon",
 };
 
-export default async function EditCouponPage({
-  params,
-}: {
-  params: { businessId: string; couponId: string };
-}) {
+export default async function EditCouponPage(
+  props: {
+    params: Promise<{ businessId: string; couponId: string }>;
+  }
+) {
+  const params = await props.params;
   const user = await getCurrentUser();
 
   if (!user) {

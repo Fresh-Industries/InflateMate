@@ -84,10 +84,8 @@ export async function GET(
 }
 
 
-export async function PATCH(
-  req: NextRequest,
-  { params }: { params: Promise<{ businessId: string }> }
-) {
+export async function PATCH(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+  const params = await props.params;
   try {
     const formData = await req.formData();
     return patchWithFormData(formData, { params });
@@ -100,10 +98,8 @@ export async function PATCH(
   }
 }
 
-export async function POST(
-  req: NextRequest,
-  { params }: { params: Promise<{ businessId: string }> }
-) {
+export async function POST(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+  const params = await props.params;
   try {
     const formData = await req.formData();
     const methodOverride = formData.get('_method')?.toString();

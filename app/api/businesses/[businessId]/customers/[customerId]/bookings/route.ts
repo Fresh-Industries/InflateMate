@@ -3,8 +3,9 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { businessId: string; customerId: string } }
+  props: { params: Promise<{ businessId: string; customerId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { businessId, customerId } = params;
 

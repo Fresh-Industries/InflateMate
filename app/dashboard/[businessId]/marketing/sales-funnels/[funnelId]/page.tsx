@@ -25,11 +25,12 @@ interface SalesFunnel {
   isActive: boolean;
 }
 
-export default async function EditSalesFunnelPage({
-  params,
-}: {
-  params: { businessId: string; funnelId: string };
-}) {
+export default async function EditSalesFunnelPage(
+  props: {
+    params: Promise<{ businessId: string; funnelId: string }>;
+  }
+) {
+  const params = await props.params;
   const user = await getCurrentUser();
 
   if (!user) {

@@ -24,16 +24,17 @@ import { Metadata } from 'next';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: { 
+  params: Promise<{ 
     domain: string;
     productId: string;
-  };
+  }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const { domain, productId } = params;
   const decodedDomain = decodeURIComponent(domain);
-  
+
   try {
     // Get the business data
     const business = await getBusinessByDomain(decodedDomain);
@@ -88,10 +89,11 @@ const formatInventoryType = (type: string) => {
   ).join(' ');
 };
 
-export default async function ProductDetailPage({ params }: PageProps) {
+export default async function ProductDetailPage(props: PageProps) {
+  const params = await props.params;
   const { domain, productId } = params;
   const decodedDomain = decodeURIComponent(domain);
-  
+
   try {
     // Get the business data
     const business = await getBusinessByDomain(decodedDomain);

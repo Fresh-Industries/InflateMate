@@ -10,12 +10,13 @@ import { ThemeColors, themeConfig, getContrastColor } from '../_themes/themeConf
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: { domain: string  };
+  params: Promise<{ domain: string  }>;
 }
 
-export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+export async function generateMetadata(props: PageProps): Promise<Metadata> {
+  const params = await props.params;
   const domain = decodeURIComponent(params.domain);
-  
+
   try {
     // Get the business data
     const business = await getBusinessByDomain(domain);

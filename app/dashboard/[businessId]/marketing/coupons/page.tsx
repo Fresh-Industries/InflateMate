@@ -11,11 +11,12 @@ export const metadata: Metadata = {
   description: "Create and manage discount coupons for your customers",
 };
 
-export default async function CouponsPage({
-  params,
-}: {
-  params: { businessId: string };
-}) {
+export default async function CouponsPage(
+  props: {
+    params: Promise<{ businessId: string }>;
+  }
+) {
+  const params = await props.params;
   const user = await getCurrentUser();
 
   if (!user) {

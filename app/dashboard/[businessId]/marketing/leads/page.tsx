@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, use } from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Loader2, MoreHorizontal } from 'lucide-react';
@@ -46,7 +46,8 @@ const formatDate = (dateString: string) => {
   }
 };
 
-export default function LeadsPage({ params }: { params: { businessId: string } }) {
+export default function LeadsPage(props: { params: Promise<{ businessId: string }> }) {
+  const params = use(props.params);
   const [data, setData] = useState<Lead[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);

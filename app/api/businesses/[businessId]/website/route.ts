@@ -4,10 +4,8 @@ import { prisma } from "@/lib/prisma";
 import { withBusinessAuth } from "@/lib/auth/clerk-utils";
 
 // PUT /api/businesses/[businessId]/website
-export async function PUT(
-  req: NextRequest,
-  { params }: { params: { businessId: string } }
-) {
+export async function PUT(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+  const params = await props.params;
   const { businessId } = params;
   const { userId } = await auth();
 
@@ -56,10 +54,8 @@ export async function PUT(
 }
 
 // GET /api/businesses/[businessId]/website
-export async function GET(
-  req: NextRequest,
-  { params }: { params: { businessId: string } }
-) {
+export async function GET(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+  const params = await props.params;
   const { businessId } = params;
   const { userId } = await auth();
 

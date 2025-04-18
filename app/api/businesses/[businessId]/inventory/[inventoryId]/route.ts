@@ -34,8 +34,9 @@ const updateInventorySchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { businessId: string; inventoryId: string } }
+  props: { params: Promise<{ businessId: string; inventoryId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { businessId, inventoryId } = await Promise.resolve(params);
     const user = await getCurrentUser();
@@ -184,8 +185,9 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { businessId: string; inventoryId: string } }
+  props: { params: Promise<{ businessId: string; inventoryId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { businessId, inventoryId } = await Promise.resolve(params);
     const user = await getCurrentUser();
@@ -291,8 +293,9 @@ export async function DELETE(
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { businessId: string; inventoryId: string } }
+  props: { params: Promise<{ businessId: string; inventoryId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { businessId, inventoryId } = await Promise.resolve(params);
     const user = await getCurrentUser();

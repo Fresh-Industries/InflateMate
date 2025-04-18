@@ -36,8 +36,9 @@ const updateCouponSchema = z.object({
 // GET /api/businesses/[businessId]/coupons/[couponId]
 export async function GET(
   req: NextRequest,
-  { params }: { params: { businessId: string; couponId: string } }
+  props: { params: Promise<{ businessId: string; couponId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { businessId, couponId } = params;
     const user = await getCurrentUser();
@@ -93,8 +94,9 @@ export async function GET(
 // PATCH /api/businesses/[businessId]/coupons/[couponId]
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: { businessId: string; couponId: string } }
+  props: { params: Promise<{ businessId: string; couponId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { businessId, couponId } = params;
     const user = await getCurrentUser();
@@ -195,8 +197,9 @@ export async function PATCH(
 // DELETE /api/businesses/[businessId]/coupons/[couponId]
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: { businessId: string; couponId: string } }
+  props: { params: Promise<{ businessId: string; couponId: string }> }
 ) {
+  const params = await props.params;
   try {
     const { businessId, couponId } = params;
     const user = await getCurrentUser();

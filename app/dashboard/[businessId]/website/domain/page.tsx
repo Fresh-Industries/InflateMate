@@ -29,10 +29,11 @@ async function getBusinessData(businessId: string) {
 }
 
 interface PageProps {
-  params: { businessId: string };
+  params: Promise<{ businessId: string }>;
 }
 
-export default async function DomainPage({ params }: PageProps) {
+export default async function DomainPage(props: PageProps) {
+  const params = await props.params;
   const { businessId } = params;
   const business = await getBusinessData(businessId);
 
