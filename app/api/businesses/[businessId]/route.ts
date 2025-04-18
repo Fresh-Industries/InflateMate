@@ -88,7 +88,7 @@ export async function PATCH(req: NextRequest, props: { params: Promise<{ busines
   const params = await props.params;
   try {
     const formData = await req.formData();
-    return patchWithFormData(formData, { params });
+    return patchWithFormData(formData, { params: Promise.resolve(params) });
   } catch (error) {
     console.error("Error in PATCH handler:", error);
     return NextResponse.json(
@@ -105,7 +105,7 @@ export async function POST(req: NextRequest, props: { params: Promise<{ business
     const methodOverride = formData.get('_method')?.toString();
     
     if (methodOverride === 'PATCH') {
-      return patchWithFormData(formData, { params });
+      return patchWithFormData(formData, { params: Promise.resolve(params) });
     }
     
     return NextResponse.json(
