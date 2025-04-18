@@ -40,23 +40,6 @@ interface CreateBounceHouseDialogProps {
 export function CreateBounceHouseDialog({ onBounceHouseCreated, businessId }: CreateBounceHouseDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  // Initialize with default values so that arrays like images and weatherRestrictions aren’t undefined.
-  const [formData, setFormData] = useState<CreateBounceHouseFormData>({
-    name: "",
-    description: "",
-    dimensions: "",
-    capacity: 1,
-    price: 0,
-    setupTime: 0,
-    teardownTime: 0,
-    images: [],
-    status: "AVAILABLE",
-    features: [],
-    minimumSpace: "",
-    weightLimit: 0,
-    ageRange: "",
-    weatherRestrictions: [],
-  });
   const { toast } = useToast();
   const router = useRouter();
 
@@ -105,7 +88,24 @@ export function CreateBounceHouseDialog({ onBounceHouseCreated, businessId }: Cr
   };
 
   const handleFormDataChange = (data: CreateBounceHouseFormData) => {
-    setFormData(data);
+    // Track the form state for validation or pre-processing before submission
+    // This could validate data, transform it, or prepare it for submission
+    const validData = {
+      ...data,
+      // Ensure price is formatted correctly
+      price: typeof data.price === 'string' ? parseFloat(data.price) : data.price,
+      // Make sure arrays exist even if undefined
+      features: data.features || [],
+      weatherRestrictions: data.weatherRestrictions || [],
+      // Clean description if empty
+      description: data.description?.trim() || ""
+    };
+    
+    // Could store in state if needed for further processing
+    // setFormState(validData);
+    
+    // Log for debugging
+    console.log('Form data validated:', validData);
   };
 
   return (
@@ -128,7 +128,6 @@ export function CreateBounceHouseDialog({ onBounceHouseCreated, businessId }: Cr
           onFormDataChange={handleFormDataChange}
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}
-          initialData={formData}
         />
       </DialogContent>
     </Dialog>

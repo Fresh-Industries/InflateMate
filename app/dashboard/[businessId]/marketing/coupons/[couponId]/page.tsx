@@ -17,7 +17,9 @@ export default async function EditCouponPage(
   props: {
     params: Promise<{ businessId: string; couponId: string }>;
   }
-) {
+
+)  {
+
   const params = await props.params;
   const user = await getCurrentUser();
 
@@ -53,6 +55,13 @@ export default async function EditCouponPage(
 
   const coupon = result.data?.coupon;
 
+  // Convert Date objects to strings for the component
+  const formattedCoupon = coupon ? {
+    ...coupon,
+    startDate: coupon.startDate?.toISOString() || null,
+    endDate: coupon.endDate?.toISOString() || null,
+  } : undefined;
+
   return (
     <div className="min-h-screen">
       <div className="max-w-4xl mx-auto px-4 py-8 sm:px-6 lg:px-8 space-y-8">
@@ -77,8 +86,8 @@ export default async function EditCouponPage(
         <Card className="rounded-xl border border-gray-100 bg-white shadow-md p-6 hover:shadow-lg transition-all duration-300">
           <CouponFormWrapper 
             businessId={params.businessId} 
-            coupon={coupon}
             mode="edit"
+            coupon={formattedCoupon}
           />
         </Card>
       </div>
