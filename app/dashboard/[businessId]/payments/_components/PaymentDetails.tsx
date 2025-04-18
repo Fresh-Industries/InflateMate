@@ -1,5 +1,13 @@
 'use client';
 
+// Declare StripeConnect on window object
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    StripeConnect: any;
+  }
+}
+
 import { useState, useEffect } from 'react';
 import { 
   ConnectPaymentDetails,
@@ -73,14 +81,6 @@ export default function PaymentDetails({
     
     loadStripeConnectJs();
   }, [businessId, stripeAccountId, isOpen, paymentId]);
-
-  // We need to declare the StripeConnect type on the window object
-  declare global {
-    interface Window {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      StripeConnect: any;
-    }
-  }
 
   if (!isOpen) return null;
 
