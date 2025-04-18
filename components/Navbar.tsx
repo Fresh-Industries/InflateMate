@@ -52,7 +52,7 @@ export default function Navbar() {
         return;
       }
 
-      console.log("Fetching user businesses for user:", userId);
+      
 
       
       try {

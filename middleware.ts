@@ -17,19 +17,18 @@ export default clerkMiddleware(async (auth, req) => {
   // Get hostname of request (e.g. business-name.localhost:3000)
   const hostname = req.headers.get('host') || '';
   
-  
   // Extract domain without port for comparison
   const domainWithoutPort = hostname.split(':')[0];
   
   // Get the pathname of the request (e.g. /, /about, /contact)
   const path = url.pathname;
   
+  const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
+  const LOCALHOST_DOMAIN = 'localhost:3000';
+  
   // Check if this is the main app domain
-  if (hostname === 'localhost:3000' || hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
-    
-    // For all other main app routes, continue with auth check
-    
-    // If it's not a public route, protect it
+  if (hostname === LOCALHOST_DOMAIN || hostname === ROOT_DOMAIN) {
+    // For main app routes, continue with auth check
     if (!isPublicRoute(req)) {
       await auth.protect();
     }
@@ -42,18 +41,14 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
   
-  // Handle both business name subdomains and custom domains
-  // If it's a subdomain of localhost or any other domain
-  if (domainWithoutPort !== process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
-    
-    // Check if it's a subdomain of localhost (for local development)
-    if (domainWithoutPort.includes('.localhost') || domainWithoutPort === process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
-      
-      // Rewrite to the dynamic domain route
-      return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
-    }
-    
-    // For any other domain, rewrite to the dynamic domain route
+  // Handle subdomains and custom domains
+  const isLocalSubdomain = domainWithoutPort.includes('.localhost');
+  const isDevelopmentDomain = hostname.includes('localhost');
+  const isProductionDomain = !isDevelopmentDomain && domainWithoutPort !== ROOT_DOMAIN.split(':')[0];
+  
+  if (isLocalSubdomain || isProductionDomain) {
+    // Rewrite to the dynamic domain route with proper path handling
+    // This maps domain.com/page -> /domain.com/page in the Next.js router
     return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
   }
   

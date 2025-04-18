@@ -9,12 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-
-// Import embedded onboarding components and custom hook
 import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { useStripeConnect } from "@/hooks/use-stripe-connect";
 
-/* ------------------ Validation Schemas ------------------ */
 const step1Schema = z.object({
   businessName: z.string().min(2, "Business name must be at least 2 characters"),
 });
@@ -38,7 +35,6 @@ export default function OnboardingPage() {
   const [error, setError] = useState(false);
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
 
-  // Form state for business information
   const [formData, setFormData] = useState({
     businessName: "",
     businessAddress: "",
@@ -48,7 +44,6 @@ export default function OnboardingPage() {
     businessPhone: "",
   });
 
-  // Load the embedded onboarding instance when connectedAccountId is available
   const stripeConnectInstance = useStripeConnect(connectedAccountId || "");
 
   const handleNext = () => {
@@ -72,7 +67,6 @@ export default function OnboardingPage() {
     setCurrentStep((prev) => prev - 1);
   };
 
-  // Submit the form data to create the connected account and business record
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -102,7 +96,6 @@ export default function OnboardingPage() {
       setConnectedAccountId(data.stripeAccountId);
       setBusinessId(data.business.id);
 
-      // Move to step 3: load the embedded onboarding component
       setCurrentStep(3);
       toast({
         title: "Success!",
@@ -236,7 +229,6 @@ export default function OnboardingPage() {
                       title: "Success!",
                       description: "Onboarding completed successfully.",
                     });
-                    // Redirect to /dashboard/{businessId}
                     router.push(`/dashboard/${businessId}`);
                   }}
                 />
