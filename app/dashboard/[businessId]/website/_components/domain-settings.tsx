@@ -206,7 +206,7 @@ export default function DomainSettings({ businessId, initialDomain, businessName
                   </Button>
                 </div>
                 <p className="text-sm text-muted-foreground">
-                  Enter your domain name without "http://" or "https://".
+                  Enter your domain name without &quot;http://&quot; or &quot;https://&quot;.
                 </p>
               </div>
               
@@ -225,7 +225,7 @@ export default function DomainSettings({ businessId, initialDomain, businessName
                   <AlertTriangle className="h-4 w-4" />
                   <AlertTitle>Verification failed</AlertTitle>
                   <AlertDescription>
-                    We couldn't verify your domain. Please check your DNS settings and try again.
+                    We couldn&apos;t verify your domain. Please check your DNS settings and try again.
                   </AlertDescription>
                 </Alert>
               )}
@@ -358,7 +358,7 @@ export default function DomainSettings({ businessId, initialDomain, businessName
                   <Info className="h-4 w-4 text-blue-600" />
                   <AlertTitle className="text-blue-800">DNS Propagation</AlertTitle>
                   <AlertDescription className="text-blue-700">
-                    DNS changes can take up to 48 hours to propagate across the internet. If your domain doesn't work immediately, please be patient.
+                    DNS changes can take up to 48 hours to propagate across the internet. If your domain doesn&apos;t work immediately, please be patient.
                   </AlertDescription>
                 </Alert>
               </div>
@@ -386,7 +386,7 @@ export default function DomainSettings({ businessId, initialDomain, businessName
                 <div className="border-b pb-4">
                   <h3 className="font-medium mb-2">Domain verification failing</h3>
                   <p className="text-sm text-muted-foreground">
-                    Make sure you've added the TXT record exactly as shown in the DNS Settings tab. Some domain registrars require you to add the full domain name in the Name field.
+                    Make sure you&apos;ve added the TXT record exactly as shown in the DNS Settings tab. Some domain registrars require you to add the full domain name in the Name field.
                   </p>
                 </div>
                 

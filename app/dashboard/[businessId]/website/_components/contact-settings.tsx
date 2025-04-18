@@ -7,6 +7,7 @@ import Link from "next/link";
 import { Settings } from "lucide-react";
 
 interface ContactSettingsProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   businessData: Record<string, any>;
 }
 
