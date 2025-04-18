@@ -52,8 +52,8 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
 }
 
-async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
-  const { domain } = await params;
+async function AboutPage({ params }: PageProps) {
+  const { domain } = params;
   const business = await getBusinessByDomain(domain);
   const siteConfig = business.siteConfig || {} as SiteConfig;
   const aboutSections = siteConfig.about?.dynamicSections || [];
