@@ -50,11 +50,12 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
   
-  // Handle www subdomain - redirect to apex domain
+  // Handle www subdomain - redirect to apex domain with absolute URL
   if (domainWithoutPort === `www.${PRODUCTION_DOMAIN}`) {
-    const newUrl = new URL(url);
-    newUrl.host = PRODUCTION_DOMAIN;
-    return NextResponse.redirect(newUrl);
+    const protocol = url.protocol;
+    const redirectURL = `${protocol}//${PRODUCTION_DOMAIN}${path}${url.search}`;
+    console.log('Redirecting www to apex domain:', redirectURL);
+    return NextResponse.redirect(redirectURL, { status: 301 });
   }
   
   // Check if this is the main app domain (root domain or production domain)
