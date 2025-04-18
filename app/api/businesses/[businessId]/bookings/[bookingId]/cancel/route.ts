@@ -11,12 +11,10 @@ const cancelBookingSchema = z.object({
   reason: z.string().optional(),
 });
 
-/**
- * POST to cancel a booking
- */
+
 export async function POST(
   req: NextRequest,
-  { params }: { params: { businessId: string; bookingId: string } }
+  { params }: { params: Promise<{ businessId: string; bookingId: string }> }
 ) {
   try {
     const { userId } = await auth();
