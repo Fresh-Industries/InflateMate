@@ -28,7 +28,7 @@ const updateBookingSchema = z.object({
  */
 export async function GET(
   req: NextRequest,
-  { params }: { params: { businessId: string; bookingId: string } }
+  { params }: { params: Promise<{ businessId: string; bookingId: string }> }
 ) {
   try {
     const { userId } = await auth();
