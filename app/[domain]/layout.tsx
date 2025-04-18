@@ -4,6 +4,7 @@ import { DomainLayoutClient } from './layout-client';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
 import { SalesFunnel } from '@prisma/client';
+import { themeConfig } from './_themes/themeConfig';
 
 export const dynamic = 'force-dynamic';
 
@@ -76,6 +77,7 @@ export default async function DomainLayout({
     };
     console.log('Colors:', colors.text);
     const themeName = siteConfig.themeName?.name || 'modern';
+    const selectedTheme = themeConfig[themeName.toLowerCase()] || themeConfig.modern;
     
     
     let activeFunnel: SalesFunnel | null = null;
@@ -93,11 +95,10 @@ export default async function DomainLayout({
     return (
       <DomainLayoutClient 
         business={business}
-        domain={domain} 
-        siteConfig={siteConfig} 
+        domain={domain}
         themeName={themeName as string}
         colors={colors}
-        activeFunnel={activeFunnel || undefined}
+        activeFunnel={activeFunnel ? {...activeFunnel, theme: selectedTheme} : undefined}
       >
         {children}
       </DomainLayoutClient>

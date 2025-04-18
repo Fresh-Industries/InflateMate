@@ -3,14 +3,13 @@ import { ReactNode, useState, useEffect } from 'react';
 import { SalesFunnel as SalesFunnelType, SalesFunnelPopup } from '@/app/[domain]/_components/SalesFunnel';
 import Header from '@/app/[domain]/_components/Header';
 import Footer from '@/app/[domain]/_components/Footer';
-import { BusinessWithSiteConfig, SiteConfig } from '@/lib/business/domain-utils';
+import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
 import { themeConfig, ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/themeConfig';
 
 interface DomainLayoutClientProps {
   children: ReactNode;
   business: BusinessWithSiteConfig;
   domain: string;
-  siteConfig: SiteConfig;
   themeName: string;
   colors: ThemeColors;
   activeFunnel?: SalesFunnelType;
@@ -19,7 +18,6 @@ interface DomainLayoutClientProps {
 export function DomainLayoutClient({ 
   children, 
   business, 
-  siteConfig,
   colors,
   activeFunnel,
   themeName 
@@ -36,7 +34,6 @@ export function DomainLayoutClient({
     <div className="flex flex-col min-h-screen">
       <Header 
         business={business} 
-        siteConfig={siteConfig} 
         colors={colors} 
         theme={selectedTheme}
       />

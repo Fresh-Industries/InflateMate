@@ -5,19 +5,18 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { BusinessWithSiteConfig /*, SiteConfig */ } from '@/lib/business/domain-utils';
+import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
 import { Menu, X, Home, Package, Info, Phone, ChevronRight } from 'lucide-react';
 import { ThemeColors, ThemeDefinition } from '@/app/[domain]/_themes/themeConfig';
 import { getContrastColor } from '@/app/[domain]/_themes/themeConfig';
 
 interface HeaderProps {
   business: BusinessWithSiteConfig;
-  // siteConfig: SiteConfig; // No longer needed for conditional links
   colors: ThemeColors;
   theme: ThemeDefinition;
 }
 
-export default function Header({ business, /* siteConfig, */ colors, theme }: HeaderProps) {
+export default function Header({ business, colors, theme }: HeaderProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
