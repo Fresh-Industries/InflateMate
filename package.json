@@ -4,14 +4,10 @@
   "private": true,
   "scripts": {
     "dev": "next dev --turbopack",
-    "build": "next build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && next build",
     "start": "next start",
-    "lint": "next lint",
-    "test:domains": "node scripts/test-domains.js",
-    "test:api": "node scripts/test-api-routes.js",
-    "test:all": "npm run test:domains && npm run test:api",
-    "setup:domains": "sudo ./scripts/setup-local-domains.sh",
-    "seed:test": "node scripts/seed-test-data.js"
+    "lint": "next lint"
   },
   "dependencies": {
     "@clerk/nextjs": "^6.12.0",
