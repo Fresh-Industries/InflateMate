@@ -25,7 +25,7 @@ export default clerkMiddleware(async (auth, req) => {
   const path = url.pathname;
   
   // Check if this is the main app domain
-  if (hostname === 'localhost:3000' || hostname === 'localhost') {
+  if (hostname === 'localhost:3000' || hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
     
     // For all other main app routes, continue with auth check
     
@@ -44,10 +44,10 @@ export default clerkMiddleware(async (auth, req) => {
   
   // Handle both business name subdomains and custom domains
   // If it's a subdomain of localhost or any other domain
-  if (domainWithoutPort !== 'localhost') {
+  if (domainWithoutPort !== process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
     
     // Check if it's a subdomain of localhost (for local development)
-    if (domainWithoutPort.includes('.localhost')) {
+    if (domainWithoutPort.includes('.localhost') || domainWithoutPort === process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
       
       // Rewrite to the dynamic domain route
       return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
