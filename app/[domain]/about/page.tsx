@@ -10,7 +10,7 @@ import { ThemeColors, themeConfig, getContrastColor } from '../_themes/themeConf
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
-  params: { domain: string };
+  params: { domain: string  };
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
