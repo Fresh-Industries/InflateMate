@@ -29,11 +29,8 @@ async function getBusinessData(businessId: string) {
   return business;
 }
 
-interface PageProps {
-  params: { businessId: string };
-}
 
-export default async function WebsitePage({ params }: PageProps) {
+export default async function WebsitePage({ params }: { params: Promise<{ businessId: string }> }) {
   const { businessId } = await params;
   const business = await getBusinessData(businessId);
 
