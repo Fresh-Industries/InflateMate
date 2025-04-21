@@ -81,7 +81,7 @@ export async function sendToOpenSign(pdfBuffer: Buffer, customerEmail: string, b
     };
   
     // Use the SelfSign endpoint with JSON payload
-    const response = await fetch('https://sandbox.opensignlabs.com/api/v1/selfsign', {
+    const response = await fetch('https://opensign-w6plx.ondigitalocean.app/app/selfsign', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -99,5 +99,7 @@ export async function sendToOpenSign(pdfBuffer: Buffer, customerEmail: string, b
   
     const data = await response.json();
     return { url: data.signurl, documentId: data.objectId }; 
-  }
+}
+
+
   
