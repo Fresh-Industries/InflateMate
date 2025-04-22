@@ -3,10 +3,25 @@ import { getBusinessByDomain } from '@/lib/business/domain-utils';
 import { DomainLayoutClient } from './layout-client';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { SalesFunnel } from '@prisma/client';
 import { themeConfig } from './_themes/themeConfig';
 
 export const dynamic = 'force-dynamic';
+
+interface SalesFunnel {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  popupTitle: string;
+  popupText: string;
+  popupImage: string | null;
+  formTitle: string;
+  thankYouMessage: string;
+  couponId: string | null;
+  businessId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ domain: string }> }
