@@ -20,7 +20,6 @@ import {
 } from "lucide-react";
 import Link from 'next/link';
 import { Metadata } from 'next';
-import { Inventory } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +28,17 @@ interface PageProps {
     domain: string;
     productId: string;
   }>;
+}
+
+interface Inventory {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  primaryImage: string | null;
+  dimensions?: string;
+  capacity?: number;
+  type: string;
 }
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
