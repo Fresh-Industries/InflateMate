@@ -164,7 +164,7 @@ export default async function ProductDetailPage(props: PageProps) {
             {/* Image gallery thumbnails if available */}
             {product.images && product.images.length > 1 && (
               <div className="flex overflow-x-auto p-2 gap-2 bg-gray-50">
-                {product.images.map((image: string, index) => (
+                {product.images.map((image: string, index: number) => (
                   <div 
                     key={index} 
                     className="w-16 h-16 flex-shrink-0 rounded-md overflow-hidden border-2"
