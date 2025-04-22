@@ -353,7 +353,7 @@ export default async function ProductDetailPage(props: PageProps) {
                   <div>
                     <p className="font-medium">Weather Restrictions</p>
                     <ul className="list-disc pl-5 text-gray-600">
-                      {product.weatherRestrictions.map((restriction, index) => (
+                      {product.weatherRestrictions.map((restriction: string, index: number) => (
                         <li key={index}>{restriction}</li>
                       ))}
                     </ul>
