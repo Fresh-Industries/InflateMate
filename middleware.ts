@@ -1,57 +1,67 @@
 import { NextResponse } from "next/server";
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
+// Define public routes that don't require authentication
 const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/:domain(.*)',
-  '/api/webhook(.*)',
+  '/api/webhooks(.*)',
   '/api(.*)'
-])
+]);
 
-// Inlined at build time
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
-
+// This function handles domain routing and authentication
 export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
-  const hostname = req.headers.get("host") || "";
-  const domainOnly = hostname.split(":")[0];
+  
+  // Get hostname of request (e.g. business-name.localhost:3000)
+  const hostname = req.headers.get('host') || '';
+  
+  
+  // Extract domain without port for comparison
+  const domainWithoutPort = hostname.split(':')[0];
+  
+  // Get the pathname of the request (e.g. /, /about, /contact)
   const path = url.pathname;
-
-  // 1️⃣ Main app root domain (dev or prod)
-  if (
-    domainOnly === ROOT_DOMAIN ||
-    domainOnly === `www.${ROOT_DOMAIN}`
-  ) {
+  
+  // Check if this is the main app domain
+  if (hostname === process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
+    
+    // For all other main app routes, continue with auth check
+    
+    // If it's not a public route, protect it
     if (!isPublicRoute(req)) {
       await auth.protect();
     }
+    
     return NextResponse.next();
-  }
-
-  // 2️⃣ API routes bypass
-  if (path.startsWith("/api")) {
-    return NextResponse.next();
-  }
-
-  // 3️⃣ Tenant subdomain (e.g. foo.inflatemate.co)
-  if (domainOnly.endsWith(`.${ROOT_DOMAIN}`)) {
-    const subdomain = domainOnly.replace(`.${ROOT_DOMAIN}`, "");
-    return NextResponse.rewrite(
-      new URL(`/${subdomain}${path}`, req.url)
-    );
   }
   
-  // 4️⃣ Custom domain handling (for non-subdomain custom domains)
-  if (domainOnly !== ROOT_DOMAIN && !domainOnly.includes(ROOT_DOMAIN)) {
-    return NextResponse.rewrite(
-      new URL(`/${domainOnly}${path}`, req.url)
-    );
+  // Skip rewriting for all /api requests
+  if (path.startsWith('/api')) {
+    return NextResponse.next();
   }
-
+  
+  // Handle both business name subdomains and custom domains
+  // If it's a subdomain of localhost or any other domain
+  if (domainWithoutPort !== process.env.NEXT_PUBLIC_ROOT_DOMAIN) {
+    
+    // Check if it's a subdomain of localhost (for local development)
+    if (domainWithoutPort.includes(process.env.NEXT_PUBLIC_ROOT_DOMAIN || '')) {
+      
+      // Rewrite to the dynamic domain route
+      return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
+    }
+    
+    // For any other domain, rewrite to the dynamic domain route
+    return NextResponse.rewrite(new URL(`/${domainWithoutPort}${path}`, req.url));
+  }
+  
+  // Default case: continue with auth check
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
+  
   return NextResponse.next();
 });
 
@@ -63,7 +73,7 @@ export const config = {
      * 2. /_next (Next.js internals)
      * 3. all static files (e.g. /favicon.ico)
      */
-    "/((?!api/webhook|_next/|[\\w-]+\\.\\w+).*)",
-    "/api/((?!webhook).*)",
+    "/((?!api/webhooks|_next/|[\\w-]+\\.\\w+).*)",
+    "/api/((?!webhooks).*)",
   ],
 };
