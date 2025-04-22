@@ -52,7 +52,7 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    "/((?!api/webhooks|_next/|[\\w-]+\\.\\w+).*)",
-    "/api/((?!webhooks).*)",
+    "/((?!api/webhook|_next/|[\\w-]+\\.\\w+).*)",
+    "/api/((?!webhook).*)",
   ],
 };
