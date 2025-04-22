@@ -2,13 +2,12 @@ import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 const isPublicRoute = createRouteMatcher([
-  "/",
+  '/sign-in(.*)',
+  '/sign-up(.*)',
   '/:domain(.*)',
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/webhook(.*)",
-  "/api(.*)",
-]);
+  '/api/webhook(.*)',
+  '/api(.*)'
+])
 
 // Inlined at build time
 const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
@@ -43,7 +42,6 @@ export default clerkMiddleware(async (auth, req) => {
     );
   }
 
-  // 4️⃣ Fallback: protect other unknown routes on root
   if (!isPublicRoute(req)) {
     await auth.protect();
   }
@@ -52,7 +50,13 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    "/((?!api/webhooks|_next/|[\\w-]+\\.\\w+).*)",
-    "/api/((?!webhooks).*)",
+    /*
+     * Match all paths except for:
+     * 1. /api routes (except those we want to protect)
+     * 2. /_next (Next.js internals)
+     * 3. all static files (e.g. /favicon.ico)
+     */
+    "/((?!api/webhook|_next/|[\\w-]+\\.\\w+).*)",
+    "/api/((?!webhook).*)",
   ],
 };

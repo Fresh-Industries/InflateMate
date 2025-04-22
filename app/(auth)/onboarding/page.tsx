@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, memo } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 
@@ -24,12 +24,129 @@ const step2Schema = z.object({
   businessPhone: z.string().regex(/^\+?1?\d{9,15}$/, "Invalid phone number"),
 });
 
+// Memoized gradient text component
+const GradientText = memo(({ children, className }: { children: React.ReactNode; className?: string }) => (
+  <span className={`bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent ${className || ''}`}>
+    {children}
+  </span>
+));
+GradientText.displayName = 'GradientText';
+
+// Memoized form step components
+const Step1 = memo(({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+  <div className="space-y-6">
+    <h2 className="text-2xl font-bold text-center mb-4">
+      <GradientText>Business Identity</GradientText>
+    </h2>
+    <div>
+      <Label htmlFor="businessName" className="mb-1 block text-gray-700 font-medium">
+        Business Name
+      </Label>
+      <Input
+        id="businessName"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Your Business Name"
+        className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
+        required
+      />
+    </div>
+  </div>
+));
+Step1.displayName = 'Step1';
+
+const Step2 = memo(({ formData, onFieldChange }: { 
+  formData: { 
+    businessAddress: string; 
+    businessCity: string; 
+    businessState: string; 
+    businessZip: string; 
+    businessPhone: string; 
+  }; 
+  onFieldChange: (field: string, value: string) => void 
+}) => (
+  <div className="space-y-6">
+    <h2 className="text-2xl font-bold text-center mb-4">
+      <GradientText>Location &amp; Contact</GradientText>
+    </h2>
+    <div>
+      <Label htmlFor="businessAddress" className="mb-1 block text-gray-700 font-medium">
+        Street Address
+      </Label>
+      <Input
+        id="businessAddress"
+        value={formData.businessAddress}
+        onChange={(e) => onFieldChange('businessAddress', e.target.value)}
+        placeholder="123 Main St"
+        className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
+        required
+      />
+    </div>
+    <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
+      <div>
+        <Label htmlFor="businessCity" className="mb-1 block text-gray-700 font-medium">
+          City
+        </Label>
+        <Input
+          id="businessCity"
+          value={formData.businessCity}
+          onChange={(e) => onFieldChange('businessCity', e.target.value)}
+          placeholder="City"
+          className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="businessState" className="mb-1 block text-gray-700 font-medium">
+          State
+        </Label>
+        <Input
+          id="businessState"
+          value={formData.businessState}
+          onChange={(e) => onFieldChange('businessState', e.target.value.toUpperCase())}
+          placeholder="CA"
+          maxLength={2}
+          className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
+          required
+        />
+      </div>
+      <div>
+        <Label htmlFor="businessZip" className="mb-1 block text-gray-700 font-medium">
+          ZIP Code
+        </Label>
+        <Input
+          id="businessZip"
+          value={formData.businessZip}
+          onChange={(e) => onFieldChange('businessZip', e.target.value)}
+          placeholder="90001"
+          className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
+          required
+        />
+      </div>
+    </div>
+    <div>
+      <Label htmlFor="businessPhone" className="mb-1 block text-gray-700 font-medium">
+        Phone Number
+      </Label>
+      <Input
+        id="businessPhone"
+        type="tel"
+        value={formData.businessPhone}
+        onChange={(e) => onFieldChange('businessPhone', e.target.value)}
+        placeholder="+1 555 1234567"
+        className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
+        required
+      />
+    </div>
+  </div>
+));
+Step2.displayName = 'Step2';
+
 export default function OnboardingPage() {
   const { toast } = useToast();
   const router = useRouter();
 
   const [currentStep, setCurrentStep] = useState(1);
-  const totalSteps = 3;
   const [isLoading, setIsLoading] = useState(false);
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [error, setError] = useState(false);
@@ -45,6 +162,10 @@ export default function OnboardingPage() {
   });
 
   const stripeConnectInstance = useStripeConnect(connectedAccountId || "");
+
+  const handleFieldChange = (field: string, value: string) => {
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
 
   const handleNext = () => {
     try {
@@ -125,102 +246,24 @@ export default function OnboardingPage() {
     switch (currentStep) {
       case 1:
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Business Identity</h2>
-            <div>
-              <Label htmlFor="businessName" className="mb-1 block text-gray-700 font-medium">
-                Business Name
-              </Label>
-              <Input
-                id="businessName"
-                value={formData.businessName}
-                onChange={(e) => setFormData({ ...formData, businessName: e.target.value })}
-                placeholder="Your Business Name"
-                className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
-                required
-              />
-            </div>
-          </div>
+          <Step1 
+            value={formData.businessName} 
+            onChange={(value) => handleFieldChange('businessName', value)} 
+          />
         );
       case 2:
         return (
-          <div className="space-y-6">
-            <h2 className="text-2xl font-bold text-center mb-4 bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Location &amp; Contact</h2>
-            <div>
-              <Label htmlFor="businessAddress" className="mb-1 block text-gray-700 font-medium">
-                Street Address
-              </Label>
-              <Input
-                id="businessAddress"
-                value={formData.businessAddress}
-                onChange={(e) => setFormData({ ...formData, businessAddress: e.target.value })}
-                placeholder="123 Main St"
-                className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
-                required
-              />
-            </div>
-            <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
-              <div>
-                <Label htmlFor="businessCity" className="mb-1 block text-gray-700 font-medium">
-                  City
-                </Label>
-                <Input
-                  id="businessCity"
-                  value={formData.businessCity}
-                  onChange={(e) => setFormData({ ...formData, businessCity: e.target.value })}
-                  placeholder="City"
-                  className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="businessState" className="mb-1 block text-gray-700 font-medium">
-                  State
-                </Label>
-                <Input
-                  id="businessState"
-                  value={formData.businessState}
-                  onChange={(e) => setFormData({ ...formData, businessState: e.target.value.toUpperCase() })}
-                  placeholder="CA"
-                  maxLength={2}
-                  className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
-                  required
-                />
-              </div>
-              <div>
-                <Label htmlFor="businessZip" className="mb-1 block text-gray-700 font-medium">
-                  ZIP Code
-                </Label>
-                <Input
-                  id="businessZip"
-                  value={formData.businessZip}
-                  onChange={(e) => setFormData({ ...formData, businessZip: e.target.value })}
-                  placeholder="90001"
-                  className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all" 
-                  required
-                />
-              </div>
-            </div>
-            <div>
-              <Label htmlFor="businessPhone" className="mb-1 block text-gray-700 font-medium">
-                Phone Number
-              </Label>
-              <Input
-                id="businessPhone"
-                type="tel"
-                value={formData.businessPhone}
-                onChange={(e) => setFormData({ ...formData, businessPhone: e.target.value })}
-                placeholder="+1 555 1234567"
-                className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
-                required
-              />
-            </div>
-          </div>
+          <Step2 
+            formData={formData} 
+            onFieldChange={handleFieldChange} 
+          />
         );
       case 3:
         return (
           <div className="space-y-4">
-            <p className="text-xl font-semibold text-center bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent">Complete Your Onboarding</p>
+            <p className="text-xl font-semibold text-center">
+              <GradientText>Complete Your Onboarding</GradientText>
+            </p>
             {stripeConnectInstance ? (
               <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
                 <ConnectAccountOnboarding
@@ -247,19 +290,25 @@ export default function OnboardingPage() {
     }
   };
 
+  const progressWidth = useMemo(() => 
+    `${(currentStep / 3) * 100}%`
+  , [currentStep]);
+
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
       <Card className="w-full max-w-lg shadow-xl rounded-2xl border border-gray-100 bg-white/90 backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
-          <CardTitle className="text-3xl font-extrabold bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text text-transparent">Welcome Onboard</CardTitle>
-          <CardDescription className="text-gray-600 mt-1">{`Step ${currentStep} of ${totalSteps}`}</CardDescription>
+          <CardTitle className="text-3xl font-extrabold">
+            <GradientText>Welcome Onboard</GradientText>
+          </CardTitle>
+          <CardDescription className="text-gray-600 mt-1">{`Step ${currentStep} of 3`}</CardDescription>
         </CardHeader>
         <CardContent className="px-8 py-6">
           <div className="mb-6">
             <div className="relative h-2 bg-gray-200 rounded-full overflow-hidden">
               <div
                 className="absolute h-2 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-500"
-                style={{ width: `${(currentStep / totalSteps) * 100}%` }}
+                style={{ width: progressWidth }}
               />
             </div>
           </div>

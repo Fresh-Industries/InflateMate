@@ -30,6 +30,17 @@ interface PageProps {
   }>;
 }
 
+interface Inventory {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  primaryImage: string | null;
+  dimensions?: string;
+  capacity?: number;
+  type: string;
+}
+
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
   const { domain, productId } = params;
@@ -389,7 +400,7 @@ export default async function ProductDetailPage(props: PageProps) {
               <h2 className="text-2xl font-semibold">Related Products</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedProducts.map((item) => (
+              {relatedProducts.map((item: Inventory) => (
                 <Link 
                   key={item.id} 
                   href={`/${domain}/inventory/${item.id}`}
