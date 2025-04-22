@@ -5,7 +5,7 @@ const isPublicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/:domain(.*)',
-  '/api/webhooks(.*)',
+  '/api/webhook(.*)',
   '/api(.*)'
 ])
 
@@ -56,7 +56,7 @@ export const config = {
      * 2. /_next (Next.js internals)
      * 3. all static files (e.g. /favicon.ico)
      */
-    "/((?!api/webhooks|_next/|[\\w-]+\\.\\w+).*)",
-    "/api/((?!webhooks).*)",
+    "/((?!api/webhook|_next/|[\\w-]+\\.\\w+).*)",
+    "/api/((?!webhook).*)",
   ],
 };
