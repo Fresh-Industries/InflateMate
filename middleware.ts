@@ -10,7 +10,7 @@ const isPublicRoute = createRouteMatcher([
 ])
 
 // Inlined at build time
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN || 'localhost:3000';
 
 export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
@@ -39,6 +39,13 @@ export default clerkMiddleware(async (auth, req) => {
     const subdomain = domainOnly.replace(`.${ROOT_DOMAIN}`, "");
     return NextResponse.rewrite(
       new URL(`/${subdomain}${path}`, req.url)
+    );
+  }
+  
+  // 4️⃣ Custom domain handling (for non-subdomain custom domains)
+  if (domainOnly !== ROOT_DOMAIN && !domainOnly.includes(ROOT_DOMAIN)) {
+    return NextResponse.rewrite(
+      new URL(`/${domainOnly}${path}`, req.url)
     );
   }
 
