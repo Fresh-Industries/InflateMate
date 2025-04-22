@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import Link from 'next/link';
 import { Metadata } from 'next';
+import { Inventory } from '@prisma/client';
 
 export const dynamic = 'force-dynamic';
 
@@ -389,7 +390,7 @@ export default async function ProductDetailPage(props: PageProps) {
               <h2 className="text-2xl font-semibold">Related Products</h2>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {relatedProducts.map((item) => (
+              {relatedProducts.map((item: Inventory) => (
                 <Link 
                   key={item.id} 
                   href={`/${domain}/inventory/${item.id}`}
