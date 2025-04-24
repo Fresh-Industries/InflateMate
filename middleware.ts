@@ -9,7 +9,6 @@ const publicRoute = createRouteMatcher([
   '/:domain(.*)',
   '/api/webhooks(.*)',
   '/api(.*)'
-
 ]);
 
 const internalRoute = createRouteMatcher([
@@ -18,12 +17,24 @@ const internalRoute = createRouteMatcher([
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const url   = new URL(req.url);
-  const host  = (req.headers.get('host') ?? '').toLowerCase().split(':')[0];
+  const url = new URL(req.url);
+  const host = (req.headers.get('host') ?? '').toLowerCase().split(':')[0];
+ 
 
   /* ── A. skip Next.js internals & static assets ─────────────────────── */
-  if (url.pathname.startsWith('/_next/') || url.pathname.match(/\.[\w]+$/))
+  if (
+    url.pathname.startsWith('/_next/') || 
+    url.pathname === '/favicon.ico' ||
+    url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|css|js)$/)
+  ) {
     return NextResponse.next();
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    const colocalHost = 'localhost:3000';
+    if (!publicRoute(req) && host === colocalHost) await auth.protect();
+    return NextResponse.next();
+  }
 
   /* ── B. root domain (marketing & dashboard live here) ─────────────── */
   if (host === ROOT || internalRoute(req)) {
@@ -41,5 +52,14 @@ export default clerkMiddleware(async (auth, req) => {
 });
 
 export const config = {
-  matcher: '/((?!_next/|favicon.ico).*)',
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 };
