@@ -1,0 +1,308 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "./generated/prisma"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+model User {
+  id          String     @id @default(cuid())
+  email       String?    @unique
+  name        String?
+  createdAt   DateTime   @default(now())
+  image       String?
+  updatedAt   DateTime   @updatedAt
+  onboarded   Boolean    @default(false)
+  clerkUserId String?    @unique
+  businesses  Business[]
+
+  @@index([email])
+}
+
+model Business {
+  id          String  @id @default(cuid())
+  name        String
+  description String?
+
+  // Contact info
+  address     String?
+  city        String?
+  state       String?
+  zipCode     String?
+  phone       String?
+  email       String?
+  serviceArea String[]
+  // Brand assets
+  logo        String?
+
+  // Core timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Booking settings
+  minAdvanceBooking Int   @default(24)
+  maxAdvanceBooking Int   @default(90)
+  minimumPurchase   Float @default(0) // New field for minimum booking amount
+
+  // Relationships & integrations
+  userId          String
+  stripeAccountId String?
+
+  socialMedia     Json?
+  customDomain    String?
+  subdomain       String? @unique
+  siteConfig      Json?
+  onboardingError String? // To store errors during Vercel/Cloudflare setup
+
+  // Relations
+  bookings     Booking[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  customers    Customer[]
+  inventory    Inventory[]
+  payments     Payment[]
+  coupons      Coupon[]
+  salesFunnels SalesFunnel[]
+  waivers      Waiver[]
+
+  @@index([userId])
+}
+
+model Inventory {
+  id                  String          @id @default(cuid())
+  type                InventoryType
+  name                String
+  description         String?
+  dimensions          String
+  capacity            Int
+  price               Float
+  setupTime           Int
+  teardownTime        Int
+  images              String[]
+  primaryImage        String?
+  status              InventoryStatus
+  minimumSpace        String
+  weightLimit         Int
+  ageRange            String
+  weatherRestrictions String[]
+  businessId          String
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @updatedAt
+  quantity            Int             @default(1)
+  bookingItems        BookingItem[]
+  business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+model Customer {
+  id           String    @id @default(cuid())
+  name         String
+  email        String
+  phone        String
+  address      String?
+  city         String?
+  state        String?
+  zipCode      String?
+  notes        String?
+  bookingCount Int       @default(0)
+  totalSpent   Float     @default(0)
+  lastBooking  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  businessId   String
+  isLead       Boolean   @default(false)
+  status       String    @default("Active")
+  type         String    @default("Regular")
+  bookings     Booking[]
+  waivers      Waiver[]
+  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([email, businessId])
+  @@index([businessId])
+  @@index([email])
+  @@index([phone])
+}
+
+model Booking {
+  id                  String        @id @default(cuid())
+  eventDate           DateTime
+  startTime           DateTime
+  endTime             DateTime
+  status              BookingStatus @default(PENDING)
+  totalAmount         Float
+  depositAmount       Float?
+  depositPaid         Boolean       @default(false)
+  eventType           String?
+  eventAddress        String
+  eventCity           String
+  eventState          String
+  eventZipCode        String
+  participantAge      Int?
+  participantCount    Int
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @updatedAt
+  businessId          String
+  customerId          String
+  isCompleted         Boolean       @default(false)
+  isCancelled         Boolean       @default(false)
+  specialInstructions String?
+  subtotalAmount      Float         @default(0)
+  taxAmount           Float         @default(0)
+  taxRate             Float         @default(0)
+  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer            Customer      @relation(fields: [customerId], references: [id])
+  inventoryItems      BookingItem[]
+  payments            Payment[]
+  waivers             Waiver[]
+
+  @@index([businessId])
+  @@index([customerId])
+  @@index([eventDate])
+  @@index([startTime, endTime])
+}
+
+model BookingItem {
+  id          String    @id @default(cuid())
+  bookingId   String
+  inventoryId String
+  quantity    Int       @default(1)
+  price       Float
+  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+
+  @@index([bookingId])
+  @@index([inventoryId])
+}
+
+model Payment {
+  id                 String        @id @default(cuid())
+  amount             Decimal       @db.Decimal(10, 2)
+  type               PaymentType
+  status             PaymentStatus
+  createdAt          DateTime      @default(now())
+  bookingId          String
+  businessId         String
+  currency           String        @default("USD")
+  metadata           Json?
+  paidAt             DateTime?
+  refundAmount       Decimal?      @db.Decimal(10, 2)
+  refundReason       String?
+  stripeClientSecret String?
+  stripePaymentId    String?
+  updatedAt          DateTime      @updatedAt
+  booking            Booking       @relation(fields: [bookingId], references: [id])
+  business           Business      @relation(fields: [businessId], references: [id])
+}
+
+model Coupon {
+  id             String       @id @default(cuid())
+  code           String
+  description    String?
+  discountType   DiscountType
+  discountAmount Float
+  maxUses        Int?
+  usedCount      Int          @default(0)
+  startDate      DateTime?
+  endDate        DateTime?
+  isActive       Boolean      @default(true)
+  minimumAmount  Float?
+  businessId     String
+  createdAt      DateTime     @default(now())
+  updatedAt      DateTime     @updatedAt
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@unique([code, businessId])
+  @@index([businessId])
+}
+
+model SalesFunnel {
+  id              String   @id @default(cuid())
+  name            String
+  isActive        Boolean  @default(true)
+  popupTitle      String
+  popupText       String
+  popupImage      String?
+  formTitle       String
+  thankYouMessage String
+  couponId        String?
+  businessId      String
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+}
+
+model Waiver {
+  id                 String       @id @default(cuid())
+  businessId         String
+  customerId         String
+  bookingId          String
+  status             WaiverStatus @default(PENDING)
+  templateVersion    String
+  documentUrl        String
+  openSignDocumentId String       @unique
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  @@index([businessId])
+  @@index([customerId])
+  @@index([bookingId])
+  @@index([status])
+}
+
+enum WaiverStatus {
+  PENDING
+  SIGNED
+  REJECTED
+  EXPIRED
+}
+
+enum InventoryStatus {
+  AVAILABLE
+  BOOKED
+  MAINTENANCE
+  RETIRED
+}
+
+enum InventoryType {
+  BOUNCE_HOUSE
+  INFLATABLE
+  GAME
+  OTHER
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELLED
+  COMPLETED
+  NO_SHOW
+  WEATHER_HOLD
+}
+
+enum PaymentType {
+  DEPOSIT
+  FULL_PAYMENT
+  REFUND
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED
+}

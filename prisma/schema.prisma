@@ -54,7 +54,9 @@ model Business {
 
   socialMedia  Json?
   customDomain String?
+  subdomain    String?  @unique
   siteConfig   Json?
+  onboardingError String? // To store errors during Vercel/Cloudflare setup
 
   // Relations
   bookings     Booking[]
