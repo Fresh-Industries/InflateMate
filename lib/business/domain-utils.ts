@@ -108,17 +108,15 @@ export interface BusinessWithSiteConfig {
  */
 export async function getBusinessByDomain(domainParam: string): Promise<BusinessWithSiteConfig> {
   const headersList = await headers();
-  const host = headersList.get('host') || '';
-  const domainWithoutPort = host.split(':')[0];
+  const subdomain = headersList.get('host') || '';
   
   console.log('Getting business by domain:', domainParam);
-  console.log('Host header:', host);
+  console.log('Host header:', subdomain);
   
   let business = null;
   
   // 1. First check if this is a subdomain of the root domain or localhost
-  if (domainWithoutPort.includes('.')) {
-    const subdomain = domainWithoutPort.split('.')[0];
+  if (subdomain.includes('.')) {
     console.log('Checking subdomain:', subdomain);
     
     // Check subdomain field in DB directly
@@ -137,21 +135,23 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
     }
     
     // Fallback to name-based subdomain matching for localhost testing
-    if (domainWithoutPort.includes('.localhost')) {
+    if (subdomain.includes('.localhost:3000')) {
+      console.log('Checking subdomain:', subdomain);
+      const name = subdomain.replace(/-/g, ' ').replace('.localhost:3000', '');
       business = await prisma.business.findFirst({
         where: {
           OR: [
             // Try to match by name (with formatting similar to what we do in the UI)
             {
               name: {
-                contains: subdomain.replace(/-/g, ' '),
+                contains: name,
                 mode: 'insensitive'
               }
             },
             // Also try to match by name with hyphens replaced by spaces
             {
               name: {
-                contains: subdomain.replace(/-/g, ''),
+                contains: name,
                 mode: 'insensitive'
               }
             },
@@ -176,7 +176,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
   // 2. Try to find by custom domain
   business = await prisma.business.findFirst({
     where: {
-      customDomain: domainWithoutPort,
+      customDomain: subdomain,
     },
   });
   
