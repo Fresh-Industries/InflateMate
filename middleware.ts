@@ -7,7 +7,7 @@ const publicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/:domain(.*)',
-  '/api/webhooks(.*)',
+  '/api/webhook(.*)',
   '/api(.*)'
 ]);
 
@@ -27,6 +27,10 @@ export default clerkMiddleware(async (auth, req) => {
     url.pathname === '/favicon.ico' ||
     url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|css|js)$/)
   ) {
+    return NextResponse.next();
+  }
+
+  if (url.pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 

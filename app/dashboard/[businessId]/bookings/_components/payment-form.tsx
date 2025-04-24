@@ -160,6 +160,7 @@ export function PaymentForm({
         type="submit" 
         disabled={!stripe || !elements || isLoading} 
         className="w-full"
+        variant="primary-gradient"
       >
         {isLoading ? (
           <>

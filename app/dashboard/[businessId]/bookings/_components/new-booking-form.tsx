@@ -431,7 +431,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
           customerEmail: newBooking.customerEmail,
           metadata: {
             ...metadata,
-            selectedItems: selectedItemsArray
+            selectedItems: JSON.stringify(selectedItemsArray)
           },
         }),
       });

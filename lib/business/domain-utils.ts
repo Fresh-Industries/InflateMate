@@ -127,6 +127,8 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
         subdomain,
       }
     });
+
+    console.log('Business:', business);
     
     if (business) {
       console.log('Found business by subdomain field:', business.name);

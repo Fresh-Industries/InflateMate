@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe-server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
-import Stripe from "stripe";
+import { Stripe } from "stripe";
 import { createLocalDate, createLocalDateTime } from "@/lib/utils";
 import { sendSignatureEmail } from "@/lib/sendEmail";
 import { generateWaiverPDF } from "@/lib/generateWaiver";
@@ -11,7 +11,7 @@ import { sendToOpenSign } from "@/lib/openSign";
 
 export async function POST(req: NextRequest) {
   const sig = (await headers()).get('stripe-signature');
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
   console.log("Received Stripe webhook, verifying signature...");
 
@@ -178,6 +178,37 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       const taxAmount = parseFloat(metadata.taxAmount || '0') || 0;
       const taxRate = parseFloat(metadata.taxRate || '10') || 10;
 
+      // Parse the selectedItems from JSON string
+      let inventoryItems = [];
+      try {
+        if (metadata.selectedItems) {
+          const selectedItems = JSON.parse(metadata.selectedItems);
+          console.log("Parsed selectedItems:", selectedItems);
+          
+          // Map the selected items to the format expected by Prisma
+          inventoryItems = selectedItems.map((item: { id: string; quantity?: number; price?: number }) => ({
+            inventoryId: item.id,
+            quantity: item.quantity || 1,
+            price: item.price || 0,
+          }));
+        } else {
+          // Fallback to legacy bounceHouseId for backwards compatibility
+          inventoryItems = [{
+            inventoryId: metadata.bounceHouseId,
+            quantity: 1,
+            price: subtotalAmount,
+          }];
+        }
+      } catch (parseError) {
+        console.error("Error parsing selectedItems:", parseError);
+        // Fallback to legacy method if parsing fails
+        inventoryItems = [{
+          inventoryId: metadata.bounceHouseId,
+          quantity: 1,
+          price: subtotalAmount,
+        }];
+      }
+
       const bookingData = {
         id: metadata.bookingId || '',
         eventDate: eventDate,
@@ -200,11 +231,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         businessId: metadata.businessId,
         customerId: customer.id,
         inventoryItems: {
-          create: [{
-            inventoryId: metadata.bounceHouseId,
-            quantity: 1,
-            price: subtotalAmount, // Use subtotal for the item price
-          }],
+          create: inventoryItems,
         },
       };
 

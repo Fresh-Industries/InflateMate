@@ -39,6 +39,12 @@ export async function POST(
     console.log("Creating PaymentIntent for connected account:", business.stripeAccountId);
 
     try {
+      // Ensure all metadata values are strings
+      const sanitizedMetadata: Record<string, string> = {};
+      Object.entries(metadata).forEach(([key, value]) => {
+        sanitizedMetadata[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      });
+      
       // Create a PaymentIntent on behalf of the connected account
       const paymentIntent = await stripe.paymentIntents.create(
         {
@@ -46,7 +52,7 @@ export async function POST(
           currency: "usd",
           payment_method_types: ["card"],
           receipt_email: customerEmail,
-          metadata,
+          metadata: sanitizedMetadata,
         },
         {
           stripeAccount: business.stripeAccountId,
