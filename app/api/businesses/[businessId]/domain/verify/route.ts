@@ -4,7 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { addDomainToVercel, removeDomainFromVercel } from "@/lib/vercel";
 import { Prisma } from "@prisma/client";
-import type { Business } from "@prisma/client";
+import type { Business } from "@/prisma/generated/prisma/client";
 
 // Define interfaces for our return types
 interface SuccessResult {
