@@ -18,7 +18,7 @@ const internalRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
-  const host = (req.headers.get('host') ?? '').toLowerCase().split(':')[0];
+  const host = (req.headers.get('host') ?? '').toLowerCase();
  
 
   /* ── A. skip Next.js internals & static assets ─────────────────────── */
@@ -30,11 +30,11 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  if (process.env.NODE_ENV === 'development') {
-    const colocalHost = 'localhost:3000';
-    if (!publicRoute(req) && host === colocalHost) await auth.protect();
-    return NextResponse.next();
-  }
+  // if (process.env.NODE_ENV === 'development') {
+  //   const colocalHost = 'localhost:3000';
+  //   if (!publicRoute(req) && host === colocalHost) await auth.protect();
+  //   return NextResponse.next();
+  // }
 
   /* ── B. root domain (marketing & dashboard live here) ─────────────── */
   if (host === ROOT || internalRoute(req)) {
