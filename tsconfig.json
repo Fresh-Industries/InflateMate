@@ -17,6 +17,7 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "types": ["jest", "node"],
     "plugins": [
       {
         "name": "next"
@@ -33,7 +34,10 @@
     "**/*.ts",
     "**/*.tsx",
     ".next/types/**/*.ts",
-    "app/[domain]/_themes/themeConfig.tsx"
+    "app/[domain]/_themes/themeConfig.tsx",
+    "__tests__/**/*.ts",
+    "jest.config.js",
+    "tests/testOpenSignIntergration.ts"
   ],
   "exclude": [
     "node_modules"

@@ -1,105 +1,86 @@
-// utils/openSign.ts
-export async function sendToOpenSign(pdfBuffer: Buffer, customerEmail: string, businessName: string, customerName: string): Promise<{url: string, documentId: string}> {
-    const OPEN_SIGN_API_KEY = process.env.OPEN_SIGN_API_KEY;
-    if (!OPEN_SIGN_API_KEY) {
-      throw new Error('OpenSign API key is missing');
-    }
-  
-    // Encode the PDF buffer to base64
-    const base64Pdf = pdfBuffer.toString('base64');
-  
-    // Construct the JSON payload based on the OpenSign API example
-    const payload = {
-      file: base64Pdf, // Base64 encoded PDF
-      title: `Waiver for ${customerName}`, // Example title
-      note: "Please review and sign the attached waiver.", // Example note
-      description: "Waiver required for booking.", // Example description
-      timeToCompleteDays: 7, // Example completion time
-      signer: {
-        role: "customer",
-        email: customerEmail,
-        name: customerName, 
-        widgets: [
-          {
-            type: "signature",
-            page: 2,
-            x: 63,
-            y: 265,
-            w: 165,
-            h: 45
-          },
-          {
-            type: "date",
-            page: 2,
-            x: 320,
-            y: 282,
-            w: 123,
-            h: 29,
-            options: {
-              required: true,
-              name: "date",
-              default: "04-30-2025", 
-              format: "mm-dd-yyyy",
-              color: "black",
-              fontsize: 12
-            }
-          },
-          {
-            type: "name",
-            page: 2,
-            x: 44,
-            y: 342,
-            w: 137,
-            h: 34,
-            options: {
-              required: true,
-              name: "name",
-              color: "black",
-              fontsize: 12
-            }
-          },
-          {
-            type: "textbox",
-            page: 2,
-            x: 315,
-            y: 339,
-            w: 150,
-            h: 39,
-            options: {
-              name: "number",
-              required: true,
-              default: "1234567890",
-              hint: "Please enter your phone number",
-              color: "black",
-              fontsize: 12,
-            }
-          } 
-        ],
-      },
-      sender_name: businessName,
-      send_email: false,
-    };
-  
-    // Use the SelfSign endpoint with JSON payload
-    const response = await fetch('https://opensign-w6plx.ondigitalocean.app/app/selfsign', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        'x-api-token': OPEN_SIGN_API_KEY,
-      },
-      body: JSON.stringify(payload), // Send the JSON payload
-    });
-  
-    if (!response.ok) {
-      const errorBody = await response.text(); // Get more details on error
-      console.error(`OpenSign API error response: ${errorBody}`);
-      throw new Error(`OpenSign API error: ${response.status} - ${response.statusText}`);
-    }
-  
-    const data = await response.json();
-    return { url: data.signurl, documentId: data.objectId }; 
+// utils/docuSeal.ts
+export interface SignResult {
+  url: string;        // signer-specific page
+  documentId: string; // submission ID (keep for webhooks / downloads)
 }
 
+/**
+ * 1) Upload PDF -> one-off template
+ * 2) Create submission -> get signing URL
+ */
+export async function sendToDocuSeal(
+  pdfBuffer: Buffer,
+  customerEmail: string,
+  businessName: string,
+  customerName: string
+): Promise<SignResult> {
+  const base64Pdf = pdfBuffer.toString("base64");
 
-  
+  /* -------------------------------------------------- *
+   *  STEP 1 – create a template from the PDF file
+   * -------------------------------------------------- */
+  const tplRes = await fetch(`${process.env.DS_BASE_URL}/templates/pdf`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Auth-Token": process.env.DOCUSEAL_API_KEY!,
+    },
+    body: JSON.stringify({
+      name: `Waiver – ${customerName}`,
+      file: base64Pdf,            // <- base64 string
+      folder: "InflateMate",      // optional – keeps the dashboard tidy
+    }),
+  });
+
+  if (!tplRes.ok) {
+    const txt = await tplRes.text();
+    throw new Error(
+      `DocuSeal template creation failed: ${tplRes.status} ${tplRes.statusText}\n${txt}`
+    );
+  }
+
+  const { id: templateId } = await tplRes.json(); // numeric ID
+
+  /* -------------------------------------------------- *
+   *  STEP 2 – create a submission (signature request)
+   * -------------------------------------------------- */
+  const subRes = await fetch(`${process.env.DS_BASE_URL}/submissions`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Auth-Token": process.env.DOCUSEAL_API_KEY!,
+    },
+    body: JSON.stringify({
+      template_id: templateId,
+      send_email: false,              // you’ll e-mail your own link
+      submitters: [
+        {
+          email: customerEmail,
+          name: customerName,
+          role: "customer",           // must match the role in text tags
+          external_id: customerEmail, // handy for look-ups / webhooks
+        },
+      ],
+      message: {
+        subject: `Waiver for ${businessName}`,
+        body: `Hi ${customerName}, please sign your waiver: {{submitter.link}}`,
+      },
+    }),
+  });
+
+  if (!subRes.ok) {
+    const txt = await subRes.text();
+    throw new Error(
+      `DocuSeal submission failed: ${subRes.status} ${subRes.statusText}\n${txt}`
+    );
+  }
+
+  /*  DocuSeal returns an array of submitters; the first one is ours. */
+  const [submitter] = await subRes.json();
+  const url =
+    submitter.signing_url ||
+    // fallback: build it manually if only a slug is returned
+    `${process.env.DS_BASE_URL?.replace(/\/api\/v1$/, "")}/s/${submitter.slug}`;
+
+  return { url, documentId: submitter.id.toString() };
+}
