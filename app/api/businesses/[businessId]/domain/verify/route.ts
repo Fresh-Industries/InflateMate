@@ -3,7 +3,7 @@ import { auth } from "@clerk/nextjs/server";
 import { prisma } from "@/lib/prisma";
 import { withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { addDomainToVercel, removeDomainFromVercel } from "@/lib/vercel";
-import { Prisma } from "@prisma/client";
+// import { Prisma } from "@prisma/client";
 import type { Business } from "@/prisma/generated/prisma/client";
 
 // Define interfaces for our return types
