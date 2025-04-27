@@ -1,13 +1,8 @@
 import { Resend } from 'resend';
-import type { CreateEmailResponse } from 'resend';
+import type { CreateEmailResponse } from 'resend';  
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-
-if (!RESEND_API_KEY) {
-  // Throw an error during module initialization if the key is missing
-  throw new Error("Missing RESEND_API_KEY environment variable.");
-}
-
+console.log("RESEND_API_KEY", RESEND_API_KEY);
 const resend = new Resend(RESEND_API_KEY);
 
 interface EmailParams {
@@ -17,10 +12,10 @@ interface EmailParams {
   from: string;
 }
 
-export async function sendSignatureEmail({ to, subject, html  }: EmailParams): Promise<CreateEmailResponse | undefined> {
+export async function sendSignatureEmail({ to, subject, html, from}: EmailParams): Promise<CreateEmailResponse | undefined> {
   try {
     return await resend.emails.send({
-      from: 'InflateMate <onboarding@resend.dev>',
+      from,
       to,
       subject,
       html,

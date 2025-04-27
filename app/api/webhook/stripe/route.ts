@@ -6,7 +6,7 @@ import { Stripe } from "stripe";
 import { createLocalDate, createLocalDateTime } from "@/lib/utils";
 import { sendSignatureEmail } from "@/lib/sendEmail";
 import { generateWaiverPDF } from "@/lib/generateWaiver";
-import { sendToOpenSign } from "@/lib/openSign";
+import { sendToDocuSeal } from "@/lib/docuseal";
 
 
 export async function POST(req: NextRequest) {
@@ -308,7 +308,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
    // Generate the waiver PDF
    const pdfBuffer = await generateWaiverPDF(pdfData);
     // Send the PDF to OpenSign to get a signing URL
-    const {url, documentId} = await sendToOpenSign(pdfBuffer, customer.email, business?.name || '', customer.name || '');
+    const {url, documentId} = await sendToDocuSeal(pdfBuffer, customer.email, business?.name || '', customer.name || '');
     console.log("OpenSign URL:", url);
     console.log("OpenSign Document ID:", documentId);
 
