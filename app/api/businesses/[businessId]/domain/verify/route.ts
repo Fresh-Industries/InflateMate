@@ -80,13 +80,6 @@ export async function POST(req: NextRequest, props: { params: Promise<{ business
 
             return { updatedBusiness } as SuccessResult;
           } catch (dbError) {
-            // If this is a unique constraint violation, return a conflict error
-            if (dbError instanceof Prisma.PrismaClientKnownRequestError && dbError.code === 'P2002') {
-              return { 
-                error: "This domain is already in use by another business",
-                statusCode: 409 // Conflict
-              } as ErrorResult;
-            }
             throw dbError; // Re-throw for the outer catch to handle
           }
         });
