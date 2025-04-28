@@ -365,7 +365,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/nikolasmanuel/inflatemate/prisma/generated/prisma",
+      "value": "C:\\Users\\Nik\\InflateMate\\prisma\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -374,12 +374,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin",
+        "value": "windows",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/nikolasmanuel/inflatemate/prisma/schema.prisma",
+    "sourceFilePath": "C:\\Users\\Nik\\InflateMate\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {
@@ -393,11 +393,12 @@ const config = {
     "db"
   ],
   "activeProvider": "postgresql",
+  "postinstall": false,
   "inlineDatasources": {
     "db": {
       "url": {
         "fromEnvVar": "DATABASE_URL",
-        "value": "postgresql://postgres.ucbpdemkkzbpibczfiza:IamChamp2018!@aws-0-us-east-1.pooler.supabase.com:6543/postgres?pgbouncer=true"
+        "value": null
       }
     }
   },

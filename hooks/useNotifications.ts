@@ -23,6 +23,23 @@ export function useNotifications() {
       toast({ title: n.title, description: n.description })
     }
 
+    // DocuSeal
+    const docusealCh = supabase
+      .channel('docuseal')
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'DocuSeal' },
+        ({ new: waiverSigned }) => {
+          push({
+            id: waiverSigned.id,
+            title: 'Waiver Signed',
+            description: `Waiver signed by ${waiverSigned.customer.name}`,
+            createdAt: new Date().toISOString(),
+          })
+        }
+      )
+      .subscribe()
+
     // Leads
     const leadCh = supabase
       .channel('leads')
@@ -62,6 +79,7 @@ export function useNotifications() {
     return () => {
       supabase.removeChannel(leadCh)
       supabase.removeChannel(bookCh)
+      supabase.removeChannel(docusealCh)
     }
   }, [toast])
 
