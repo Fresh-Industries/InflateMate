@@ -12,7 +12,7 @@ interface DocuSealWebhook {
   event_type: 'form.completed' | 'form.declined' | string
   timestamp: string
   data: {
-    submission_id: number
+    id: number
     external_id: string | null            // we set this to customer email
     status: 'completed' | 'declined'
     documents?: { name: string; url: string }[]
@@ -39,18 +39,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Bad JSON' }, { status: 400 })
   }
 
-  const { submission_id, documents = [] } = payload.data
-  if (!submission_id || !payload.event_type) {
+  const { id, documents = [] } = payload.data
+  if (!id || !payload.event_type) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
 
   /* ---------- 2. Find matching waiver ---------- */
   const waiver = await prisma.waiver.findFirst({
-    where: { docuSealDocumentId: submission_id.toString() },   // ← store this when you call /submissions
+    where: { docuSealDocumentId: id.toString() },   // ← store this when you call /submissions
     include: { customer: true },
   })
   if (!waiver) {
-    console.error('No waiver found for submission', submission_id)
+    console.error('No waiver found for submission', id)
     return NextResponse.json({ ok: true })      // ack so DocuSeal stops retrying
   }
 
