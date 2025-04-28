@@ -1,7 +1,7 @@
 // DomainPage.tsx
 
 import { notFound } from 'next/navigation';
-import { getBusinessByDomain } from '@/lib/business/domain-utils';
+import { DynamicSection, getBusinessByDomain } from '@/lib/business/domain-utils';
 import Link from 'next/link';
 import { Star, ArrowRight, Sparkles, Truck } from 'lucide-react';
 import { prisma } from '@/lib/prisma';
@@ -362,7 +362,7 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
           </div>
         </section>
         {/* DYNAMIC LANDING SECTIONS - Rendered via SectionRenderer */}
-        {siteConfig.landing?.sections?.map((section) => (
+        {siteConfig.landing?.sections?.map((section: DynamicSection) => (
           <section key={section.id} className="dynamic-section" style={{ background: section.backgroundColor }}>
             {/* Removed theme and colors props */}
             <SectionRenderer section={section} theme={theme} colors={colors} /> 

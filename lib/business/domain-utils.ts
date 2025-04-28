@@ -2,11 +2,6 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 
-// Define types for different section content structures
-export interface TextSectionContent {
-  title?: string;
-  text: string;
-}
 
 export interface ImageTextSectionContent {
   title?: string;
@@ -42,9 +37,9 @@ export interface TextCardsSectionContent {
 // Define the structure for a dynamic section
 export interface DynamicSection {
   id: string; // Unique identifier for the section
-  type: 'text' | 'imageText' | 'videoText' | 'textCards';
+  type: 'Image' | 'Video' | 'Cards';
   page: 'landing' | 'about'; // Or other page identifiers
-  content: TextSectionContent | ImageTextSectionContent | VideoTextSectionContent | TextCardsSectionContent;
+  content: ImageTextSectionContent | VideoTextSectionContent | TextCardsSectionContent;
   backgroundColor?: string;
 }
 

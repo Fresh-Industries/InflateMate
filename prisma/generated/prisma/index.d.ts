@@ -13498,7 +13498,7 @@ export namespace Prisma {
     status: $Enums.WaiverStatus | null
     templateVersion: string | null
     documentUrl: string | null
-    openSignDocumentId: string | null
+    docuSealDocumentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13511,7 +13511,7 @@ export namespace Prisma {
     status: $Enums.WaiverStatus | null
     templateVersion: string | null
     documentUrl: string | null
-    openSignDocumentId: string | null
+    docuSealDocumentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
   }
@@ -13524,7 +13524,7 @@ export namespace Prisma {
     status: number
     templateVersion: number
     documentUrl: number
-    openSignDocumentId: number
+    docuSealDocumentId: number
     createdAt: number
     updatedAt: number
     _all: number
@@ -13539,7 +13539,7 @@ export namespace Prisma {
     status?: true
     templateVersion?: true
     documentUrl?: true
-    openSignDocumentId?: true
+    docuSealDocumentId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13552,7 +13552,7 @@ export namespace Prisma {
     status?: true
     templateVersion?: true
     documentUrl?: true
-    openSignDocumentId?: true
+    docuSealDocumentId?: true
     createdAt?: true
     updatedAt?: true
   }
@@ -13565,7 +13565,7 @@ export namespace Prisma {
     status?: true
     templateVersion?: true
     documentUrl?: true
-    openSignDocumentId?: true
+    docuSealDocumentId?: true
     createdAt?: true
     updatedAt?: true
     _all?: true
@@ -13651,7 +13651,7 @@ export namespace Prisma {
     status: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt: Date
     updatedAt: Date
     _count: WaiverCountAggregateOutputType | null
@@ -13681,7 +13681,7 @@ export namespace Prisma {
     status?: boolean
     templateVersion?: boolean
     documentUrl?: boolean
-    openSignDocumentId?: boolean
+    docuSealDocumentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13697,7 +13697,7 @@ export namespace Prisma {
     status?: boolean
     templateVersion?: boolean
     documentUrl?: boolean
-    openSignDocumentId?: boolean
+    docuSealDocumentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13713,7 +13713,7 @@ export namespace Prisma {
     status?: boolean
     templateVersion?: boolean
     documentUrl?: boolean
-    openSignDocumentId?: boolean
+    docuSealDocumentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13729,12 +13729,12 @@ export namespace Prisma {
     status?: boolean
     templateVersion?: boolean
     documentUrl?: boolean
-    openSignDocumentId?: boolean
+    docuSealDocumentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type WaiverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "customerId" | "bookingId" | "status" | "templateVersion" | "documentUrl" | "openSignDocumentId" | "createdAt" | "updatedAt", ExtArgs["result"]["waiver"]>
+  export type WaiverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "customerId" | "bookingId" | "status" | "templateVersion" | "documentUrl" | "docuSealDocumentId" | "createdAt" | "updatedAt", ExtArgs["result"]["waiver"]>
   export type WaiverInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
@@ -13766,7 +13766,7 @@ export namespace Prisma {
       status: $Enums.WaiverStatus
       templateVersion: string
       documentUrl: string
-      openSignDocumentId: string
+      docuSealDocumentId: string
       createdAt: Date
       updatedAt: Date
     }, ExtArgs["result"]["waiver"]>
@@ -14202,7 +14202,7 @@ export namespace Prisma {
     readonly status: FieldRef<"Waiver", 'WaiverStatus'>
     readonly templateVersion: FieldRef<"Waiver", 'String'>
     readonly documentUrl: FieldRef<"Waiver", 'String'>
-    readonly openSignDocumentId: FieldRef<"Waiver", 'String'>
+    readonly docuSealDocumentId: FieldRef<"Waiver", 'String'>
     readonly createdAt: FieldRef<"Waiver", 'DateTime'>
     readonly updatedAt: FieldRef<"Waiver", 'DateTime'>
   }
@@ -14835,7 +14835,7 @@ export namespace Prisma {
     status: 'status',
     templateVersion: 'templateVersion',
     documentUrl: 'documentUrl',
-    openSignDocumentId: 'openSignDocumentId',
+    docuSealDocumentId: 'docuSealDocumentId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
   };
@@ -16126,7 +16126,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFilter<"Waiver"> | $Enums.WaiverStatus
     templateVersion?: StringFilter<"Waiver"> | string
     documentUrl?: StringFilter<"Waiver"> | string
-    openSignDocumentId?: StringFilter<"Waiver"> | string
+    docuSealDocumentId?: StringFilter<"Waiver"> | string
     createdAt?: DateTimeFilter<"Waiver"> | Date | string
     updatedAt?: DateTimeFilter<"Waiver"> | Date | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
@@ -16142,7 +16142,7 @@ export namespace Prisma {
     status?: SortOrder
     templateVersion?: SortOrder
     documentUrl?: SortOrder
-    openSignDocumentId?: SortOrder
+    docuSealDocumentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     business?: BusinessOrderByWithRelationInput
@@ -16152,7 +16152,7 @@ export namespace Prisma {
 
   export type WaiverWhereUniqueInput = Prisma.AtLeast<{
     id?: string
-    openSignDocumentId?: string
+    docuSealDocumentId?: string
     AND?: WaiverWhereInput | WaiverWhereInput[]
     OR?: WaiverWhereInput[]
     NOT?: WaiverWhereInput | WaiverWhereInput[]
@@ -16167,7 +16167,7 @@ export namespace Prisma {
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
-  }, "id" | "openSignDocumentId">
+  }, "id" | "docuSealDocumentId">
 
   export type WaiverOrderByWithAggregationInput = {
     id?: SortOrder
@@ -16177,7 +16177,7 @@ export namespace Prisma {
     status?: SortOrder
     templateVersion?: SortOrder
     documentUrl?: SortOrder
-    openSignDocumentId?: SortOrder
+    docuSealDocumentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     _count?: WaiverCountOrderByAggregateInput
@@ -16196,7 +16196,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusWithAggregatesFilter<"Waiver"> | $Enums.WaiverStatus
     templateVersion?: StringWithAggregatesFilter<"Waiver"> | string
     documentUrl?: StringWithAggregatesFilter<"Waiver"> | string
-    openSignDocumentId?: StringWithAggregatesFilter<"Waiver"> | string
+    docuSealDocumentId?: StringWithAggregatesFilter<"Waiver"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Waiver"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Waiver"> | Date | string
   }
@@ -17420,7 +17420,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutWaiversInput
@@ -17436,7 +17436,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17446,7 +17446,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutWaiversNestedInput
@@ -17462,7 +17462,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17475,7 +17475,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -17485,7 +17485,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -17498,7 +17498,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -18681,7 +18681,7 @@ export namespace Prisma {
     status?: SortOrder
     templateVersion?: SortOrder
     documentUrl?: SortOrder
-    openSignDocumentId?: SortOrder
+    docuSealDocumentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -18694,7 +18694,7 @@ export namespace Prisma {
     status?: SortOrder
     templateVersion?: SortOrder
     documentUrl?: SortOrder
-    openSignDocumentId?: SortOrder
+    docuSealDocumentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -18707,7 +18707,7 @@ export namespace Prisma {
     status?: SortOrder
     templateVersion?: SortOrder
     documentUrl?: SortOrder
-    openSignDocumentId?: SortOrder
+    docuSealDocumentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
   }
@@ -20513,7 +20513,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     customer: CustomerCreateNestedOneWithoutWaiversInput
@@ -20527,7 +20527,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -20838,7 +20838,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFilter<"Waiver"> | $Enums.WaiverStatus
     templateVersion?: StringFilter<"Waiver"> | string
     documentUrl?: StringFilter<"Waiver"> | string
-    openSignDocumentId?: StringFilter<"Waiver"> | string
+    docuSealDocumentId?: StringFilter<"Waiver"> | string
     createdAt?: DateTimeFilter<"Waiver"> | Date | string
     updatedAt?: DateTimeFilter<"Waiver"> | Date | string
   }
@@ -21113,7 +21113,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutWaiversInput
@@ -21127,7 +21127,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -21509,7 +21509,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutWaiversInput
@@ -21523,7 +21523,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -23149,7 +23149,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -23519,7 +23519,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customer?: CustomerUpdateOneRequiredWithoutWaiversNestedInput
@@ -23533,7 +23533,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23545,7 +23545,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23612,7 +23612,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -23709,7 +23709,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutWaiversNestedInput
@@ -23723,7 +23723,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23735,7 +23735,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23771,7 +23771,7 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    openSignDocumentId: string
+    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
   }
@@ -23853,7 +23853,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutWaiversNestedInput
@@ -23867,7 +23867,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -23879,7 +23879,7 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    openSignDocumentId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }

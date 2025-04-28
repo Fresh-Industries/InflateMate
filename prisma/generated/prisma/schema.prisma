@@ -245,7 +245,7 @@ model Waiver {
   status             WaiverStatus @default(PENDING)
   templateVersion    String
   documentUrl        String
-  openSignDocumentId String       @unique
+  docuSealDocumentId String       @unique // DocuSeal document ID
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 

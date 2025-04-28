@@ -2,66 +2,67 @@
 
 import React from 'react';
 import { VideoTextSectionContent } from '@/lib/business/domain-utils';
+import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/themeConfig';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 
 interface VideoTextSectionProps {
   content: VideoTextSectionContent;
+  theme: ThemeDefinition;
+  colors: ThemeColors;
 }
 
-// Basic component to render video and text
-// Layout (e.g., side-by-side) will be handled by theme components
-export default function VideoTextSection({ content }: VideoTextSectionProps) {
-  const { title, text, videoUrl, videoPosition = 'left' } = content;
-
-  // Basic iframe embed - consider using a library for more robust embedding
-  const getEmbedUrl = (url: string) => {
-    try {
-      const urlObj = new URL(url);
-      if (urlObj.hostname.includes('youtube.com') || urlObj.hostname.includes('youtu.be')) {
-        const videoId = urlObj.searchParams.get('v') || urlObj.pathname.split('/').pop();
-        return `https://www.youtube.com/embed/${videoId}`;
-      }
-      if (urlObj.hostname.includes('vimeo.com')) {
-        const videoId = urlObj.pathname.split('/').pop();
-        return `https://player.vimeo.com/video/${videoId}`;
-      }
-    } catch (e) {
-      console.error("Invalid video URL", url, e);
-    }
-    return url; // Fallback or handle unsupported URLs
+// Helper function from ImageTextSection for card styling
+const getCardStyle = (theme: ThemeDefinition, colors: ThemeColors): React.CSSProperties => {
+  const styles = theme.cardStyles;
+  return {
+    backgroundColor: styles.background(colors),
+    border: styles.border(colors),
+    boxShadow: styles.boxShadow(colors),
+    color: styles.textColor(colors),
+    borderRadius: styles.borderRadius || '16px',
   };
-  
-  const embedUrl = getEmbedUrl(videoUrl);
+};
+
+export default function VideoTextSection({ content, theme, colors }: VideoTextSectionProps) {
+  const { title, text, videoUrl, videoPosition = 'left', backgroundColor } = content || {};
+  const textColor = colors.text;
+  const cardStyles = getCardStyle(theme, colors);
+
+
 
   return (
-    <div className="container mx-auto px-4 py-8 md:py-12">
-      {title && <h2 className="text-2xl md:text-3xl font-bold text-center mb-6">{title}</h2>}
-      {/* Layout classes (like flex direction) will be added by theme components */}
+    <div className="container mx-auto px-4 py-8 md:py-12" style={{ backgroundColor: backgroundColor || 'transparent' }}>
       <div className="flex flex-col md:flex-row gap-6 md:gap-8 items-center">
         {/* Video Element */}
         <div className={`w-full md:w-1/2 ${videoPosition === 'right' ? 'md:order-last' : ''}`}>
-          {embedUrl ? (
-            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg">
-               <iframe 
-                src={embedUrl} 
-                title={title || 'Video Section'} 
-                frameBorder="0" 
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
-                allowFullScreen
-                className="w-full h-full"
-              ></iframe>
+          {videoUrl ? (
+            // Use HTML <video> tag for direct URLs
+            <div className="aspect-w-16 aspect-h-9 rounded-lg overflow-hidden shadow-lg bg-black">
+              <video
+                src={videoUrl}
+                controls // Show default browser controls
+                playsInline // Recommended for mobile compatibility
+                className="w-full h-full object-cover" // Use object-cover or object-contain
+                title={title || 'Video Section'} // Accessibility
+              >
+                Your browser does not support the video tag.
+              </video>
             </div>
           ) : (
             <div className="aspect-w-16 aspect-h-9 bg-muted rounded-lg flex items-center justify-center">
-              <p className="text-muted-foreground">Invalid video URL</p>
+              <p className="text-muted-foreground">Video URL missing</p>
             </div>
           )}
         </div>
         {/* Text Content */}
-        {text && (
-          <div className="w-full md:w-1/2">
-            <p className="text-base md:text-lg text-muted-foreground whitespace-pre-wrap">{text}</p>
-          </div>
-        )}
+         <Card className="w-full md:w-1/2 flex flex-col items-center justify-center p-6 md:p-8" style={cardStyles}>
+           {title && <CardTitle className="text-2xl md:text-3xl font-bold text-center mb-4 md:mb-6" style={{ color: textColor }}>{title}</CardTitle>}
+           {text && (
+             <CardContent className="p-0" style={{ color: textColor }}>
+               <p className="text-base md:text-lg text-center text-muted-foreground whitespace-pre-wrap">{text}</p>
+             </CardContent>
+           )}
+         </Card>
       </div>
     </div>
   );

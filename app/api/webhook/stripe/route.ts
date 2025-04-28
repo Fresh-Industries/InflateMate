@@ -321,7 +321,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         status: 'PENDING',
         templateVersion: 'v1',
         documentUrl: url, 
-        openSignDocumentId: documentId
+        docuSealDocumentId: documentId
       },
     });
     console.log("Waiver record created.");

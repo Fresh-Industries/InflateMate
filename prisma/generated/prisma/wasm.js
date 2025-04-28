@@ -292,7 +292,7 @@ exports.Prisma.WaiverScalarFieldEnum = {
   status: 'status',
   templateVersion: 'templateVersion',
   documentUrl: 'documentUrl',
-  openSignDocumentId: 'openSignDocumentId',
+  docuSealDocumentId: 'docuSealDocumentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };

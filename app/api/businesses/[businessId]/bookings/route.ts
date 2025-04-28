@@ -110,7 +110,7 @@ export async function GET(
           select: {
             id: true,
             status: true, // Get the waiver status
-            openSignDocumentId: true // Include for potential linking/viewing
+            docuSealDocumentId: true // Include for potential linking/viewing
           }
         }
       },

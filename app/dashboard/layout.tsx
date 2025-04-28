@@ -1,5 +1,4 @@
 'use client'
-import { UserButton } from "@clerk/nextjs";
 import Link from "next/link";
 import Image from "next/image";
 import { useParams, usePathname } from "next/navigation";
@@ -31,6 +30,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotificationsContext } from "@/context/NotificationsContext";
+import dynamic from 'next/dynamic';
 
 interface Business {
   id: string;
@@ -44,6 +44,12 @@ interface SidebarItem {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
 }
+
+// Dynamically import UserButton with SSR disabled
+const UserButton = dynamic(() => import('@clerk/nextjs').then(mod => mod.UserButton), {
+  ssr: false,
+  loading: () => <Skeleton className="h-8 w-8 rounded-full" />
+});
 
 export default function DashboardLayout({
   children,
