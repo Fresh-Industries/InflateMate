@@ -87,41 +87,49 @@ export async function POST(
           stripeAccount: business.stripeAccountId,
         });
         
-        // Create a refund record in the database
-        const refundPayment = await prisma.payment.create({
-          data: {
-            amount: -refundAmount, // Negative amount for refund
-            currency: paymentToRefund.currency || "USD",
-            status: "COMPLETED",
-            type: "REFUND",
-            stripePaymentId: refundResult.id,
-            refundAmount: refundAmount,
-            refundReason: reason || "Manual refund",
-            bookingId: paymentToRefund.bookingId,
-            businessId: paymentToRefund.businessId,
-            metadata: {
-              originalPaymentId: paymentToRefund.id,
-              isFullRefund: fullRefund,
-            },
-            paidAt: new Date(),
-          },
-        });
+        // Determine the updates for the original payment record
+        const originalAmount = Number(paymentToRefund.amount);
+        const isFullRefund = refundAmount === originalAmount;
         
-        // Update the original payment status
-        await prisma.payment.update({
+        // Use "REFUNDED" for full refunds, keep "COMPLETED" for partial, as payment was still captured.
+        const newStatus = isFullRefund ? "REFUNDED" : paymentToRefund.status;
+        // Ensure the new amount reflects the remaining value or negative full refund
+        const newAmount = isFullRefund ? -originalAmount : originalAmount - refundAmount;
+        
+        // Metadata update: preserve existing metadata and add refund info
+        const existingMetadata = paymentToRefund.metadata && typeof paymentToRefund.metadata === 'object' 
+                               ? paymentToRefund.metadata 
+                               : {};
+        const newMetadata = {
+          ...existingMetadata,
+          stripeRefundId: refundResult.id,
+          refundReason: reason || "Manual refund",
+          isFullRefund: isFullRefund,
+          originalPaymentAmount: originalAmount, // Record original amount before modification
+          refundedAmount: refundAmount, // Record the amount actually refunded
+        };
+        
+        // Update the original payment record
+        const updatedPayment = await prisma.payment.update({
           where: { id: paymentToRefund.id },
           data: {
-            status: "REFUNDED",
-            refundAmount: refundAmount,
-            refundReason: reason || "Manual refund",
+            status: newStatus,
+            amount: newAmount, // Update amount based on refund type
+            refundAmount: refundAmount, // Store the refunded amount explicitly
+            refundReason: reason || "Manual refund", // Store the reason explicitly
+            metadata: newMetadata, // Store detailed refund info in metadata
+            updatedAt: new Date(),
+            // Keep original type and stripePaymentId (for the original charge)
+            // type: paymentToRefund.type, 
+            // stripePaymentId: paymentToRefund.stripePaymentId, 
           },
         });
         
         return { 
-          data: refundPayment,
-          refundAmount,
-          isFullRefund: fullRefund,
-          stripeRefundId: refundResult?.id
+          data: updatedPayment, // Return the updated original payment
+          refundAmount, // Keep this for clarity in the API response
+          isFullRefund, // Keep this for clarity
+          stripeRefundId: refundResult.id // Keep this for clarity
         };
         
       } catch (stripeError) {

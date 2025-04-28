@@ -56,7 +56,7 @@ export default async function CouponsPage(
           </div>
           
           <Link href={`/dashboard/${params.businessId}/marketing/coupons/new`} passHref>
-            <Button className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all duration-300 px-5 py-2.5">
+            <Button  className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-full shadow-lg hover:scale-105 transition-all duration-300 px-5 py-2.5">
               <Plus className="mr-2 h-4 w-4" />
               Create Coupon
             </Button>

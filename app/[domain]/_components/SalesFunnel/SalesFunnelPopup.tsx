@@ -1,5 +1,4 @@
-"use client";
-
+'use client'
 import { useState, useEffect, useRef } from "react";
 import { X, ChevronUp, PartyPopper, Gift, Sparkles, ArrowRight, Check } from "lucide-react";
 import Image from "next/image";

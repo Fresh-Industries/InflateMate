@@ -30,10 +30,10 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
-      console.log("file url:", file.url);
+      console.log("file url:", file.ufsUrl);
 
       // Return data relevant to the upload
-      return { uploadedBy: metadata.userId, url: file.url };
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
   
     videoUploader: f({
@@ -60,10 +60,10 @@ export const ourFileRouter = {
       .onUploadComplete(async ({ metadata, file }) => {
         // This code RUNS ON YOUR SERVER after upload
         console.log("Upload complete for userId:", metadata.userId);
-        console.log("file url:", file.url);
+        console.log("file url:", file.ufsUrl);
   
         // Return data relevant to the upload
-        return { uploadedBy: metadata.userId, url: file.url };
+        return { uploadedBy: metadata.userId, url: file.ufsUrl };
       }),
   // Business logo uploader with different settings
   logoUploader: f({
@@ -79,8 +79,8 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Logo upload complete for userId:", metadata.userId);
-      console.log("Logo file url:", file.url);
-      return { uploadedBy: metadata.userId, url: file.url };
+      console.log("Logo file url:", file.ufsUrl);
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 
   // PDF document uploader for waivers and other documents
@@ -92,8 +92,8 @@ export const ourFileRouter = {
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Document upload complete for userId:", metadata.userId);
-      console.log("Document file url:", file.url);
-      return { uploadedBy: metadata.userId, url: file.url };
+      console.log("Document file url:", file.ufsUrl);
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 } satisfies FileRouter;
 

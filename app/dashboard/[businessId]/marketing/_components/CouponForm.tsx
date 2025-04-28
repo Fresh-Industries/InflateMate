@@ -10,40 +10,55 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Calendar } from "@/components/ui/calendar";
-import { CalendarIcon } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { format } from "date-fns";
+import { DatePickerWithRange } from "@/components/DatePicker";
 import { useToast } from "@/hooks/use-toast";
+
+const optionalNumber = z.preprocess(
+  (val) => (val === "" || val === null ? undefined : Number(val)),
+  z.number().positive().optional()
+);
+
+const optionalNonNegativeNumber = z.preprocess(
+  (val) => (val === "" || val === null ? undefined : Number(val)),
+  z.number().nonnegative().optional()
+);
 
 const formSchema = z.object({
   code: z.string().min(2, "Code must be at least 2 characters"),
   description: z.string().optional(),
   discountType: z.enum(["PERCENTAGE", "FIXED"]),
   discountAmount: z.coerce.number().positive("Amount must be positive"),
-  maxUses: z.coerce.number().int().positive("Max uses must be a positive integer").optional(),
+  maxUses: optionalNumber.refine(
+    val => val === undefined || Number.isInteger(val), 
+    "Max uses must be a whole number"
+  ),
   isActive: z.boolean().default(true),
-  minimumAmount: z.coerce.number().nonnegative("Minimum amount must be non-negative").optional(),
-  startDate: z.date().optional(),
-  endDate: z.date().optional(),
+  minimumAmount: optionalNonNegativeNumber,
+  dateRange: z.object({
+    from: z.date().optional(),
+    to: z.date().optional(),
+  }).optional(),
 }).refine(data => {
-  // If both dates are provided, ensure endDate is after startDate
-  if (data.startDate && data.endDate) {
-    return data.endDate > data.startDate;
+  // If both dates are provided, ensure to is after from
+  if (data.dateRange?.from && data.dateRange?.to) {
+    // Set time to end of day for 'to' date for inclusive comparison
+    const toDate = new Date(data.dateRange.to);
+    toDate.setHours(23, 59, 59, 999);
+    return toDate >= data.dateRange.from;
   }
   return true;
 }, {
-  message: "End date must be after start date",
-  path: ["endDate"],
+  message: "End date must be on or after start date",
+  path: ["dateRange"],
 }).refine(data => {
   // For percentage discounts, ensure the amount is between 1 and 100
   if (data.discountType === "PERCENTAGE") {
-    return data.discountAmount <= 100;
+    // Allow positive check to handle the initial required validation
+    return data.discountAmount > 0 && data.discountAmount <= 100;
   }
   return true;
 }, {
-  message: "Percentage discount cannot exceed 100%",
+  message: "Percentage discount must be between 1 and 100",
   path: ["discountAmount"],
 });
 
@@ -78,11 +93,13 @@ export function CouponForm({ businessId, coupon, onSuccess, onCancel }: CouponFo
     description: coupon?.description || "",
     discountType: coupon?.discountType || "PERCENTAGE",
     discountAmount: coupon?.discountAmount || 10,
-    maxUses: coupon?.maxUses || undefined,
+    maxUses: coupon?.maxUses ?? undefined,
     isActive: coupon?.isActive ?? true,
-    minimumAmount: coupon?.minimumAmount || undefined,
-    startDate: coupon?.startDate ? new Date(coupon.startDate) : undefined,
-    endDate: coupon?.endDate ? new Date(coupon.endDate) : undefined,
+    minimumAmount: coupon?.minimumAmount ?? undefined,
+    dateRange: {
+        from: coupon?.startDate ? new Date(coupon.startDate) : undefined,
+        to: coupon?.endDate ? new Date(coupon.endDate) : undefined,
+    },
   };
 
   const form = useForm<FormValues>({
@@ -102,12 +119,20 @@ export function CouponForm({ businessId, coupon, onSuccess, onCancel }: CouponFo
       
       const method = coupon ? "PATCH" : "POST";
       
+      // Extract dates from dateRange for API payload
+      const payload = {
+        ...values,
+        startDate: values.dateRange?.from,
+        endDate: values.dateRange?.to,
+        dateRange: undefined, // Remove dateRange from payload
+      };
+      
       const response = await fetch(url, {
         method,
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(values),
+        body: JSON.stringify(payload), // Send modified payload
       });
       
       if (!response.ok) {
@@ -251,9 +276,10 @@ export function CouponForm({ businessId, coupon, onSuccess, onCancel }: CouponFo
                 <div className="relative">
                   <Input 
                     type="number" 
-                    placeholder="Enter minimum amount" 
+                    placeholder="Leave blank for no minimum" 
                     {...field} 
-                    value={field.value || ""}
+                    value={field.value ?? ""}
+                    onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                     min={0}
                     step={0.01}
                   />
@@ -279,110 +305,39 @@ export function CouponForm({ businessId, coupon, onSuccess, onCancel }: CouponFo
               <FormControl>
                 <Input 
                   type="number" 
-                  placeholder="Enter maximum uses" 
+                  placeholder="Leave blank for unlimited" 
                   {...field} 
-                  value={field.value || ""}
+                  value={field.value ?? ""}
+                  onChange={(e) => field.onChange(e.target.value === '' ? undefined : Number(e.target.value))}
                   min={1}
+                  step={1}
                 />
               </FormControl>
               <FormDescription>
-                The maximum number of times this coupon can be used.
+                The maximum number of times this coupon can be used in total.
               </FormDescription>
               <FormMessage />
             </FormItem>
           )}
         />
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <FormField
-            control={form.control}
-            name="startDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Start Date (Optional)</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>
-                  When the coupon becomes valid.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          
-          <FormField
-            control={form.control}
-            name="endDate"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>End Date (Optional)</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full pl-3 text-left font-normal",
-                          !field.value && "text-muted-foreground"
-                        )}
-                      >
-                        {field.value ? (
-                          format(field.value, "PPP")
-                        ) : (
-                          <span>Pick a date</span>
-                        )}
-                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      disabled={(date) => {
-                        const startDate = form.getValues("startDate");
-                        return startDate ? date <= startDate : date < new Date(new Date().setHours(0, 0, 0, 0));
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormDescription>
-                  When the coupon expires.
-                </FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+        <FormField
+          control={form.control}
+          name="dateRange"
+          render={({ field }) => (
+            <FormItem className="flex flex-col">
+              <FormLabel>Validity Period (Optional)</FormLabel>
+              <DatePickerWithRange 
+                date={field.value ? { from: field.value.from, to: field.value.to } : undefined}
+                onSelect={field.onChange}
+              />
+              <FormDescription>
+                The date range during which the coupon is active.
+              </FormDescription>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         
         <FormField
           control={form.control}

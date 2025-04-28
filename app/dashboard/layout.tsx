@@ -11,7 +11,7 @@ import {
   Menu,
   Globe,
   Mail,
-  Inbox,
+  // Inbox,
   FileStack,
   Wallet,
   Building2,
@@ -128,11 +128,11 @@ export default function DashboardLayout({
       href: `/dashboard/${businessId}/customers`,
       icon: Users,
     },
-    {
-      title: "Messages",
-      href: `/dashboard/${businessId}/messages`,
-      icon: Inbox,
-    },
+    // {
+    //   title: "Messages",
+    //   href: `/dashboard/${businessId}/messages`,
+    //   icon: Inbox,
+    // },
     {
       title: "Documents",
       href: `/dashboard/${businessId}/documents`,

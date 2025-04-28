@@ -48,7 +48,7 @@ interface Booking {
     id: string;
     name: string;
   };
-  bookingItems?: Array<{
+  inventoryItems?: Array<{
     inventoryId: string;
     inventory?: {
       name: string;
@@ -136,7 +136,7 @@ export default function DashboardPage() {
 
         // Fetch bookings and inventory
         const [bookingsResponse, inventoryResponse] = await Promise.all([
-          fetch(`/api/businesses/${businessId}/bookings?expand=customer,bookingItems`),
+          fetch(`/api/businesses/${businessId}/bookings`),
           fetch(`/api/businesses/${businessId}/inventory`)
         ]);
 
@@ -174,7 +174,7 @@ export default function DashboardPage() {
         const bookingsWithCustomers = bookingsArray.map((booking: Booking) => ({
           ...booking,
           customer: booking.customer || { name: 'Anonymous' },
-          bookingItems: booking.bookingItems?.map(item => ({
+          inventoryItems: booking.inventoryItems?.map(item => ({
             ...item,
             inventory: item.inventoryId ? inventoryMap.get(item.inventoryId) || { name: 'Unknown Item' } : { name: 'Unknown Item' }
           })) || []
@@ -267,9 +267,9 @@ export default function DashboardPage() {
         console.log('Bookings data:', bookingsWithCustomers);
         
         bookingsWithCustomers.forEach((booking: Booking) => {
-          console.log('Processing booking:', booking.id, 'Booking items:', booking.bookingItems?.[0]);
-          if (booking.bookingItems && booking.status !== 'CANCELLED') {
-            booking.bookingItems.forEach((item: { inventory?: { name: string } }) => {
+          console.log('Processing booking:', booking.id, 'Booking items:', booking.inventoryItems?.[0]);
+          if (booking.inventoryItems && booking.status !== 'CANCELLED') {
+            booking.inventoryItems.forEach((item: { inventory?: { name: string } }) => {
               console.log('Processing item:', item);
               const name = item.inventory?.name || 'Unknown Item';
               if (!inventoryBookingCounts[name]) {
@@ -772,7 +772,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       <p className="text-sm font-medium">{formatCurrency(booking.totalAmount)}</p>
                       <p className="text-xs text-muted-foreground">
-                        {booking.bookingItems?.[0]?.inventory?.name || 'Item'}
+                        {booking.inventoryItems?.[0]?.inventory?.name || 'Item'}
                       </p>
                     </div>
                   </div>
@@ -829,7 +829,7 @@ export default function DashboardPage() {
                     <div className="text-right">
                       <p className="text-sm font-semibold text-[#1a1f36]">{formatCurrency(booking.totalAmount)}</p>
                       <p className="text-xs text-gray-500">
-                        {booking.bookingItems?.[0]?.inventory?.name || 'Item'}
+                        {booking.inventoryItems?.[0]?.inventory?.name || 'Item'}
                       </p>
                     </div>
                   </div>
@@ -851,7 +851,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Top Customers */}
-      <Card className="bg-white rounded-xl shadow-sm border-none">
+      <Card className="bg-white rounded-xl shadow-sm border-none mt-6">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
             <CardTitle>Top Customers</CardTitle>

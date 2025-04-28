@@ -98,35 +98,42 @@ export async function POST(
           stripeAccount: business.stripeAccountId,
         });
         
-        // Create a refund record in the database
-        await prisma.payment.create({
-          data: {
-            amount: -refundAmount, // Negative amount for refund
-            currency: "USD",
-            status: "COMPLETED",
-            type: "REFUND",
-            stripePaymentId: refundResult.id,
-            refundAmount: refundAmount,
-            refundReason: reason || "Customer cancellation",
-            bookingId: booking.id,
-            businessId: booking.businessId,
-            metadata: {
-              originalPaymentId: paymentToRefund.id,
-              refundPercentage: refundPercentage,
-              isFullRefund: fullRefund,
-              isWithin24Hours: isWithin24Hours,
-            },
-            paidAt: new Date(),
-          },
-        });
+        // Determine the updates for the original payment record
+        const originalAmount = Number(paymentToRefund.amount);
+        // Note: refundAmount might be less than original due to cancellation policy
+        const isFullRefund = refundAmount === originalAmount;
         
-        // Update the original payment status
+        // Use "REFUNDED" for full refunds, keep original status (e.g., "COMPLETED") for partial
+        const newStatus = isFullRefund ? "REFUNDED" : paymentToRefund.status;
+        // Ensure the new amount reflects the remaining value or negative full refund
+        const newAmount = isFullRefund ? -originalAmount : originalAmount - refundAmount;
+        
+        // Metadata update: preserve existing metadata and add refund info
+        const existingMetadata = paymentToRefund.metadata && typeof paymentToRefund.metadata === 'object' 
+                               ? paymentToRefund.metadata 
+                               : {};
+        const refundMetadata = {
+          ...existingMetadata,
+          stripeRefundId: refundResult.id,
+          refundReason: reason || "Customer cancellation",
+          isFullRefund: isFullRefund, // Whether the *actual* refunded amount equalled original
+          requestedFullRefundOverride: fullRefund, // Whether user explicitly requested full refund
+          originalPaymentAmount: originalAmount,
+          refundedAmount: refundAmount,
+          refundPercentage: refundPercentage,
+          isWithin24Hours: isWithin24Hours,
+        };
+        
+        // Update the original payment record instead of creating a new one
         await prisma.payment.update({
           where: { id: paymentToRefund.id },
           data: {
-            status: "REFUNDED",
+            status: newStatus,
+            amount: newAmount, 
             refundAmount: refundAmount,
             refundReason: reason || "Customer cancellation",
+            metadata: refundMetadata,
+            updatedAt: new Date(),
           },
         });
         
@@ -138,6 +145,11 @@ export async function POST(
         };
       }
       
+      // Delete associated booking items
+      await prisma.bookingItem.deleteMany({
+        where: { bookingId: bookingId },
+      });
+
       // Update the booking status
       const updatedBooking = await prisma.booking.update({
         where: { id: bookingId },

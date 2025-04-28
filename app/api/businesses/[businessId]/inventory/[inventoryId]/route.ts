@@ -68,11 +68,11 @@ export async function PATCH(
             return { error: "Inventory item not found" };
           }
 
-          // Handle image updates if provided
-          let imageUrls = currentInventory.images;
-          let primaryImageUrl = currentInventory.primaryImage;
+          // Initialize variables for final image state
+          let finalImageUrls: string[] = currentInventory.images;
+          let finalPrimaryImageUrl: string | null = currentInventory.primaryImage;
 
-          // Handle removed images if specified
+          // 1. Handle removed images (delete from storage)
           if (validatedData.removedImages && validatedData.removedImages.length > 0) {
             // Delete images from UploadThing
             for (const imageUrl of validatedData.removedImages) {
@@ -88,57 +88,62 @@ export async function PATCH(
                 // Continue with the update even if image deletion fails
               }
             }
-
-            // Remove the deleted images from the imageUrls array
-            imageUrls = currentInventory.images.filter(
-              (url) => !validatedData.removedImages?.includes(url)
-            );
-
-            // If the primary image was deleted, update it
-            if (
-              primaryImageUrl &&
-              validatedData.removedImages.includes(primaryImageUrl)
-            ) {
-              primaryImageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
-            }
+            // Note: We don't modify finalImageUrls based on removedImages here.
+            // The final list comes solely from validatedData.images.
           }
 
-          // Handle new images if provided
+          // 2. Determine the final image state from the request payload
           if (validatedData.images) {
-            const newImageUrls = validatedData.images.map((img) => img.url);
-            
-            // Combine existing images (minus removed ones) with new images
-            imageUrls = [...imageUrls, ...newImageUrls];
-            
-            // Update primary image if specified
+            // Use the provided images array as the definitive list
+            finalImageUrls = validatedData.images.map((img) => img.url);
+
+            // Find the primary image specified in the payload
             const primaryImage = validatedData.images.find((img) => img.isPrimary);
             if (primaryImage) {
-              primaryImageUrl = primaryImage.url;
-            } else if (!primaryImageUrl && newImageUrls.length > 0) {
-              // If no primary image exists and we have new images, use the first new one
-              primaryImageUrl = newImageUrls[0];
+              finalPrimaryImageUrl = primaryImage.url;
+            } else if (finalImageUrls.length > 0) {
+              // If no primary is explicitly set, default to the first image in the final list
+              finalPrimaryImageUrl = finalImageUrls[0];
+            } else {
+              // If the final list is empty, there's no primary image
+              finalPrimaryImageUrl = null;
             }
+          } else {
+            // If no 'images' array is provided in the PATCH, keep the existing ones
+            // (minus any potentially removed ones if only `removedImages` was sent,
+            // although the current frontend always sends `images`).
+            // To be safe, let's filter based on removedImages if images array is missing.
+            if (validatedData.removedImages && validatedData.removedImages.length > 0) {
+                 finalImageUrls = currentInventory.images.filter(
+                    (url) => !validatedData.removedImages?.includes(url)
+                 );
+                 if (finalPrimaryImageUrl && validatedData.removedImages.includes(finalPrimaryImageUrl)) {
+                    finalPrimaryImageUrl = finalImageUrls.length > 0 ? finalImageUrls[0] : null;
+                 }
+            }
+            // If neither images nor removedImages is provided, finalImageUrls and finalPrimaryImageUrl
+            // remain as they were fetched from currentInventory.
           }
 
-          // Update the inventory item
+          // Update the inventory item in the database
           const updatedInventory = await prisma.inventory.update({
             where: { id: inventoryId },
             data: {
-              name: validatedData.name,
-              description: validatedData.description,
-              dimensions: validatedData.dimensions,
-              capacity: validatedData.capacity,
-              price: validatedData.price,
-              setupTime: validatedData.setupTime,
-              teardownTime: validatedData.teardownTime,
-              images: imageUrls,
-              primaryImage: primaryImageUrl,
-              status: validatedData.status,
-              minimumSpace: validatedData.minimumSpace,
-              weightLimit: validatedData.weightLimit,
-              ageRange: validatedData.ageRange,
-              weatherRestrictions: validatedData.weatherRestrictions,
-              quantity: validatedData.quantity,
+              name: validatedData.name ?? currentInventory.name,
+              description: validatedData.description ?? currentInventory.description,
+              dimensions: validatedData.dimensions ?? currentInventory.dimensions,
+              capacity: validatedData.capacity ?? currentInventory.capacity,
+              price: validatedData.price ?? currentInventory.price,
+              setupTime: validatedData.setupTime ?? currentInventory.setupTime,
+              teardownTime: validatedData.teardownTime ?? currentInventory.teardownTime,
+              status: validatedData.status ?? currentInventory.status,
+              minimumSpace: validatedData.minimumSpace ?? currentInventory.minimumSpace,
+              weightLimit: validatedData.weightLimit ?? currentInventory.weightLimit,
+              ageRange: validatedData.ageRange ?? currentInventory.ageRange,
+              weatherRestrictions: validatedData.weatherRestrictions ?? currentInventory.weatherRestrictions,
+              quantity: validatedData.quantity ?? currentInventory.quantity,
+              images: finalImageUrls,
+              primaryImage: finalPrimaryImageUrl,
             },
           });
 
