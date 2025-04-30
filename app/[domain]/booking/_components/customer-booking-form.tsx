@@ -487,7 +487,7 @@ export function NewBookingForm({ businessId, themeName, colors }: NewBookingForm
 
   // Add a function to handle successful payment
   const handlePaymentSuccess = async () => {
-    // Refresh the page to show the new booking
+  
     router.refresh();
     
     // Show success message
@@ -992,10 +992,10 @@ export function NewBookingForm({ businessId, themeName, colors }: NewBookingForm
             </CardContent>
           </Card>
 
-          {/* Payment Form - Rendered only when clientSecret is available */}
-          {clientSecret && pendingBookingData && businessData?.stripeConnectedAccountId ? (
+          {/* Payment Form - Rendered only when clientSecret is available and business has Stripe ID */}
+          {clientSecret && pendingBookingData && businessData?.stripeAccountId ? (
             <Elements
-              stripe={getStripeInstance(businessData.stripeConnectedAccountId)}
+              stripe={getStripeInstance(businessData.stripeAccountId)}
               options={{ clientSecret }} 
             >
               <PaymentForm
