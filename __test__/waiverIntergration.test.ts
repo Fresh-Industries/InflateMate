@@ -1,22 +1,16 @@
 import 'dotenv/config';
-import { sendToDocuSeal } from '../lib/docuseal';
+import { sendToDocuSeal } from '../lib/docuseal.server';
 import { sendSignatureEmail } from '../lib/sendEmail';
 import { testData } from './data/testData';
-import { generateWaiverPDF } from '../lib/generateWaiver';
-
 
 describe('End-to-end: generate sign URL and email waiver', () => {
   it('should create a sign URL and send it via email', async () => {
-    // Load the test waiver PDF fixture
-    const pdfBuffer = await generateWaiverPDF(testData);
-    console.log("pdfBuffer", pdfBuffer);
-
-    // 1) Generate signing URL
+    // 1) Generate signing URL using the new function signature
     const { url, documentId } = await sendToDocuSeal(
-      pdfBuffer,
-      "nikolas.manuel13@gmail.com",
-      'InflateMate',
-      'Nikolas Manuel'
+      testData.business,
+      testData.customer,
+      testData.booking,
+      testData.templateVersion
     );
 
     expect(typeof url).toBe('string');

@@ -5,8 +5,19 @@ import { prisma } from "@/lib/prisma";
 import { Stripe } from "stripe";
 import { createLocalDate, createLocalDateTime } from "@/lib/utils";
 import { sendSignatureEmail } from "@/lib/sendEmail";
-import { generateWaiverPDF } from "@/lib/generateWaiver";
-import { sendToDocuSeal } from "@/lib/docuseal";
+import { sendToDocuSeal } from "@/lib/docuseal.server";
+
+
+interface Booking {
+    id: string;
+    eventDate: string; // Ensure this is string
+    eventAddress: string;
+    eventCity: string;
+    eventState: string;
+    eventZipCode: string;
+    participantCount: number;
+    participantAge?: number;
+  }
 
 
 export async function POST(req: NextRequest) {
@@ -274,43 +285,44 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       throw paymentError;
     }
     
-   // Prepare data for PDF generation
-   const pdfData = {
-     customer: {
-       id: customer.id,
-       name: customer.name,
-       email: customer.email,
-       phone: customer.phone,
-     },
-     booking: {
-       id: booking.id,
-       eventDate: metadata.eventDate, 
-       eventAddress: metadata.eventAddress,
-       eventCity: metadata.eventCity,
-       eventState: metadata.eventState,
-       eventZipCode: metadata.eventZipCode,
-       participantCount: parseInt(metadata.participantCount) || 1,
-       participantAge: metadata.participantAge ? parseInt(metadata.participantAge) : undefined,
-     },
-     business: {
-       id: business?.id || '' ,
-       name: business?.name || '',
-       logo: business?.logo || null,
-       phone: business?.phone || null,
-       email: business?.email || null,
-     },
-     templateVersion: 'v1',
-   };
+    // Find the business object
+    if (!business) {
+      console.error(`Business not found for ID: ${metadata.businessId}`);
+      // Decide how to handle this - maybe throw an error or return early
+      throw new Error(`Business not found for ID: ${metadata.businessId}`);
+    }
 
-   // Log the data being passed to generateWaiverPDF
-   console.log("Data for PDF generation:", JSON.stringify(pdfData, null, 2));
+    // Ensure customer and booking objects are defined from the upserts/creates above
+    if (!customer || !booking) {
+        console.error("Customer or Booking object is missing after database operations.");
+        throw new Error("Failed to retrieve customer or booking after database operations.");
+    }
 
-   // Generate the waiver PDF
-   const pdfBuffer = await generateWaiverPDF(pdfData);
-    // Send the PDF to OpenSign to get a signing URL
-    const {url, documentId} = await sendToDocuSeal(pdfBuffer, customer.email, business?.name || '', customer.name || '');
-    console.log("OpenSign URL:", url);
-    console.log("OpenSign Document ID:", documentId);
+    // Send the data to DocuSeal to build HTML, create template, and get signing URL
+    const templateVersion = 'v1'; // Define or retrieve template version
+
+    // Construct the booking object expected by sendToDocuSeal/buildWaiverHtml
+    const docuSealBooking: Booking = {
+        id: booking.id, // Use ID from prisma result
+        eventDate: metadata.eventDate, // Use the original string date from metadata
+        eventAddress: booking.eventAddress,
+        eventCity: booking.eventCity,
+        eventState: booking.eventState,
+        eventZipCode: booking.eventZipCode,
+        participantCount: booking.participantCount,
+        participantAge: booking.participantAge ?? undefined, // Handle null
+    };
+
+
+
+    const { url, documentId } = await sendToDocuSeal(
+        business, // Pass the full business object
+        customer, // Pass the full customer object
+        docuSealBooking,  // Pass the correctly typed booking object
+        templateVersion
+    );
+    console.log("DocuSeal URL:", url);
+    console.log("DocuSeal Document ID:", documentId);
 
     // Create a new waiver record in the database
     await prisma.waiver.create({
@@ -336,7 +348,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     await sendSignatureEmail({
       from: `${business?.name} <onboarding@resend.dev>`,
       to: customer.email,
-      subject: 'Your Waiver is Ready for Signature',
+      subject: 'Your  Waiver is Ready for Signature',
       html: emailHtml,
     });
     console.log(`Waiver email sent to ${customer.email}`);
