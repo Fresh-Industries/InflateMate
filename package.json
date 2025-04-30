@@ -59,7 +59,7 @@
     "pdfkit": "^0.17.0",
     "react": "19.1.0",
     "react-big-calendar": "^1.18.0",
-    "react-day-picker": "^8.10.1",
+    "react-day-picker": "^9.6.7",
     "react-dom": "19.1.0",
     "react-google-autocomplete": "^2.7.4",
     "react-hook-form": "^7.54.2",
