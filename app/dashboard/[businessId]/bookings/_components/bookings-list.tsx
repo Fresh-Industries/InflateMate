@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { format, isPast, startOfDay } from "date-fns";
+import { isPast, startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { BookingsViewControls } from "./bookings-view-controls";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -14,7 +14,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { createLocalDate } from "@/lib/utils";
+import { dateOnlyUTC, utcToLocal } from "@/lib/utils";
 import { DateRange } from "react-day-picker";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -62,6 +62,7 @@ interface Booking {
   eventCity: string;
   eventState: string;
   eventZipCode: string;
+  eventTimeZone: string;
   specialInstructions?: string;
   refundAmount?: number;
   refundReason?: string;
@@ -248,7 +249,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
     if (!booking) return;
     
     const now = new Date();
-    const eventDate = createLocalDate(booking.eventDate);
+    const eventDate = dateOnlyUTC(booking.eventDate);
     const isWithin24HoursOfEvent = (eventDate.getTime() - now.getTime()) < (24 * 60 * 60 * 1000);
     
     setIsWithin24Hours(isWithin24HoursOfEvent);
@@ -335,7 +336,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
               <div>
                 <div className="font-medium">Event Date & Time</div>
                 <div className="text-sm text-muted-foreground">
-                  {format(new Date(booking.eventDate), "PPP")} ({format(new Date(booking.startTime), "p")} - {format(new Date(booking.endTime), "p")})
+                 {utcToLocal(new Date(booking.startTime), booking.eventTimeZone, 'MMM d, yyyy')} ({utcToLocal(new Date(booking.startTime), booking.eventTimeZone, "p")} - {utcToLocal(new Date(booking.endTime), booking.eventTimeZone, "p")})
                 </div>
               </div>
             </div>
@@ -427,6 +428,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   // Handler for selecting a booking (used by both list and calendar)
   const handleSelectBooking = (booking: Booking) => {
     setSelectedBooking(booking);
+    console.log("Selected booking:", booking);
     setIsViewSheetOpen(true);
   };
 
@@ -435,6 +437,8 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
     setCurrentCalendarDate(newDate);
     // Optional: Fetch data for the new month/view if necessary
   };
+
+  console.log("Selected booking:", selectedBooking);
 
   return (
     <div className="space-y-6">
@@ -533,11 +537,11 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                       <td className="py-4 px-4">
                         <div className="flex flex-col">
                           <span className="font-medium text-gray-900">
-                            {format(new Date(booking.eventDate), 'MMM d, yyyy')}
+                            {utcToLocal(new Date(booking.startTime), booking.eventTimeZone, 'MMM d, yyyy')}
                           </span>
                           <span className="text-sm text-gray-500">
-                            {format(new Date(booking.startTime), 'h:mm a')} - 
-                            {format(new Date(booking.endTime), 'h:mm a')}
+                            {utcToLocal(new Date(booking.startTime), booking.eventTimeZone, 'h:mm a')} -
+                            {utcToLocal(new Date(booking.endTime), booking.eventTimeZone, 'h:mm a')}
                           </span>
                           <span className="text-sm text-gray-500 flex items-center gap-1">
                             <MapPin className="h-3 w-3" />
@@ -661,7 +665,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         // We could add an explicit hidden class here too for robustness if needed: className="hidden md:block"
         <BookingsCalendarView 
           bookings={filteredAndSortedBookings}
-          onSelectBooking={handleSelectBooking}
+          onSelectBooking={(booking) => handleSelectBooking(booking as Booking)}
           currentDate={currentCalendarDate}
           onNavigateChange={handleNavigate}
         />

@@ -38,14 +38,12 @@ const getTypeEmoji = (type: string) => {
 // Client component for the inventory page with filtering functionality
 interface InventoryClientProps {
   inventoryItems: InventoryItem[];
-  domain: string;
   themeName: string;
   colors: ThemeColors;
 }
 
 export default function InventoryClient({ 
   inventoryItems, 
-  domain,
   themeName,
   colors
 }: InventoryClientProps) {
@@ -318,13 +316,18 @@ export default function InventoryClient({
                       <div className="text-2xl font-bold" style={{ color: colors.accent }}>
                         ${item.price}/day
                       </div>
-                      <Button asChild style={buttonStyle} className="font-bold hover:scale-105 transition-transform duration-300">
-                        <Link href={`/${domain}/booking?item=${item.id}`}>
-                          Book Now
+                      <div className="flex items-center gap-2">
+                        <Button asChild style={buttonStyle} className="font-bold hover:scale-105 transition-transform duration-300">
+                          <Link href={`/booking`}>
+                            Book Now
                         </Link>
                       </Button>
-                      
-
+                      <Button asChild style={buttonStyle} className="font-bold hover:scale-105 transition-transform duration-300">
+                        <Link href={`/inventory/${item.id}`}>
+                          Details
+                        </Link>
+                      </Button>
+                      </div>
                     </div>
                   </div>
                 </div>

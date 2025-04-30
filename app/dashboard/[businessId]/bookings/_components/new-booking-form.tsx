@@ -89,6 +89,7 @@ type BookingMetadata = {
   customerPhone: string;
   businessId: string;
   bookingId?: string;
+  eventTimeZone: string;
 };
 
 type SelectedItem = {
@@ -364,6 +365,9 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       
       if (isNaN(amount) || amount <= 0) throw new Error("Invalid total amount.");
 
+      // Get browser timezone
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       // Create an array of selected items with their details
       const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
         id: item.id,
@@ -394,6 +398,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         customerPhone: newBooking.customerPhone,
         businessId: businessId,
         bookingId: crypto.randomUUID(),
+        eventTimeZone: tz,
       };
       
 

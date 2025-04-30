@@ -3174,6 +3174,7 @@ export namespace Prisma {
     minAdvanceBooking: number | null
     maxAdvanceBooking: number | null
     minimumPurchase: number | null
+    timeZone: string | null
     userId: string | null
     stripeAccountId: string | null
     customDomain: string | null
@@ -3197,6 +3198,7 @@ export namespace Prisma {
     minAdvanceBooking: number | null
     maxAdvanceBooking: number | null
     minimumPurchase: number | null
+    timeZone: string | null
     userId: string | null
     stripeAccountId: string | null
     customDomain: string | null
@@ -3221,6 +3223,7 @@ export namespace Prisma {
     minAdvanceBooking: number
     maxAdvanceBooking: number
     minimumPurchase: number
+    timeZone: number
     userId: number
     stripeAccountId: number
     socialMedia: number
@@ -3260,6 +3263,7 @@ export namespace Prisma {
     minAdvanceBooking?: true
     maxAdvanceBooking?: true
     minimumPurchase?: true
+    timeZone?: true
     userId?: true
     stripeAccountId?: true
     customDomain?: true
@@ -3283,6 +3287,7 @@ export namespace Prisma {
     minAdvanceBooking?: true
     maxAdvanceBooking?: true
     minimumPurchase?: true
+    timeZone?: true
     userId?: true
     stripeAccountId?: true
     customDomain?: true
@@ -3307,6 +3312,7 @@ export namespace Prisma {
     minAdvanceBooking?: true
     maxAdvanceBooking?: true
     minimumPurchase?: true
+    timeZone?: true
     userId?: true
     stripeAccountId?: true
     socialMedia?: true
@@ -3420,6 +3426,7 @@ export namespace Prisma {
     minAdvanceBooking: number
     maxAdvanceBooking: number
     minimumPurchase: number
+    timeZone: string
     userId: string
     stripeAccountId: string | null
     socialMedia: JsonValue | null
@@ -3465,6 +3472,7 @@ export namespace Prisma {
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
     minimumPurchase?: boolean
+    timeZone?: boolean
     userId?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -3500,6 +3508,7 @@ export namespace Prisma {
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
     minimumPurchase?: boolean
+    timeZone?: boolean
     userId?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -3527,6 +3536,7 @@ export namespace Prisma {
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
     minimumPurchase?: boolean
+    timeZone?: boolean
     userId?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -3554,6 +3564,7 @@ export namespace Prisma {
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
     minimumPurchase?: boolean
+    timeZone?: boolean
     userId?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -3563,7 +3574,7 @@ export namespace Prisma {
     onboardingError?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "logo" | "createdAt" | "updatedAt" | "minAdvanceBooking" | "maxAdvanceBooking" | "minimumPurchase" | "userId" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "logo" | "createdAt" | "updatedAt" | "minAdvanceBooking" | "maxAdvanceBooking" | "minimumPurchase" | "timeZone" | "userId" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     bookings?: boolean | Business$bookingsArgs<ExtArgs>
     user?: boolean | UserDefaultArgs<ExtArgs>
@@ -3611,6 +3622,7 @@ export namespace Prisma {
       minAdvanceBooking: number
       maxAdvanceBooking: number
       minimumPurchase: number
+      timeZone: string
       userId: string
       stripeAccountId: string | null
       socialMedia: Prisma.JsonValue | null
@@ -4065,6 +4077,7 @@ export namespace Prisma {
     readonly minAdvanceBooking: FieldRef<"Business", 'Int'>
     readonly maxAdvanceBooking: FieldRef<"Business", 'Int'>
     readonly minimumPurchase: FieldRef<"Business", 'Float'>
+    readonly timeZone: FieldRef<"Business", 'String'>
     readonly userId: FieldRef<"Business", 'String'>
     readonly stripeAccountId: FieldRef<"Business", 'String'>
     readonly socialMedia: FieldRef<"Business", 'Json'>
@@ -7352,6 +7365,7 @@ export namespace Prisma {
     eventCity: string | null
     eventState: string | null
     eventZipCode: string | null
+    eventTimeZone: string | null
     participantAge: number | null
     participantCount: number | null
     createdAt: Date | null
@@ -7380,6 +7394,7 @@ export namespace Prisma {
     eventCity: string | null
     eventState: string | null
     eventZipCode: string | null
+    eventTimeZone: string | null
     participantAge: number | null
     participantCount: number | null
     createdAt: Date | null
@@ -7408,6 +7423,7 @@ export namespace Prisma {
     eventCity: number
     eventState: number
     eventZipCode: number
+    eventTimeZone: number
     participantAge: number
     participantCount: number
     createdAt: number
@@ -7458,6 +7474,7 @@ export namespace Prisma {
     eventCity?: true
     eventState?: true
     eventZipCode?: true
+    eventTimeZone?: true
     participantAge?: true
     participantCount?: true
     createdAt?: true
@@ -7486,6 +7503,7 @@ export namespace Prisma {
     eventCity?: true
     eventState?: true
     eventZipCode?: true
+    eventTimeZone?: true
     participantAge?: true
     participantCount?: true
     createdAt?: true
@@ -7514,6 +7532,7 @@ export namespace Prisma {
     eventCity?: true
     eventState?: true
     eventZipCode?: true
+    eventTimeZone?: true
     participantAge?: true
     participantCount?: true
     createdAt?: true
@@ -7629,6 +7648,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone: string
     participantAge: number | null
     participantCount: number
     createdAt: Date
@@ -7676,6 +7696,7 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
+    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
     createdAt?: boolean
@@ -7710,6 +7731,7 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
+    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
     createdAt?: boolean
@@ -7740,6 +7762,7 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
+    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
     createdAt?: boolean
@@ -7770,6 +7793,7 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
+    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
     createdAt?: boolean
@@ -7784,7 +7808,7 @@ export namespace Prisma {
     taxRate?: boolean
   }
 
-  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventDate" | "startTime" | "endTime" | "status" | "totalAmount" | "depositAmount" | "depositPaid" | "eventType" | "eventAddress" | "eventCity" | "eventState" | "eventZipCode" | "participantAge" | "participantCount" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "isCompleted" | "isCancelled" | "specialInstructions" | "subtotalAmount" | "taxAmount" | "taxRate", ExtArgs["result"]["booking"]>
+  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventDate" | "startTime" | "endTime" | "status" | "totalAmount" | "depositAmount" | "depositPaid" | "eventType" | "eventAddress" | "eventCity" | "eventState" | "eventZipCode" | "eventTimeZone" | "participantAge" | "participantCount" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "isCompleted" | "isCancelled" | "specialInstructions" | "subtotalAmount" | "taxAmount" | "taxRate", ExtArgs["result"]["booking"]>
   export type BookingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
@@ -7825,6 +7849,7 @@ export namespace Prisma {
       eventCity: string
       eventState: string
       eventZipCode: string
+      eventTimeZone: string
       participantAge: number | null
       participantCount: number
       createdAt: Date
@@ -8278,6 +8303,7 @@ export namespace Prisma {
     readonly eventCity: FieldRef<"Booking", 'String'>
     readonly eventState: FieldRef<"Booking", 'String'>
     readonly eventZipCode: FieldRef<"Booking", 'String'>
+    readonly eventTimeZone: FieldRef<"Booking", 'String'>
     readonly participantAge: FieldRef<"Booking", 'Int'>
     readonly participantCount: FieldRef<"Booking", 'Int'>
     readonly createdAt: FieldRef<"Booking", 'DateTime'>
@@ -14664,6 +14690,7 @@ export namespace Prisma {
     minAdvanceBooking: 'minAdvanceBooking',
     maxAdvanceBooking: 'maxAdvanceBooking',
     minimumPurchase: 'minimumPurchase',
+    timeZone: 'timeZone',
     userId: 'userId',
     stripeAccountId: 'stripeAccountId',
     socialMedia: 'socialMedia',
@@ -14740,6 +14767,7 @@ export namespace Prisma {
     eventCity: 'eventCity',
     eventState: 'eventState',
     eventZipCode: 'eventZipCode',
+    eventTimeZone: 'eventTimeZone',
     participantAge: 'participantAge',
     participantCount: 'participantCount',
     createdAt: 'createdAt',
@@ -15171,6 +15199,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFilter<"Business"> | number
     maxAdvanceBooking?: IntFilter<"Business"> | number
     minimumPurchase?: FloatFilter<"Business"> | number
+    timeZone?: StringFilter<"Business"> | string
     userId?: StringFilter<"Business"> | string
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     socialMedia?: JsonNullableFilter<"Business">
@@ -15205,6 +15234,7 @@ export namespace Prisma {
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
     minimumPurchase?: SortOrder
+    timeZone?: SortOrder
     userId?: SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     socialMedia?: SortOrderInput | SortOrder
@@ -15243,6 +15273,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFilter<"Business"> | number
     maxAdvanceBooking?: IntFilter<"Business"> | number
     minimumPurchase?: FloatFilter<"Business"> | number
+    timeZone?: StringFilter<"Business"> | string
     userId?: StringFilter<"Business"> | string
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     socialMedia?: JsonNullableFilter<"Business">
@@ -15276,6 +15307,7 @@ export namespace Prisma {
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
     minimumPurchase?: SortOrder
+    timeZone?: SortOrder
     userId?: SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     socialMedia?: SortOrderInput | SortOrder
@@ -15310,6 +15342,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
     maxAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
     minimumPurchase?: FloatWithAggregatesFilter<"Business"> | number
+    timeZone?: StringWithAggregatesFilter<"Business"> | string
     userId?: StringWithAggregatesFilter<"Business"> | string
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     socialMedia?: JsonNullableWithAggregatesFilter<"Business">
@@ -15600,6 +15633,7 @@ export namespace Prisma {
     eventCity?: StringFilter<"Booking"> | string
     eventState?: StringFilter<"Booking"> | string
     eventZipCode?: StringFilter<"Booking"> | string
+    eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
     participantCount?: IntFilter<"Booking"> | number
     createdAt?: DateTimeFilter<"Booking"> | Date | string
@@ -15633,6 +15667,7 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
+    eventTimeZone?: SortOrder
     participantAge?: SortOrderInput | SortOrder
     participantCount?: SortOrder
     createdAt?: SortOrder
@@ -15669,6 +15704,7 @@ export namespace Prisma {
     eventCity?: StringFilter<"Booking"> | string
     eventState?: StringFilter<"Booking"> | string
     eventZipCode?: StringFilter<"Booking"> | string
+    eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
     participantCount?: IntFilter<"Booking"> | number
     createdAt?: DateTimeFilter<"Booking"> | Date | string
@@ -15702,6 +15738,7 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
+    eventTimeZone?: SortOrder
     participantAge?: SortOrderInput | SortOrder
     participantCount?: SortOrder
     createdAt?: SortOrder
@@ -15738,6 +15775,7 @@ export namespace Prisma {
     eventCity?: StringWithAggregatesFilter<"Booking"> | string
     eventState?: StringWithAggregatesFilter<"Booking"> | string
     eventZipCode?: StringWithAggregatesFilter<"Booking"> | string
+    eventTimeZone?: StringWithAggregatesFilter<"Booking"> | string
     participantAge?: IntNullableWithAggregatesFilter<"Booking"> | number | null
     participantCount?: IntWithAggregatesFilter<"Booking"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
@@ -16299,6 +16337,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -16332,6 +16371,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -16365,6 +16405,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16398,6 +16439,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -16431,6 +16473,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -16457,6 +16500,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -16482,6 +16526,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -16823,6 +16868,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -16854,6 +16900,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -16885,6 +16932,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16916,6 +16964,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -16947,6 +16996,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -16975,6 +17025,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17001,6 +17052,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -17800,6 +17852,7 @@ export namespace Prisma {
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
     minimumPurchase?: SortOrder
+    timeZone?: SortOrder
     userId?: SortOrder
     stripeAccountId?: SortOrder
     socialMedia?: SortOrder
@@ -17831,6 +17884,7 @@ export namespace Prisma {
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
     minimumPurchase?: SortOrder
+    timeZone?: SortOrder
     userId?: SortOrder
     stripeAccountId?: SortOrder
     customDomain?: SortOrder
@@ -17854,6 +17908,7 @@ export namespace Prisma {
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
     minimumPurchase?: SortOrder
+    timeZone?: SortOrder
     userId?: SortOrder
     stripeAccountId?: SortOrder
     customDomain?: SortOrder
@@ -18208,6 +18263,7 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
+    eventTimeZone?: SortOrder
     participantAge?: SortOrder
     participantCount?: SortOrder
     createdAt?: SortOrder
@@ -18246,6 +18302,7 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
+    eventTimeZone?: SortOrder
     participantAge?: SortOrder
     participantCount?: SortOrder
     createdAt?: SortOrder
@@ -18274,6 +18331,7 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
+    eventTimeZone?: SortOrder
     participantAge?: SortOrder
     participantCount?: SortOrder
     createdAt?: SortOrder
@@ -20075,6 +20133,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -20107,6 +20166,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -20168,6 +20228,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFilter<"Business"> | number
     maxAdvanceBooking?: IntFilter<"Business"> | number
     minimumPurchase?: FloatFilter<"Business"> | number
+    timeZone?: StringFilter<"Business"> | string
     userId?: StringFilter<"Business"> | string
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     socialMedia?: JsonNullableFilter<"Business">
@@ -20191,6 +20252,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -20221,6 +20283,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -20575,6 +20638,7 @@ export namespace Prisma {
     eventCity?: StringFilter<"Booking"> | string
     eventState?: StringFilter<"Booking"> | string
     eventZipCode?: StringFilter<"Booking"> | string
+    eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
     participantCount?: IntFilter<"Booking"> | number
     createdAt?: DateTimeFilter<"Booking"> | Date | string
@@ -20884,6 +20948,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -20916,6 +20981,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -20991,6 +21057,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21023,6 +21090,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -21052,6 +21120,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -21082,6 +21151,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -21159,6 +21229,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -21191,6 +21262,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -21271,6 +21343,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21303,6 +21376,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -21335,6 +21409,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -21367,6 +21442,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -21566,6 +21642,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -21598,6 +21675,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -21730,6 +21808,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -21760,6 +21839,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -21857,6 +21937,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21887,6 +21968,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -21974,6 +22056,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -22004,6 +22087,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -22042,6 +22126,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -22074,6 +22159,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22119,6 +22205,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22149,6 +22236,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22193,6 +22281,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22225,6 +22314,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22257,6 +22347,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -22289,6 +22380,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22337,6 +22429,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22369,6 +22462,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22401,6 +22495,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -22433,6 +22528,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22481,6 +22577,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22513,6 +22610,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22545,6 +22643,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -22577,6 +22676,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     userId: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22660,6 +22760,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -22690,6 +22791,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -22739,6 +22841,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22771,6 +22874,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -22866,6 +22970,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22896,6 +23001,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -22929,6 +23035,7 @@ export namespace Prisma {
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
     minimumPurchase?: number
+    timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: string | null
@@ -22954,6 +23061,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -22986,6 +23094,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23018,6 +23127,7 @@ export namespace Prisma {
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
     minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
     customDomain?: NullableStringFieldUpdateOperationsInput | string | null
@@ -23040,6 +23150,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -23168,6 +23279,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23198,6 +23310,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23228,6 +23341,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23592,6 +23706,7 @@ export namespace Prisma {
     eventCity: string
     eventState: string
     eventZipCode: string
+    eventTimeZone?: string
     participantAge?: number | null
     participantCount: number
     createdAt?: Date | string
@@ -23631,6 +23746,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23661,6 +23777,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23691,6 +23808,7 @@ export namespace Prisma {
     eventCity?: StringFieldUpdateOperationsInput | string
     eventState?: StringFieldUpdateOperationsInput | string
     eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string

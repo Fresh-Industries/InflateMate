@@ -3,7 +3,7 @@ import { stripe } from "@/lib/stripe-server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
 import { Stripe } from "stripe";
-import { createLocalDate, createLocalDateTime } from "@/lib/utils";
+import { dateOnlyUTC, localToUTC } from "@/lib/utils";
 import { sendSignatureEmail } from "@/lib/sendEmail";
 import { sendToDocuSeal } from "@/lib/docuseal.server";
 
@@ -177,14 +177,27 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       console.log("Raw date/time values from metadata:", {
         eventDate: metadata.eventDate,
         startTime: metadata.startTime,
-        endTime: metadata.endTime
+        endTime: metadata.endTime,
+        eventTimeZone: metadata.eventTimeZone, // Log the incoming timezone
       });
       
-      // New – now treating these as local time values
-      const startDateTime = createLocalDateTime(metadata.eventDate, metadata.startTime);
-      const endDateTime = createLocalDateTime(metadata.eventDate, metadata.endTime);
-      const eventDate = createLocalDate(metadata.eventDate);
+      // Determine the timezone to use
+      // Use metadata timezone, fallback to business timezone, or default if business is null
+      const tz = metadata.eventTimeZone ?? business?.timeZone ?? 'America/Chicago'; 
+      console.log(`Using timezone: ${tz}`);
+
+      // Use new utility functions for date/time conversion
+      const eventDate = dateOnlyUTC(metadata.eventDate);
+      const startUTC  = localToUTC(metadata.eventDate, metadata.startTime, tz);
+      const endUTC    = localToUTC(metadata.eventDate, metadata.endTime,   tz);
       
+      // Log the converted UTC times
+      console.log("Converted UTC times:", {
+        eventDate: eventDate.toISOString(),
+        startUTC: startUTC.toISOString(),
+        endUTC: endUTC.toISOString(),
+      });
+
       const subtotalAmount = parseFloat(metadata.subtotalAmount || '0') || 0;
       const taxAmount = parseFloat(metadata.taxAmount || '0') || 0;
       const taxRate = parseFloat(metadata.taxRate || '10') || 10;
@@ -222,9 +235,10 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
       const bookingData = {
         id: metadata.bookingId || '',
-        eventDate: eventDate,
-        startTime: startDateTime,
-        endTime: endDateTime,
+        eventDate: eventDate, // Use the date-only UTC Date object
+        startTime: startUTC,  // Use the converted UTC start time
+        endTime: endUTC,    // Use the converted UTC end time
+        eventTimeZone: tz,    // Persist the timezone used
         status: 'CONFIRMED' as const,
         totalAmount: paymentIntent.amount / 100,
         subtotalAmount: subtotalAmount,

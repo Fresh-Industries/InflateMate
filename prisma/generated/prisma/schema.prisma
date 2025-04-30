@@ -44,9 +44,10 @@ model Business {
   updatedAt DateTime @updatedAt
 
   // Booking settings
-  minAdvanceBooking Int   @default(24)
-  maxAdvanceBooking Int   @default(90)
-  minimumPurchase   Float @default(0) // New field for minimum booking amount
+  minAdvanceBooking Int    @default(24)
+  maxAdvanceBooking Int    @default(90)
+  minimumPurchase   Float  @default(0) // New field for minimum booking amount
+  timeZone          String @default("America/Chicago")
 
   // Relationships & integrations
   userId          String
@@ -129,9 +130,9 @@ model Customer {
 
 model Booking {
   id                  String        @id @default(cuid())
-  eventDate           DateTime
-  startTime           DateTime
-  endTime             DateTime
+  eventDate           DateTime      @db.Date
+  startTime           DateTime      @db.Timestamp(3)
+  endTime             DateTime      @db.Timestamp(3)
   status              BookingStatus @default(PENDING)
   totalAmount         Float
   depositAmount       Float?
@@ -141,6 +142,7 @@ model Booking {
   eventCity           String
   eventState          String
   eventZipCode        String
+  eventTimeZone       String        @default("America/Chicago")
   participantAge      Int?
   participantCount    Int
   createdAt           DateTime      @default(now())
