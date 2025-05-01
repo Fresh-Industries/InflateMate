@@ -7,6 +7,7 @@ import Stripe from "stripe";
 import { addDomainToVercel } from "@/lib/vercel";
 import { createCnameInCloudflare } from "@/lib/cloudflare";
 import { clerkClient } from "@clerk/nextjs/server";
+import { redirect } from "next/navigation";
 
 function generateSlug(name: string): string {
   return name
@@ -58,13 +59,23 @@ export async function POST(req: NextRequest) {
 
     const user = await prisma.user.findUnique({
       where: { clerkUserId: userId },
+       include: { business: { include: { organization: true } } }, // Include related business and org
     });
-
-    console.log(user);
 
     if (!user) {
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
+
+    // Ensure clerkUserId exists before proceeding
+    if (!user.clerkUserId) {
+      console.error("User found in DB but missing clerkUserId:", user.id);
+      return NextResponse.json({ message: "User identifier mismatch" }, { status: 500 });
+    }
+
+     // Prevent re-onboarding if the user is already linked to a business/organization
+     if (user.business?.organization) {
+         redirect(`/dashboard/${user.business.id}`)
+     }
 
     const body = await req.json();
     const validatedData = businessSchema.parse(body);
@@ -174,20 +185,25 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    const org = (await clerkClient()).organizations.createOrganization({
-      name: validatedData.businessName,
-    })
+    // Get the Clerk client instance (asynchronous)
+    const client = await clerkClient();
 
-    const membership = await (await clerkClient()).organizations.createOrganizationMembership({
-      organizationId: (await org).id,
-      userId: user.id,
+    // Correctly await the organization creation
+    const org = await client.organizations.createOrganization({
+      name: validatedData.businessName,
+    });
+
+    // Correctly await the membership creation and use the correct Clerk userId
+    const membership = await client.organizations.createOrganizationMembership({
+      organizationId: org.id, // Use the ID from the resolved promise
+      userId: user.clerkUserId, // Use the clerkUserId from the fetched Prisma user record (now guaranteed non-null)
       role: "admin",
-    })
+    });
     
 
     await prisma.organization.create({
       data: {
-        clerkOrgId: (await org).id,
+        clerkOrgId: org.id,
         name: validatedData.businessName,
         businessId: business.id,
       },
@@ -195,7 +211,7 @@ export async function POST(req: NextRequest) {
 
     await prisma.membership.create({
       data: {
-        organizationId: (await org).id,
+        organizationId: org.id,
         userId: user.id,
         role: "ADMIN",
         clerkMembershipId: membership.id,
@@ -210,6 +226,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
+      orgId: org.id,
       business,
       stripeAccountId: account.id,
       subdomain: finalSubdomain,

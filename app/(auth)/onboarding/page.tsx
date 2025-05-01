@@ -3,7 +3,6 @@
 import { useState, useMemo, memo } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { useStripeConnect } from "@/hooks/use-stripe-connect";
+import { useAuth } from "@clerk/nextjs";
 
 const step1Schema = z.object({
   businessName: z.string().min(2, "Business name must be at least 2 characters"),
@@ -145,6 +145,7 @@ Step2.displayName = 'Step2';
 export default function OnboardingPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const { userId } = useAuth();
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -201,6 +202,16 @@ export default function OnboardingPage() {
 
       setIsLoading(true);
       setError(false);
+
+      if (!userId) { // Basic check if user is authenticated
+        toast({
+          title: "Error",
+          description: "You must be logged in to onboard.",
+          variant: "destructive",
+        });
+        router.replace('/sign-in'); // Redirect to login if not authenticated
+        return;
+    }
 
       const response = await fetch("/api/auth/onboarding", {
         method: "POST",
@@ -270,9 +281,10 @@ export default function OnboardingPage() {
                   onExit={() => {
                     toast({
                       title: "Success!",
-                      description: "Onboarding completed successfully.",
+                      description: "Business and Organization created. Choose your plan.",
                     });
-                    router.push(`/dashboard/${businessId}`);
+                    // Redirect to the pricing page
+                    router.replace('/pricing');
                   }}
                 />
               </ConnectComponentsProvider>

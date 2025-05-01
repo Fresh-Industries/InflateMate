@@ -13,26 +13,80 @@ import {
 import { CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-
+import { useOrganization, useAuth } from '@clerk/nextjs'; // Import useOrganization and useAuth
+import { useRouter } from 'next/navigation'; // Import useRouter
+import { useToast } from '@/hooks/use-toast';
 export default function PricingPage() {
   const [isLoading, setIsLoading] = useState(false);
+  const { organization } = useOrganization();
+  const { isLoaded, userId } = useAuth();
+  const router = useRouter();
+  const { toast } = useToast();
 
   const handleSubscribe = async () => {
-    try {
-      setIsLoading(true);
-      const res = await fetch('/api/stripe/checkout', { method: 'POST' });
-      const { url } = await res.json();
-      if (url) {
-        window.location.href = url;
-      } else {
-        console.error('No checkout URL returned');
-        setIsLoading(false);
-      }
-    } catch (err) {
-      console.error('Checkout error', err);
-      setIsLoading(false);
+    if (!isLoaded || !userId) {
+      router.replace('/sign-in');
+      return;
     }
-  };
+
+    if (!organization) {
+      // If no active organization in Clerk, the user needs to onboard first.
+      // This scenario might happen if a user somehow lands on /pricing after signup
+      // but before completing the onboarding form that creates the organization.
+       console.warn("Attempted subscribe without an active Clerk organization.");
+       router.replace('/onboarding'); // Redirect to onboarding
+       return;
+    }
+    
+    try {
+      
+      setIsLoading(true);
+      const res = await fetch('/api/stripe/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ organizationId: organization.id })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error('Checkout initiation failed:', data.error);
+        // Handle error, show a toast or error message
+        toast({
+          title: "Subscription Error",
+          description: data.error || "Failed to initiate subscription.",
+          variant: "destructive",
+        });
+        setIsLoading(false);
+        return; // Stop here if there's an error
+     }
+
+     // If the response includes a redirect URL (like if they are already subscribed)
+     if (data.url && data.url.startsWith('/')) {
+          router.push(data.url); // Navigate within your app
+     } else if (data.url) {
+       // If the response includes a Stripe checkout URL, redirect the user
+       window.location.href = data.url;
+     } else {
+       console.error('No checkout URL returned');
+       // Handle unexpected response
+       toast({
+         title: "Subscription Error",
+         description: "Failed to get checkout URL.",
+         variant: "destructive",
+       });
+       setIsLoading(false);
+     }
+   } catch (err) {
+     console.error('Checkout error', err);
+      toast({
+        title: "Subscription Error",
+        description: "An unexpected error occurred.",
+        variant: "destructive",
+      });
+     setIsLoading(false);
+   }
+ };
 
   return (
     <section className="py-24 bg-white">
