@@ -31,6 +31,7 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotificationsContext, NotificationsProvider } from "@/context/NotificationsContext";
 import dynamic from 'next/dynamic';
+import { OrganizationSwitcher } from "@clerk/nextjs";
 
 interface Business {
   id: string;
@@ -215,6 +216,7 @@ function DashboardUI({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
+      <OrganizationSwitcher appearance={{ elements: { avatarBox: "w-8 h-8" } }} hidePersonal={true}/>
     </div>
   );
 
@@ -370,6 +372,7 @@ function DashboardUI({ children }: { children: React.ReactNode }) {
                 {/* User Button */}
                 <div className="rounded-full transition-colors duration-200 hover:bg-blue-100/50 p-0.5">
                   <UserButton afterSignOutUrl="/" appearance={{ elements: { avatarBox: "w-8 h-8" } }} />
+          
                 </div>
               </div>
             </div>

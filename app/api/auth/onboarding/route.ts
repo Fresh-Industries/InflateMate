@@ -6,6 +6,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { addDomainToVercel } from "@/lib/vercel";
 import { createCnameInCloudflare } from "@/lib/cloudflare";
+import { clerkClient } from "@clerk/nextjs/server";
 
 function generateSlug(name: string): string {
   return name
@@ -171,6 +172,36 @@ export async function POST(req: NextRequest) {
         minimumPurchase: 100,
       },
     });
+
+    const org = (await clerkClient()).organizations.createOrganization({
+      name: validatedData.businessName,
+    })
+
+    const membership = await (await clerkClient()).organizations.createOrganizationMembership({
+      organizationId: (await org).id,
+      userId: user.id,
+      role: "admin",
+    })
+    
+
+    await prisma.organization.create({
+      data: {
+        clerkOrgId: (await org).id,
+        name: validatedData.businessName,
+        businessId: business.id,
+      },
+    });
+
+    await prisma.membership.create({
+      data: {
+        organizationId: (await org).id,
+        userId: user.id,
+        role: "ADMIN",
+        membershipId: membership.id,
+      },
+    });
+    
+    
 
     await prisma.user.update({
       where: { id: user.id },

@@ -9,16 +9,24 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  ADMIN
+  MEMBER
+}
+
 model User {
-  id          String     @id @default(cuid())
-  email       String?    @unique
+  id          String   @id @default(cuid())
+  email       String?  @unique
   name        String?
-  createdAt   DateTime   @default(now())
   image       String?
-  updatedAt   DateTime   @updatedAt
-  onboarded   Boolean    @default(false)
-  clerkUserId String?    @unique
+  onboarded   Boolean  @default(false)
+  clerkUserId String?  @unique
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
   businesses  Business[]
+  memberships Membership[]
 
   @@index([email])
 }
@@ -36,40 +44,80 @@ model Business {
   phone       String?
   email       String?
   serviceArea String[]
-  // Brand assets
-  logo        String?
 
-  // Core timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Brand assets
+  logo String?
 
   // Booking settings
   minAdvanceBooking Int    @default(24)
   maxAdvanceBooking Int    @default(90)
-  minimumPurchase   Float  @default(0) // New field for minimum booking amount
+  minimumPurchase   Float  @default(0)
   timeZone          String @default("America/Chicago")
 
-  // Relationships & integrations
-  userId          String
+  // Integrations
   stripeAccountId String?
 
   socialMedia     Json?
   customDomain    String?
   subdomain       String? @unique
   siteConfig      Json?
-  onboardingError String? // To store errors during Vercel/Cloudflare setup
+  onboardingError String?
+
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   // Relations
-  bookings     Booking[]
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  customers    Customer[]
+  userId       String
   inventory    Inventory[]
+  customers    Customer[]
+  bookings     Booking[]
   payments     Payment[]
   coupons      Coupon[]
   salesFunnels SalesFunnel[]
   waivers      Waiver[]
 
+  // One-to-one Organization link
+  organization   Organization?
+  organizationId String?       @unique
+
   @@index([userId])
+}
+
+model Organization {
+  id         String   @id @default(cuid())
+  clerkOrgId String   @unique // Clerk's org ID
+  name       String? // Optional mirror of org name
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  businessId String   @unique
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  memberships  Membership[]
+  subscription Subscription?
+
+  @@index([clerkOrgId])
+  @@index([businessId])
+}
+
+model Membership {
+  id           String   @id @default(cuid())
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @default(now())
+  membershipId String   @unique
+
+  // Relations
+  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId         String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId String
+
+  @@unique([userId, organizationId])
+  @@index([userId])
+  @@index([organizationId])
 }
 
 model Inventory {
@@ -89,12 +137,14 @@ model Inventory {
   weightLimit         Int
   ageRange            String
   weatherRestrictions String[]
-  businessId          String
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
   quantity            Int             @default(1)
-  bookingItems        BookingItem[]
-  business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+
+  bookingItems BookingItem[]
 
   @@index([businessId])
 }
@@ -113,14 +163,17 @@ model Customer {
   totalSpent   Float     @default(0)
   lastBooking  DateTime?
   createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  businessId   String
-  isLead       Boolean   @default(false)
-  status       String    @default("Active")
-  type         String    @default("Regular")
-  bookings     Booking[]
-  waivers      Waiver[]
-  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  updatedAt    DateTime  @default(now())
+
+  isLead Boolean @default(false)
+  status String  @default("Active")
+  type   String  @default("Regular")
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+
+  bookings Booking[]
+  waivers  Waiver[]
 
   @@unique([email, businessId])
   @@index([businessId])
@@ -145,21 +198,23 @@ model Booking {
   eventTimeZone       String        @default("America/Chicago")
   participantAge      Int?
   participantCount    Int
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  businessId          String
-  customerId          String
-  isCompleted         Boolean       @default(false)
-  isCancelled         Boolean       @default(false)
-  specialInstructions String?
   subtotalAmount      Float         @default(0)
   taxAmount           Float         @default(0)
   taxRate             Float         @default(0)
-  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer            Customer      @relation(fields: [customerId], references: [id])
-  inventoryItems      BookingItem[]
-  payments            Payment[]
-  waivers             Waiver[]
+  isCompleted         Boolean       @default(false)
+  isCancelled         Boolean       @default(false)
+  specialInstructions String?
+  createdAt           DateTime      @default(now())
+  updatedAt           DateTime      @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+  customerId String
+
+  inventoryItems BookingItem[]
+  payments       Payment[]
+  waivers        Waiver[]
 
   @@index([businessId])
   @@index([customerId])
@@ -168,13 +223,16 @@ model Booking {
 }
 
 model BookingItem {
-  id          String    @id @default(cuid())
-  bookingId   String
-  inventoryId String
-  quantity    Int       @default(1)
-  price       Float
+  id        String   @id @default(cuid())
+  quantity  Int      @default(1)
+  price     Float
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+
   booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId   String
   inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId String
 
   @@index([bookingId])
   @@index([inventoryId])
@@ -185,19 +243,17 @@ model Payment {
   amount             Decimal       @db.Decimal(10, 2)
   type               PaymentType
   status             PaymentStatus
-  createdAt          DateTime      @default(now())
-  bookingId          String
-  businessId         String
   currency           String        @default("USD")
   metadata           Json?
-  paidAt             DateTime?
-  refundAmount       Decimal?      @db.Decimal(10, 2)
-  refundReason       String?
   stripeClientSecret String?
   stripePaymentId    String?
-  updatedAt          DateTime      @updatedAt
-  booking            Booking       @relation(fields: [bookingId], references: [id])
-  business           Business      @relation(fields: [businessId], references: [id])
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @default(now())
+
+  booking    Booking  @relation(fields: [bookingId], references: [id])
+  bookingId  String
+  business   Business @relation(fields: [businessId], references: [id])
+  businessId String
 }
 
 model Coupon {
@@ -212,10 +268,11 @@ model Coupon {
   endDate        DateTime?
   isActive       Boolean      @default(true)
   minimumAmount  Float?
-  businessId     String
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  updatedAt      DateTime     @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
 
   @@unique([code, businessId])
   @@index([businessId])
@@ -230,30 +287,30 @@ model SalesFunnel {
   popupImage      String?
   formTitle       String
   thankYouMessage String
-  couponId        String?
-  businessId      String
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  updatedAt       DateTime @default(now())
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
 
   @@index([businessId])
 }
 
 model Waiver {
   id                 String       @id @default(cuid())
-  businessId         String
-  customerId         String
-  bookingId          String
   status             WaiverStatus @default(PENDING)
   templateVersion    String
   documentUrl        String
-  docuSealDocumentId String       @unique // DocuSeal document ID
+  docuSealDocumentId String       @unique
   createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  updatedAt          DateTime     @default(now())
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId  String
 
   @@index([businessId])
   @@index([customerId])
@@ -261,11 +318,32 @@ model Waiver {
   @@index([status])
 }
 
-enum WaiverStatus {
-  PENDING
-  SIGNED
-  REJECTED
-  EXPIRED
+model Subscription {
+  id                   String       @id @default(cuid())
+  stripeCustomerId     String       @unique
+  stripeSubscriptionId String       @unique
+  status               String
+  priceId              String
+  currentPeriodStart   DateTime
+  currentPeriodEnd     DateTime
+  cancelAtPeriodEnd    Boolean
+  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId       String       @unique
+  createdAt            DateTime     @default(now())
+  updatedAt            DateTime     @updatedAt
+
+  @@index([organizationId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+// Enums
+
+enum InventoryType {
+  BOUNCE_HOUSE
+  INFLATABLE
+  GAME
+  OTHER
 }
 
 enum InventoryStatus {
@@ -273,13 +351,6 @@ enum InventoryStatus {
   BOOKED
   MAINTENANCE
   RETIRED
-}
-
-enum InventoryType {
-  BOUNCE_HOUSE
-  INFLATABLE
-  GAME
-  OTHER
 }
 
 enum BookingStatus {
@@ -307,4 +378,11 @@ enum PaymentStatus {
 enum DiscountType {
   PERCENTAGE
   FIXED
+}
+
+enum WaiverStatus {
+  PENDING
+  SIGNED
+  REJECTED
+  EXPIRED
 }

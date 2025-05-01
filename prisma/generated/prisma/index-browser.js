@@ -124,11 +124,11 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
-  createdAt: 'createdAt',
   image: 'image',
-  updatedAt: 'updatedAt',
   onboarded: 'onboarded',
-  clerkUserId: 'clerkUserId'
+  clerkUserId: 'clerkUserId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.BusinessScalarFieldEnum = {
@@ -143,19 +143,39 @@ exports.Prisma.BusinessScalarFieldEnum = {
   email: 'email',
   serviceArea: 'serviceArea',
   logo: 'logo',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
   minAdvanceBooking: 'minAdvanceBooking',
   maxAdvanceBooking: 'maxAdvanceBooking',
   minimumPurchase: 'minimumPurchase',
   timeZone: 'timeZone',
-  userId: 'userId',
   stripeAccountId: 'stripeAccountId',
   socialMedia: 'socialMedia',
   customDomain: 'customDomain',
   subdomain: 'subdomain',
   siteConfig: 'siteConfig',
-  onboardingError: 'onboardingError'
+  onboardingError: 'onboardingError',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  userId: 'userId',
+  organizationId: 'organizationId'
+};
+
+exports.Prisma.OrganizationScalarFieldEnum = {
+  id: 'id',
+  clerkOrgId: 'clerkOrgId',
+  name: 'name',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId'
+};
+
+exports.Prisma.MembershipScalarFieldEnum = {
+  id: 'id',
+  role: 'role',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  membershipId: 'membershipId',
+  userId: 'userId',
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.InventoryScalarFieldEnum = {
@@ -175,10 +195,10 @@ exports.Prisma.InventoryScalarFieldEnum = {
   weightLimit: 'weightLimit',
   ageRange: 'ageRange',
   weatherRestrictions: 'weatherRestrictions',
-  businessId: 'businessId',
+  quantity: 'quantity',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  quantity: 'quantity'
+  businessId: 'businessId'
 };
 
 exports.Prisma.CustomerScalarFieldEnum = {
@@ -196,10 +216,10 @@ exports.Prisma.CustomerScalarFieldEnum = {
   lastBooking: 'lastBooking',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  businessId: 'businessId',
   isLead: 'isLead',
   status: 'status',
-  type: 'type'
+  type: 'type',
+  businessId: 'businessId'
 };
 
 exports.Prisma.BookingScalarFieldEnum = {
@@ -219,24 +239,26 @@ exports.Prisma.BookingScalarFieldEnum = {
   eventTimeZone: 'eventTimeZone',
   participantAge: 'participantAge',
   participantCount: 'participantCount',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  businessId: 'businessId',
-  customerId: 'customerId',
+  subtotalAmount: 'subtotalAmount',
+  taxAmount: 'taxAmount',
+  taxRate: 'taxRate',
   isCompleted: 'isCompleted',
   isCancelled: 'isCancelled',
   specialInstructions: 'specialInstructions',
-  subtotalAmount: 'subtotalAmount',
-  taxAmount: 'taxAmount',
-  taxRate: 'taxRate'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  customerId: 'customerId'
 };
 
 exports.Prisma.BookingItemScalarFieldEnum = {
   id: 'id',
-  bookingId: 'bookingId',
-  inventoryId: 'inventoryId',
   quantity: 'quantity',
-  price: 'price'
+  price: 'price',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  bookingId: 'bookingId',
+  inventoryId: 'inventoryId'
 };
 
 exports.Prisma.PaymentScalarFieldEnum = {
@@ -244,17 +266,14 @@ exports.Prisma.PaymentScalarFieldEnum = {
   amount: 'amount',
   type: 'type',
   status: 'status',
-  createdAt: 'createdAt',
-  bookingId: 'bookingId',
-  businessId: 'businessId',
   currency: 'currency',
   metadata: 'metadata',
-  paidAt: 'paidAt',
-  refundAmount: 'refundAmount',
-  refundReason: 'refundReason',
   stripeClientSecret: 'stripeClientSecret',
   stripePaymentId: 'stripePaymentId',
-  updatedAt: 'updatedAt'
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  bookingId: 'bookingId',
+  businessId: 'businessId'
 };
 
 exports.Prisma.CouponScalarFieldEnum = {
@@ -269,9 +288,9 @@ exports.Prisma.CouponScalarFieldEnum = {
   endDate: 'endDate',
   isActive: 'isActive',
   minimumAmount: 'minimumAmount',
-  businessId: 'businessId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  businessId: 'businessId'
 };
 
 exports.Prisma.SalesFunnelScalarFieldEnum = {
@@ -283,21 +302,34 @@ exports.Prisma.SalesFunnelScalarFieldEnum = {
   popupImage: 'popupImage',
   formTitle: 'formTitle',
   thankYouMessage: 'thankYouMessage',
-  couponId: 'couponId',
-  businessId: 'businessId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  businessId: 'businessId'
 };
 
 exports.Prisma.WaiverScalarFieldEnum = {
   id: 'id',
-  businessId: 'businessId',
-  customerId: 'customerId',
-  bookingId: 'bookingId',
   status: 'status',
   templateVersion: 'templateVersion',
   documentUrl: 'documentUrl',
   docuSealDocumentId: 'docuSealDocumentId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  bookingId: 'bookingId'
+};
+
+exports.Prisma.SubscriptionScalarFieldEnum = {
+  id: 'id',
+  stripeCustomerId: 'stripeCustomerId',
+  stripeSubscriptionId: 'stripeSubscriptionId',
+  status: 'status',
+  priceId: 'priceId',
+  currentPeriodStart: 'currentPeriodStart',
+  currentPeriodEnd: 'currentPeriodEnd',
+  cancelAtPeriodEnd: 'cancelAtPeriodEnd',
+  organizationId: 'organizationId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -327,6 +359,11 @@ exports.Prisma.JsonNullValueFilter = {
   JsonNull: Prisma.JsonNull,
   AnyNull: Prisma.AnyNull
 };
+exports.Role = exports.$Enums.Role = {
+  ADMIN: 'ADMIN',
+  MEMBER: 'MEMBER'
+};
+
 exports.InventoryType = exports.$Enums.InventoryType = {
   BOUNCE_HOUSE: 'BOUNCE_HOUSE',
   INFLATABLE: 'INFLATABLE',
@@ -378,6 +415,8 @@ exports.WaiverStatus = exports.$Enums.WaiverStatus = {
 exports.Prisma.ModelName = {
   User: 'User',
   Business: 'Business',
+  Organization: 'Organization',
+  Membership: 'Membership',
   Inventory: 'Inventory',
   Customer: 'Customer',
   Booking: 'Booking',
@@ -385,7 +424,8 @@ exports.Prisma.ModelName = {
   Payment: 'Payment',
   Coupon: 'Coupon',
   SalesFunnel: 'SalesFunnel',
-  Waiver: 'Waiver'
+  Waiver: 'Waiver',
+  Subscription: 'Subscription'
 };
 
 /**

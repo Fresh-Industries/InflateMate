@@ -6,7 +6,7 @@ import { Stripe } from "stripe";
 import { dateOnlyUTC, localToUTC } from "@/lib/utils";
 import { sendSignatureEmail } from "@/lib/sendEmail";
 import { sendToDocuSeal } from "@/lib/docuseal.server";
-
+import { syncStripeDataToDB } from "@/lib/stripe-sync";
 
 interface Booking {
     id: string;
@@ -78,6 +78,18 @@ export async function POST(req: NextRequest) {
         console.log(`Received ${event.type} event - no action needed`);
         break;
 
+      case 'customer.subscription.created':
+      case 'customer.subscription.updated':
+      case 'customer.subscription.deleted':
+      case 'customer.subscription.paused':
+      case 'customer.subscription.resumed':
+      case 'customer.subscription.trial_will_end':
+      case 'customer.subscription.pending_update_applied':
+      case 'customer.subscription.pending_update_expired':
+        const subscription = event.data.object as Stripe.Subscription;
+        await handleSubscription(subscription);
+        break;
+
       default:
         console.log(`Unhandled event type: ${event.type}`);
     }
@@ -90,6 +102,12 @@ export async function POST(req: NextRequest) {
   }
 }
 
+async function handleSubscription(subscription: Stripe.Subscription) {
+  console.log(`Subscription: ${subscription.id}`);
+
+  const customerId = subscription.customer as string;
+  await syncStripeDataToDB(customerId);
+}
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent succeeded: ${paymentIntent.id}`);
   

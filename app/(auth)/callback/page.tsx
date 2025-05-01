@@ -1,36 +1,40 @@
+// app/callback/page.tsx
 'use client';
-
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 export default function CallbackPage() {
+  const { isLoaded, userId } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    const checkBusinesses = async () => {
-      try {
-        const response = await fetch('/api/businesses');
-        if (!response.ok) {
-          router.push('/onboarding');
-          return;
-        }
-        
-        const businesses = await response.json();
-        
-        if (businesses?.length > 0) {
-          router.push(`/dashboard/${businesses[0].id}`);
-        } else {
-          router.push('/onboarding');
-        }
-      } catch (error) {
-        console.error('Error in callback:', error);
-        router.push('/onboarding');
+    if (!isLoaded) return;
+    if (!userId) {
+      router.replace('/sign-in');
+      return;
+    }
+
+    (async () => {
+      const res = await fetch('/api/me');
+      const { business, subscription } = await res.json();
+
+      // 1. unpaid → pricing
+      if (!subscription?.status || !['active','trialing'].includes(subscription.status)) {
+        router.replace('/pricing');
+        return;
       }
-    };
 
-    checkBusinesses();
-  }, [router]);
+      // 2. paid but not onboarded → onboarding
+      if (!business?.onboarded) {
+        router.replace('/onboarding');
+        return;
+      }
 
+      // 3. paid & onboarded → dashboard
+      router.replace(`/dashboard/${business.id}`);
+    })();
+  }, [isLoaded, userId, router]);
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-6">

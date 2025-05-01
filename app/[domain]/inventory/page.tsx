@@ -106,7 +106,6 @@ export default async function InventoryPage(props: { params: Promise<{ domain: s
     return (
       <InventoryClient 
         inventoryItems={inventoryItems} 
-        domain={domain} 
         themeName={themeName}
         colors={colors}
       />
