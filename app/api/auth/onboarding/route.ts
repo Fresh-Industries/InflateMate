@@ -185,25 +185,16 @@ export async function POST(req: NextRequest) {
       },
     });
 
-    // Get the Clerk client instance (asynchronous)
-    const client = await clerkClient();
-
     // Correctly await the organization creation
-    const org = await client.organizations.createOrganization({
+    const org = (await clerkClient()).organizations.createOrganization({
       name: validatedData.businessName,
-    });
-
-    // Correctly await the membership creation and use the correct Clerk userId
-    const membership = await client.organizations.createOrganizationMembership({
-      organizationId: org.id, // Use the ID from the resolved promise
-      userId: user.clerkUserId, // Use the clerkUserId from the fetched Prisma user record (now guaranteed non-null)
-      role: "admin",
+      createdBy: user.clerkUserId,
     });
     
 
     await prisma.organization.create({
       data: {
-        clerkOrgId: org.id,
+        clerkOrgId: (await org).id,
         name: validatedData.businessName,
         businessId: business.id,
       },
@@ -211,10 +202,10 @@ export async function POST(req: NextRequest) {
 
     await prisma.membership.create({
       data: {
-        organizationId: org.id,
+        organizationId: (await org).id,
         userId: user.id,
         role: "ADMIN",
-        clerkMembershipId: membership.id,
+        clerkMembershipId: (await org).createdBy || "",
       },
     });
     
@@ -226,7 +217,7 @@ export async function POST(req: NextRequest) {
     });
 
     return NextResponse.json({
-      orgId: org.id,
+      orgId: (await org).id,
       business,
       stripeAccountId: account.id,
       subdomain: finalSubdomain,
