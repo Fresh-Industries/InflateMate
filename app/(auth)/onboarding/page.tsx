@@ -149,6 +149,7 @@ export default function OnboardingPage() {
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
