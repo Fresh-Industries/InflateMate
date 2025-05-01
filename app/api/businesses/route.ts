@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
     // Check if user has any businesses
     const userWithBusinesses = await prisma.user.findUnique({
       where: { id: user.id },
-      include: { businesses: true }
+      include: { business: true }
     });
 
     if (!userWithBusinesses) {
@@ -56,12 +56,12 @@ export async function POST(req: NextRequest) {
         // Set default business settings
         minAdvanceBooking: 24,
         maxAdvanceBooking: 90,
-        
+        siteConfig: {},
       },
     });
 
     // Update user's onboarded status if this is their first business
-    if (!userWithBusinesses.businesses.length) {
+    if (!userWithBusinesses.business) {
       await prisma.user.update({
         where: { id: userWithBusinesses.id },
         data: { onboarded: true },
@@ -98,7 +98,7 @@ export async function GET() {
     console.log("user", user);
     const userWithBusinesses = await prisma.user.findUnique({
       where: { id: user.id  },
-      include: { businesses: true }
+      include: { business: true }
     });
 
     if (!userWithBusinesses) {
