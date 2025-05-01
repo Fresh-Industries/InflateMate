@@ -153,7 +153,7 @@ export async function POST(req: Request) {
         data: {
           userId: user.id,
           organizationId: org.id,
-          membershipId: clerkMembershipId,
+          clerkMembershipId: clerkMembershipId,
           role: prismaRoleString,
         },
       });

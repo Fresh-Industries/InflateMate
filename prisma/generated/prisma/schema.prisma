@@ -22,10 +22,10 @@ model User {
   onboarded   Boolean  @default(false)
   clerkUserId String?  @unique
   createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime @default(now())
 
-  // Relations
-  businesses  Business[]
+  business Business? @relation("UserBusiness")
+
   memberships Membership[]
 
   @@index([email])
@@ -43,7 +43,7 @@ model Business {
   zipCode     String?
   phone       String?
   email       String?
-  serviceArea String[]
+  serviceArea String[] @default([])
 
   // Brand assets
   logo String?
@@ -60,16 +60,18 @@ model Business {
   socialMedia     Json?
   customDomain    String?
   subdomain       String? @unique
-  siteConfig      Json?
+  siteConfig      Json
   onboardingError String?
 
   // Timestamps
   createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt DateTime @default(now())
 
-  // Relations
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId       String
+  // ← ONE-TO-ONE: each business belongs to exactly one user,
+  //     and userId is unique so no other business can point at that user
+  userId String @unique
+  user   User   @relation("UserBusiness", fields: [userId], references: [id], onDelete: Cascade)
+
   inventory    Inventory[]
   customers    Customer[]
   bookings     Booking[]
@@ -78,42 +80,40 @@ model Business {
   salesFunnels SalesFunnel[]
   waivers      Waiver[]
 
-  // One-to-one Organization link
-  organization   Organization?
-  organizationId String?       @unique
+  // One-to-one link to an Organization
+  organization Organization? @relation("BusinessOrg")
 
   @@index([userId])
 }
 
 model Organization {
   id         String   @id @default(cuid())
-  clerkOrgId String   @unique // Clerk's org ID
-  name       String? // Optional mirror of org name
+  clerkOrgId String   @unique
+  name       String?
   createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  updatedAt  DateTime @default(now())
 
   businessId String   @unique
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  business   Business @relation("BusinessOrg", fields: [businessId], references: [id], onDelete: Cascade)
 
   memberships  Membership[]
   subscription Subscription?
 
   @@index([clerkOrgId])
-  @@index([businessId])
 }
 
 model Membership {
-  id           String   @id @default(cuid())
-  role         Role
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @default(now())
-  membershipId String   @unique
+  id                String   @id @default(cuid())
+  role              Role
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @default(now())
+  clerkMembershipId String   @unique
 
-  // Relations
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  userId         String
-  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
   organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@unique([userId, organizationId])
   @@index([userId])
@@ -268,11 +268,10 @@ model Coupon {
   endDate        DateTime?
   isActive       Boolean      @default(true)
   minimumAmount  Float?
+  businessId     String
   createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @default(now())
-
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String
+  updatedAt      DateTime     @updatedAt
+  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@unique([code, businessId])
   @@index([businessId])
@@ -287,11 +286,11 @@ model SalesFunnel {
   popupImage      String?
   formTitle       String
   thankYouMessage String
+  couponId        String?
+  businessId      String
   createdAt       DateTime @default(now())
-  updatedAt       DateTime @default(now())
-
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String
+  updatedAt       DateTime @updatedAt
+  business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
 
   @@index([businessId])
 }

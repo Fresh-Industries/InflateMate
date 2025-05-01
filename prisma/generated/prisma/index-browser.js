@@ -155,8 +155,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   onboardingError: 'onboardingError',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  userId: 'userId',
-  organizationId: 'organizationId'
+  userId: 'userId'
 };
 
 exports.Prisma.OrganizationScalarFieldEnum = {
@@ -173,7 +172,7 @@ exports.Prisma.MembershipScalarFieldEnum = {
   role: 'role',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  membershipId: 'membershipId',
+  clerkMembershipId: 'clerkMembershipId',
   userId: 'userId',
   organizationId: 'organizationId'
 };
@@ -288,9 +287,9 @@ exports.Prisma.CouponScalarFieldEnum = {
   endDate: 'endDate',
   isActive: 'isActive',
   minimumAmount: 'minimumAmount',
+  businessId: 'businessId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  businessId: 'businessId'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.SalesFunnelScalarFieldEnum = {
@@ -302,9 +301,10 @@ exports.Prisma.SalesFunnelScalarFieldEnum = {
   popupImage: 'popupImage',
   formTitle: 'formTitle',
   thankYouMessage: 'thankYouMessage',
+  couponId: 'couponId',
+  businessId: 'businessId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  businessId: 'businessId'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.WaiverScalarFieldEnum = {
@@ -341,6 +341,10 @@ exports.Prisma.SortOrder = {
 
 exports.Prisma.NullableJsonNullValueInput = {
   DbNull: Prisma.DbNull,
+  JsonNull: Prisma.JsonNull
+};
+
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 

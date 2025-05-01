@@ -170,6 +170,7 @@ export async function POST(req: NextRequest) {
         minAdvanceBooking: 24,
         maxAdvanceBooking: 90,
         minimumPurchase: 100,
+        siteConfig: {},
       },
     });
 
@@ -197,7 +198,7 @@ export async function POST(req: NextRequest) {
         organizationId: (await org).id,
         userId: user.id,
         role: "ADMIN",
-        membershipId: membership.id,
+        clerkMembershipId: membership.id,
       },
     });
     

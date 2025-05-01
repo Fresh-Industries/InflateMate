@@ -63,8 +63,8 @@ export async function POST() {
     subscription_data: {
       metadata: { organizationId: organization.id, userId },
     },
-    success_url: `${process.env.NEXT_PUBLIC_APP_URL}/api/stripe/success`,
-    cancel_url: `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,
+    success_url: `${process.env.NEXT_PUBLIC_API_HOST}/api/stripe/success`,
+    cancel_url: `${process.env.NEXT_PUBLIC_API_HOST}/pricing`,
     payment_method_types: ['card'],
     metadata: { organizationId: organization.id, userId },
   });

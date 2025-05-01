@@ -130,8 +130,6 @@ export async function POST(
           data: {
             status: newStatus,
             amount: newAmount, 
-            refundAmount: refundAmount,
-            refundReason: reason || "Customer cancellation",
             metadata: refundMetadata,
             updatedAt: new Date(),
           },

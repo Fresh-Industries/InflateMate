@@ -99,6 +99,7 @@ export default async function DomainLayout({
         where: {
           businessId: business.id,
           isActive: true,
+          
         },
       });
     } catch (error) {

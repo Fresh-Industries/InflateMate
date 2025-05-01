@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { InventoryStatus, InventoryType } from "@prisma/client";
+import { InventoryStatus, InventoryType } from "../../../../../prisma/generated/prisma";
 
 // Base schema with common fields for all inventory types
 const baseInventorySchema = z.object({

@@ -115,8 +115,6 @@ export async function POST(
           data: {
             status: newStatus,
             amount: newAmount, // Update amount based on refund type
-            refundAmount: refundAmount, // Store the refunded amount explicitly
-            refundReason: reason || "Manual refund", // Store the reason explicitly
             metadata: newMetadata, // Store detailed refund info in metadata
             updatedAt: new Date(),
             // Keep original type and stripePaymentId (for the original charge)
