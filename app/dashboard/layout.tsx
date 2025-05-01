@@ -71,6 +71,7 @@ function DashboardUI({ children }: { children: React.ReactNode }) {
         if (!params.businessId) {
           const response = await fetch('/api/businesses');
           const businesses = await response.json();
+          console.log(businesses);
           
           if (businesses.length > 0) {
             router.push(`/dashboard/${businesses[0].id}`);

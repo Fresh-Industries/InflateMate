@@ -111,6 +111,7 @@ export async function GET() {
     const businesses = await prisma.business.findMany({
       where: { user: { id: userWithBusinesses.id } },
       include: {
+        organization: true,
         inventory: true,
         bookings: {
           where: {
