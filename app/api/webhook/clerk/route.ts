@@ -92,6 +92,26 @@ export async function POST(req: Request) {
         return NextResponse.json({ message: 'Missing required membership data' }, { status: 400 });
       }
 
+      if(role === "org:admin"){
+        const user = await prisma.user.findUnique({
+          where: { clerkUserId },
+        });
+
+        const membership = await prisma.membership.findUnique({
+          where: {
+            userId_organizationId: {
+              userId: user?.id || "",
+              organizationId: clerkOrgId,
+            },
+          },
+        });
+
+        if(membership){
+          console.log(`Membership already exists for user ${user?.id} in organization ${clerkOrgId}`);
+          return NextResponse.json({ message: 'Membership already exists' }, { status: 200 });
+        }
+      }
+
       // Find the user and organization in your database
       const user = await prisma.user.findUnique({
         where: { clerkUserId },
