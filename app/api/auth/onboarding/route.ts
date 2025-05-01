@@ -192,7 +192,7 @@ export async function POST(req: NextRequest) {
     });
     
 
-    await prisma.organization.create({
+   const localOrg = await prisma.organization.create({
       data: {
         clerkOrgId: (await org).id,
         name: validatedData.businessName,
@@ -202,7 +202,7 @@ export async function POST(req: NextRequest) {
 
     await prisma.membership.create({
       data: {
-        organizationId: (await org).id,
+        organizationId: localOrg.id,
         userId: user.id,
         role: "ADMIN",
         clerkMembershipId: (await org).createdBy || "",
