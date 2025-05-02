@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
 import { prisma } from "@/lib/prisma";
+import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
 
 // Define a schema for the expected payload
 const paymentIntentSchema = z.object({
@@ -35,15 +36,29 @@ export async function POST(
     if (!business || !business.stripeAccountId) {
       return NextResponse.json({ error: "Business not found or Stripe account not set up" }, { status: 404 });
     }
+    const stripeConnectedAccountId = business.stripeAccountId;
 
-    console.log("Creating PaymentIntent for connected account:", business.stripeAccountId);
+    console.log("Creating PaymentIntent for connected account:", stripeConnectedAccountId);
 
     try {
-      // Ensure all metadata values are strings
+      // Ensure all metadata values are strings for PaymentIntent
       const sanitizedMetadata: Record<string, string> = {};
       Object.entries(metadata).forEach(([key, value]) => {
         sanitizedMetadata[key] = typeof value === 'string' ? value : JSON.stringify(value);
       });
+
+      // Extract name and phone from metadata, providing defaults
+      const customerName = metadata.customerName as string || 'Customer';
+      const customerPhone = metadata.customerPhone as string || ''; 
+      
+      const stripeCustomerId = await findOrCreateStripeCustomer(
+          customerEmail,
+          customerName,
+          customerPhone,
+          businessId,
+          stripeConnectedAccountId
+      );
+      console.log(`Using Stripe Customer ID: ${stripeCustomerId}`);
       
       // Create a PaymentIntent on behalf of the connected account
       const paymentIntent = await stripe.paymentIntents.create(
@@ -53,9 +68,10 @@ export async function POST(
           payment_method_types: ["card"],
           receipt_email: customerEmail,
           metadata: sanitizedMetadata,
+          customer: stripeCustomerId,
         },
         {
-          stripeAccount: business.stripeAccountId,
+          stripeAccount: stripeConnectedAccountId,
         }
       );
 

@@ -78,6 +78,16 @@ export type Waiver = $Result.DefaultSelection<Prisma.$WaiverPayload>
  * 
  */
 export type Subscription = $Result.DefaultSelection<Prisma.$SubscriptionPayload>
+/**
+ * Model Invoice
+ * 
+ */
+export type Invoice = $Result.DefaultSelection<Prisma.$InvoicePayload>
+/**
+ * Model CustomerStripeAccount
+ * 
+ */
+export type CustomerStripeAccount = $Result.DefaultSelection<Prisma.$CustomerStripeAccountPayload>
 
 /**
  * Enums
@@ -103,6 +113,7 @@ export type InventoryType = (typeof InventoryType)[keyof typeof InventoryType]
 
 export const InventoryStatus: {
   AVAILABLE: 'AVAILABLE',
+  PENDING: 'PENDING',
   BOOKED: 'BOOKED',
   MAINTENANCE: 'MAINTENANCE',
   RETIRED: 'RETIRED'
@@ -159,6 +170,17 @@ export const WaiverStatus: {
 
 export type WaiverStatus = (typeof WaiverStatus)[keyof typeof WaiverStatus]
 
+
+export const InvoiceStatus: {
+  DRAFT: 'DRAFT',
+  OPEN: 'OPEN',
+  PAID: 'PAID',
+  VOID: 'VOID',
+  UNCOLLECTIBLE: 'UNCOLLECTIBLE'
+};
+
+export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus]
+
 }
 
 export type Role = $Enums.Role
@@ -192,6 +214,10 @@ export const DiscountType: typeof $Enums.DiscountType
 export type WaiverStatus = $Enums.WaiverStatus
 
 export const WaiverStatus: typeof $Enums.WaiverStatus
+
+export type InvoiceStatus = $Enums.InvoiceStatus
+
+export const InvoiceStatus: typeof $Enums.InvoiceStatus
 
 /**
  * ##  Prisma Client ʲˢ
@@ -447,6 +473,26 @@ export class PrismaClient<
     * ```
     */
   get subscription(): Prisma.SubscriptionDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.invoice`: Exposes CRUD operations for the **Invoice** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more Invoices
+    * const invoices = await prisma.invoice.findMany()
+    * ```
+    */
+  get invoice(): Prisma.InvoiceDelegate<ExtArgs, ClientOptions>;
+
+  /**
+   * `prisma.customerStripeAccount`: Exposes CRUD operations for the **CustomerStripeAccount** model.
+    * Example usage:
+    * ```ts
+    * // Fetch zero or more CustomerStripeAccounts
+    * const customerStripeAccounts = await prisma.customerStripeAccount.findMany()
+    * ```
+    */
+  get customerStripeAccount(): Prisma.CustomerStripeAccountDelegate<ExtArgs, ClientOptions>;
 }
 
 export namespace Prisma {
@@ -899,7 +945,9 @@ export namespace Prisma {
     Coupon: 'Coupon',
     SalesFunnel: 'SalesFunnel',
     Waiver: 'Waiver',
-    Subscription: 'Subscription'
+    Subscription: 'Subscription',
+    Invoice: 'Invoice',
+    CustomerStripeAccount: 'CustomerStripeAccount'
   };
 
   export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -918,7 +966,7 @@ export namespace Prisma {
       omit: GlobalOmitOptions
     }
     meta: {
-      modelProps: "user" | "business" | "organization" | "membership" | "inventory" | "customer" | "booking" | "bookingItem" | "payment" | "coupon" | "salesFunnel" | "waiver" | "subscription"
+      modelProps: "user" | "business" | "organization" | "membership" | "inventory" | "customer" | "booking" | "bookingItem" | "payment" | "coupon" | "salesFunnel" | "waiver" | "subscription" | "invoice" | "customerStripeAccount"
       txIsolationLevel: Prisma.TransactionIsolationLevel
     }
     model: {
@@ -1884,6 +1932,154 @@ export namespace Prisma {
           }
         }
       }
+      Invoice: {
+        payload: Prisma.$InvoicePayload<ExtArgs>
+        fields: Prisma.InvoiceFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.InvoiceFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.InvoiceFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          findFirst: {
+            args: Prisma.InvoiceFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.InvoiceFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          findMany: {
+            args: Prisma.InvoiceFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          create: {
+            args: Prisma.InvoiceCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          createMany: {
+            args: Prisma.InvoiceCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.InvoiceCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          delete: {
+            args: Prisma.InvoiceDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          update: {
+            args: Prisma.InvoiceUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          deleteMany: {
+            args: Prisma.InvoiceDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.InvoiceUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.InvoiceUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>[]
+          }
+          upsert: {
+            args: Prisma.InvoiceUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$InvoicePayload>
+          }
+          aggregate: {
+            args: Prisma.InvoiceAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateInvoice>
+          }
+          groupBy: {
+            args: Prisma.InvoiceGroupByArgs<ExtArgs>
+            result: $Utils.Optional<InvoiceGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.InvoiceCountArgs<ExtArgs>
+            result: $Utils.Optional<InvoiceCountAggregateOutputType> | number
+          }
+        }
+      }
+      CustomerStripeAccount: {
+        payload: Prisma.$CustomerStripeAccountPayload<ExtArgs>
+        fields: Prisma.CustomerStripeAccountFieldRefs
+        operations: {
+          findUnique: {
+            args: Prisma.CustomerStripeAccountFindUniqueArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload> | null
+          }
+          findUniqueOrThrow: {
+            args: Prisma.CustomerStripeAccountFindUniqueOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>
+          }
+          findFirst: {
+            args: Prisma.CustomerStripeAccountFindFirstArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload> | null
+          }
+          findFirstOrThrow: {
+            args: Prisma.CustomerStripeAccountFindFirstOrThrowArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>
+          }
+          findMany: {
+            args: Prisma.CustomerStripeAccountFindManyArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>[]
+          }
+          create: {
+            args: Prisma.CustomerStripeAccountCreateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>
+          }
+          createMany: {
+            args: Prisma.CustomerStripeAccountCreateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          createManyAndReturn: {
+            args: Prisma.CustomerStripeAccountCreateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>[]
+          }
+          delete: {
+            args: Prisma.CustomerStripeAccountDeleteArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>
+          }
+          update: {
+            args: Prisma.CustomerStripeAccountUpdateArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>
+          }
+          deleteMany: {
+            args: Prisma.CustomerStripeAccountDeleteManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateMany: {
+            args: Prisma.CustomerStripeAccountUpdateManyArgs<ExtArgs>
+            result: BatchPayload
+          }
+          updateManyAndReturn: {
+            args: Prisma.CustomerStripeAccountUpdateManyAndReturnArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>[]
+          }
+          upsert: {
+            args: Prisma.CustomerStripeAccountUpsertArgs<ExtArgs>
+            result: $Utils.PayloadToResult<Prisma.$CustomerStripeAccountPayload>
+          }
+          aggregate: {
+            args: Prisma.CustomerStripeAccountAggregateArgs<ExtArgs>
+            result: $Utils.Optional<AggregateCustomerStripeAccount>
+          }
+          groupBy: {
+            args: Prisma.CustomerStripeAccountGroupByArgs<ExtArgs>
+            result: $Utils.Optional<CustomerStripeAccountGroupByOutputType>[]
+          }
+          count: {
+            args: Prisma.CustomerStripeAccountCountArgs<ExtArgs>
+            result: $Utils.Optional<CustomerStripeAccountCountAggregateOutputType> | number
+          }
+        }
+      }
     }
   } & {
     other: {
@@ -1981,6 +2177,8 @@ export namespace Prisma {
     salesFunnel?: SalesFunnelOmit
     waiver?: WaiverOmit
     subscription?: SubscriptionOmit
+    invoice?: InvoiceOmit
+    customerStripeAccount?: CustomerStripeAccountOmit
   }
 
   /* Types for Logging */
@@ -2113,6 +2311,8 @@ export namespace Prisma {
     coupons: number
     salesFunnels: number
     waivers: number
+    invoices: number
+    customerStripeAccounts: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -2123,6 +2323,8 @@ export namespace Prisma {
     coupons?: boolean | BusinessCountOutputTypeCountCouponsArgs
     salesFunnels?: boolean | BusinessCountOutputTypeCountSalesFunnelsArgs
     waivers?: boolean | BusinessCountOutputTypeCountWaiversArgs
+    invoices?: boolean | BusinessCountOutputTypeCountInvoicesArgs
+    customerStripeAccounts?: boolean | BusinessCountOutputTypeCountCustomerStripeAccountsArgs
   }
 
   // Custom InputTypes
@@ -2183,6 +2385,20 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountWaiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: WaiverWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountCustomerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerStripeAccountWhereInput
   }
 
 
@@ -2255,11 +2471,15 @@ export namespace Prisma {
   export type CustomerCountOutputType = {
     bookings: number
     waivers: number
+    invoices: number
+    customerStripeAccounts: number
   }
 
   export type CustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     bookings?: boolean | CustomerCountOutputTypeCountBookingsArgs
     waivers?: boolean | CustomerCountOutputTypeCountWaiversArgs
+    invoices?: boolean | CustomerCountOutputTypeCountInvoicesArgs
+    customerStripeAccounts?: boolean | CustomerCountOutputTypeCountCustomerStripeAccountsArgs
   }
 
   // Custom InputTypes
@@ -2285,6 +2505,20 @@ export namespace Prisma {
    */
   export type CustomerCountOutputTypeCountWaiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: WaiverWhereInput
+  }
+
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
+  }
+
+  /**
+   * CustomerCountOutputType without action
+   */
+  export type CustomerCountOutputTypeCountCustomerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerStripeAccountWhereInput
   }
 
 
@@ -3827,6 +4061,8 @@ export namespace Prisma {
     coupons?: boolean | Business$couponsArgs<ExtArgs>
     salesFunnels?: boolean | Business$salesFunnelsArgs<ExtArgs>
     waivers?: boolean | Business$waiversArgs<ExtArgs>
+    invoices?: boolean | Business$invoicesArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
     organization?: boolean | Business$organizationArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
@@ -3924,6 +4160,8 @@ export namespace Prisma {
     coupons?: boolean | Business$couponsArgs<ExtArgs>
     salesFunnels?: boolean | Business$salesFunnelsArgs<ExtArgs>
     waivers?: boolean | Business$waiversArgs<ExtArgs>
+    invoices?: boolean | Business$invoicesArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
     organization?: boolean | Business$organizationArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
@@ -3945,6 +4183,8 @@ export namespace Prisma {
       coupons: Prisma.$CouponPayload<ExtArgs>[]
       salesFunnels: Prisma.$SalesFunnelPayload<ExtArgs>[]
       waivers: Prisma.$WaiverPayload<ExtArgs>[]
+      invoices: Prisma.$InvoicePayload<ExtArgs>[]
+      customerStripeAccounts: Prisma.$CustomerStripeAccountPayload<ExtArgs>[]
       organization: Prisma.$OrganizationPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
@@ -4374,6 +4614,8 @@ export namespace Prisma {
     coupons<T extends Business$couponsArgs<ExtArgs> = {}>(args?: Subset<T, Business$couponsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     salesFunnels<T extends Business$salesFunnelsArgs<ExtArgs> = {}>(args?: Subset<T, Business$salesFunnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SalesFunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     waivers<T extends Business$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Business$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    invoices<T extends Business$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerStripeAccounts<T extends Business$customerStripeAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Business$customerStripeAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     organization<T extends Business$organizationArgs<ExtArgs> = {}>(args?: Subset<T, Business$organizationArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -4989,6 +5231,54 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: WaiverScalarFieldEnum | WaiverScalarFieldEnum[]
+  }
+
+  /**
+   * Business.invoices
+   */
+  export type Business$invoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    cursor?: InvoiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Business.customerStripeAccounts
+   */
+  export type Business$customerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    where?: CustomerStripeAccountWhereInput
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    cursor?: CustomerStripeAccountWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
   }
 
   /**
@@ -8883,6 +9173,8 @@ export namespace Prisma {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookings?: boolean | Customer$bookingsArgs<ExtArgs>
     waivers?: boolean | Customer$waiversArgs<ExtArgs>
+    invoices?: boolean | Customer$invoicesArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Customer$customerStripeAccountsArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -8956,6 +9248,8 @@ export namespace Prisma {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookings?: boolean | Customer$bookingsArgs<ExtArgs>
     waivers?: boolean | Customer$waiversArgs<ExtArgs>
+    invoices?: boolean | Customer$invoicesArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Customer$customerStripeAccountsArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8971,6 +9265,8 @@ export namespace Prisma {
       business: Prisma.$BusinessPayload<ExtArgs>
       bookings: Prisma.$BookingPayload<ExtArgs>[]
       waivers: Prisma.$WaiverPayload<ExtArgs>[]
+      invoices: Prisma.$InvoicePayload<ExtArgs>[]
+      customerStripeAccounts: Prisma.$CustomerStripeAccountPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9388,6 +9684,8 @@ export namespace Prisma {
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     bookings<T extends Customer$bookingsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     waivers<T extends Customer$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Customer$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    invoices<T extends Customer$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerStripeAccounts<T extends Customer$customerStripeAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$customerStripeAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9879,6 +10177,54 @@ export namespace Prisma {
   }
 
   /**
+   * Customer.invoices
+   */
+  export type Customer$invoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    cursor?: InvoiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Customer.customerStripeAccounts
+   */
+  export type Customer$customerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    where?: CustomerStripeAccountWhereInput
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    cursor?: CustomerStripeAccountWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
+  }
+
+  /**
    * Customer without action
    */
   export type CustomerDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10292,6 +10638,7 @@ export namespace Prisma {
     inventoryItems?: boolean | Booking$inventoryItemsArgs<ExtArgs>
     payments?: boolean | Booking$paymentsArgs<ExtArgs>
     waivers?: boolean | Booking$waiversArgs<ExtArgs>
+    invoice?: boolean | Booking$invoiceArgs<ExtArgs>
     _count?: boolean | BookingCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["booking"]>
 
@@ -10393,6 +10740,7 @@ export namespace Prisma {
     inventoryItems?: boolean | Booking$inventoryItemsArgs<ExtArgs>
     payments?: boolean | Booking$paymentsArgs<ExtArgs>
     waivers?: boolean | Booking$waiversArgs<ExtArgs>
+    invoice?: boolean | Booking$invoiceArgs<ExtArgs>
     _count?: boolean | BookingCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BookingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10412,6 +10760,7 @@ export namespace Prisma {
       inventoryItems: Prisma.$BookingItemPayload<ExtArgs>[]
       payments: Prisma.$PaymentPayload<ExtArgs>[]
       waivers: Prisma.$WaiverPayload<ExtArgs>[]
+      invoice: Prisma.$InvoicePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10839,6 +11188,7 @@ export namespace Prisma {
     inventoryItems<T extends Booking$inventoryItemsArgs<ExtArgs> = {}>(args?: Subset<T, Booking$inventoryItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends Booking$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Booking$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     waivers<T extends Booking$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Booking$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    invoice<T extends Booking$invoiceArgs<ExtArgs> = {}>(args?: Subset<T, Booking$invoiceArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11359,6 +11709,25 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: WaiverScalarFieldEnum | WaiverScalarFieldEnum[]
+  }
+
+  /**
+   * Booking.invoice
+   */
+  export type Booking$invoiceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    where?: InvoiceWhereInput
   }
 
   /**
@@ -18343,6 +18712,2392 @@ export namespace Prisma {
 
 
   /**
+   * Model Invoice
+   */
+
+  export type AggregateInvoice = {
+    _count: InvoiceCountAggregateOutputType | null
+    _avg: InvoiceAvgAggregateOutputType | null
+    _sum: InvoiceSumAggregateOutputType | null
+    _min: InvoiceMinAggregateOutputType | null
+    _max: InvoiceMaxAggregateOutputType | null
+  }
+
+  export type InvoiceAvgAggregateOutputType = {
+    amountDue: number | null
+    amountPaid: number | null
+    amountRemaining: number | null
+  }
+
+  export type InvoiceSumAggregateOutputType = {
+    amountDue: number | null
+    amountPaid: number | null
+    amountRemaining: number | null
+  }
+
+  export type InvoiceMinAggregateOutputType = {
+    id: string | null
+    stripeInvoiceId: string | null
+    status: $Enums.InvoiceStatus | null
+    amountDue: number | null
+    amountPaid: number | null
+    amountRemaining: number | null
+    currency: string | null
+    invoicePdfUrl: string | null
+    hostedInvoiceUrl: string | null
+    issuedAt: Date | null
+    paidAt: Date | null
+    voidedAt: Date | null
+    dueAt: Date | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    bookingId: string | null
+  }
+
+  export type InvoiceMaxAggregateOutputType = {
+    id: string | null
+    stripeInvoiceId: string | null
+    status: $Enums.InvoiceStatus | null
+    amountDue: number | null
+    amountPaid: number | null
+    amountRemaining: number | null
+    currency: string | null
+    invoicePdfUrl: string | null
+    hostedInvoiceUrl: string | null
+    issuedAt: Date | null
+    paidAt: Date | null
+    voidedAt: Date | null
+    dueAt: Date | null
+    expiresAt: Date | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    bookingId: string | null
+  }
+
+  export type InvoiceCountAggregateOutputType = {
+    id: number
+    stripeInvoiceId: number
+    status: number
+    amountDue: number
+    amountPaid: number
+    amountRemaining: number
+    currency: number
+    invoicePdfUrl: number
+    hostedInvoiceUrl: number
+    issuedAt: number
+    paidAt: number
+    voidedAt: number
+    dueAt: number
+    expiresAt: number
+    metadata: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    customerId: number
+    bookingId: number
+    _all: number
+  }
+
+
+  export type InvoiceAvgAggregateInputType = {
+    amountDue?: true
+    amountPaid?: true
+    amountRemaining?: true
+  }
+
+  export type InvoiceSumAggregateInputType = {
+    amountDue?: true
+    amountPaid?: true
+    amountRemaining?: true
+  }
+
+  export type InvoiceMinAggregateInputType = {
+    id?: true
+    stripeInvoiceId?: true
+    status?: true
+    amountDue?: true
+    amountPaid?: true
+    amountRemaining?: true
+    currency?: true
+    invoicePdfUrl?: true
+    hostedInvoiceUrl?: true
+    issuedAt?: true
+    paidAt?: true
+    voidedAt?: true
+    dueAt?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    bookingId?: true
+  }
+
+  export type InvoiceMaxAggregateInputType = {
+    id?: true
+    stripeInvoiceId?: true
+    status?: true
+    amountDue?: true
+    amountPaid?: true
+    amountRemaining?: true
+    currency?: true
+    invoicePdfUrl?: true
+    hostedInvoiceUrl?: true
+    issuedAt?: true
+    paidAt?: true
+    voidedAt?: true
+    dueAt?: true
+    expiresAt?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    bookingId?: true
+  }
+
+  export type InvoiceCountAggregateInputType = {
+    id?: true
+    stripeInvoiceId?: true
+    status?: true
+    amountDue?: true
+    amountPaid?: true
+    amountRemaining?: true
+    currency?: true
+    invoicePdfUrl?: true
+    hostedInvoiceUrl?: true
+    issuedAt?: true
+    paidAt?: true
+    voidedAt?: true
+    dueAt?: true
+    expiresAt?: true
+    metadata?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    bookingId?: true
+    _all?: true
+  }
+
+  export type InvoiceAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Invoice to aggregate.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned Invoices
+    **/
+    _count?: true | InvoiceCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to average
+    **/
+    _avg?: InvoiceAvgAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to sum
+    **/
+    _sum?: InvoiceSumAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: InvoiceMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: InvoiceMaxAggregateInputType
+  }
+
+  export type GetInvoiceAggregateType<T extends InvoiceAggregateArgs> = {
+        [P in keyof T & keyof AggregateInvoice]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateInvoice[P]>
+      : GetScalarType<T[P], AggregateInvoice[P]>
+  }
+
+
+
+
+  export type InvoiceGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithAggregationInput | InvoiceOrderByWithAggregationInput[]
+    by: InvoiceScalarFieldEnum[] | InvoiceScalarFieldEnum
+    having?: InvoiceScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: InvoiceCountAggregateInputType | true
+    _avg?: InvoiceAvgAggregateInputType
+    _sum?: InvoiceSumAggregateInputType
+    _min?: InvoiceMinAggregateInputType
+    _max?: InvoiceMaxAggregateInputType
+  }
+
+  export type InvoiceGroupByOutputType = {
+    id: string
+    stripeInvoiceId: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid: number
+    amountRemaining: number
+    currency: string
+    invoicePdfUrl: string | null
+    hostedInvoiceUrl: string | null
+    issuedAt: Date | null
+    paidAt: Date | null
+    voidedAt: Date | null
+    dueAt: Date | null
+    expiresAt: Date | null
+    metadata: JsonValue | null
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    customerId: string
+    bookingId: string
+    _count: InvoiceCountAggregateOutputType | null
+    _avg: InvoiceAvgAggregateOutputType | null
+    _sum: InvoiceSumAggregateOutputType | null
+    _min: InvoiceMinAggregateOutputType | null
+    _max: InvoiceMaxAggregateOutputType | null
+  }
+
+  type GetInvoiceGroupByPayload<T extends InvoiceGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<InvoiceGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof InvoiceGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], InvoiceGroupByOutputType[P]>
+            : GetScalarType<T[P], InvoiceGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type InvoiceSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stripeInvoiceId?: boolean
+    status?: boolean
+    amountDue?: boolean
+    amountPaid?: boolean
+    amountRemaining?: boolean
+    currency?: boolean
+    invoicePdfUrl?: boolean
+    hostedInvoiceUrl?: boolean
+    issuedAt?: boolean
+    paidAt?: boolean
+    voidedAt?: boolean
+    dueAt?: boolean
+    expiresAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    bookingId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stripeInvoiceId?: boolean
+    status?: boolean
+    amountDue?: boolean
+    amountPaid?: boolean
+    amountRemaining?: boolean
+    currency?: boolean
+    invoicePdfUrl?: boolean
+    hostedInvoiceUrl?: boolean
+    issuedAt?: boolean
+    paidAt?: boolean
+    voidedAt?: boolean
+    dueAt?: boolean
+    expiresAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    bookingId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stripeInvoiceId?: boolean
+    status?: boolean
+    amountDue?: boolean
+    amountPaid?: boolean
+    amountRemaining?: boolean
+    currency?: boolean
+    invoicePdfUrl?: boolean
+    hostedInvoiceUrl?: boolean
+    issuedAt?: boolean
+    paidAt?: boolean
+    voidedAt?: boolean
+    dueAt?: boolean
+    expiresAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    bookingId?: boolean
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["invoice"]>
+
+  export type InvoiceSelectScalar = {
+    id?: boolean
+    stripeInvoiceId?: boolean
+    status?: boolean
+    amountDue?: boolean
+    amountPaid?: boolean
+    amountRemaining?: boolean
+    currency?: boolean
+    invoicePdfUrl?: boolean
+    hostedInvoiceUrl?: boolean
+    issuedAt?: boolean
+    paidAt?: boolean
+    voidedAt?: boolean
+    dueAt?: boolean
+    expiresAt?: boolean
+    metadata?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    bookingId?: boolean
+  }
+
+  export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeInvoiceId" | "status" | "amountDue" | "amountPaid" | "amountRemaining" | "currency" | "invoicePdfUrl" | "hostedInvoiceUrl" | "issuedAt" | "paidAt" | "voidedAt" | "dueAt" | "expiresAt" | "metadata" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "bookingId", ExtArgs["result"]["invoice"]>
+  export type InvoiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
+  }
+  export type InvoiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
+  }
+  export type InvoiceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
+  }
+
+  export type $InvoicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "Invoice"
+    objects: {
+      business: Prisma.$BusinessPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs>
+      booking: Prisma.$BookingPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      stripeInvoiceId: string | null
+      status: $Enums.InvoiceStatus
+      amountDue: number
+      amountPaid: number
+      amountRemaining: number
+      currency: string
+      invoicePdfUrl: string | null
+      hostedInvoiceUrl: string | null
+      issuedAt: Date | null
+      paidAt: Date | null
+      voidedAt: Date | null
+      dueAt: Date | null
+      expiresAt: Date | null
+      metadata: Prisma.JsonValue | null
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      customerId: string
+      bookingId: string
+    }, ExtArgs["result"]["invoice"]>
+    composites: {}
+  }
+
+  type InvoiceGetPayload<S extends boolean | null | undefined | InvoiceDefaultArgs> = $Result.GetResult<Prisma.$InvoicePayload, S>
+
+  type InvoiceCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<InvoiceFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: InvoiceCountAggregateInputType | true
+    }
+
+  export interface InvoiceDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['Invoice'], meta: { name: 'Invoice' } }
+    /**
+     * Find zero or one Invoice that matches the filter.
+     * @param {InvoiceFindUniqueArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends InvoiceFindUniqueArgs>(args: SelectSubset<T, InvoiceFindUniqueArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one Invoice that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {InvoiceFindUniqueOrThrowArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends InvoiceFindUniqueOrThrowArgs>(args: SelectSubset<T, InvoiceFindUniqueOrThrowArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Invoice that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindFirstArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends InvoiceFindFirstArgs>(args?: SelectSubset<T, InvoiceFindFirstArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first Invoice that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindFirstOrThrowArgs} args - Arguments to find a Invoice
+     * @example
+     * // Get one Invoice
+     * const invoice = await prisma.invoice.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends InvoiceFindFirstOrThrowArgs>(args?: SelectSubset<T, InvoiceFindFirstOrThrowArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more Invoices that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all Invoices
+     * const invoices = await prisma.invoice.findMany()
+     * 
+     * // Get first 10 Invoices
+     * const invoices = await prisma.invoice.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends InvoiceFindManyArgs>(args?: SelectSubset<T, InvoiceFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a Invoice.
+     * @param {InvoiceCreateArgs} args - Arguments to create a Invoice.
+     * @example
+     * // Create one Invoice
+     * const Invoice = await prisma.invoice.create({
+     *   data: {
+     *     // ... data to create a Invoice
+     *   }
+     * })
+     * 
+     */
+    create<T extends InvoiceCreateArgs>(args: SelectSubset<T, InvoiceCreateArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many Invoices.
+     * @param {InvoiceCreateManyArgs} args - Arguments to create many Invoices.
+     * @example
+     * // Create many Invoices
+     * const invoice = await prisma.invoice.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends InvoiceCreateManyArgs>(args?: SelectSubset<T, InvoiceCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many Invoices and returns the data saved in the database.
+     * @param {InvoiceCreateManyAndReturnArgs} args - Arguments to create many Invoices.
+     * @example
+     * // Create many Invoices
+     * const invoice = await prisma.invoice.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many Invoices and only return the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends InvoiceCreateManyAndReturnArgs>(args?: SelectSubset<T, InvoiceCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a Invoice.
+     * @param {InvoiceDeleteArgs} args - Arguments to delete one Invoice.
+     * @example
+     * // Delete one Invoice
+     * const Invoice = await prisma.invoice.delete({
+     *   where: {
+     *     // ... filter to delete one Invoice
+     *   }
+     * })
+     * 
+     */
+    delete<T extends InvoiceDeleteArgs>(args: SelectSubset<T, InvoiceDeleteArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one Invoice.
+     * @param {InvoiceUpdateArgs} args - Arguments to update one Invoice.
+     * @example
+     * // Update one Invoice
+     * const invoice = await prisma.invoice.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends InvoiceUpdateArgs>(args: SelectSubset<T, InvoiceUpdateArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more Invoices.
+     * @param {InvoiceDeleteManyArgs} args - Arguments to filter Invoices to delete.
+     * @example
+     * // Delete a few Invoices
+     * const { count } = await prisma.invoice.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends InvoiceDeleteManyArgs>(args?: SelectSubset<T, InvoiceDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Invoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many Invoices
+     * const invoice = await prisma.invoice.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends InvoiceUpdateManyArgs>(args: SelectSubset<T, InvoiceUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more Invoices and returns the data updated in the database.
+     * @param {InvoiceUpdateManyAndReturnArgs} args - Arguments to update many Invoices.
+     * @example
+     * // Update many Invoices
+     * const invoice = await prisma.invoice.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more Invoices and only return the `id`
+     * const invoiceWithIdOnly = await prisma.invoice.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends InvoiceUpdateManyAndReturnArgs>(args: SelectSubset<T, InvoiceUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one Invoice.
+     * @param {InvoiceUpsertArgs} args - Arguments to update or create a Invoice.
+     * @example
+     * // Update or create a Invoice
+     * const invoice = await prisma.invoice.upsert({
+     *   create: {
+     *     // ... data to create a Invoice
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the Invoice we want to update
+     *   }
+     * })
+     */
+    upsert<T extends InvoiceUpsertArgs>(args: SelectSubset<T, InvoiceUpsertArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of Invoices.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceCountArgs} args - Arguments to filter Invoices to count.
+     * @example
+     * // Count the number of Invoices
+     * const count = await prisma.invoice.count({
+     *   where: {
+     *     // ... the filter for the Invoices we want to count
+     *   }
+     * })
+    **/
+    count<T extends InvoiceCountArgs>(
+      args?: Subset<T, InvoiceCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], InvoiceCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a Invoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends InvoiceAggregateArgs>(args: Subset<T, InvoiceAggregateArgs>): Prisma.PrismaPromise<GetInvoiceAggregateType<T>>
+
+    /**
+     * Group by Invoice.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {InvoiceGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends InvoiceGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: InvoiceGroupByArgs['orderBy'] }
+        : { orderBy?: InvoiceGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, InvoiceGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetInvoiceGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the Invoice model
+   */
+  readonly fields: InvoiceFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for Invoice.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__InvoiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    booking<T extends BookingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BookingDefaultArgs<ExtArgs>>): Prisma__BookingClient<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the Invoice model
+   */
+  interface InvoiceFieldRefs {
+    readonly id: FieldRef<"Invoice", 'String'>
+    readonly stripeInvoiceId: FieldRef<"Invoice", 'String'>
+    readonly status: FieldRef<"Invoice", 'InvoiceStatus'>
+    readonly amountDue: FieldRef<"Invoice", 'Float'>
+    readonly amountPaid: FieldRef<"Invoice", 'Float'>
+    readonly amountRemaining: FieldRef<"Invoice", 'Float'>
+    readonly currency: FieldRef<"Invoice", 'String'>
+    readonly invoicePdfUrl: FieldRef<"Invoice", 'String'>
+    readonly hostedInvoiceUrl: FieldRef<"Invoice", 'String'>
+    readonly issuedAt: FieldRef<"Invoice", 'DateTime'>
+    readonly paidAt: FieldRef<"Invoice", 'DateTime'>
+    readonly voidedAt: FieldRef<"Invoice", 'DateTime'>
+    readonly dueAt: FieldRef<"Invoice", 'DateTime'>
+    readonly expiresAt: FieldRef<"Invoice", 'DateTime'>
+    readonly metadata: FieldRef<"Invoice", 'Json'>
+    readonly createdAt: FieldRef<"Invoice", 'DateTime'>
+    readonly updatedAt: FieldRef<"Invoice", 'DateTime'>
+    readonly businessId: FieldRef<"Invoice", 'String'>
+    readonly customerId: FieldRef<"Invoice", 'String'>
+    readonly bookingId: FieldRef<"Invoice", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * Invoice findUnique
+   */
+  export type InvoiceFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice findUniqueOrThrow
+   */
+  export type InvoiceFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice findFirst
+   */
+  export type InvoiceFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice findFirstOrThrow
+   */
+  export type InvoiceFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoice to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of Invoices.
+     */
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice findMany
+   */
+  export type InvoiceFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter, which Invoices to fetch.
+     */
+    where?: InvoiceWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of Invoices to fetch.
+     */
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing Invoices.
+     */
+    cursor?: InvoiceWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` Invoices from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` Invoices.
+     */
+    skip?: number
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
+   * Invoice create
+   */
+  export type InvoiceCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * The data needed to create a Invoice.
+     */
+    data: XOR<InvoiceCreateInput, InvoiceUncheckedCreateInput>
+  }
+
+  /**
+   * Invoice createMany
+   */
+  export type InvoiceCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many Invoices.
+     */
+    data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * Invoice createManyAndReturn
+   */
+  export type InvoiceCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to create many Invoices.
+     */
+    data: InvoiceCreateManyInput | InvoiceCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Invoice update
+   */
+  export type InvoiceUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * The data needed to update a Invoice.
+     */
+    data: XOR<InvoiceUpdateInput, InvoiceUncheckedUpdateInput>
+    /**
+     * Choose, which Invoice to update.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice updateMany
+   */
+  export type InvoiceUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update Invoices.
+     */
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Invoices to update
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * Invoice updateManyAndReturn
+   */
+  export type InvoiceUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * The data used to update Invoices.
+     */
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyInput>
+    /**
+     * Filter which Invoices to update
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * Invoice upsert
+   */
+  export type InvoiceUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * The filter to search for the Invoice to update in case it exists.
+     */
+    where: InvoiceWhereUniqueInput
+    /**
+     * In case the Invoice found by the `where` argument doesn't exist, create a new Invoice with this data.
+     */
+    create: XOR<InvoiceCreateInput, InvoiceUncheckedCreateInput>
+    /**
+     * In case the Invoice was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<InvoiceUpdateInput, InvoiceUncheckedUpdateInput>
+  }
+
+  /**
+   * Invoice delete
+   */
+  export type InvoiceDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    /**
+     * Filter which Invoice to delete.
+     */
+    where: InvoiceWhereUniqueInput
+  }
+
+  /**
+   * Invoice deleteMany
+   */
+  export type InvoiceDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which Invoices to delete
+     */
+    where?: InvoiceWhereInput
+    /**
+     * Limit how many Invoices to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * Invoice without action
+   */
+  export type InvoiceDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+  }
+
+
+  /**
+   * Model CustomerStripeAccount
+   */
+
+  export type AggregateCustomerStripeAccount = {
+    _count: CustomerStripeAccountCountAggregateOutputType | null
+    _min: CustomerStripeAccountMinAggregateOutputType | null
+    _max: CustomerStripeAccountMaxAggregateOutputType | null
+  }
+
+  export type CustomerStripeAccountMinAggregateOutputType = {
+    id: string | null
+    stripeCustomerId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    customerId: string | null
+    businessId: string | null
+  }
+
+  export type CustomerStripeAccountMaxAggregateOutputType = {
+    id: string | null
+    stripeCustomerId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    customerId: string | null
+    businessId: string | null
+  }
+
+  export type CustomerStripeAccountCountAggregateOutputType = {
+    id: number
+    stripeCustomerId: number
+    createdAt: number
+    updatedAt: number
+    customerId: number
+    businessId: number
+    _all: number
+  }
+
+
+  export type CustomerStripeAccountMinAggregateInputType = {
+    id?: true
+    stripeCustomerId?: true
+    createdAt?: true
+    updatedAt?: true
+    customerId?: true
+    businessId?: true
+  }
+
+  export type CustomerStripeAccountMaxAggregateInputType = {
+    id?: true
+    stripeCustomerId?: true
+    createdAt?: true
+    updatedAt?: true
+    customerId?: true
+    businessId?: true
+  }
+
+  export type CustomerStripeAccountCountAggregateInputType = {
+    id?: true
+    stripeCustomerId?: true
+    createdAt?: true
+    updatedAt?: true
+    customerId?: true
+    businessId?: true
+    _all?: true
+  }
+
+  export type CustomerStripeAccountAggregateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomerStripeAccount to aggregate.
+     */
+    where?: CustomerStripeAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerStripeAccounts to fetch.
+     */
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the start position
+     */
+    cursor?: CustomerStripeAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerStripeAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerStripeAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Count returned CustomerStripeAccounts
+    **/
+    _count?: true | CustomerStripeAccountCountAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the minimum value
+    **/
+    _min?: CustomerStripeAccountMinAggregateInputType
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/aggregations Aggregation Docs}
+     * 
+     * Select which fields to find the maximum value
+    **/
+    _max?: CustomerStripeAccountMaxAggregateInputType
+  }
+
+  export type GetCustomerStripeAccountAggregateType<T extends CustomerStripeAccountAggregateArgs> = {
+        [P in keyof T & keyof AggregateCustomerStripeAccount]: P extends '_count' | 'count'
+      ? T[P] extends true
+        ? number
+        : GetScalarType<T[P], AggregateCustomerStripeAccount[P]>
+      : GetScalarType<T[P], AggregateCustomerStripeAccount[P]>
+  }
+
+
+
+
+  export type CustomerStripeAccountGroupByArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerStripeAccountWhereInput
+    orderBy?: CustomerStripeAccountOrderByWithAggregationInput | CustomerStripeAccountOrderByWithAggregationInput[]
+    by: CustomerStripeAccountScalarFieldEnum[] | CustomerStripeAccountScalarFieldEnum
+    having?: CustomerStripeAccountScalarWhereWithAggregatesInput
+    take?: number
+    skip?: number
+    _count?: CustomerStripeAccountCountAggregateInputType | true
+    _min?: CustomerStripeAccountMinAggregateInputType
+    _max?: CustomerStripeAccountMaxAggregateInputType
+  }
+
+  export type CustomerStripeAccountGroupByOutputType = {
+    id: string
+    stripeCustomerId: string
+    createdAt: Date
+    updatedAt: Date
+    customerId: string
+    businessId: string
+    _count: CustomerStripeAccountCountAggregateOutputType | null
+    _min: CustomerStripeAccountMinAggregateOutputType | null
+    _max: CustomerStripeAccountMaxAggregateOutputType | null
+  }
+
+  type GetCustomerStripeAccountGroupByPayload<T extends CustomerStripeAccountGroupByArgs> = Prisma.PrismaPromise<
+    Array<
+      PickEnumerable<CustomerStripeAccountGroupByOutputType, T['by']> &
+        {
+          [P in ((keyof T) & (keyof CustomerStripeAccountGroupByOutputType))]: P extends '_count'
+            ? T[P] extends boolean
+              ? number
+              : GetScalarType<T[P], CustomerStripeAccountGroupByOutputType[P]>
+            : GetScalarType<T[P], CustomerStripeAccountGroupByOutputType[P]>
+        }
+      >
+    >
+
+
+  export type CustomerStripeAccountSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stripeCustomerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    customerId?: boolean
+    businessId?: boolean
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["customerStripeAccount"]>
+
+  export type CustomerStripeAccountSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stripeCustomerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    customerId?: boolean
+    businessId?: boolean
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["customerStripeAccount"]>
+
+  export type CustomerStripeAccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
+    id?: boolean
+    stripeCustomerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    customerId?: boolean
+    businessId?: boolean
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }, ExtArgs["result"]["customerStripeAccount"]>
+
+  export type CustomerStripeAccountSelectScalar = {
+    id?: boolean
+    stripeCustomerId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    customerId?: boolean
+    businessId?: boolean
+  }
+
+  export type CustomerStripeAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeCustomerId" | "createdAt" | "updatedAt" | "customerId" | "businessId", ExtArgs["result"]["customerStripeAccount"]>
+  export type CustomerStripeAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type CustomerStripeAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+  export type CustomerStripeAccountIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+  }
+
+  export type $CustomerStripeAccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    name: "CustomerStripeAccount"
+    objects: {
+      customer: Prisma.$CustomerPayload<ExtArgs>
+      business: Prisma.$BusinessPayload<ExtArgs>
+    }
+    scalars: $Extensions.GetPayloadResult<{
+      id: string
+      stripeCustomerId: string
+      createdAt: Date
+      updatedAt: Date
+      customerId: string
+      businessId: string
+    }, ExtArgs["result"]["customerStripeAccount"]>
+    composites: {}
+  }
+
+  type CustomerStripeAccountGetPayload<S extends boolean | null | undefined | CustomerStripeAccountDefaultArgs> = $Result.GetResult<Prisma.$CustomerStripeAccountPayload, S>
+
+  type CustomerStripeAccountCountArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> =
+    Omit<CustomerStripeAccountFindManyArgs, 'select' | 'include' | 'distinct' | 'omit'> & {
+      select?: CustomerStripeAccountCountAggregateInputType | true
+    }
+
+  export interface CustomerStripeAccountDelegate<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> {
+    [K: symbol]: { types: Prisma.TypeMap<ExtArgs>['model']['CustomerStripeAccount'], meta: { name: 'CustomerStripeAccount' } }
+    /**
+     * Find zero or one CustomerStripeAccount that matches the filter.
+     * @param {CustomerStripeAccountFindUniqueArgs} args - Arguments to find a CustomerStripeAccount
+     * @example
+     * // Get one CustomerStripeAccount
+     * const customerStripeAccount = await prisma.customerStripeAccount.findUnique({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUnique<T extends CustomerStripeAccountFindUniqueArgs>(args: SelectSubset<T, CustomerStripeAccountFindUniqueArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findUnique", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find one CustomerStripeAccount that matches the filter or throw an error with `error.code='P2025'`
+     * if no matches were found.
+     * @param {CustomerStripeAccountFindUniqueOrThrowArgs} args - Arguments to find a CustomerStripeAccount
+     * @example
+     * // Get one CustomerStripeAccount
+     * const customerStripeAccount = await prisma.customerStripeAccount.findUniqueOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findUniqueOrThrow<T extends CustomerStripeAccountFindUniqueOrThrowArgs>(args: SelectSubset<T, CustomerStripeAccountFindUniqueOrThrowArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CustomerStripeAccount that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerStripeAccountFindFirstArgs} args - Arguments to find a CustomerStripeAccount
+     * @example
+     * // Get one CustomerStripeAccount
+     * const customerStripeAccount = await prisma.customerStripeAccount.findFirst({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirst<T extends CustomerStripeAccountFindFirstArgs>(args?: SelectSubset<T, CustomerStripeAccountFindFirstArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findFirst", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find the first CustomerStripeAccount that matches the filter or
+     * throw `PrismaKnownClientError` with `P2025` code if no matches were found.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerStripeAccountFindFirstOrThrowArgs} args - Arguments to find a CustomerStripeAccount
+     * @example
+     * // Get one CustomerStripeAccount
+     * const customerStripeAccount = await prisma.customerStripeAccount.findFirstOrThrow({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     */
+    findFirstOrThrow<T extends CustomerStripeAccountFindFirstOrThrowArgs>(args?: SelectSubset<T, CustomerStripeAccountFindFirstOrThrowArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findFirstOrThrow", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Find zero or more CustomerStripeAccounts that matches the filter.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerStripeAccountFindManyArgs} args - Arguments to filter and select certain fields only.
+     * @example
+     * // Get all CustomerStripeAccounts
+     * const customerStripeAccounts = await prisma.customerStripeAccount.findMany()
+     * 
+     * // Get first 10 CustomerStripeAccounts
+     * const customerStripeAccounts = await prisma.customerStripeAccount.findMany({ take: 10 })
+     * 
+     * // Only select the `id`
+     * const customerStripeAccountWithIdOnly = await prisma.customerStripeAccount.findMany({ select: { id: true } })
+     * 
+     */
+    findMany<T extends CustomerStripeAccountFindManyArgs>(args?: SelectSubset<T, CustomerStripeAccountFindManyArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions>>
+
+    /**
+     * Create a CustomerStripeAccount.
+     * @param {CustomerStripeAccountCreateArgs} args - Arguments to create a CustomerStripeAccount.
+     * @example
+     * // Create one CustomerStripeAccount
+     * const CustomerStripeAccount = await prisma.customerStripeAccount.create({
+     *   data: {
+     *     // ... data to create a CustomerStripeAccount
+     *   }
+     * })
+     * 
+     */
+    create<T extends CustomerStripeAccountCreateArgs>(args: SelectSubset<T, CustomerStripeAccountCreateArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "create", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Create many CustomerStripeAccounts.
+     * @param {CustomerStripeAccountCreateManyArgs} args - Arguments to create many CustomerStripeAccounts.
+     * @example
+     * // Create many CustomerStripeAccounts
+     * const customerStripeAccount = await prisma.customerStripeAccount.createMany({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     *     
+     */
+    createMany<T extends CustomerStripeAccountCreateManyArgs>(args?: SelectSubset<T, CustomerStripeAccountCreateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Create many CustomerStripeAccounts and returns the data saved in the database.
+     * @param {CustomerStripeAccountCreateManyAndReturnArgs} args - Arguments to create many CustomerStripeAccounts.
+     * @example
+     * // Create many CustomerStripeAccounts
+     * const customerStripeAccount = await prisma.customerStripeAccount.createManyAndReturn({
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Create many CustomerStripeAccounts and only return the `id`
+     * const customerStripeAccountWithIdOnly = await prisma.customerStripeAccount.createManyAndReturn({
+     *   select: { id: true },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    createManyAndReturn<T extends CustomerStripeAccountCreateManyAndReturnArgs>(args?: SelectSubset<T, CustomerStripeAccountCreateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "createManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Delete a CustomerStripeAccount.
+     * @param {CustomerStripeAccountDeleteArgs} args - Arguments to delete one CustomerStripeAccount.
+     * @example
+     * // Delete one CustomerStripeAccount
+     * const CustomerStripeAccount = await prisma.customerStripeAccount.delete({
+     *   where: {
+     *     // ... filter to delete one CustomerStripeAccount
+     *   }
+     * })
+     * 
+     */
+    delete<T extends CustomerStripeAccountDeleteArgs>(args: SelectSubset<T, CustomerStripeAccountDeleteArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "delete", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Update one CustomerStripeAccount.
+     * @param {CustomerStripeAccountUpdateArgs} args - Arguments to update one CustomerStripeAccount.
+     * @example
+     * // Update one CustomerStripeAccount
+     * const customerStripeAccount = await prisma.customerStripeAccount.update({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    update<T extends CustomerStripeAccountUpdateArgs>(args: SelectSubset<T, CustomerStripeAccountUpdateArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "update", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+    /**
+     * Delete zero or more CustomerStripeAccounts.
+     * @param {CustomerStripeAccountDeleteManyArgs} args - Arguments to filter CustomerStripeAccounts to delete.
+     * @example
+     * // Delete a few CustomerStripeAccounts
+     * const { count } = await prisma.customerStripeAccount.deleteMany({
+     *   where: {
+     *     // ... provide filter here
+     *   }
+     * })
+     * 
+     */
+    deleteMany<T extends CustomerStripeAccountDeleteManyArgs>(args?: SelectSubset<T, CustomerStripeAccountDeleteManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CustomerStripeAccounts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerStripeAccountUpdateManyArgs} args - Arguments to update one or more rows.
+     * @example
+     * // Update many CustomerStripeAccounts
+     * const customerStripeAccount = await prisma.customerStripeAccount.updateMany({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: {
+     *     // ... provide data here
+     *   }
+     * })
+     * 
+     */
+    updateMany<T extends CustomerStripeAccountUpdateManyArgs>(args: SelectSubset<T, CustomerStripeAccountUpdateManyArgs<ExtArgs>>): Prisma.PrismaPromise<BatchPayload>
+
+    /**
+     * Update zero or more CustomerStripeAccounts and returns the data updated in the database.
+     * @param {CustomerStripeAccountUpdateManyAndReturnArgs} args - Arguments to update many CustomerStripeAccounts.
+     * @example
+     * // Update many CustomerStripeAccounts
+     * const customerStripeAccount = await prisma.customerStripeAccount.updateManyAndReturn({
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * 
+     * // Update zero or more CustomerStripeAccounts and only return the `id`
+     * const customerStripeAccountWithIdOnly = await prisma.customerStripeAccount.updateManyAndReturn({
+     *   select: { id: true },
+     *   where: {
+     *     // ... provide filter here
+     *   },
+     *   data: [
+     *     // ... provide data here
+     *   ]
+     * })
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * 
+     */
+    updateManyAndReturn<T extends CustomerStripeAccountUpdateManyAndReturnArgs>(args: SelectSubset<T, CustomerStripeAccountUpdateManyAndReturnArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "updateManyAndReturn", GlobalOmitOptions>>
+
+    /**
+     * Create or update one CustomerStripeAccount.
+     * @param {CustomerStripeAccountUpsertArgs} args - Arguments to update or create a CustomerStripeAccount.
+     * @example
+     * // Update or create a CustomerStripeAccount
+     * const customerStripeAccount = await prisma.customerStripeAccount.upsert({
+     *   create: {
+     *     // ... data to create a CustomerStripeAccount
+     *   },
+     *   update: {
+     *     // ... in case it already exists, update
+     *   },
+     *   where: {
+     *     // ... the filter for the CustomerStripeAccount we want to update
+     *   }
+     * })
+     */
+    upsert<T extends CustomerStripeAccountUpsertArgs>(args: SelectSubset<T, CustomerStripeAccountUpsertArgs<ExtArgs>>): Prisma__CustomerStripeAccountClient<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "upsert", GlobalOmitOptions>, never, ExtArgs, GlobalOmitOptions>
+
+
+    /**
+     * Count the number of CustomerStripeAccounts.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerStripeAccountCountArgs} args - Arguments to filter CustomerStripeAccounts to count.
+     * @example
+     * // Count the number of CustomerStripeAccounts
+     * const count = await prisma.customerStripeAccount.count({
+     *   where: {
+     *     // ... the filter for the CustomerStripeAccounts we want to count
+     *   }
+     * })
+    **/
+    count<T extends CustomerStripeAccountCountArgs>(
+      args?: Subset<T, CustomerStripeAccountCountArgs>,
+    ): Prisma.PrismaPromise<
+      T extends $Utils.Record<'select', any>
+        ? T['select'] extends true
+          ? number
+          : GetScalarType<T['select'], CustomerStripeAccountCountAggregateOutputType>
+        : number
+    >
+
+    /**
+     * Allows you to perform aggregations operations on a CustomerStripeAccount.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerStripeAccountAggregateArgs} args - Select which aggregations you would like to apply and on what fields.
+     * @example
+     * // Ordered by age ascending
+     * // Where email contains prisma.io
+     * // Limited to the 10 users
+     * const aggregations = await prisma.user.aggregate({
+     *   _avg: {
+     *     age: true,
+     *   },
+     *   where: {
+     *     email: {
+     *       contains: "prisma.io",
+     *     },
+     *   },
+     *   orderBy: {
+     *     age: "asc",
+     *   },
+     *   take: 10,
+     * })
+    **/
+    aggregate<T extends CustomerStripeAccountAggregateArgs>(args: Subset<T, CustomerStripeAccountAggregateArgs>): Prisma.PrismaPromise<GetCustomerStripeAccountAggregateType<T>>
+
+    /**
+     * Group by CustomerStripeAccount.
+     * Note, that providing `undefined` is treated as the value not being there.
+     * Read more here: https://pris.ly/d/null-undefined
+     * @param {CustomerStripeAccountGroupByArgs} args - Group by arguments.
+     * @example
+     * // Group by city, order by createdAt, get count
+     * const result = await prisma.user.groupBy({
+     *   by: ['city', 'createdAt'],
+     *   orderBy: {
+     *     createdAt: true
+     *   },
+     *   _count: {
+     *     _all: true
+     *   },
+     * })
+     * 
+    **/
+    groupBy<
+      T extends CustomerStripeAccountGroupByArgs,
+      HasSelectOrTake extends Or<
+        Extends<'skip', Keys<T>>,
+        Extends<'take', Keys<T>>
+      >,
+      OrderByArg extends True extends HasSelectOrTake
+        ? { orderBy: CustomerStripeAccountGroupByArgs['orderBy'] }
+        : { orderBy?: CustomerStripeAccountGroupByArgs['orderBy'] },
+      OrderFields extends ExcludeUnderscoreKeys<Keys<MaybeTupleToUnion<T['orderBy']>>>,
+      ByFields extends MaybeTupleToUnion<T['by']>,
+      ByValid extends Has<ByFields, OrderFields>,
+      HavingFields extends GetHavingFields<T['having']>,
+      HavingValid extends Has<ByFields, HavingFields>,
+      ByEmpty extends T['by'] extends never[] ? True : False,
+      InputErrors extends ByEmpty extends True
+      ? `Error: "by" must not be empty.`
+      : HavingValid extends False
+      ? {
+          [P in HavingFields]: P extends ByFields
+            ? never
+            : P extends string
+            ? `Error: Field "${P}" used in "having" needs to be provided in "by".`
+            : [
+                Error,
+                'Field ',
+                P,
+                ` in "having" needs to be provided in "by"`,
+              ]
+        }[HavingFields]
+      : 'take' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "take", you also need to provide "orderBy"'
+      : 'skip' extends Keys<T>
+      ? 'orderBy' extends Keys<T>
+        ? ByValid extends True
+          ? {}
+          : {
+              [P in OrderFields]: P extends ByFields
+                ? never
+                : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+            }[OrderFields]
+        : 'Error: If you provide "skip", you also need to provide "orderBy"'
+      : ByValid extends True
+      ? {}
+      : {
+          [P in OrderFields]: P extends ByFields
+            ? never
+            : `Error: Field "${P}" in "orderBy" needs to be provided in "by"`
+        }[OrderFields]
+    >(args: SubsetIntersection<T, CustomerStripeAccountGroupByArgs, OrderByArg> & InputErrors): {} extends InputErrors ? GetCustomerStripeAccountGroupByPayload<T> : Prisma.PrismaPromise<InputErrors>
+  /**
+   * Fields of the CustomerStripeAccount model
+   */
+  readonly fields: CustomerStripeAccountFieldRefs;
+  }
+
+  /**
+   * The delegate class that acts as a "Promise-like" for CustomerStripeAccount.
+   * Why is this prefixed with `Prisma__`?
+   * Because we want to prevent naming conflicts as mentioned in
+   * https://github.com/prisma/prisma-client-js/issues/707
+   */
+  export interface Prisma__CustomerStripeAccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
+    readonly [Symbol.toStringTag]: "PrismaPromise"
+    customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    /**
+     * Attaches callbacks for the resolution and/or rejection of the Promise.
+     * @param onfulfilled The callback to execute when the Promise is resolved.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of which ever callback is executed.
+     */
+    then<TResult1 = T, TResult2 = never>(onfulfilled?: ((value: T) => TResult1 | PromiseLike<TResult1>) | undefined | null, onrejected?: ((reason: any) => TResult2 | PromiseLike<TResult2>) | undefined | null): $Utils.JsPromise<TResult1 | TResult2>
+    /**
+     * Attaches a callback for only the rejection of the Promise.
+     * @param onrejected The callback to execute when the Promise is rejected.
+     * @returns A Promise for the completion of the callback.
+     */
+    catch<TResult = never>(onrejected?: ((reason: any) => TResult | PromiseLike<TResult>) | undefined | null): $Utils.JsPromise<T | TResult>
+    /**
+     * Attaches a callback that is invoked when the Promise is settled (fulfilled or rejected). The
+     * resolved value cannot be modified from the callback.
+     * @param onfinally The callback to execute when the Promise is settled (fulfilled or rejected).
+     * @returns A Promise for the completion of the callback.
+     */
+    finally(onfinally?: (() => void) | undefined | null): $Utils.JsPromise<T>
+  }
+
+
+
+
+  /**
+   * Fields of the CustomerStripeAccount model
+   */
+  interface CustomerStripeAccountFieldRefs {
+    readonly id: FieldRef<"CustomerStripeAccount", 'String'>
+    readonly stripeCustomerId: FieldRef<"CustomerStripeAccount", 'String'>
+    readonly createdAt: FieldRef<"CustomerStripeAccount", 'DateTime'>
+    readonly updatedAt: FieldRef<"CustomerStripeAccount", 'DateTime'>
+    readonly customerId: FieldRef<"CustomerStripeAccount", 'String'>
+    readonly businessId: FieldRef<"CustomerStripeAccount", 'String'>
+  }
+    
+
+  // Custom InputTypes
+  /**
+   * CustomerStripeAccount findUnique
+   */
+  export type CustomerStripeAccountFindUniqueArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerStripeAccount to fetch.
+     */
+    where: CustomerStripeAccountWhereUniqueInput
+  }
+
+  /**
+   * CustomerStripeAccount findUniqueOrThrow
+   */
+  export type CustomerStripeAccountFindUniqueOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerStripeAccount to fetch.
+     */
+    where: CustomerStripeAccountWhereUniqueInput
+  }
+
+  /**
+   * CustomerStripeAccount findFirst
+   */
+  export type CustomerStripeAccountFindFirstArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerStripeAccount to fetch.
+     */
+    where?: CustomerStripeAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerStripeAccounts to fetch.
+     */
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomerStripeAccounts.
+     */
+    cursor?: CustomerStripeAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerStripeAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerStripeAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomerStripeAccounts.
+     */
+    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
+  }
+
+  /**
+   * CustomerStripeAccount findFirstOrThrow
+   */
+  export type CustomerStripeAccountFindFirstOrThrowArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerStripeAccount to fetch.
+     */
+    where?: CustomerStripeAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerStripeAccounts to fetch.
+     */
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for searching for CustomerStripeAccounts.
+     */
+    cursor?: CustomerStripeAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerStripeAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerStripeAccounts.
+     */
+    skip?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/distinct Distinct Docs}
+     * 
+     * Filter by unique combinations of CustomerStripeAccounts.
+     */
+    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
+  }
+
+  /**
+   * CustomerStripeAccount findMany
+   */
+  export type CustomerStripeAccountFindManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * Filter, which CustomerStripeAccounts to fetch.
+     */
+    where?: CustomerStripeAccountWhereInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/sorting Sorting Docs}
+     * 
+     * Determine the order of CustomerStripeAccounts to fetch.
+     */
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination#cursor-based-pagination Cursor Docs}
+     * 
+     * Sets the position for listing CustomerStripeAccounts.
+     */
+    cursor?: CustomerStripeAccountWhereUniqueInput
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Take `±n` CustomerStripeAccounts from the position of the cursor.
+     */
+    take?: number
+    /**
+     * {@link https://www.prisma.io/docs/concepts/components/prisma-client/pagination Pagination Docs}
+     * 
+     * Skip the first `n` CustomerStripeAccounts.
+     */
+    skip?: number
+    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
+  }
+
+  /**
+   * CustomerStripeAccount create
+   */
+  export type CustomerStripeAccountCreateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * The data needed to create a CustomerStripeAccount.
+     */
+    data: XOR<CustomerStripeAccountCreateInput, CustomerStripeAccountUncheckedCreateInput>
+  }
+
+  /**
+   * CustomerStripeAccount createMany
+   */
+  export type CustomerStripeAccountCreateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to create many CustomerStripeAccounts.
+     */
+    data: CustomerStripeAccountCreateManyInput | CustomerStripeAccountCreateManyInput[]
+    skipDuplicates?: boolean
+  }
+
+  /**
+   * CustomerStripeAccount createManyAndReturn
+   */
+  export type CustomerStripeAccountCreateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelectCreateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * The data used to create many CustomerStripeAccounts.
+     */
+    data: CustomerStripeAccountCreateManyInput | CustomerStripeAccountCreateManyInput[]
+    skipDuplicates?: boolean
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountIncludeCreateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CustomerStripeAccount update
+   */
+  export type CustomerStripeAccountUpdateArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * The data needed to update a CustomerStripeAccount.
+     */
+    data: XOR<CustomerStripeAccountUpdateInput, CustomerStripeAccountUncheckedUpdateInput>
+    /**
+     * Choose, which CustomerStripeAccount to update.
+     */
+    where: CustomerStripeAccountWhereUniqueInput
+  }
+
+  /**
+   * CustomerStripeAccount updateMany
+   */
+  export type CustomerStripeAccountUpdateManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * The data used to update CustomerStripeAccounts.
+     */
+    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyInput>
+    /**
+     * Filter which CustomerStripeAccounts to update
+     */
+    where?: CustomerStripeAccountWhereInput
+    /**
+     * Limit how many CustomerStripeAccounts to update.
+     */
+    limit?: number
+  }
+
+  /**
+   * CustomerStripeAccount updateManyAndReturn
+   */
+  export type CustomerStripeAccountUpdateManyAndReturnArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelectUpdateManyAndReturn<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * The data used to update CustomerStripeAccounts.
+     */
+    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyInput>
+    /**
+     * Filter which CustomerStripeAccounts to update
+     */
+    where?: CustomerStripeAccountWhereInput
+    /**
+     * Limit how many CustomerStripeAccounts to update.
+     */
+    limit?: number
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountIncludeUpdateManyAndReturn<ExtArgs> | null
+  }
+
+  /**
+   * CustomerStripeAccount upsert
+   */
+  export type CustomerStripeAccountUpsertArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * The filter to search for the CustomerStripeAccount to update in case it exists.
+     */
+    where: CustomerStripeAccountWhereUniqueInput
+    /**
+     * In case the CustomerStripeAccount found by the `where` argument doesn't exist, create a new CustomerStripeAccount with this data.
+     */
+    create: XOR<CustomerStripeAccountCreateInput, CustomerStripeAccountUncheckedCreateInput>
+    /**
+     * In case the CustomerStripeAccount was found with the provided `where` argument, update it with this data.
+     */
+    update: XOR<CustomerStripeAccountUpdateInput, CustomerStripeAccountUncheckedUpdateInput>
+  }
+
+  /**
+   * CustomerStripeAccount delete
+   */
+  export type CustomerStripeAccountDeleteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    /**
+     * Filter which CustomerStripeAccount to delete.
+     */
+    where: CustomerStripeAccountWhereUniqueInput
+  }
+
+  /**
+   * CustomerStripeAccount deleteMany
+   */
+  export type CustomerStripeAccountDeleteManyArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Filter which CustomerStripeAccounts to delete
+     */
+    where?: CustomerStripeAccountWhereInput
+    /**
+     * Limit how many CustomerStripeAccounts to delete.
+     */
+    limit?: number
+  }
+
+  /**
+   * CustomerStripeAccount without action
+   */
+  export type CustomerStripeAccountDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the CustomerStripeAccount
+     */
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the CustomerStripeAccount
+     */
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+  }
+
+
+  /**
    * Enums
    */
 
@@ -18609,6 +21364,44 @@ export namespace Prisma {
   export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
 
 
+  export const InvoiceScalarFieldEnum: {
+    id: 'id',
+    stripeInvoiceId: 'stripeInvoiceId',
+    status: 'status',
+    amountDue: 'amountDue',
+    amountPaid: 'amountPaid',
+    amountRemaining: 'amountRemaining',
+    currency: 'currency',
+    invoicePdfUrl: 'invoicePdfUrl',
+    hostedInvoiceUrl: 'hostedInvoiceUrl',
+    issuedAt: 'issuedAt',
+    paidAt: 'paidAt',
+    voidedAt: 'voidedAt',
+    dueAt: 'dueAt',
+    expiresAt: 'expiresAt',
+    metadata: 'metadata',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    customerId: 'customerId',
+    bookingId: 'bookingId'
+  };
+
+  export type InvoiceScalarFieldEnum = (typeof InvoiceScalarFieldEnum)[keyof typeof InvoiceScalarFieldEnum]
+
+
+  export const CustomerStripeAccountScalarFieldEnum: {
+    id: 'id',
+    stripeCustomerId: 'stripeCustomerId',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    customerId: 'customerId',
+    businessId: 'businessId'
+  };
+
+  export type CustomerStripeAccountScalarFieldEnum = (typeof CustomerStripeAccountScalarFieldEnum)[keyof typeof CustomerStripeAccountScalarFieldEnum]
+
+
   export const SortOrder: {
     asc: 'asc',
     desc: 'desc'
@@ -18863,6 +21656,20 @@ export namespace Prisma {
    */
   export type ListEnumWaiverStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WaiverStatus[]'>
     
+
+
+  /**
+   * Reference to a field of type 'InvoiceStatus'
+   */
+  export type EnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceStatus'>
+    
+
+
+  /**
+   * Reference to a field of type 'InvoiceStatus[]'
+   */
+  export type ListEnumInvoiceStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'InvoiceStatus[]'>
+    
   /**
    * Deep Input Types
    */
@@ -18977,6 +21784,8 @@ export namespace Prisma {
     coupons?: CouponListRelationFilter
     salesFunnels?: SalesFunnelListRelationFilter
     waivers?: WaiverListRelationFilter
+    invoices?: InvoiceListRelationFilter
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
     organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
   }
 
@@ -19013,6 +21822,8 @@ export namespace Prisma {
     coupons?: CouponOrderByRelationAggregateInput
     salesFunnels?: SalesFunnelOrderByRelationAggregateInput
     waivers?: WaiverOrderByRelationAggregateInput
+    invoices?: InvoiceOrderByRelationAggregateInput
+    customerStripeAccounts?: CustomerStripeAccountOrderByRelationAggregateInput
     organization?: OrganizationOrderByWithRelationInput
   }
 
@@ -19052,6 +21863,8 @@ export namespace Prisma {
     coupons?: CouponListRelationFilter
     salesFunnels?: SalesFunnelListRelationFilter
     waivers?: WaiverListRelationFilter
+    invoices?: InvoiceListRelationFilter
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
     organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
   }, "id" | "subdomain" | "userId">
 
@@ -19412,6 +22225,8 @@ export namespace Prisma {
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookings?: BookingListRelationFilter
     waivers?: WaiverListRelationFilter
+    invoices?: InvoiceListRelationFilter
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
   }
 
   export type CustomerOrderByWithRelationInput = {
@@ -19436,6 +22251,8 @@ export namespace Prisma {
     business?: BusinessOrderByWithRelationInput
     bookings?: BookingOrderByRelationAggregateInput
     waivers?: WaiverOrderByRelationAggregateInput
+    invoices?: InvoiceOrderByRelationAggregateInput
+    customerStripeAccounts?: CustomerStripeAccountOrderByRelationAggregateInput
   }
 
   export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -19464,6 +22281,8 @@ export namespace Prisma {
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookings?: BookingListRelationFilter
     waivers?: WaiverListRelationFilter
+    invoices?: InvoiceListRelationFilter
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
   }, "id" | "email_businessId">
 
   export type CustomerOrderByWithAggregationInput = {
@@ -19551,6 +22370,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemListRelationFilter
     payments?: PaymentListRelationFilter
     waivers?: WaiverListRelationFilter
+    invoice?: XOR<InvoiceNullableScalarRelationFilter, InvoiceWhereInput> | null
   }
 
   export type BookingOrderByWithRelationInput = {
@@ -19585,6 +22405,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemOrderByRelationAggregateInput
     payments?: PaymentOrderByRelationAggregateInput
     waivers?: WaiverOrderByRelationAggregateInput
+    invoice?: InvoiceOrderByWithRelationInput
   }
 
   export type BookingWhereUniqueInput = Prisma.AtLeast<{
@@ -19622,6 +22443,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemListRelationFilter
     payments?: PaymentListRelationFilter
     waivers?: WaiverListRelationFilter
+    invoice?: XOR<InvoiceNullableScalarRelationFilter, InvoiceWhereInput> | null
   }, "id">
 
   export type BookingOrderByWithAggregationInput = {
@@ -20086,6 +22908,7 @@ export namespace Prisma {
   export type WaiverWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     docuSealDocumentId?: string
+    customerId_businessId_bookingId?: WaiverCustomerIdBusinessIdBookingIdCompoundUniqueInput
     AND?: WaiverWhereInput | WaiverWhereInput[]
     OR?: WaiverWhereInput[]
     NOT?: WaiverWhereInput | WaiverWhereInput[]
@@ -20100,7 +22923,7 @@ export namespace Prisma {
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
-  }, "id" | "docuSealDocumentId">
+  }, "id" | "docuSealDocumentId" | "customerId_businessId_bookingId">
 
   export type WaiverOrderByWithAggregationInput = {
     id?: SortOrder
@@ -20217,6 +23040,208 @@ export namespace Prisma {
     organizationId?: StringWithAggregatesFilter<"Subscription"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
+  }
+
+  export type InvoiceWhereInput = {
+    AND?: InvoiceWhereInput | InvoiceWhereInput[]
+    OR?: InvoiceWhereInput[]
+    NOT?: InvoiceWhereInput | InvoiceWhereInput[]
+    id?: StringFilter<"Invoice"> | string
+    stripeInvoiceId?: StringNullableFilter<"Invoice"> | string | null
+    status?: EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+    amountDue?: FloatFilter<"Invoice"> | number
+    amountPaid?: FloatFilter<"Invoice"> | number
+    amountRemaining?: FloatFilter<"Invoice"> | number
+    currency?: StringFilter<"Invoice"> | string
+    invoicePdfUrl?: StringNullableFilter<"Invoice"> | string | null
+    hostedInvoiceUrl?: StringNullableFilter<"Invoice"> | string | null
+    issuedAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    paidAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    voidedAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    dueAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    expiresAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    metadata?: JsonNullableFilter<"Invoice">
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+    businessId?: StringFilter<"Invoice"> | string
+    customerId?: StringFilter<"Invoice"> | string
+    bookingId?: StringFilter<"Invoice"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
+  }
+
+  export type InvoiceOrderByWithRelationInput = {
+    id?: SortOrder
+    stripeInvoiceId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    amountDue?: SortOrder
+    amountPaid?: SortOrder
+    amountRemaining?: SortOrder
+    currency?: SortOrder
+    invoicePdfUrl?: SortOrderInput | SortOrder
+    hostedInvoiceUrl?: SortOrderInput | SortOrder
+    issuedAt?: SortOrderInput | SortOrder
+    paidAt?: SortOrderInput | SortOrder
+    voidedAt?: SortOrderInput | SortOrder
+    dueAt?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    bookingId?: SortOrder
+    business?: BusinessOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
+    booking?: BookingOrderByWithRelationInput
+  }
+
+  export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    stripeInvoiceId?: string
+    bookingId?: string
+    AND?: InvoiceWhereInput | InvoiceWhereInput[]
+    OR?: InvoiceWhereInput[]
+    NOT?: InvoiceWhereInput | InvoiceWhereInput[]
+    status?: EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+    amountDue?: FloatFilter<"Invoice"> | number
+    amountPaid?: FloatFilter<"Invoice"> | number
+    amountRemaining?: FloatFilter<"Invoice"> | number
+    currency?: StringFilter<"Invoice"> | string
+    invoicePdfUrl?: StringNullableFilter<"Invoice"> | string | null
+    hostedInvoiceUrl?: StringNullableFilter<"Invoice"> | string | null
+    issuedAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    paidAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    voidedAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    dueAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    expiresAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    metadata?: JsonNullableFilter<"Invoice">
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+    businessId?: StringFilter<"Invoice"> | string
+    customerId?: StringFilter<"Invoice"> | string
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
+  }, "id" | "stripeInvoiceId" | "bookingId">
+
+  export type InvoiceOrderByWithAggregationInput = {
+    id?: SortOrder
+    stripeInvoiceId?: SortOrderInput | SortOrder
+    status?: SortOrder
+    amountDue?: SortOrder
+    amountPaid?: SortOrder
+    amountRemaining?: SortOrder
+    currency?: SortOrder
+    invoicePdfUrl?: SortOrderInput | SortOrder
+    hostedInvoiceUrl?: SortOrderInput | SortOrder
+    issuedAt?: SortOrderInput | SortOrder
+    paidAt?: SortOrderInput | SortOrder
+    voidedAt?: SortOrderInput | SortOrder
+    dueAt?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    metadata?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    bookingId?: SortOrder
+    _count?: InvoiceCountOrderByAggregateInput
+    _avg?: InvoiceAvgOrderByAggregateInput
+    _max?: InvoiceMaxOrderByAggregateInput
+    _min?: InvoiceMinOrderByAggregateInput
+    _sum?: InvoiceSumOrderByAggregateInput
+  }
+
+  export type InvoiceScalarWhereWithAggregatesInput = {
+    AND?: InvoiceScalarWhereWithAggregatesInput | InvoiceScalarWhereWithAggregatesInput[]
+    OR?: InvoiceScalarWhereWithAggregatesInput[]
+    NOT?: InvoiceScalarWhereWithAggregatesInput | InvoiceScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"Invoice"> | string
+    stripeInvoiceId?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    status?: EnumInvoiceStatusWithAggregatesFilter<"Invoice"> | $Enums.InvoiceStatus
+    amountDue?: FloatWithAggregatesFilter<"Invoice"> | number
+    amountPaid?: FloatWithAggregatesFilter<"Invoice"> | number
+    amountRemaining?: FloatWithAggregatesFilter<"Invoice"> | number
+    currency?: StringWithAggregatesFilter<"Invoice"> | string
+    invoicePdfUrl?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    hostedInvoiceUrl?: StringNullableWithAggregatesFilter<"Invoice"> | string | null
+    issuedAt?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    paidAt?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    voidedAt?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    dueAt?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"Invoice"> | Date | string | null
+    metadata?: JsonNullableWithAggregatesFilter<"Invoice">
+    createdAt?: DateTimeWithAggregatesFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Invoice"> | Date | string
+    businessId?: StringWithAggregatesFilter<"Invoice"> | string
+    customerId?: StringWithAggregatesFilter<"Invoice"> | string
+    bookingId?: StringWithAggregatesFilter<"Invoice"> | string
+  }
+
+  export type CustomerStripeAccountWhereInput = {
+    AND?: CustomerStripeAccountWhereInput | CustomerStripeAccountWhereInput[]
+    OR?: CustomerStripeAccountWhereInput[]
+    NOT?: CustomerStripeAccountWhereInput | CustomerStripeAccountWhereInput[]
+    id?: StringFilter<"CustomerStripeAccount"> | string
+    stripeCustomerId?: StringFilter<"CustomerStripeAccount"> | string
+    createdAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    customerId?: StringFilter<"CustomerStripeAccount"> | string
+    businessId?: StringFilter<"CustomerStripeAccount"> | string
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }
+
+  export type CustomerStripeAccountOrderByWithRelationInput = {
+    id?: SortOrder
+    stripeCustomerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    customerId?: SortOrder
+    businessId?: SortOrder
+    customer?: CustomerOrderByWithRelationInput
+    business?: BusinessOrderByWithRelationInput
+  }
+
+  export type CustomerStripeAccountWhereUniqueInput = Prisma.AtLeast<{
+    id?: string
+    stripeCustomerId?: string
+    customerId_businessId?: CustomerStripeAccountCustomerIdBusinessIdCompoundUniqueInput
+    AND?: CustomerStripeAccountWhereInput | CustomerStripeAccountWhereInput[]
+    OR?: CustomerStripeAccountWhereInput[]
+    NOT?: CustomerStripeAccountWhereInput | CustomerStripeAccountWhereInput[]
+    createdAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    customerId?: StringFilter<"CustomerStripeAccount"> | string
+    businessId?: StringFilter<"CustomerStripeAccount"> | string
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+  }, "id" | "stripeCustomerId" | "customerId_businessId">
+
+  export type CustomerStripeAccountOrderByWithAggregationInput = {
+    id?: SortOrder
+    stripeCustomerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    customerId?: SortOrder
+    businessId?: SortOrder
+    _count?: CustomerStripeAccountCountOrderByAggregateInput
+    _max?: CustomerStripeAccountMaxOrderByAggregateInput
+    _min?: CustomerStripeAccountMinOrderByAggregateInput
+  }
+
+  export type CustomerStripeAccountScalarWhereWithAggregatesInput = {
+    AND?: CustomerStripeAccountScalarWhereWithAggregatesInput | CustomerStripeAccountScalarWhereWithAggregatesInput[]
+    OR?: CustomerStripeAccountScalarWhereWithAggregatesInput[]
+    NOT?: CustomerStripeAccountScalarWhereWithAggregatesInput | CustomerStripeAccountScalarWhereWithAggregatesInput[]
+    id?: StringWithAggregatesFilter<"CustomerStripeAccount"> | string
+    stripeCustomerId?: StringWithAggregatesFilter<"CustomerStripeAccount"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"CustomerStripeAccount"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"CustomerStripeAccount"> | Date | string
+    customerId?: StringWithAggregatesFilter<"CustomerStripeAccount"> | string
+    businessId?: StringWithAggregatesFilter<"CustomerStripeAccount"> | string
   }
 
   export type UserCreateInput = {
@@ -20336,6 +23361,8 @@ export namespace Prisma {
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -20371,6 +23398,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -20406,6 +23435,8 @@ export namespace Prisma {
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -20441,6 +23472,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -20847,6 +23880,8 @@ export namespace Prisma {
     business: BusinessCreateNestedOneWithoutCustomersInput
     bookings?: BookingCreateNestedManyWithoutCustomerInput
     waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateInput = {
@@ -20870,6 +23905,8 @@ export namespace Prisma {
     businessId: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUpdateInput = {
@@ -20893,6 +23930,8 @@ export namespace Prisma {
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
     waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateInput = {
@@ -20916,6 +23955,8 @@ export namespace Prisma {
     businessId?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateManyInput = {
@@ -21010,6 +24051,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateInput = {
@@ -21042,6 +24084,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUpdateInput = {
@@ -21074,6 +24117,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateInput = {
@@ -21106,6 +24150,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingCreateManyInput = {
@@ -21771,6 +24816,225 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
+  export type InvoiceCreateInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutInvoicesInput
+    customer: CustomerCreateNestedOneWithoutInvoicesInput
+    booking: BookingCreateNestedOneWithoutInvoiceInput
+  }
+
+  export type InvoiceUncheckedCreateInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId: string
+    bookingId: string
+  }
+
+  export type InvoiceUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutInvoicesNestedInput
+    booking?: BookingUpdateOneRequiredWithoutInvoiceNestedInput
+  }
+
+  export type InvoiceUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InvoiceCreateManyInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId: string
+    bookingId: string
+  }
+
+  export type InvoiceUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CustomerStripeAccountCreateInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer: CustomerCreateNestedOneWithoutCustomerStripeAccountsInput
+    business: BusinessCreateNestedOneWithoutCustomerStripeAccountsInput
+  }
+
+  export type CustomerStripeAccountUncheckedCreateInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId: string
+    businessId: string
+  }
+
+  export type CustomerStripeAccountUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CustomerStripeAccountCreateManyInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId: string
+    businessId: string
+  }
+
+  export type CustomerStripeAccountUpdateManyMutationInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateManyInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type StringFilter<$PrismaModel = never> = {
     equals?: string | StringFieldRefInput<$PrismaModel>
     in?: string[] | ListStringFieldRefInput<$PrismaModel>
@@ -22051,6 +25315,18 @@ export namespace Prisma {
     none?: WaiverWhereInput
   }
 
+  export type InvoiceListRelationFilter = {
+    every?: InvoiceWhereInput
+    some?: InvoiceWhereInput
+    none?: InvoiceWhereInput
+  }
+
+  export type CustomerStripeAccountListRelationFilter = {
+    every?: CustomerStripeAccountWhereInput
+    some?: CustomerStripeAccountWhereInput
+    none?: CustomerStripeAccountWhereInput
+  }
+
   export type OrganizationNullableScalarRelationFilter = {
     is?: OrganizationWhereInput | null
     isNot?: OrganizationWhereInput | null
@@ -22081,6 +25357,14 @@ export namespace Prisma {
   }
 
   export type WaiverOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InvoiceOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type CustomerStripeAccountOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -22613,6 +25897,11 @@ export namespace Prisma {
     isNot?: CustomerWhereInput
   }
 
+  export type InvoiceNullableScalarRelationFilter = {
+    is?: InvoiceWhereInput | null
+    isNot?: InvoiceWhereInput | null
+  }
+
   export type BookingCountOrderByAggregateInput = {
     id?: SortOrder
     eventDate?: SortOrder
@@ -23063,6 +26352,12 @@ export namespace Prisma {
     not?: NestedEnumWaiverStatusFilter<$PrismaModel> | $Enums.WaiverStatus
   }
 
+  export type WaiverCustomerIdBusinessIdBookingIdCompoundUniqueInput = {
+    customerId: string
+    businessId: string
+    bookingId: string
+  }
+
   export type WaiverCountOrderByAggregateInput = {
     id?: SortOrder
     status?: SortOrder
@@ -23152,6 +26447,134 @@ export namespace Prisma {
     organizationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+  }
+
+  export type EnumInvoiceStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusFilter<$PrismaModel> | $Enums.InvoiceStatus
+  }
+
+  export type InvoiceCountOrderByAggregateInput = {
+    id?: SortOrder
+    stripeInvoiceId?: SortOrder
+    status?: SortOrder
+    amountDue?: SortOrder
+    amountPaid?: SortOrder
+    amountRemaining?: SortOrder
+    currency?: SortOrder
+    invoicePdfUrl?: SortOrder
+    hostedInvoiceUrl?: SortOrder
+    issuedAt?: SortOrder
+    paidAt?: SortOrder
+    voidedAt?: SortOrder
+    dueAt?: SortOrder
+    expiresAt?: SortOrder
+    metadata?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    bookingId?: SortOrder
+  }
+
+  export type InvoiceAvgOrderByAggregateInput = {
+    amountDue?: SortOrder
+    amountPaid?: SortOrder
+    amountRemaining?: SortOrder
+  }
+
+  export type InvoiceMaxOrderByAggregateInput = {
+    id?: SortOrder
+    stripeInvoiceId?: SortOrder
+    status?: SortOrder
+    amountDue?: SortOrder
+    amountPaid?: SortOrder
+    amountRemaining?: SortOrder
+    currency?: SortOrder
+    invoicePdfUrl?: SortOrder
+    hostedInvoiceUrl?: SortOrder
+    issuedAt?: SortOrder
+    paidAt?: SortOrder
+    voidedAt?: SortOrder
+    dueAt?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    bookingId?: SortOrder
+  }
+
+  export type InvoiceMinOrderByAggregateInput = {
+    id?: SortOrder
+    stripeInvoiceId?: SortOrder
+    status?: SortOrder
+    amountDue?: SortOrder
+    amountPaid?: SortOrder
+    amountRemaining?: SortOrder
+    currency?: SortOrder
+    invoicePdfUrl?: SortOrder
+    hostedInvoiceUrl?: SortOrder
+    issuedAt?: SortOrder
+    paidAt?: SortOrder
+    voidedAt?: SortOrder
+    dueAt?: SortOrder
+    expiresAt?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    bookingId?: SortOrder
+  }
+
+  export type InvoiceSumOrderByAggregateInput = {
+    amountDue?: SortOrder
+    amountPaid?: SortOrder
+    amountRemaining?: SortOrder
+  }
+
+  export type EnumInvoiceStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+    _max?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+  }
+
+  export type CustomerStripeAccountCustomerIdBusinessIdCompoundUniqueInput = {
+    customerId: string
+    businessId: string
+  }
+
+  export type CustomerStripeAccountCountOrderByAggregateInput = {
+    id?: SortOrder
+    stripeCustomerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    customerId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type CustomerStripeAccountMaxOrderByAggregateInput = {
+    id?: SortOrder
+    stripeCustomerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    customerId?: SortOrder
+    businessId?: SortOrder
+  }
+
+  export type CustomerStripeAccountMinOrderByAggregateInput = {
+    id?: SortOrder
+    stripeCustomerId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    customerId?: SortOrder
+    businessId?: SortOrder
   }
 
   export type BusinessCreateNestedOneWithoutUserInput = {
@@ -23303,6 +26726,20 @@ export namespace Prisma {
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
   }
 
+  export type InvoiceCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
+  export type CustomerStripeAccountCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+  }
+
   export type OrganizationCreateNestedOneWithoutBusinessInput = {
     create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
     connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
@@ -23356,6 +26793,20 @@ export namespace Prisma {
     connectOrCreate?: WaiverCreateOrConnectWithoutBusinessInput | WaiverCreateOrConnectWithoutBusinessInput[]
     createMany?: WaiverCreateManyBusinessInputEnvelope
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+  }
+
+  export type InvoiceUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
+  export type CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
   }
 
   export type OrganizationUncheckedCreateNestedOneWithoutBusinessInput = {
@@ -23491,6 +26942,34 @@ export namespace Prisma {
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
   }
 
+  export type InvoiceUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  }
+
+  export type CustomerStripeAccountUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput | CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+  }
+
   export type OrganizationUpdateOneWithoutBusinessNestedInput = {
     create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
     connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
@@ -23597,6 +27076,34 @@ export namespace Prisma {
     update?: WaiverUpdateWithWhereUniqueWithoutBusinessInput | WaiverUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: WaiverUpdateManyWithWhereWithoutBusinessInput | WaiverUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput | CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
   }
 
   export type OrganizationUncheckedUpdateOneWithoutBusinessNestedInput = {
@@ -23831,6 +27338,20 @@ export namespace Prisma {
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
   }
 
+  export type InvoiceCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<InvoiceCreateWithoutCustomerInput, InvoiceUncheckedCreateWithoutCustomerInput> | InvoiceCreateWithoutCustomerInput[] | InvoiceUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutCustomerInput | InvoiceCreateOrConnectWithoutCustomerInput[]
+    createMany?: InvoiceCreateManyCustomerInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
+  export type CustomerStripeAccountCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+  }
+
   export type BookingUncheckedCreateNestedManyWithoutCustomerInput = {
     create?: XOR<BookingCreateWithoutCustomerInput, BookingUncheckedCreateWithoutCustomerInput> | BookingCreateWithoutCustomerInput[] | BookingUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: BookingCreateOrConnectWithoutCustomerInput | BookingCreateOrConnectWithoutCustomerInput[]
@@ -23843,6 +27364,20 @@ export namespace Prisma {
     connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
     createMany?: WaiverCreateManyCustomerInputEnvelope
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+  }
+
+  export type InvoiceUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<InvoiceCreateWithoutCustomerInput, InvoiceUncheckedCreateWithoutCustomerInput> | InvoiceCreateWithoutCustomerInput[] | InvoiceUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutCustomerInput | InvoiceCreateOrConnectWithoutCustomerInput[]
+    createMany?: InvoiceCreateManyCustomerInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
+  export type CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -23885,6 +27420,34 @@ export namespace Prisma {
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
   }
 
+  export type InvoiceUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<InvoiceCreateWithoutCustomerInput, InvoiceUncheckedCreateWithoutCustomerInput> | InvoiceCreateWithoutCustomerInput[] | InvoiceUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutCustomerInput | InvoiceCreateOrConnectWithoutCustomerInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutCustomerInput | InvoiceUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: InvoiceCreateManyCustomerInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutCustomerInput | InvoiceUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutCustomerInput | InvoiceUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  }
+
+  export type CustomerStripeAccountUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput | CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+  }
+
   export type BookingUncheckedUpdateManyWithoutCustomerNestedInput = {
     create?: XOR<BookingCreateWithoutCustomerInput, BookingUncheckedCreateWithoutCustomerInput> | BookingCreateWithoutCustomerInput[] | BookingUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: BookingCreateOrConnectWithoutCustomerInput | BookingCreateOrConnectWithoutCustomerInput[]
@@ -23911,6 +27474,34 @@ export namespace Prisma {
     update?: WaiverUpdateWithWhereUniqueWithoutCustomerInput | WaiverUpdateWithWhereUniqueWithoutCustomerInput[]
     updateMany?: WaiverUpdateManyWithWhereWithoutCustomerInput | WaiverUpdateManyWithWhereWithoutCustomerInput[]
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<InvoiceCreateWithoutCustomerInput, InvoiceUncheckedCreateWithoutCustomerInput> | InvoiceCreateWithoutCustomerInput[] | InvoiceUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutCustomerInput | InvoiceCreateOrConnectWithoutCustomerInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutCustomerInput | InvoiceUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: InvoiceCreateManyCustomerInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutCustomerInput | InvoiceUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutCustomerInput | InvoiceUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput | CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutBookingsInput = {
@@ -23946,6 +27537,12 @@ export namespace Prisma {
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
   }
 
+  export type InvoiceCreateNestedOneWithoutBookingInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
+    connect?: InvoiceWhereUniqueInput
+  }
+
   export type BookingItemUncheckedCreateNestedManyWithoutBookingInput = {
     create?: XOR<BookingItemCreateWithoutBookingInput, BookingItemUncheckedCreateWithoutBookingInput> | BookingItemCreateWithoutBookingInput[] | BookingItemUncheckedCreateWithoutBookingInput[]
     connectOrCreate?: BookingItemCreateOrConnectWithoutBookingInput | BookingItemCreateOrConnectWithoutBookingInput[]
@@ -23965,6 +27562,12 @@ export namespace Prisma {
     connectOrCreate?: WaiverCreateOrConnectWithoutBookingInput | WaiverCreateOrConnectWithoutBookingInput[]
     createMany?: WaiverCreateManyBookingInputEnvelope
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+  }
+
+  export type InvoiceUncheckedCreateNestedOneWithoutBookingInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
+    connect?: InvoiceWhereUniqueInput
   }
 
   export type EnumBookingStatusFieldUpdateOperationsInput = {
@@ -24045,6 +27648,16 @@ export namespace Prisma {
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
   }
 
+  export type InvoiceUpdateOneWithoutBookingNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
+    upsert?: InvoiceUpsertWithoutBookingInput
+    disconnect?: InvoiceWhereInput | boolean
+    delete?: InvoiceWhereInput | boolean
+    connect?: InvoiceWhereUniqueInput
+    update?: XOR<XOR<InvoiceUpdateToOneWithWhereWithoutBookingInput, InvoiceUpdateWithoutBookingInput>, InvoiceUncheckedUpdateWithoutBookingInput>
+  }
+
   export type BookingItemUncheckedUpdateManyWithoutBookingNestedInput = {
     create?: XOR<BookingItemCreateWithoutBookingInput, BookingItemUncheckedCreateWithoutBookingInput> | BookingItemCreateWithoutBookingInput[] | BookingItemUncheckedCreateWithoutBookingInput[]
     connectOrCreate?: BookingItemCreateOrConnectWithoutBookingInput | BookingItemCreateOrConnectWithoutBookingInput[]
@@ -24085,6 +27698,16 @@ export namespace Prisma {
     update?: WaiverUpdateWithWhereUniqueWithoutBookingInput | WaiverUpdateWithWhereUniqueWithoutBookingInput[]
     updateMany?: WaiverUpdateManyWithWhereWithoutBookingInput | WaiverUpdateManyWithWhereWithoutBookingInput[]
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
+  }
+
+  export type InvoiceUncheckedUpdateOneWithoutBookingNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
+    upsert?: InvoiceUpsertWithoutBookingInput
+    disconnect?: InvoiceWhereInput | boolean
+    delete?: InvoiceWhereInput | boolean
+    connect?: InvoiceWhereUniqueInput
+    update?: XOR<XOR<InvoiceUpdateToOneWithWhereWithoutBookingInput, InvoiceUpdateWithoutBookingInput>, InvoiceUncheckedUpdateWithoutBookingInput>
   }
 
   export type BookingCreateNestedOneWithoutInventoryItemsInput = {
@@ -24249,6 +27872,80 @@ export namespace Prisma {
     upsert?: OrganizationUpsertWithoutSubscriptionInput
     connect?: OrganizationWhereUniqueInput
     update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutSubscriptionInput, OrganizationUpdateWithoutSubscriptionInput>, OrganizationUncheckedUpdateWithoutSubscriptionInput>
+  }
+
+  export type BusinessCreateNestedOneWithoutInvoicesInput = {
+    create?: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInvoicesInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerCreateNestedOneWithoutInvoicesInput = {
+    create?: XOR<CustomerCreateWithoutInvoicesInput, CustomerUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutInvoicesInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type BookingCreateNestedOneWithoutInvoiceInput = {
+    create?: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutInvoiceInput
+    connect?: BookingWhereUniqueInput
+  }
+
+  export type EnumInvoiceStatusFieldUpdateOperationsInput = {
+    set?: $Enums.InvoiceStatus
+  }
+
+  export type BusinessUpdateOneRequiredWithoutInvoicesNestedInput = {
+    create?: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInvoicesInput
+    upsert?: BusinessUpsertWithoutInvoicesInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutInvoicesInput, BusinessUpdateWithoutInvoicesInput>, BusinessUncheckedUpdateWithoutInvoicesInput>
+  }
+
+  export type CustomerUpdateOneRequiredWithoutInvoicesNestedInput = {
+    create?: XOR<CustomerCreateWithoutInvoicesInput, CustomerUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutInvoicesInput
+    upsert?: CustomerUpsertWithoutInvoicesInput
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutInvoicesInput, CustomerUpdateWithoutInvoicesInput>, CustomerUncheckedUpdateWithoutInvoicesInput>
+  }
+
+  export type BookingUpdateOneRequiredWithoutInvoiceNestedInput = {
+    create?: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutInvoiceInput
+    upsert?: BookingUpsertWithoutInvoiceInput
+    connect?: BookingWhereUniqueInput
+    update?: XOR<XOR<BookingUpdateToOneWithWhereWithoutInvoiceInput, BookingUpdateWithoutInvoiceInput>, BookingUncheckedUpdateWithoutInvoiceInput>
+  }
+
+  export type CustomerCreateNestedOneWithoutCustomerStripeAccountsInput = {
+    create?: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutCustomerStripeAccountsInput
+    connect?: CustomerWhereUniqueInput
+  }
+
+  export type BusinessCreateNestedOneWithoutCustomerStripeAccountsInput = {
+    create?: XOR<BusinessCreateWithoutCustomerStripeAccountsInput, BusinessUncheckedCreateWithoutCustomerStripeAccountsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutCustomerStripeAccountsInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput = {
+    create?: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutCustomerStripeAccountsInput
+    upsert?: CustomerUpsertWithoutCustomerStripeAccountsInput
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutCustomerStripeAccountsInput, CustomerUpdateWithoutCustomerStripeAccountsInput>, CustomerUncheckedUpdateWithoutCustomerStripeAccountsInput>
+  }
+
+  export type BusinessUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput = {
+    create?: XOR<BusinessCreateWithoutCustomerStripeAccountsInput, BusinessUncheckedCreateWithoutCustomerStripeAccountsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutCustomerStripeAccountsInput
+    upsert?: BusinessUpsertWithoutCustomerStripeAccountsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutCustomerStripeAccountsInput, BusinessUpdateWithoutCustomerStripeAccountsInput>, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -24693,6 +28390,23 @@ export namespace Prisma {
     _max?: NestedEnumWaiverStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumInvoiceStatusFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusFilter<$PrismaModel> | $Enums.InvoiceStatus
+  }
+
+  export type NestedEnumInvoiceStatusWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
+    in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    notIn?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
+    not?: NestedEnumInvoiceStatusWithAggregatesFilter<$PrismaModel> | $Enums.InvoiceStatus
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+    _max?: NestedEnumInvoiceStatusFilter<$PrismaModel>
+  }
+
   export type BusinessCreateWithoutUserInput = {
     id?: string
     name: string
@@ -24724,6 +28438,8 @@ export namespace Prisma {
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -24758,6 +28474,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -24836,6 +28554,8 @@ export namespace Prisma {
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -24870,6 +28590,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -25007,6 +28729,8 @@ export namespace Prisma {
     type?: string
     bookings?: BookingCreateNestedManyWithoutCustomerInput
     waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBusinessInput = {
@@ -25029,6 +28753,8 @@ export namespace Prisma {
     type?: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBusinessInput = {
@@ -25070,6 +28796,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutBusinessInput = {
@@ -25101,6 +28828,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutBusinessInput = {
@@ -25262,6 +28990,86 @@ export namespace Prisma {
 
   export type WaiverCreateManyBusinessInputEnvelope = {
     data: WaiverCreateManyBusinessInput | WaiverCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InvoiceCreateWithoutBusinessInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer: CustomerCreateNestedOneWithoutInvoicesInput
+    booking: BookingCreateNestedOneWithoutInvoiceInput
+  }
+
+  export type InvoiceUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId: string
+    bookingId: string
+  }
+
+  export type InvoiceCreateOrConnectWithoutBusinessInput = {
+    where: InvoiceWhereUniqueInput
+    create: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InvoiceCreateManyBusinessInputEnvelope = {
+    data: InvoiceCreateManyBusinessInput | InvoiceCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerStripeAccountCreateWithoutBusinessInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customer: CustomerCreateNestedOneWithoutCustomerStripeAccountsInput
+  }
+
+  export type CustomerStripeAccountUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId: string
+  }
+
+  export type CustomerStripeAccountCreateOrConnectWithoutBusinessInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    create: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type CustomerStripeAccountCreateManyBusinessInputEnvelope = {
+    data: CustomerStripeAccountCreateManyBusinessInput | CustomerStripeAccountCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -25591,6 +29399,76 @@ export namespace Prisma {
     bookingId?: StringFilter<"Waiver"> | string
   }
 
+  export type InvoiceUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: InvoiceWhereUniqueInput
+    update: XOR<InvoiceUpdateWithoutBusinessInput, InvoiceUncheckedUpdateWithoutBusinessInput>
+    create: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InvoiceUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: InvoiceWhereUniqueInput
+    data: XOR<InvoiceUpdateWithoutBusinessInput, InvoiceUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type InvoiceUpdateManyWithWhereWithoutBusinessInput = {
+    where: InvoiceScalarWhereInput
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type InvoiceScalarWhereInput = {
+    AND?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+    OR?: InvoiceScalarWhereInput[]
+    NOT?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+    id?: StringFilter<"Invoice"> | string
+    stripeInvoiceId?: StringNullableFilter<"Invoice"> | string | null
+    status?: EnumInvoiceStatusFilter<"Invoice"> | $Enums.InvoiceStatus
+    amountDue?: FloatFilter<"Invoice"> | number
+    amountPaid?: FloatFilter<"Invoice"> | number
+    amountRemaining?: FloatFilter<"Invoice"> | number
+    currency?: StringFilter<"Invoice"> | string
+    invoicePdfUrl?: StringNullableFilter<"Invoice"> | string | null
+    hostedInvoiceUrl?: StringNullableFilter<"Invoice"> | string | null
+    issuedAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    paidAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    voidedAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    dueAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    expiresAt?: DateTimeNullableFilter<"Invoice"> | Date | string | null
+    metadata?: JsonNullableFilter<"Invoice">
+    createdAt?: DateTimeFilter<"Invoice"> | Date | string
+    updatedAt?: DateTimeFilter<"Invoice"> | Date | string
+    businessId?: StringFilter<"Invoice"> | string
+    customerId?: StringFilter<"Invoice"> | string
+    bookingId?: StringFilter<"Invoice"> | string
+  }
+
+  export type CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    update: XOR<CustomerStripeAccountUpdateWithoutBusinessInput, CustomerStripeAccountUncheckedUpdateWithoutBusinessInput>
+    create: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    data: XOR<CustomerStripeAccountUpdateWithoutBusinessInput, CustomerStripeAccountUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput = {
+    where: CustomerStripeAccountScalarWhereInput
+    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type CustomerStripeAccountScalarWhereInput = {
+    AND?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+    OR?: CustomerStripeAccountScalarWhereInput[]
+    NOT?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+    id?: StringFilter<"CustomerStripeAccount"> | string
+    stripeCustomerId?: StringFilter<"CustomerStripeAccount"> | string
+    createdAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    customerId?: StringFilter<"CustomerStripeAccount"> | string
+    businessId?: StringFilter<"CustomerStripeAccount"> | string
+  }
+
   export type OrganizationUpsertWithoutBusinessInput = {
     update: XOR<OrganizationUpdateWithoutBusinessInput, OrganizationUncheckedUpdateWithoutBusinessInput>
     create: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
@@ -25654,6 +29532,8 @@ export namespace Prisma {
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrganizationInput = {
@@ -25688,6 +29568,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrganizationInput = {
@@ -25797,6 +29679,8 @@ export namespace Prisma {
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrganizationInput = {
@@ -25831,6 +29715,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type MembershipUpsertWithWhereUniqueWithoutOrganizationInput = {
@@ -26037,6 +29923,8 @@ export namespace Prisma {
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -26071,6 +29959,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -26149,6 +30039,8 @@ export namespace Prisma {
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -26183,6 +30075,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -26246,6 +30140,8 @@ export namespace Prisma {
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -26280,6 +30176,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -26317,6 +30215,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutCustomerInput = {
@@ -26348,6 +30247,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutCustomerInput = {
@@ -26394,6 +30294,86 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type InvoiceCreateWithoutCustomerInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutInvoicesInput
+    booking: BookingCreateNestedOneWithoutInvoiceInput
+  }
+
+  export type InvoiceUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    bookingId: string
+  }
+
+  export type InvoiceCreateOrConnectWithoutCustomerInput = {
+    where: InvoiceWhereUniqueInput
+    create: XOR<InvoiceCreateWithoutCustomerInput, InvoiceUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type InvoiceCreateManyCustomerInputEnvelope = {
+    data: InvoiceCreateManyCustomerInput | InvoiceCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type CustomerStripeAccountCreateWithoutCustomerInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutCustomerStripeAccountsInput
+  }
+
+  export type CustomerStripeAccountUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+  }
+
+  export type CustomerStripeAccountCreateOrConnectWithoutCustomerInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    create: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type CustomerStripeAccountCreateManyCustomerInputEnvelope = {
+    data: CustomerStripeAccountCreateManyCustomerInput | CustomerStripeAccountCreateManyCustomerInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BusinessUpsertWithoutCustomersInput = {
     update: XOR<BusinessUpdateWithoutCustomersInput, BusinessUncheckedUpdateWithoutCustomersInput>
     create: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
@@ -26436,6 +30416,8 @@ export namespace Prisma {
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -26470,6 +30452,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -26505,6 +30489,38 @@ export namespace Prisma {
     data: XOR<WaiverUpdateManyMutationInput, WaiverUncheckedUpdateManyWithoutCustomerInput>
   }
 
+  export type InvoiceUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: InvoiceWhereUniqueInput
+    update: XOR<InvoiceUpdateWithoutCustomerInput, InvoiceUncheckedUpdateWithoutCustomerInput>
+    create: XOR<InvoiceCreateWithoutCustomerInput, InvoiceUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type InvoiceUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: InvoiceWhereUniqueInput
+    data: XOR<InvoiceUpdateWithoutCustomerInput, InvoiceUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type InvoiceUpdateManyWithWhereWithoutCustomerInput = {
+    where: InvoiceScalarWhereInput
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyWithoutCustomerInput>
+  }
+
+  export type CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    update: XOR<CustomerStripeAccountUpdateWithoutCustomerInput, CustomerStripeAccountUncheckedUpdateWithoutCustomerInput>
+    create: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    data: XOR<CustomerStripeAccountUpdateWithoutCustomerInput, CustomerStripeAccountUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput = {
+    where: CustomerStripeAccountScalarWhereInput
+    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyWithoutCustomerInput>
+  }
+
   export type BusinessCreateWithoutBookingsInput = {
     id?: string
     name: string
@@ -26536,6 +30552,8 @@ export namespace Prisma {
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -26570,6 +30588,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -26598,6 +30618,8 @@ export namespace Prisma {
     type?: string
     business: BusinessCreateNestedOneWithoutCustomersInput
     waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBookingsInput = {
@@ -26620,6 +30642,8 @@ export namespace Prisma {
     type?: string
     businessId: string
     waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBookingsInput = {
@@ -26727,6 +30751,55 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type InvoiceCreateWithoutBookingInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutInvoicesInput
+    customer: CustomerCreateNestedOneWithoutInvoicesInput
+  }
+
+  export type InvoiceUncheckedCreateWithoutBookingInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId: string
+  }
+
+  export type InvoiceCreateOrConnectWithoutBookingInput = {
+    where: InvoiceWhereUniqueInput
+    create: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
+  }
+
   export type BusinessUpsertWithoutBookingsInput = {
     update: XOR<BusinessUpdateWithoutBookingsInput, BusinessUncheckedUpdateWithoutBookingsInput>
     create: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
@@ -26769,6 +30842,8 @@ export namespace Prisma {
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -26803,6 +30878,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -26837,6 +30914,8 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBookingsInput = {
@@ -26859,6 +30938,8 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type BookingItemUpsertWithWhereUniqueWithoutBookingInput = {
@@ -26909,6 +30990,61 @@ export namespace Prisma {
     data: XOR<WaiverUpdateManyMutationInput, WaiverUncheckedUpdateManyWithoutBookingInput>
   }
 
+  export type InvoiceUpsertWithoutBookingInput = {
+    update: XOR<InvoiceUpdateWithoutBookingInput, InvoiceUncheckedUpdateWithoutBookingInput>
+    create: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
+    where?: InvoiceWhereInput
+  }
+
+  export type InvoiceUpdateToOneWithWhereWithoutBookingInput = {
+    where?: InvoiceWhereInput
+    data: XOR<InvoiceUpdateWithoutBookingInput, InvoiceUncheckedUpdateWithoutBookingInput>
+  }
+
+  export type InvoiceUpdateWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutInvoicesNestedInput
+  }
+
+  export type InvoiceUncheckedUpdateWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type BookingCreateWithoutInventoryItemsInput = {
     id?: string
     eventDate: Date | string
@@ -26938,6 +31074,7 @@ export namespace Prisma {
     customer: CustomerCreateNestedOneWithoutBookingsInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutInventoryItemsInput = {
@@ -26969,6 +31106,7 @@ export namespace Prisma {
     customerId: string
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutInventoryItemsInput = {
@@ -27067,6 +31205,7 @@ export namespace Prisma {
     customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutInventoryItemsInput = {
@@ -27098,6 +31237,7 @@ export namespace Prisma {
     customerId?: StringFieldUpdateOperationsInput | string
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type InventoryUpsertWithoutBookingItemsInput = {
@@ -27186,6 +31326,7 @@ export namespace Prisma {
     customer: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutPaymentsInput = {
@@ -27217,6 +31358,7 @@ export namespace Prisma {
     customerId: string
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutPaymentsInput = {
@@ -27255,6 +31397,8 @@ export namespace Prisma {
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -27289,6 +31433,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -27337,6 +31483,7 @@ export namespace Prisma {
     customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutPaymentsInput = {
@@ -27368,6 +31515,7 @@ export namespace Prisma {
     customerId?: StringFieldUpdateOperationsInput | string
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BusinessUpsertWithoutPaymentsInput = {
@@ -27412,6 +31560,8 @@ export namespace Prisma {
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -27446,6 +31596,8 @@ export namespace Prisma {
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -27480,6 +31632,8 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -27514,6 +31668,8 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -27564,6 +31720,8 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -27598,6 +31756,8 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -27632,6 +31792,8 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -27666,6 +31828,8 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -27716,6 +31880,8 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -27750,6 +31916,8 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -27784,6 +31952,8 @@ export namespace Prisma {
     payments?: PaymentCreateNestedManyWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization?: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
@@ -27818,6 +31988,8 @@ export namespace Prisma {
     payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
     organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
@@ -27846,6 +32018,8 @@ export namespace Prisma {
     type?: string
     business: BusinessCreateNestedOneWithoutCustomersInput
     bookings?: BookingCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutWaiversInput = {
@@ -27868,6 +32042,8 @@ export namespace Prisma {
     type?: string
     businessId: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutWaiversInput = {
@@ -27904,6 +32080,7 @@ export namespace Prisma {
     customer: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutWaiversInput = {
@@ -27935,6 +32112,7 @@ export namespace Prisma {
     customerId: string
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutWaiversInput = {
@@ -27984,6 +32162,8 @@ export namespace Prisma {
     payments?: PaymentUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneWithoutBusinessNestedInput
   }
 
@@ -28018,6 +32198,8 @@ export namespace Prisma {
     payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
@@ -28052,6 +32234,8 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutWaiversInput = {
@@ -28074,6 +32258,8 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type BookingUpsertWithoutWaiversInput = {
@@ -28116,6 +32302,7 @@ export namespace Prisma {
     customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutWaiversInput = {
@@ -28147,6 +32334,7 @@ export namespace Prisma {
     customerId?: StringFieldUpdateOperationsInput | string
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type OrganizationCreateWithoutSubscriptionInput = {
@@ -28203,6 +32391,694 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+  }
+
+  export type BusinessCreateWithoutInvoicesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    logo?: string | null
+    minAdvanceBooking?: number
+    maxAdvanceBooking?: number
+    minimumPurchase?: number
+    timeZone?: string
+    stripeAccountId?: string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: string | null
+    subdomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    onboardingError?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    bookings?: BookingCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    coupons?: CouponCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutInvoicesInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    logo?: string | null
+    minAdvanceBooking?: number
+    maxAdvanceBooking?: number
+    minimumPurchase?: number
+    timeZone?: string
+    stripeAccountId?: string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: string | null
+    subdomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    onboardingError?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutInvoicesInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+  }
+
+  export type CustomerCreateWithoutInvoicesInput = {
+    id?: string
+    name: string
+    email: string
+    phone: string
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    notes?: string | null
+    bookingCount?: number
+    totalSpent?: number
+    lastBooking?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isLead?: boolean
+    status?: string
+    type?: string
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    bookings?: BookingCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutInvoicesInput = {
+    id?: string
+    name: string
+    email: string
+    phone: string
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    notes?: string | null
+    bookingCount?: number
+    totalSpent?: number
+    lastBooking?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isLead?: boolean
+    status?: string
+    type?: string
+    businessId: string
+    bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutInvoicesInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutInvoicesInput, CustomerUncheckedCreateWithoutInvoicesInput>
+  }
+
+  export type BookingCreateWithoutInvoiceInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount: number
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress: string
+    eventCity: string
+    eventState: string
+    eventZipCode: string
+    eventTimeZone?: string
+    participantAge?: number | null
+    participantCount: number
+    subtotalAmount?: number
+    taxAmount?: number
+    taxRate?: number
+    isCompleted?: boolean
+    isCancelled?: boolean
+    specialInstructions?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutBookingsInput
+    customer: CustomerCreateNestedOneWithoutBookingsInput
+    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    payments?: PaymentCreateNestedManyWithoutBookingInput
+    waivers?: WaiverCreateNestedManyWithoutBookingInput
+  }
+
+  export type BookingUncheckedCreateWithoutInvoiceInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount: number
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress: string
+    eventCity: string
+    eventState: string
+    eventZipCode: string
+    eventTimeZone?: string
+    participantAge?: number | null
+    participantCount: number
+    subtotalAmount?: number
+    taxAmount?: number
+    taxRate?: number
+    isCompleted?: boolean
+    isCancelled?: boolean
+    specialInstructions?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId: string
+    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
+  }
+
+  export type BookingCreateOrConnectWithoutInvoiceInput = {
+    where: BookingWhereUniqueInput
+    create: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
+  }
+
+  export type BusinessUpsertWithoutInvoicesInput = {
+    update: XOR<BusinessUpdateWithoutInvoicesInput, BusinessUncheckedUpdateWithoutInvoicesInput>
+    create: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutInvoicesInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutInvoicesInput, BusinessUncheckedUpdateWithoutInvoicesInput>
+  }
+
+  export type BusinessUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    bookings?: BookingUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
+  }
+
+  export type CustomerUpsertWithoutInvoicesInput = {
+    update: XOR<CustomerUpdateWithoutInvoicesInput, CustomerUncheckedUpdateWithoutInvoicesInput>
+    create: XOR<CustomerCreateWithoutInvoicesInput, CustomerUncheckedCreateWithoutInvoicesInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutInvoicesInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutInvoicesInput, CustomerUncheckedUpdateWithoutInvoicesInput>
+  }
+
+  export type CustomerUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingCount?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isLead?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    bookings?: BookingUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingCount?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isLead?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type BookingUpsertWithoutInvoiceInput = {
+    update: XOR<BookingUpdateWithoutInvoiceInput, BookingUncheckedUpdateWithoutInvoiceInput>
+    create: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
+    where?: BookingWhereInput
+  }
+
+  export type BookingUpdateToOneWithWhereWithoutInvoiceInput = {
+    where?: BookingWhereInput
+    data: XOR<BookingUpdateWithoutInvoiceInput, BookingUncheckedUpdateWithoutInvoiceInput>
+  }
+
+  export type BookingUpdateWithoutInvoiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: StringFieldUpdateOperationsInput | string
+    eventCity?: StringFieldUpdateOperationsInput | string
+    eventState?: StringFieldUpdateOperationsInput | string
+    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: IntFieldUpdateOperationsInput | number
+    subtotalAmount?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
+    taxRate?: FloatFieldUpdateOperationsInput | number
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUpdateManyWithoutBookingNestedInput
+    waivers?: WaiverUpdateManyWithoutBookingNestedInput
+  }
+
+  export type BookingUncheckedUpdateWithoutInvoiceInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: FloatFieldUpdateOperationsInput | number
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: StringFieldUpdateOperationsInput | string
+    eventCity?: StringFieldUpdateOperationsInput | string
+    eventState?: StringFieldUpdateOperationsInput | string
+    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: IntFieldUpdateOperationsInput | number
+    subtotalAmount?: FloatFieldUpdateOperationsInput | number
+    taxAmount?: FloatFieldUpdateOperationsInput | number
+    taxRate?: FloatFieldUpdateOperationsInput | number
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
+  }
+
+  export type CustomerCreateWithoutCustomerStripeAccountsInput = {
+    id?: string
+    name: string
+    email: string
+    phone: string
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    notes?: string | null
+    bookingCount?: number
+    totalSpent?: number
+    lastBooking?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isLead?: boolean
+    status?: string
+    type?: string
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    bookings?: BookingCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerUncheckedCreateWithoutCustomerStripeAccountsInput = {
+    id?: string
+    name: string
+    email: string
+    phone: string
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    notes?: string | null
+    bookingCount?: number
+    totalSpent?: number
+    lastBooking?: Date | string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    isLead?: boolean
+    status?: string
+    type?: string
+    businessId: string
+    bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+  }
+
+  export type CustomerCreateOrConnectWithoutCustomerStripeAccountsInput = {
+    where: CustomerWhereUniqueInput
+    create: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
+  }
+
+  export type BusinessCreateWithoutCustomerStripeAccountsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    logo?: string | null
+    minAdvanceBooking?: number
+    maxAdvanceBooking?: number
+    minimumPurchase?: number
+    timeZone?: string
+    stripeAccountId?: string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: string | null
+    subdomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    onboardingError?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    user: UserCreateNestedOneWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    bookings?: BookingCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    coupons?: CouponCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutCustomerStripeAccountsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    logo?: string | null
+    minAdvanceBooking?: number
+    maxAdvanceBooking?: number
+    minimumPurchase?: number
+    timeZone?: string
+    stripeAccountId?: string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: string | null
+    subdomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    onboardingError?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    userId: string
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutCustomerStripeAccountsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutCustomerStripeAccountsInput, BusinessUncheckedCreateWithoutCustomerStripeAccountsInput>
+  }
+
+  export type CustomerUpsertWithoutCustomerStripeAccountsInput = {
+    update: XOR<CustomerUpdateWithoutCustomerStripeAccountsInput, CustomerUncheckedUpdateWithoutCustomerStripeAccountsInput>
+    create: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
+    where?: CustomerWhereInput
+  }
+
+  export type CustomerUpdateToOneWithWhereWithoutCustomerStripeAccountsInput = {
+    where?: CustomerWhereInput
+    data: XOR<CustomerUpdateWithoutCustomerStripeAccountsInput, CustomerUncheckedUpdateWithoutCustomerStripeAccountsInput>
+  }
+
+  export type CustomerUpdateWithoutCustomerStripeAccountsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingCount?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isLead?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    bookings?: BookingUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type CustomerUncheckedUpdateWithoutCustomerStripeAccountsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    email?: StringFieldUpdateOperationsInput | string
+    phone?: StringFieldUpdateOperationsInput | string
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    notes?: NullableStringFieldUpdateOperationsInput | string | null
+    bookingCount?: IntFieldUpdateOperationsInput | number
+    totalSpent?: FloatFieldUpdateOperationsInput | number
+    lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isLead?: BoolFieldUpdateOperationsInput | boolean
+    status?: StringFieldUpdateOperationsInput | string
+    type?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+  }
+
+  export type BusinessUpsertWithoutCustomerStripeAccountsInput = {
+    update: XOR<BusinessUpdateWithoutCustomerStripeAccountsInput, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
+    create: XOR<BusinessCreateWithoutCustomerStripeAccountsInput, BusinessUncheckedCreateWithoutCustomerStripeAccountsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutCustomerStripeAccountsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutCustomerStripeAccountsInput, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
+  }
+
+  export type BusinessUpdateWithoutCustomerStripeAccountsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    bookings?: BookingUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
+    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    timeZone?: StringFieldUpdateOperationsInput | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    userId?: StringFieldUpdateOperationsInput | string
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type MembershipCreateManyUserInput = {
@@ -28367,6 +33243,36 @@ export namespace Prisma {
     bookingId: string
   }
 
+  export type InvoiceCreateManyBusinessInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId: string
+    bookingId: string
+  }
+
+  export type CustomerStripeAccountCreateManyBusinessInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId: string
+  }
+
   export type InventoryUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     type?: EnumInventoryTypeFieldUpdateOperationsInput | $Enums.InventoryType
@@ -28455,6 +33361,8 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
     waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBusinessInput = {
@@ -28477,6 +33385,8 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutBusinessInput = {
@@ -28528,6 +33438,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutBusinessInput = {
@@ -28559,6 +33470,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateManyWithoutBusinessInput = {
@@ -28757,6 +33669,96 @@ export namespace Prisma {
     bookingId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type InvoiceUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneRequiredWithoutInvoicesNestedInput
+    booking?: BookingUpdateOneRequiredWithoutInvoiceNestedInput
+  }
+
+  export type InvoiceUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CustomerStripeAccountUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customer?: CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    customerId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type MembershipCreateManyOrganizationInput = {
     id?: string
     role: $Enums.Role
@@ -28869,6 +33871,36 @@ export namespace Prisma {
     bookingId: string
   }
 
+  export type InvoiceCreateManyCustomerInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    bookingId: string
+  }
+
+  export type CustomerStripeAccountCreateManyCustomerInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+  }
+
   export type BookingUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
     eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -28898,6 +33930,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutCustomerInput = {
@@ -28929,6 +33962,7 @@ export namespace Prisma {
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
+    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateManyWithoutCustomerInput = {
@@ -28993,6 +34027,96 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InvoiceUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
+    booking?: BookingUpdateOneRequiredWithoutInvoiceNestedInput
+  }
+
+  export type InvoiceUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CustomerStripeAccountUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutCustomerInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type BookingItemCreateManyBookingInput = {

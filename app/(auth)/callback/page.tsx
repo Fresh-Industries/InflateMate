@@ -20,13 +20,13 @@ export default function CallbackPage() {
       const { business, subscription } = await res.json();
 
       // 1. unpaid and onboarded → pricing
-      if (!subscription?.status || !['active','trialing'].includes(subscription.status) && business?.onboarded) {
+      if (!subscription?.status || !['active','trialing'].includes(subscription.status) && business) {
         router.replace('/pricing');
         return;
       }
 
       // 2. not onboarded → onboarding
-      if (!business?.onboarded) {
+      if (!business) {
         router.replace('/onboarding');
         return;
       }

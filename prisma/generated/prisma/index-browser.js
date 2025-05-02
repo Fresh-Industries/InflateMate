@@ -334,6 +334,38 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   updatedAt: 'updatedAt'
 };
 
+exports.Prisma.InvoiceScalarFieldEnum = {
+  id: 'id',
+  stripeInvoiceId: 'stripeInvoiceId',
+  status: 'status',
+  amountDue: 'amountDue',
+  amountPaid: 'amountPaid',
+  amountRemaining: 'amountRemaining',
+  currency: 'currency',
+  invoicePdfUrl: 'invoicePdfUrl',
+  hostedInvoiceUrl: 'hostedInvoiceUrl',
+  issuedAt: 'issuedAt',
+  paidAt: 'paidAt',
+  voidedAt: 'voidedAt',
+  dueAt: 'dueAt',
+  expiresAt: 'expiresAt',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  bookingId: 'bookingId'
+};
+
+exports.Prisma.CustomerStripeAccountScalarFieldEnum = {
+  id: 'id',
+  stripeCustomerId: 'stripeCustomerId',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  customerId: 'customerId',
+  businessId: 'businessId'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -377,6 +409,7 @@ exports.InventoryType = exports.$Enums.InventoryType = {
 
 exports.InventoryStatus = exports.$Enums.InventoryStatus = {
   AVAILABLE: 'AVAILABLE',
+  PENDING: 'PENDING',
   BOOKED: 'BOOKED',
   MAINTENANCE: 'MAINTENANCE',
   RETIRED: 'RETIRED'
@@ -416,6 +449,14 @@ exports.WaiverStatus = exports.$Enums.WaiverStatus = {
   EXPIRED: 'EXPIRED'
 };
 
+exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
+  DRAFT: 'DRAFT',
+  OPEN: 'OPEN',
+  PAID: 'PAID',
+  VOID: 'VOID',
+  UNCOLLECTIBLE: 'UNCOLLECTIBLE'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Business: 'Business',
@@ -429,7 +470,9 @@ exports.Prisma.ModelName = {
   Coupon: 'Coupon',
   SalesFunnel: 'SalesFunnel',
   Waiver: 'Waiver',
-  Subscription: 'Subscription'
+  Subscription: 'Subscription',
+  Invoice: 'Invoice',
+  CustomerStripeAccount: 'CustomerStripeAccount'
 };
 
 /**

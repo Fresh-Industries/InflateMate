@@ -72,13 +72,15 @@ model Business {
   userId String @unique
   user   User   @relation("UserBusiness", fields: [userId], references: [id], onDelete: Cascade)
 
-  inventory    Inventory[]
-  customers    Customer[]
-  bookings     Booking[]
-  payments     Payment[]
-  coupons      Coupon[]
-  salesFunnels SalesFunnel[]
-  waivers      Waiver[]
+  inventory              Inventory[]
+  customers              Customer[]
+  bookings               Booking[]
+  payments               Payment[]
+  coupons                Coupon[]
+  salesFunnels           SalesFunnel[]
+  waivers                Waiver[]
+  invoices               Invoice[]
+  customerStripeAccounts CustomerStripeAccount[]
 
   // One-to-one link to an Organization
   organization Organization? @relation("BusinessOrg")
@@ -172,8 +174,10 @@ model Customer {
   business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
   businessId String
 
-  bookings Booking[]
-  waivers  Waiver[]
+  bookings               Booking[]
+  waivers                Waiver[]
+  invoices               Invoice[]
+  customerStripeAccounts CustomerStripeAccount[]
 
   @@unique([email, businessId])
   @@index([businessId])
@@ -215,6 +219,7 @@ model Booking {
   inventoryItems BookingItem[]
   payments       Payment[]
   waivers        Waiver[]
+  invoice        Invoice?
 
   @@index([businessId])
   @@index([customerId])
@@ -311,6 +316,7 @@ model Waiver {
   booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId  String
 
+  @@unique([customerId, businessId, bookingId])
   @@index([businessId])
   @@index([customerId])
   @@index([bookingId])
@@ -336,6 +342,40 @@ model Subscription {
   @@index([stripeSubscriptionId])
 }
 
+// ADDED: Invoice model
+model Invoice {
+  id               String        @id @default(uuid())
+  stripeInvoiceId  String?       @unique
+  status           InvoiceStatus
+  amountDue        Float
+  amountPaid       Float         @default(0)
+  amountRemaining  Float         @default(0)
+  currency         String
+  invoicePdfUrl    String?
+  hostedInvoiceUrl String?
+  issuedAt         DateTime?
+  paidAt           DateTime?
+  voidedAt         DateTime?
+  dueAt            DateTime?
+  expiresAt        DateTime? // For the 24-hour hold
+  metadata         Json?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId String
+  booking    Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId  String   @unique
+
+  @@index([businessId])
+  @@index([customerId])
+  @@index([bookingId])
+  @@index([status])
+  @@index([stripeInvoiceId])
+}
+
 // Enums
 
 enum InventoryType {
@@ -347,6 +387,7 @@ enum InventoryType {
 
 enum InventoryStatus {
   AVAILABLE
+  PENDING
   BOOKED
   MAINTENANCE
   RETIRED
@@ -384,4 +425,34 @@ enum WaiverStatus {
   SIGNED
   REJECTED
   EXPIRED
+}
+
+// ADDED: InvoiceStatusEnum
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  UNCOLLECTIBLE
+}
+
+// ADDED: Linking table for Customer <-> Business specific Stripe Customer IDs
+model CustomerStripeAccount {
+  id               String   @id @default(uuid())
+  stripeCustomerId String   @unique // The Stripe Customer ID for this specific business relationship
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Foreign Keys & Relations
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  businessId String
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Constraints & Indexes
+  @@unique([customerId, businessId]) // Ensure one Stripe ID per customer per business
+  @@index([customerId])
+  @@index([businessId])
+  @@index([stripeCustomerId])
 }
