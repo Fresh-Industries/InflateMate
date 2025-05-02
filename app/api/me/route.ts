@@ -26,5 +26,5 @@ export async function GET() {
       })
     : null;
 
-  return NextResponse.json({ business, subscription });
+  return NextResponse.json({ business, subscription, orgId });
 }

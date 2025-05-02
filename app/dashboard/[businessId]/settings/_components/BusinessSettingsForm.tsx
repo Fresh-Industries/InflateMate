@@ -4,7 +4,6 @@ import React, { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Autocomplete from "react-google-autocomplete";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,12 +11,12 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info, CreditCard } from "lucide-react";
+import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info, CreditCard, CircleCheck } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "@/components/ui/separator";
 import { useUploadThing } from "@/lib/uploadthing";
 import StripeSettingsForm from "./StripeSettingsForm";
-
+import SubscriptionSettings from "./SubscriptionSettings";
 interface BusinessSettings {
   id: string;
   name: string;
@@ -61,7 +60,6 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
   const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
   const [logoUrl, setLogoUrl] = useState<string | null>(business.logo || null);
   const [isUploading, setIsUploading] = useState(false);
 
@@ -175,7 +173,6 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
-    setSuccessMessage("");
 
     try {
       const formData = new FormData(e.currentTarget);
@@ -210,14 +207,12 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       });
 
       if (response.ok) {
-        setSuccessMessage("Settings saved successfully!");
         toast({
           title: "Success",
           description: "Business settings updated",
           variant: "default",
         });
         router.refresh();
-        setTimeout(() => setSuccessMessage(""), 3000);
       } else {
         console.error("Failed to update settings");
         toast({
@@ -246,8 +241,8 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
     }}>
       <div className="space-y-6">
         <Tabs defaultValue="general" className="w-full">
-          <div className="flex justify-between items-center mb-6">
-            <TabsList className="grid grid-cols-5 w-[500px]">
+          <div className="flex justify-between flex-col-reverse lg:flex-row items-center mb-6">
+            <TabsList className="grid grid-cols-6 sm:mt-3 w-[500px] sm:w-[650px]">
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
                 <span>General</span>
@@ -268,12 +263,16 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                 <CreditCard className="h-4 w-4" />
                 <span>Stripe</span>
               </TabsTrigger>
+              <TabsTrigger value="subscription" className="flex items-center gap-2">
+              <CircleCheck className="h-4 w-4" />
+              <span>Sub</span>
+              </TabsTrigger>
             </TabsList>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 w-full lg:w-auto">
               <Button 
                 type="submit" 
-                className="gap-2"
+                className="gap-2 w-full lg:w-auto"
                 variant="primary-gradient"
                 disabled={isLoading || isUploading}
               >
@@ -290,11 +289,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                 )}
               </Button>
 
-              {successMessage && (
-                <Badge variant="success" className="text-sm py-1 px-3">
-                  {successMessage}
-                </Badge>
-              )}
+            
             </div>
           </div>
 
@@ -720,6 +715,9 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
           </TabsContent>
           <TabsContent value="stripe">
           <StripeSettingsForm />
+        </TabsContent>
+        <TabsContent value="subscription">
+          <SubscriptionSettings />
         </TabsContent>
         </Tabs>
       </div>

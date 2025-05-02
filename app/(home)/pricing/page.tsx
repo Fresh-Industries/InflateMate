@@ -13,15 +13,17 @@ import {
 import { CheckCircle2, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { useOrganization, useAuth } from '@clerk/nextjs'; // Import useOrganization and useAuth
-import { useRouter } from 'next/navigation'; // Import useRouter
+import { useAuth } from '@clerk/nextjs'; // Import useOrganization and useAuth
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 export default function PricingPage() {
-  const [isLoading, setIsLoading] = useState(false);
-  const { organization } = useOrganization();
+  const [isLoading, setIsLoading] = useState(false)
   const { isLoaded, userId } = useAuth();
   const router = useRouter();
   const { toast } = useToast();
+  
+  const searchParams = useSearchParams();
+  const orgId = searchParams.get('orgId');
 
   const handleSubscribe = async () => {
     if (!isLoaded || !userId) {
@@ -29,14 +31,6 @@ export default function PricingPage() {
       return;
     }
 
-    if (!organization) {
-      // If no active organization in Clerk, the user needs to onboard first.
-      // This scenario might happen if a user somehow lands on /pricing after signup
-      // but before completing the onboarding form that creates the organization.
-       console.warn("Attempted subscribe without an active Clerk organization.");
-       router.replace('/onboarding'); // Redirect to onboarding
-       return;
-    }
     
     try {
       
@@ -46,7 +40,7 @@ export default function PricingPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ organizationId: organization.id })
+        body: JSON.stringify({ organizationId: orgId })
       });
       const data = await res.json();
       if (!res.ok) {
@@ -63,6 +57,7 @@ export default function PricingPage() {
 
      // If the response includes a redirect URL (like if they are already subscribed)
      if (data.url && data.url.startsWith('/')) {
+      console.log('Redirecting to:', data.url);
           router.push(data.url); // Navigate within your app
      } else if (data.url) {
        // If the response includes a Stripe checkout URL, redirect the user

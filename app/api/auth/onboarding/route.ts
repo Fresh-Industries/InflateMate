@@ -208,8 +208,8 @@ export async function POST(req: NextRequest) {
         clerkMembershipId: (await org).createdBy || "",
       },
     });
-    
-    
+
+        
 
     await prisma.user.update({
       where: { id: user.id },

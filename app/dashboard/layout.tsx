@@ -217,7 +217,22 @@ function DashboardUI({ children }: { children: React.ReactNode }) {
           );
         })}
       </nav>
-      <OrganizationSwitcher appearance={{ elements: { avatarBox: "w-8 h-8" } }} hidePersonal={true}/>
+      {/* Organization Switcher Section */}
+      <div className="mt-auto p-4 border-t border-gray-100">
+        <OrganizationSwitcher 
+          hidePersonal={true} 
+          appearance={{ 
+            elements: { 
+              avatarBox: "w-8 h-8",
+              organizationSwitcherTrigger: "w-full flex items-center justify-between p-2 rounded-md hover:bg-gray-50 transition-colors",
+              organizationPreviewTextContainer: "text-sm",
+              organizationSwitcherPopoverCard: "shadow-lg border border-gray-100 rounded-xl",
+              organizationSwitcherPopoverActionButton: "text-blue-600 hover:text-blue-700",
+              organizationSwitcherPopoverActionButtonIcon: "text-blue-500"
+            } 
+          }} 
+        />
+      </div>
     </div>
   );
 

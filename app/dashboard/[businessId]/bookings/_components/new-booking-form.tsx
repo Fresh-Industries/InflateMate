@@ -158,6 +158,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [taxRate, setTaxRate] = useState(0);
   const [applyTax, setApplyTax] = useState(false);
   const sheetCloseRef = React.useRef<HTMLButtonElement>(null);
+  const [isInvoicing, setIsInvoicing] = useState(false);
   
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
@@ -306,7 +307,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     if (currentStep === 1 && !validateEventDetails()) return;
     if (currentStep === 2 && !validateCustomerInfo()) return;
     if (currentStep === 3) {
-      handleSubmit();
+      handlePaymentProceed();
       return;
     }
     setCurrentStep((prev) => Math.min(3, prev + 1));
@@ -353,7 +354,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
 
 
   // Modify the handleSubmit function to use UTC dates
-  const handleSubmit = async () => {
+  const handlePaymentProceed = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
@@ -483,6 +484,79 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     }
   };
 
+
+  const handleSendAsInvoice = async () => {
+    if (isInvoicing) return;
+    setIsInvoicing(true); // Set invoicing loading state
+
+    try {
+        const subtotal = calculateSubtotal();
+        const taxAmount = calculateTaxAmount();
+        const total = calculateTotal();
+
+        const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
+          id: item.id,
+          name: item.name,
+          price: item.price,
+          quantity: quantity
+        }));
+
+        const bookingDetails = {
+          ...newBooking, // Include all booking form data
+          selectedItems: selectedItemsArray,
+          subtotalAmount: subtotal,
+          taxAmount: taxAmount,
+          taxRate: taxRate,
+          totalAmount: total,
+          businessId: businessId,
+          bookingId: crypto.randomUUID(), // Generate a booking ID client-side
+          eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Include browser timezone
+        };
+
+        console.log("Sending request to create invoice:", `/api/businesses/${businessId}/invoices`);
+
+        const response = await fetch(`/api/businesses/${businessId}/invoices`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(bookingDetails),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          console.error("Invoice API error:", data.error);
+          throw new Error(data.error || "Failed to create invoice");
+        }
+
+        console.log("Invoice created successfully:", data.invoiceId);
+
+        // Update UI and potentially redirect
+        toast({
+          title: "Invoice Sent",
+          description: `Invoice for ${newBooking.customerName} has been sent. Booking ID: ${data.bookingId}`,
+        });
+
+        // Close the sheet
+        if (sheetCloseRef.current) {
+          sheetCloseRef.current.click();
+        }
+
+        // Redirect to the bookings list page and trigger a refresh
+        router.push(`/dashboard/${businessId}/bookings`);
+
+
+    } catch (error) {
+        console.error("Invoicing error:", error);
+        toast({
+          title: "Error",
+          description: error instanceof Error ? error.message : "Failed to send invoice",
+          variant: "destructive",
+        });
+    } finally {
+        setIsInvoicing(false); // Reset invoicing loading state
+    }
+  };
+
   // Add a function to handle successful payment
   const handlePaymentSuccess = async () => {
     // Close the sheet
@@ -509,10 +583,10 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   }, [newBooking.eventDate, newBooking.startTime, newBooking.endTime]);
 
   // Show loading or error states when needed
-  if (showPaymentForm && isSubmitting) {
+  if (isSubmitting || isInvoicing) {
     return (
       <div className="space-y-4 text-center p-6 border rounded-lg">
-        <h2 className="text-2xl font-semibold">Preparing Payment...</h2>
+        <h2 className="text-2xl font-semibold">{ isInvoicing ? "Preparing Invoice..." : "Preparing Payment..."}</h2>
         <div className="flex justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
@@ -520,7 +594,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     );
   }
 
-  if (showPaymentForm && clientSecret && pendingBookingData) {
+  if (showPaymentForm && clientSecret && pendingBookingData ) {
     // Make sure we have the business data with Stripe information
     if (!businessData) {
       return (
@@ -1137,33 +1211,57 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         )}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between mt-8">
+{/* Navigation Buttons */}
+       {/* Modify buttons to show 'Send as Invoice' on Step 3 */}
+       <div className="flex justify-between mt-8">
         {currentStep > 1 ? (
-          <Button onClick={handleBack} variant="outline">
+          <Button onClick={handleBack} variant="outline" disabled={isSubmitting || isInvoicing}>
             <ChevronLeft className="mr-2 h-4 w-4" /> Back
           </Button>
         ) : (
-          <div />
+          <div /> // Empty div to maintain space
         )}
-        <Button onClick={handleNext} disabled={isSubmitting} variant="primary-gradient">
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : currentStep === 3 ? (
-            <>
-              Proceed to Payment
-              <CreditCard className="ml-2 h-4 w-4" />
-            </>
-          ) : (
-            <>
-              Continue
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
+
+        {currentStep < 3 ? (
+          <Button onClick={handleNext} disabled={isSubmitting || isInvoicing} variant="primary-gradient" className="ml-auto"> {/* Use ml-auto to push to the right if only one button */}
+             Continue
+             <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        ) : (
+           <div className="flex gap-4 ml-auto"> {/* Container for both buttons */}
+              <Button
+                  onClick={handleSendAsInvoice}
+                  disabled={isSubmitting || isInvoicing}
+                  variant="outline" // Or a secondary variant
+              >
+                  {isInvoicing ? (
+                     <>
+                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                       Sending...
+                     </>
+                  ) : (
+                     "Send as Invoice"
+                  )}
+              </Button>
+              <Button
+                  onClick={handlePaymentProceed}
+                  disabled={isSubmitting || isInvoicing}
+                  variant="primary-gradient"
+              >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                       Proceed to Payment
+                       <CreditCard className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+              </Button>
+           </div>
+        )}
       </div>
     </div>
   );

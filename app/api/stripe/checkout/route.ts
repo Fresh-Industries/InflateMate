@@ -14,6 +14,7 @@ export async function POST(req: Request) {
   const body = await req.json();
   const { organizationId } = body; // Expect the internal organizationId
 
+  console.log('organizationId', organizationId);
   if (!organizationId) {
      return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
   }
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
      subscription_data: {
       metadata: {
          internalOrganizationId: organization.id, // Pass internal Organization ID
-         clerkOrgId: organization.clerkOrgId, // Pass Clerk Org ID
+         clerkOrgId: organizationId, // Pass Clerk Org ID
          clerkUserId: userId, // Pass Clerk User ID (optional, but can be helpful)
        },
      },
@@ -92,7 +93,7 @@ export async function POST(req: Request) {
     payment_method_types: ['card'],
     metadata: {
        internalOrganizationId: organization.id, // Pass internal Organization ID
-       clerkOrgId: organization.clerkOrgId, // Pass Clerk Org ID
+       clerkOrgId: organizationId, // Pass Clerk Org ID
        clerkUserId: userId, // Pass Clerk User ID
     },
   });

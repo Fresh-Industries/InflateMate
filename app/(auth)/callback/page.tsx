@@ -19,13 +19,13 @@ export default function CallbackPage() {
       const res = await fetch('/api/me');
       const { business, subscription } = await res.json();
 
-      // 1. unpaid → pricing
-      if (!subscription?.status || !['active','trialing'].includes(subscription.status)) {
+      // 1. unpaid and onboarded → pricing
+      if (!subscription?.status || !['active','trialing'].includes(subscription.status) && business?.onboarded) {
         router.replace('/pricing');
         return;
       }
 
-      // 2. paid but not onboarded → onboarding
+      // 2. not onboarded → onboarding
       if (!business?.onboarded) {
         router.replace('/onboarding');
         return;
@@ -33,6 +33,8 @@ export default function CallbackPage() {
 
       // 3. paid & onboarded → dashboard
       router.replace(`/dashboard/${business.id}`);
+
+      
     })();
   }, [isLoaded, userId, router]);
   return (
