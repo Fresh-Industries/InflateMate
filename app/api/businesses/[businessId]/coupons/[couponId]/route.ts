@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -41,49 +41,32 @@ export async function GET(
   const params = await props.params;
   try {
     const { businessId, couponId } = params;
-    const user = await getCurrentUser();
-    
+    const user = await getCurrentUserWithOrgAndBusiness();
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const coupon = await prisma.coupon.findUnique({
-          where: {
-            id: couponId,
-            businessId: business.id,
-          },
-        });
-
-        if (!coupon) {
-          throw new Error("Coupon not found");
-        }
-
-        return coupon;
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json(result.data);
+    const coupon = await prisma.coupon.findUnique({
+      where: {
+        id: couponId,
+        businessId: businessId,
+      },
+    });
+
+    if (!coupon) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(coupon);
   } catch (error) {
     console.error("Error fetching coupon:", error);
-    
-    if (error instanceof Error && error.message === "Coupon not found") {
-      return NextResponse.json(
-        { error: "Coupon not found" },
-        { status: 404 }
-      );
-    }
-    
     return NextResponse.json(
       { error: "Failed to fetch coupon" },
       { status: 500 }
@@ -99,92 +82,66 @@ export async function PATCH(
   const params = await props.params;
   try {
     const { businessId, couponId } = params;
-    const user = await getCurrentUser();
-    
+    const user = await getCurrentUserWithOrgAndBusiness();
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const body = await req.json();
-    
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const validatedData = updateCouponSchema.parse(body);
+    const validatedData = updateCouponSchema.parse(body);
 
-        // Check if the coupon exists
-        const existingCoupon = await prisma.coupon.findUnique({
-          where: {
-            id: couponId,
-            businessId: business.id,
-          },
-        });
+    // Check if the coupon exists
+    const existingCoupon = await prisma.coupon.findUnique({
+      where: {
+        id: couponId,
+        businessId: businessId,
+      },
+    });
 
-        if (!existingCoupon) {
-          throw new Error("Coupon not found");
-        }
-
-        // If code is being updated, check if it already exists
-        if (validatedData.code && validatedData.code !== existingCoupon.code) {
-          const codeExists = await prisma.coupon.findUnique({
-            where: {
-              code_businessId: {
-                code: validatedData.code,
-                businessId: business.id,
-              },
-            },
-          });
-
-          if (codeExists) {
-            throw new Error("Coupon code already exists");
-          }
-        }
-
-        const coupon = await prisma.coupon.update({
-          where: {
-            id: couponId,
-            businessId: business.id,
-          },
-          data: validatedData,
-        });
-
-        return coupon;
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    if (!existingCoupon) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
     }
 
-    return NextResponse.json(result.data);
+    // If code is being updated, check if it already exists
+    if (validatedData.code && validatedData.code !== existingCoupon.code) {
+      const codeExists = await prisma.coupon.findUnique({
+        where: {
+          code_businessId: {
+            code: validatedData.code,
+            businessId: businessId,
+          },
+        },
+      });
+
+      if (codeExists) {
+        return NextResponse.json({ error: "Coupon code already exists" }, { status: 400 });
+      }
+    }
+
+    const coupon = await prisma.coupon.update({
+      where: {
+        id: couponId,
+        businessId: businessId,
+      },
+      data: validatedData,
+    });
+
+    return NextResponse.json(coupon);
   } catch (error) {
     console.error("Error updating coupon:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid input", details: error.errors },
         { status: 400 }
       );
-    }
-    
-    if (error instanceof Error) {
-      if (error.message === "Coupon not found") {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 404 }
-        );
-      }
-      
-      if (error.message === "Coupon code already exists") {
-        return NextResponse.json(
-          { error: error.message },
-          { status: 400 }
-        );
-      }
     }
 
     return NextResponse.json(
@@ -202,61 +159,44 @@ export async function DELETE(
   const params = await props.params;
   try {
     const { businessId, couponId } = params;
-    const user = await getCurrentUser();
-    
+    const user = await getCurrentUserWithOrgAndBusiness();
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        // Check if the coupon exists
-        const existingCoupon = await prisma.coupon.findUnique({
-          where: {
-            id: couponId,
-            businessId: business.id,
-          },
-        });
-
-        if (!existingCoupon) {
-          throw new Error("Coupon not found");
-        }
-
-        // Delete the coupon
-        await prisma.coupon.delete({
-          where: {
-            id: couponId,
-            businessId: business.id,
-          },
-        });
-
-        return { success: true };
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json(result.data);
+    // Check if the coupon exists
+    const existingCoupon = await prisma.coupon.findUnique({
+      where: {
+        id: couponId,
+        businessId: businessId,
+      },
+    });
+
+    if (!existingCoupon) {
+      return NextResponse.json({ error: "Coupon not found" }, { status: 404 });
+    }
+
+    // Delete the coupon
+    await prisma.coupon.delete({
+      where: {
+        id: couponId,
+        businessId: businessId,
+      },
+    });
+
+    return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error deleting coupon:", error);
-    
-    if (error instanceof Error && error.message === "Coupon not found") {
-      return NextResponse.json(
-        { error: "Coupon not found" },
-        { status: 404 }
-      );
-    }
-    
     return NextResponse.json(
       { error: "Failed to delete coupon" },
       { status: 500 }
     );
   }
-} 
+}

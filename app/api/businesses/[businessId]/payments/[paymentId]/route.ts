@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
-import { withBusinessAuth } from "@/lib/auth/clerk-utils";
 
 /**
  * GET a single payment by ID
@@ -12,67 +11,70 @@ export async function GET(
 ) {
   const params = await props.params;
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    const user = await getCurrentUserWithOrgAndBusiness();
+    if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const { businessId, paymentId } = params;
-    
-    const result = await withBusinessAuth(businessId, userId, async () => {
-      const payment = await prisma.payment.findFirst({
-        where: {
-          id: paymentId,
-          businessId,
-        },
-        include: {
-          booking: {
-            include: {
-              customer: {
-                select: {
-                  id: true,
-                  name: true,
-                  email: true,
-                  phone: true,
-                }
-              },
-              inventoryItems: {
-                include: {
-                  inventory: true,
-                }
+
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    const payment = await prisma.payment.findFirst({
+      where: {
+        id: paymentId,
+        businessId,
+      },
+      include: {
+        booking: {
+          include: {
+            customer: {
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+              }
+            },
+            inventoryItems: {
+              include: {
+                inventory: true,
               }
             }
-          },
+          }
+        },
+      },
+    });
+
+    if (!payment) {
+      return NextResponse.json({ error: "Payment not found" }, { status: 404 });
+    }
+
+    // If this is a refund, get the original payment
+    let originalPayment = null;
+    if (
+      payment.type === "REFUND" &&
+      payment.metadata &&
+      typeof payment.metadata === "object" &&
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (payment.metadata as any).originalPaymentId
+    ) {
+      originalPayment = await prisma.payment.findUnique({
+        where: {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          id: (payment.metadata as any).originalPaymentId,
         },
       });
-      
-      if (!payment) {
-        return { error: "Payment not found" };
-      }
-      
-      // If this is a refund, get the original payment
-      let originalPayment = null;
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      if (payment.type === "REFUND" && payment.metadata && (payment.metadata as any).originalPaymentId) {
-        originalPayment = await prisma.payment.findUnique({
-          where: {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            id: (payment.metadata as any).originalPaymentId,
-          },
-        });
-      }
-      
-      return {
-        data: payment,
-        originalPayment,
-      };
-    });
-    
-    if ("error" in result) {
-      return NextResponse.json({ error: result.error }, { status: 404 });
     }
-    
-    return NextResponse.json(result);
+
+    return NextResponse.json({
+      data: payment,
+      originalPayment,
+    });
   } catch (error) {
     console.error("Error in get payment route:", error);
     return NextResponse.json(
@@ -80,4 +82,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

@@ -1,5 +1,5 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { getCurrentUser } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 
 const f = createUploadthing();
 
@@ -19,7 +19,7 @@ export const ourFileRouter = {
     // Set permissions and file types for this FileRoute
     .middleware(async () => {
       // This code runs on your server before upload
-      const user = await getCurrentUser();
+      const user = await getCurrentUserWithOrgAndBusiness();
 
       // If you throw, the user will not be able to upload
       if (!user) throw new Error("Unauthorized");
@@ -49,7 +49,7 @@ export const ourFileRouter = {
       // Set permissions and file types for this FileRoute
       .middleware(async () => {
         // This code runs on your server before upload
-        const user = await getCurrentUser();
+        const user = await getCurrentUserWithOrgAndBusiness();
   
         // If you throw, the user will not be able to upload
         if (!user) throw new Error("Unauthorized");
@@ -73,7 +73,7 @@ export const ourFileRouter = {
     },
   })
     .middleware(async () => {
-      const user = await getCurrentUser();
+      const user = await getCurrentUserWithOrgAndBusiness();
       if (!user) throw new Error("Unauthorized");
       return { userId: user.id };
     })
@@ -86,7 +86,7 @@ export const ourFileRouter = {
   // PDF document uploader for waivers and other documents
   documentUploader: f({ pdf: { maxFileSize: "8MB", maxFileCount: 1 } })
     .middleware(async () => {
-      const user = await getCurrentUser();
+      const user = await getCurrentUserWithOrgAndBusiness();
       if (!user) throw new Error("Unauthorized");
       return { userId: user.id };
     })

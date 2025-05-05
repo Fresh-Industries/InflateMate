@@ -15,18 +15,14 @@ enum Role {
 }
 
 model User {
-  id          String   @id @default(cuid())
-  email       String?  @unique
+  id          String      @id @default(cuid())
+  email       String?     @unique
   name        String?
   image       String?
-  onboarded   Boolean  @default(false)
-  clerkUserId String?  @unique
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now())
-
-  business Business? @relation("UserBusiness")
-
-  memberships Membership[]
+  clerkUserId String?     @unique
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @default(now())
+  membership  Membership?
 
   @@index([email])
 }
@@ -44,6 +40,7 @@ model Business {
   phone       String?
   email       String?
   serviceArea String[] @default([])
+  onboarded   Boolean  @default(false)
 
   // Brand assets
   logo String?
@@ -67,11 +64,6 @@ model Business {
   createdAt DateTime @default(now())
   updatedAt DateTime @default(now())
 
-  // ← ONE-TO-ONE: each business belongs to exactly one user,
-  //     and userId is unique so no other business can point at that user
-  userId String @unique
-  user   User   @relation("UserBusiness", fields: [userId], references: [id], onDelete: Cascade)
-
   inventory              Inventory[]
   customers              Customer[]
   bookings               Booking[]
@@ -82,10 +74,8 @@ model Business {
   invoices               Invoice[]
   customerStripeAccounts CustomerStripeAccount[]
 
-  // One-to-one link to an Organization
-  organization Organization? @relation("BusinessOrg")
-
-  @@index([userId])
+  organizationId String       @unique
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 }
 
 model Organization {
@@ -95,9 +85,7 @@ model Organization {
   createdAt  DateTime @default(now())
   updatedAt  DateTime @default(now())
 
-  businessId String   @unique
-  business   Business @relation("BusinessOrg", fields: [businessId], references: [id], onDelete: Cascade)
-
+  business     Business?
   memberships  Membership[]
   subscription Subscription?
 
@@ -111,13 +99,12 @@ model Membership {
   updatedAt         DateTime @default(now())
   clerkMembershipId String   @unique
 
-  userId String
+  userId String @unique
   user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   organizationId String
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, organizationId])
   @@index([userId])
   @@index([organizationId])
 }

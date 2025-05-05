@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -18,51 +18,45 @@ const updateCustomerSchema = z.object({
 
 export async function PATCH(
   req: NextRequest,
-  { params }: { params: Promise<{ businessId: string, customerId: string }>}
+  { params }: { params: Promise<{ businessId: string, customerId: string }> }
 ) {
   try {
     const { businessId, customerId } = await params;
-    const user = await getCurrentUser();
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const body = await req.json();
-        const validatedData = updateCustomerSchema.parse(body);
-
-        const customer = await prisma.customer.update({
-          where: {
-            id: customerId,
-            businessId: business.id,
-          },
-          data: validatedData,
-          include: {
-            bookings: {
-              orderBy: {
-                eventDate: 'desc'
-              },
-              take: 1,
-            },
-          },
-        });
-
-        return {
-          ...customer,
-          type: customer.type as "Regular" | "VIP",
-          lastBooking: customer.bookings[0]?.eventDate || null,
-        };
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json(result.data);
+    const body = await req.json();
+    const validatedData = updateCustomerSchema.parse(body);
+
+    const customer = await prisma.customer.update({
+      where: {
+        id: customerId,
+        businessId: businessId,
+      },
+      data: validatedData,
+      include: {
+        bookings: {
+          orderBy: {
+            eventDate: 'desc'
+          },
+          take: 1,
+        },
+      },
+    });
+
+    return NextResponse.json({
+      ...customer,
+      type: customer.type as "Regular" | "VIP",
+      lastBooking: customer.bookings[0]?.eventDate || null,
+    });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -81,81 +75,76 @@ export async function PATCH(
 
 export async function DELETE(
   req: NextRequest,
-  { params }: { params: Promise<{ businessId: string, customerId: string }>}
+  { params }: { params: Promise<{ businessId: string, customerId: string }> }
 ) {
   try {
     const { businessId, customerId } = await params;
-    const user = await getCurrentUser();
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        // Check if customer has any upcoming bookings
-        const upcomingBookings = await prisma.booking.findFirst({
-          where: {
-            customerId,
-            businessId: business.id,
-            eventDate: {
-              gte: new Date(),
-            },
-            status: {
-              notIn: ["CANCELLED", "COMPLETED", "NO_SHOW"],
-            },
-          },
-        });
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
 
-        // If customer has upcoming bookings, prevent deletion
-        if (upcomingBookings) {
-          return { message: "Cannot delete customer with upcoming bookings", success: false };
-        }
+    // Check if customer has any upcoming bookings
+    const upcomingBookings = await prisma.booking.findFirst({
+      where: {
+        customerId,
+        businessId,
+        eventDate: {
+          gte: new Date(),
+        },
+        status: {
+          notIn: ["CANCELLED", "COMPLETED", "NO_SHOW"],
+        },
+      },
+    });
 
-        // Check if customer has any past bookings
-        const pastBookings = await prisma.booking.findFirst({
-          where: {
-            customerId,
-            businessId: business.id,
-          },
-        });
+    if (upcomingBookings) {
+      return NextResponse.json(
+        { error: "Cannot delete customer with upcoming bookings" },
+        { status: 400 }
+      );
+    }
 
-        // If customer has past bookings, set status to inactive instead of deleting
-        if (pastBookings) {
-          await prisma.customer.update({
-            where: {
-              id: customerId,
-              businessId: business.id,
-            },
-            data: {
-              status: "Inactive",
-            },
-          });
-          return { message: "Customer marked as inactive", success: true };
-        }
+    // Check if customer has any past bookings
+    const pastBookings = await prisma.booking.findFirst({
+      where: {
+        customerId,
+        businessId,
+      },
+    });
 
-        // If no bookings, proceed with deletion
-        await prisma.customer.delete({
-          where: {
-            id: customerId,
-            businessId: business.id,
-          },
-        });
+    if (pastBookings) {
+      await prisma.customer.update({
+        where: {
+          id: customerId,
+          businessId,
+        },
+        data: {
+          status: "Inactive",
+        },
+      });
+      return NextResponse.json(
+        { message: "Customer marked as inactive", success: true }
+      );
+    }
 
-        return { message: "Customer deleted successfully", success: true };
-      }
+    // If no bookings, proceed with deletion
+    await prisma.customer.delete({
+      where: {
+        id: customerId,
+        businessId,
+      },
+    });
+
+    return NextResponse.json(
+      { message: "Customer deleted successfully", success: true }
     );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
-    }
-
-    if (result.data && !result.data.success) {
-      return NextResponse.json({ error: result.data.message }, { status: 400 });
-    }
-
-    return NextResponse.json(result.data);
   } catch (error) {
     console.error("Error deleting customer:", error);
     return NextResponse.json(
@@ -163,4 +152,4 @@ export async function DELETE(
       { status: 500 }
     );
   }
-} 
+}

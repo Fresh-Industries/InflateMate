@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { sendCouponEmail } from "@/lib/sendEmail";
@@ -139,37 +139,32 @@ export async function GET(
 ) {
   try {
     const { businessId } = await params;
-    const user = await getCurrentUser();
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const customers = await prisma.customer.findMany({
-          where: { businessId: business.id, isLead: true },
-          select: {
-            id: true,
-            name: true,
-            email: true,
-            phone: true,
-            createdAt: true,
-          },
-          orderBy: {
-            createdAt: 'desc',
-          }
-        });
-        return customers;
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json(result.data);
+    const customers = await prisma.customer.findMany({
+      where: { businessId, isLead: true },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        createdAt: true,
+      },
+      orderBy: {
+        createdAt: 'desc',
+      }
+    });
+
+    return NextResponse.json(customers);
   } catch (error) {
     console.error("Error fetching leads:", error);
     return NextResponse.json(
@@ -177,4 +172,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

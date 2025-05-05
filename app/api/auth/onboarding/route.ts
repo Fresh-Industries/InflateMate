@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe-server";
 import { z } from "zod";
@@ -7,7 +7,6 @@ import Stripe from "stripe";
 import { addDomainToVercel } from "@/lib/vercel";
 import { createCnameInCloudflare } from "@/lib/cloudflare";
 import { clerkClient } from "@clerk/nextjs/server";
-import { redirect } from "next/navigation";
 
 function generateSlug(name: string): string {
   return name
@@ -51,21 +50,10 @@ const businessSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    console.log(userId);
-    if (!userId) {
+    const user = await getCurrentUserWithOrgAndBusiness();
+    if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-       include: { business: { include: { organization: true } } }, // Include related business and org
-    });
-
-    if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
-    }
-
     // Ensure clerkUserId exists before proceeding
     if (!user.clerkUserId) {
       console.error("User found in DB but missing clerkUserId:", user.id);
@@ -73,8 +61,8 @@ export async function POST(req: NextRequest) {
     }
 
      // Prevent re-onboarding if the user is already linked to a business/organization
-     if (user.business?.organization) {
-         redirect(`/dashboard/${user.business.id}`)
+     if (user.membership?.organization?.business) {
+        return NextResponse.redirect(`/dashboard/${user.membership?.organization?.business?.id}`)
      }
 
     const body = await req.json();
@@ -165,28 +153,8 @@ export async function POST(req: NextRequest) {
       finalSubdomain = `error-${generateSlug(validatedData.businessName)}`; 
     }
 
-    const business = await prisma.business.create({
-      data: {
-        name: validatedData.businessName,
-        address: validatedData.businessAddress,
-        city: validatedData.businessCity,
-        state: validatedData.businessState,
-        zipCode: validatedData.businessZip,
-        phone: validatedData.businessPhone.replace(/\D/g, ""),
-        email: user.email,
-        userId: user.id,
-        stripeAccountId: account.id,
-        subdomain: finalSubdomain,
-        onboardingError: onboardingErrorMessage,
-        minAdvanceBooking: 24,
-        maxAdvanceBooking: 90,
-        minimumPurchase: 100,
-        siteConfig: {},
-      },
-    });
-
-    // Correctly await the organization creation
-    const org = (await clerkClient()).organizations.createOrganization({
+    const clerk = await clerkClient();
+    const org = clerk.organizations.createOrganization({
       name: validatedData.businessName,
       createdBy: user.clerkUserId,
     });
@@ -196,7 +164,6 @@ export async function POST(req: NextRequest) {
       data: {
         clerkOrgId: (await org).id,
         name: validatedData.businessName,
-        businessId: business.id,
       },
     });
 
@@ -209,12 +176,31 @@ export async function POST(req: NextRequest) {
       },
     });
 
-        
-
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { onboarded: true },
+    const business = await prisma.business.create({
+      data: {
+        name: validatedData.businessName,
+        address: validatedData.businessAddress,
+        city: validatedData.businessCity,
+        state: validatedData.businessState,
+        zipCode: validatedData.businessZip,
+        phone: validatedData.businessPhone.replace(/\D/g, ""),
+        email: user.email,
+        onboarded: true,
+        stripeAccountId: account.id,
+        subdomain: finalSubdomain,
+        onboardingError: onboardingErrorMessage,
+        minAdvanceBooking: 24,
+        maxAdvanceBooking: 90,
+        minimumPurchase: 100,
+        siteConfig: {},
+        organization: {
+          connect: {
+            id: localOrg.id,
+          },
+        },
+      },
     });
+
 
     return NextResponse.json({
       orgId: (await org).id,

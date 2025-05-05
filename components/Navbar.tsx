@@ -7,69 +7,59 @@ import { Button } from "@/components/ui/button";
 import { Menu, X, ChevronDown, Star, Zap, LifeBuoy } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 
-interface Business {
-  id: string;
-  name: string;
-}
-
 const navItems = [
-  { 
-    label: "Features", 
-    href: "/features",
-    icon: <Star className="w-4 h-4" />
-  },
-  { 
-    label: "Pricing", 
-    href: "/pricing",
-    icon: <Zap className="w-4 h-4" />
-  },
-  { 
-    label: "Resources", 
-    href: "/resources",
-    icon: <LifeBuoy className="w-4 h-4" />
-  },
+  { label: "Features", href: "/features", icon: <Star className="w-4 h-4" /> },
+  { label: "Pricing", href: "/pricing", icon: <Zap className="w-4 h-4" /> },
+  { label: "Resources", href: "/resources", icon: <LifeBuoy className="w-4 h-4" /> },
 ];
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [userBusinesses, setUserBusinesses] = useState<Business[]>([]);
+  const [dashboardHref, setDashboardHref] = useState("/dashboard");
   const [loading, setLoading] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const { isLoaded, userId } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   useEffect(() => {
-    async function fetchUserBusinesses() {
+    async function fetchUserStatus() {
       if (!userId) {
         setLoading(false);
         return;
       }
-
-      
-
-      
       try {
-        const response = await fetch('/api/businesses');
+        const response = await fetch('/api/me');
         if (response.ok) {
-          const businesses = await response.json();
-          setUserBusinesses(businesses);
+          const data = await response.json();
+          // 1. Not onboarded
+          if (!data.business) {
+            setDashboardHref("/onboarding");
+          }
+          // 2. Onboarded but not subscribed
+          else if (
+            !data.subscription?.status ||
+            !["active", "trialing"].includes(data.subscription.status)
+          ) {
+            setDashboardHref(`/pricing?orgId=${data.orgId}`);
+          }
+          // 3. Onboarded and subscribed
+          else {
+            setDashboardHref(`/dashboard/${data.business.id}`);
+          }
         }
       } catch (error) {
-        console.error("Error fetching user businesses:", error);
+        console.error("Error fetching user status:", error);
       } finally {
         setLoading(false);
       }
     }
-
     if (isLoaded) {
-      fetchUserBusinesses();
+      fetchUserStatus();
     }
   }, [isLoaded, userId]);
 
@@ -124,16 +114,11 @@ export default function Navbar() {
             {isLoadingUser ? (
               <div className="h-10 w-24 bg-gradient-to-r from-blue-100 to-purple-100 animate-pulse rounded-full"></div>
             ) : userId ? (
-              <>
-                <Link href={userBusinesses.length > 0 
-                  ? `/dashboard/${userBusinesses[0].id}` 
-                  : "/onboarding"}
-                >
-                  <Button variant="ghost" className="h-12 px-6 rounded-full hover:bg-blue-50 border border-blue-100/50 shadow-sm">
-                    Dashboard
-                  </Button>
-                </Link>
-              </>
+              <Link href={dashboardHref}>
+                <Button variant="ghost" className="h-12 px-6 rounded-full hover:bg-blue-50 border border-blue-100/50 shadow-sm">
+                  Dashboard
+                </Button>
+              </Link>
             ) : (
               <>
                 <Link href="/sign-in">
@@ -188,10 +173,7 @@ export default function Navbar() {
               {isLoadingUser ? (
                 <div className="h-14 bg-gradient-to-r from-blue-100 to-purple-100 animate-pulse rounded-xl"></div>
               ) : userId ? (
-                <Link href={userBusinesses.length > 0 
-                  ? `/dashboard/${userBusinesses[0].id}` 
-                  : "/onboarding"}
-                >
+                <Link href={dashboardHref}>
                   <Button variant="ghost" className="w-full justify-center h-14 rounded-xl border border-blue-100 shadow-sm">
                     Dashboard
                   </Button>

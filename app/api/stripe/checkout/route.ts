@@ -1,4 +1,3 @@
-// app/api/stripe/checkout/route.ts
 import { NextResponse } from 'next/server';
 import { auth } from '@clerk/nextjs/server';
 import { prisma } from '@/lib/prisma';
@@ -10,91 +9,88 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-
   const body = await req.json();
   const { organizationId } = body; // Expect the internal organizationId
 
-  console.log('organizationId', organizationId);
   if (!organizationId) {
-     return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
+    return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
   }
 
-  // 1️⃣ load org → include business.user & existing subscription
+  // 1️⃣ Load org, include business, memberships, and subscription
   const organization = await prisma.organization.findUnique({
     where: { clerkOrgId: organizationId },
     include: {
-      business: { include: { user: true } },
+      business: true,
       memberships: { include: { user: true } },
       subscription: true,
     },
   });
+
   // Verify the organization exists and the user is a member
-  if (!organization || organization.memberships.length === 0) {
+  const isMember = organization?.memberships.some(m => m.user.clerkUserId === userId);
+  if (!organization || !isMember) {
     return NextResponse.json({ error: 'Organization not found or user not a member' }, { status: 404 });
   }
 
   // If a subscription already exists and is active/trialing, redirect
   if (organization.subscription && ['active', 'trialing'].includes(organization.subscription.status)) {
-      // Redirect to the dashboard or a page indicating they are already subscribed
-       return NextResponse.json({ url: `/dashboard/${organization.business?.id}` }); // Assume business exists after onboarding
-   }
+    return NextResponse.json({ url: `/dashboard/${organization.business?.id}` });
+  }
 
-   // Find or create the Stripe Customer for this Organization
+  // 2️⃣ Find or create the Stripe Customer for this Organization
   let customerId = organization.subscription?.stripeCustomerId;
 
   if (!customerId) {
-    const owner = organization.business?.user; // Get the founding user details
+    // Use the first member as the "owner" for Stripe customer info
+    const owner = organization.memberships[0]?.user;
 
     const customer = await stripe.customers.create({
       email: owner?.email ?? undefined,
       name: owner?.name ?? undefined,
       metadata: {
-        internalOrganizationId: organization.id, // Link Stripe Customer to internal Organization ID
-        clerkOrgId: organization.clerkOrgId, // Include Clerk Org ID
+        internalOrganizationId: organization.id,
+        clerkOrgId: organization.clerkOrgId,
       },
     });
     customerId = customer.id;
 
     // Create/Upsert a placeholder Subscription record linked to the Organization
-     await prisma.subscription.upsert({
-       where: { organizationId: organization.id }, // Key on internal organizationId
-       create: {
-         organizationId: organization.id,
-         stripeCustomerId: customerId,
-         stripeSubscriptionId: '',
-         status: 'incomplete', // Initial status
-         priceId: '',
-         currentPeriodStart: new Date(0),
-         currentPeriodEnd: new Date(0),
-         cancelAtPeriodEnd: false,
-       },
-       update: { stripeCustomerId: customerId }, // If it existed for some reason, update customer ID
-     });
+    await prisma.subscription.upsert({
+      where: { organizationId: organization.id },
+      create: {
+        organizationId: organization.id,
+        stripeCustomerId: customerId,
+        stripeSubscriptionId: '',
+        status: 'incomplete',
+        priceId: '',
+        currentPeriodStart: new Date(0),
+        currentPeriodEnd: new Date(0),
+        cancelAtPeriodEnd: false,
+      },
+      update: { stripeCustomerId: customerId },
+    });
   }
 
-
-  // 3️⃣ create Checkout Session
-  const priceId = process.env.STRIPE_PRICE_ID!; // Ensure this is set
-
+  // 3️⃣ Create Checkout Session
+  const priceId = process.env.STRIPE_PRICE_ID!;
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
     line_items: [{ price: priceId, quantity: 1 }],
-     subscription_data: {
+    subscription_data: {
       metadata: {
-         internalOrganizationId: organization.id, // Pass internal Organization ID
-         clerkOrgId: organizationId, // Pass Clerk Org ID
-         clerkUserId: userId, // Pass Clerk User ID (optional, but can be helpful)
-       },
-     },
-    // Set success_url and cancel_url to redirect back to your application
-    success_url: `${process.env.NEXT_PUBLIC_API_HOST}/api/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${process.env.NEXT_PUBLIC_API_HOST}/pricing`, // Redirect back to pricing if canceled
+        internalOrganizationId: organization.id,
+        clerkOrgId: organizationId,
+        clerkUserId: userId,
+      },
+    },
+    success_url: `${process.env.NEXT_PUBLIC_API_HOST}/callback`,
+    cancel_url: `${process.env.NEXT_PUBLIC_API_HOST}/pricing`,
     payment_method_types: ['card'],
     metadata: {
-       internalOrganizationId: organization.id, // Pass internal Organization ID
-       clerkOrgId: organizationId, // Pass Clerk Org ID
-       clerkUserId: userId, // Pass Clerk User ID
+      internalOrganizationId: organization.id,
+      clerkOrgId: organizationId,
+      clerkUserId: userId,
     },
   });
 

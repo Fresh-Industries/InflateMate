@@ -125,7 +125,6 @@ exports.Prisma.UserScalarFieldEnum = {
   email: 'email',
   name: 'name',
   image: 'image',
-  onboarded: 'onboarded',
   clerkUserId: 'clerkUserId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
@@ -142,6 +141,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   phone: 'phone',
   email: 'email',
   serviceArea: 'serviceArea',
+  onboarded: 'onboarded',
   logo: 'logo',
   minAdvanceBooking: 'minAdvanceBooking',
   maxAdvanceBooking: 'maxAdvanceBooking',
@@ -155,7 +155,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   onboardingError: 'onboardingError',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  userId: 'userId'
+  organizationId: 'organizationId'
 };
 
 exports.Prisma.OrganizationScalarFieldEnum = {
@@ -163,8 +163,7 @@ exports.Prisma.OrganizationScalarFieldEnum = {
   clerkOrgId: 'clerkOrgId',
   name: 'name',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  businessId: 'businessId'
+  updatedAt: 'updatedAt'
 };
 
 exports.Prisma.MembershipScalarFieldEnum = {

@@ -17,22 +17,26 @@ export default function CallbackPage() {
 
     (async () => {
       const res = await fetch('/api/me');
-      const { business, subscription } = await res.json();
-
+      
+      const data = await res.json();
+      console.log(data);
       // 1. unpaid and onboarded → pricing
-      if (!subscription?.status || !['active','trialing'].includes(subscription.status) && business) {
-        router.replace('/pricing');
+      if (
+        data.business &&
+        (!data.subscription?.status || !['active', 'trialing'].includes(data.subscription.status))
+      ) {
+        router.replace(`/pricing?orgId=${data.orgId}`);
         return;
       }
 
       // 2. not onboarded → onboarding
-      if (!business) {
+      if (!data.business) {
         router.replace('/onboarding');
         return;
       }
 
       // 3. paid & onboarded → dashboard
-      router.replace(`/dashboard/${business.id}`);
+      router.replace(`/dashboard/${data.business.id}`);
 
       
     })();

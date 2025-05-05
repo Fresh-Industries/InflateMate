@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe-server";
 
 export async function GET(req: NextRequest) {
   try {
-    const user = await getCurrentUser();
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -20,7 +20,9 @@ export async function GET(req: NextRequest) {
     const business = await prisma.business.findUnique({
       where: {
         id: businessId,
-        userId: user.id,
+        organization: {
+          clerkOrgId: user.membership?.organization?.clerkOrgId,
+        },
       },
     });
     if (!business) {

@@ -1,30 +1,25 @@
 // app/api/me/route.ts
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserWithOrgAndBusiness } from '@/lib/auth/clerk-utils';
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET() {
-  const { userId, orgId } = await auth();
-  if (!userId || !orgId) {
+  const user = await getCurrentUserWithOrgAndBusiness();
+  if (!user) {
     return NextResponse.json({ business: null, subscription: null });
   }
 
-  // find your organization → its business
-  const org = await prisma.organization.findUnique({
-    where: { clerkOrgId: orgId },
-    select: {
-      business: { select: { id: true } },
-    },
-  });
-  const business = org?.business ?? null;
-
   // find subscription status if business exists
-  const subscription = business
-    ? await prisma.subscription.findUnique({
-        where: { organizationId: business.id },
-        select: { status: true },
-      })
-    : null;
+  const orgId = user.membership?.organization?.id;
+  const business = user.membership?.organization?.business;
+
+const subscription = orgId
+  ? await prisma.subscription.findUnique({
+      where: { organizationId: orgId },
+      select: { status: true },
+    })
+  : null;
+
 
   return NextResponse.json({ business, subscription, orgId });
 }

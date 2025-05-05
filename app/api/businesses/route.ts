@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -18,8 +18,8 @@ const businessSchema = z.object({
 
 export async function POST(req: NextRequest) {
   try {
-    // Get the current user
-    const user = await getCurrentUser();
+    // Get the current user (with org and business)
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json(
         { message: "Unauthorized" },
@@ -27,16 +27,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Check if user has any businesses
-    const userWithBusinesses = await prisma.user.findUnique({
-      where: { id: user.id },
-      include: { business: true }
-    });
-
-    if (!userWithBusinesses) {
+    // Get the user's organization via membership
+    const org = user.membership?.organization;
+    if (!org) {
       return NextResponse.json(
-        { message: "User not found" },
-        { status: 404 }
+        { message: "User is not a member of any organization" },
+        { status: 400 }
+      );
+    }
+
+    // Check if this org already has a business
+    if (org.business) {
+      return NextResponse.json(
+        { message: "This organization already has a business" },
+        { status: 400 }
       );
     }
 
@@ -44,29 +48,18 @@ export async function POST(req: NextRequest) {
     const body = await req.json();
     const validatedData = businessSchema.parse(body);
 
-    // Create the business
+    // Create the business for the organization
     const business = await prisma.business.create({
       data: {
         ...validatedData,
-        user: {
-          connect: {
-            id: userWithBusinesses.id
-          }
+        organization: {
+          connect: { id: org.id }
         },
-        // Set default business settings
         minAdvanceBooking: 24,
         maxAdvanceBooking: 90,
         siteConfig: {},
       },
     });
-
-    // Update user's onboarded status if this is their first business
-    if (!userWithBusinesses.business) {
-      await prisma.user.update({
-        where: { id: userWithBusinesses.id },
-        data: { onboarded: true },
-      });
-    }
 
     return NextResponse.json(business, { status: 201 });
   } catch (error) {
@@ -87,29 +80,25 @@ export async function POST(req: NextRequest) {
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
-    console.log("user", user);
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
-    console.log("user", user);
-    const userWithBusinesses = await prisma.user.findUnique({
-      where: { id: user.id  },
-      include: { business: true }
-    });
 
-    if (!userWithBusinesses) {
+    const org = user.membership?.organization;
+    if (!org) {
       return NextResponse.json(
-        { error: "User not found" },
-        { status: 404 }
+        { error: "User is not a member of any organization" },
+        { status: 400 }
       );
     }
 
-    const businesses = await prisma.business.findMany({
-      where: { user: { id: userWithBusinesses.id } },
+    // Get the business for this org (should be at most one)
+    const business = await prisma.business.findUnique({
+      where: { organizationId: org.id },
       include: {
         organization: true,
         inventory: true,
@@ -127,12 +116,20 @@ export async function GET() {
       },
     });
 
-    return NextResponse.json(businesses);
+    if (!business) {
+      return NextResponse.json(
+        { error: "No business found for this organization" },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json(business);
   } catch (error) {
-    console.error("Error fetching businesses:", error);
+    console.error("Error fetching business:", error);
     return NextResponse.json(
-      { error: "Failed to fetch businesses" },
+      { error: "Failed to fetch business" },
       { status: 500 }
     );
   }
-} 
+}
+

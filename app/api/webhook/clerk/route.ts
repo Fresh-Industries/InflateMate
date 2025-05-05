@@ -7,7 +7,6 @@ import { prisma } from '@/lib/prisma';
 const webhookSecret = process.env.CLERK_WEBHOOK_SECRET || '';
 
 async function verifyWebhook(req: Request): Promise<WebhookEvent> {
-  // Get the raw payload as a string
   const payloadString = await req.text();
   const headerPayload = await headers();
   const svixHeaders = {
@@ -15,26 +14,19 @@ async function verifyWebhook(req: Request): Promise<WebhookEvent> {
     'svix-timestamp': headerPayload.get('svix-timestamp')!,
     'svix-signature': headerPayload.get('svix-signature')!,
   };
-  
-
   const wh = new Webhook(webhookSecret);
-  // Verify the payload. If verification fails, this will throw.
   return wh.verify(payloadString, svixHeaders) as WebhookEvent;
 }
 
 export async function POST(req: Request) {
   try {
     console.log("Webhook received, attempting verification...");
-    // First, verify the webhook and get the event object.
     const event = await verifyWebhook(req);
     console.log("Webhook verified successfully:", event.type);
-    // For user.created events
+
+    // Handle user.created
     if (event.type === 'user.created') {
-      // Extract relevant data from Clerk's event payload
-      // Clerk's user structure typically looks different from your schema
       const userData = event.data;
-      
-      // Extract user information from Clerk's data structure
       const email = userData.email_addresses?.[0]?.email_address;
       const firstName = userData.first_name || '';
       const lastName = userData.last_name || '';
@@ -42,7 +34,6 @@ export async function POST(req: Request) {
       const clerkUserId = userData.id;
       const image = userData.image_url;
 
-      // Validate the extracted data
       if (!email || !clerkUserId) {
         return NextResponse.json(
           { message: "Missing required user data" },
@@ -50,99 +41,66 @@ export async function POST(req: Request) {
         );
       }
 
-      // Check if user already exists by email
-      const existingUser = await prisma.user.findUnique({
-        where: { email },
-      });
-
+      // Idempotency: check if user already exists
+      const existingUser = await prisma.user.findUnique({ where: { clerkUserId } });
       if (existingUser) {
-        console.log(`User with email ${email} already exists`);
-        return NextResponse.json(
-          { message: "User already exists" },
-          { status: 200 } // Using 200 instead of 400 since this isn't an error case for webhooks
-        );
+        console.log(`User with Clerk ID ${clerkUserId} already exists`);
+        return NextResponse.json({ message: "User already exists" }, { status: 200 });
       }
 
-      // Create the user in your database
       await prisma.user.create({
-        data: {
-          name,
-          email,
-          clerkUserId,
-          image,
-        },
+        data: { name, email, clerkUserId, image },
       });
 
       console.log(`User created with email ${email} and clerk ID ${clerkUserId}`);
-      return NextResponse.json(
-        { message: "User created successfully" },
-        { status: 201 }
-      );
+      return NextResponse.json({ message: "User created successfully" }, { status: 201 });
     }
-    // Handle organizationMembership.created events
+
+    // Handle organizationMembership.created
     else if (event.type === 'organizationMembership.created') {
-      // Extract data from the event payload
       const { id: clerkMembershipId, organization, public_user_data, role } = event.data;
       const clerkOrgId = organization.id;
       const clerkUserId = public_user_data?.user_id;
 
-      // Validate extracted data
       if (!clerkMembershipId || !clerkOrgId || !clerkUserId || !role) {
         console.error('Missing data for organization membership creation:', { clerkMembershipId, clerkOrgId, clerkUserId, role });
         return NextResponse.json({ message: 'Missing required membership data' }, { status: 400 });
       }
 
-
       // Find the user and organization in your database
-      const user = await prisma.user.findUnique({
-        where: { clerkUserId },
-      });
-
-      const org = await prisma.organization.findUnique({
-        where: { clerkOrgId },
-      });
-
-      // Check if user and organization exist
+      const user = await prisma.user.findUnique({ where: { clerkUserId } });
       if (!user) {
         console.error(`User not found with clerkUserId: ${clerkUserId}`);
-        // Consider retrying or logging for manual intervention
         return NextResponse.json({ message: `User not found: ${clerkUserId}` }, { status: 404 });
       }
 
+      const org = await prisma.organization.findUnique({ where: { clerkOrgId } });
       if (!org) {
         console.error(`Organization not found with clerkOrgId: ${clerkOrgId}`);
-        // It's possible the org.created webhook hasn't processed yet, or failed.
-        // Consider retrying or logging.
         return NextResponse.json({ message: `Organization not found: ${clerkOrgId}` }, { status: 404 });
       }
 
-      // Check if membership already exists (idempotency)
-      const existingMembership = await prisma.membership.findUnique({
+      // Idempotency: check if membership already exists
+      const existingMembership = await prisma.membership.findFirst({
         where: {
-          userId_organizationId: {
-            userId: user.id,
-            organizationId: org.id,
-          },
+          userId: user.id,
+          organizationId: org.id,
         },
       });
 
       // Map Clerk role string to your Prisma Role enum string values
       const mapClerkRoleToPrismaRoleString = (clerkRole: string): 'ADMIN' | 'MEMBER' => {
-        if (clerkRole === 'org:admin') {
-          return 'ADMIN';
-        }
-        // Default to MEMBER for any other role string or if unsure
+        if (clerkRole === 'org:admin') return 'ADMIN';
         return 'MEMBER';
       };
       const prismaRoleString = mapClerkRoleToPrismaRoleString(role);
 
       if (existingMembership) {
-        console.log(`Membership already exists for user ${user.id} in organization ${org.id}`);
         // Optionally update the role if it has changed
-        if (existingMembership.clerkMembershipId === clerkUserId) {
+        if (existingMembership.role !== prismaRoleString || existingMembership.clerkMembershipId !== clerkMembershipId) {
           await prisma.membership.update({
             where: { id: existingMembership.id },
-            data: { clerkMembershipId  },
+            data: { role: prismaRoleString, clerkMembershipId },
           });
           console.log(`Updated role for user ${user.id} in organization ${org.id} to ${prismaRoleString}`);
         }
@@ -154,7 +112,7 @@ export async function POST(req: Request) {
         data: {
           userId: user.id,
           organizationId: org.id,
-          clerkMembershipId: clerkMembershipId,
+          clerkMembershipId,
           role: prismaRoleString,
         },
       });
@@ -162,19 +120,15 @@ export async function POST(req: Request) {
       console.log(`Membership created for user ${user.id} in organization ${org.id} with role ${prismaRoleString}`);
       return NextResponse.json({ message: 'Membership created successfully' }, { status: 201 });
     }
+
     // Handle other event types or return a default response
     else {
-        console.log(`Received unhandled event type: ${event.type}`);
-        return NextResponse.json({ message: 'Received unhandled event type' }, { status: 200 });
+      console.log(`Received unhandled event type: ${event.type}`);
+      return NextResponse.json({ message: 'Received unhandled event type' }, { status: 200 });
     }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     console.error("[WEBHOOK_ERROR]", error);
-    // Log more details about the request
-
-  
-  
     return NextResponse.json(
       { message: "Webhook processing failed", error: error.message },
       { status: 500 }

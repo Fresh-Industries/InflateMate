@@ -2269,37 +2269,6 @@ export namespace Prisma {
 
 
   /**
-   * Count Type UserCountOutputType
-   */
-
-  export type UserCountOutputType = {
-    memberships: number
-  }
-
-  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
-  }
-
-  // Custom InputTypes
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the UserCountOutputType
-     */
-    select?: UserCountOutputTypeSelect<ExtArgs> | null
-  }
-
-  /**
-   * UserCountOutputType without action
-   */
-  export type UserCountOutputTypeCountMembershipsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: MembershipWhereInput
-  }
-
-
-  /**
    * Count Type BusinessCountOutputType
    */
 
@@ -2590,7 +2559,6 @@ export namespace Prisma {
     email: string | null
     name: string | null
     image: string | null
-    onboarded: boolean | null
     clerkUserId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2601,7 +2569,6 @@ export namespace Prisma {
     email: string | null
     name: string | null
     image: string | null
-    onboarded: boolean | null
     clerkUserId: string | null
     createdAt: Date | null
     updatedAt: Date | null
@@ -2612,7 +2579,6 @@ export namespace Prisma {
     email: number
     name: number
     image: number
-    onboarded: number
     clerkUserId: number
     createdAt: number
     updatedAt: number
@@ -2625,7 +2591,6 @@ export namespace Prisma {
     email?: true
     name?: true
     image?: true
-    onboarded?: true
     clerkUserId?: true
     createdAt?: true
     updatedAt?: true
@@ -2636,7 +2601,6 @@ export namespace Prisma {
     email?: true
     name?: true
     image?: true
-    onboarded?: true
     clerkUserId?: true
     createdAt?: true
     updatedAt?: true
@@ -2647,7 +2611,6 @@ export namespace Prisma {
     email?: true
     name?: true
     image?: true
-    onboarded?: true
     clerkUserId?: true
     createdAt?: true
     updatedAt?: true
@@ -2731,7 +2694,6 @@ export namespace Prisma {
     email: string | null
     name: string | null
     image: string | null
-    onboarded: boolean
     clerkUserId: string | null
     createdAt: Date
     updatedAt: Date
@@ -2759,13 +2721,10 @@ export namespace Prisma {
     email?: boolean
     name?: boolean
     image?: boolean
-    onboarded?: boolean
     clerkUserId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    business?: boolean | User$businessArgs<ExtArgs>
-    memberships?: boolean | User$membershipsArgs<ExtArgs>
-    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+    membership?: boolean | User$membershipArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -2773,7 +2732,6 @@ export namespace Prisma {
     email?: boolean
     name?: boolean
     image?: boolean
-    onboarded?: boolean
     clerkUserId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2784,7 +2742,6 @@ export namespace Prisma {
     email?: boolean
     name?: boolean
     image?: boolean
-    onboarded?: boolean
     clerkUserId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
@@ -2795,17 +2752,14 @@ export namespace Prisma {
     email?: boolean
     name?: boolean
     image?: boolean
-    onboarded?: boolean
     clerkUserId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "image" | "onboarded" | "clerkUserId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "image" | "clerkUserId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    business?: boolean | User$businessArgs<ExtArgs>
-    memberships?: boolean | User$membershipsArgs<ExtArgs>
-    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
+    membership?: boolean | User$membershipArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
   export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2813,15 +2767,13 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
-      business: Prisma.$BusinessPayload<ExtArgs> | null
-      memberships: Prisma.$MembershipPayload<ExtArgs>[]
+      membership: Prisma.$MembershipPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       email: string | null
       name: string | null
       image: string | null
-      onboarded: boolean
       clerkUserId: string | null
       createdAt: Date
       updatedAt: Date
@@ -3219,8 +3171,7 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    business<T extends User$businessArgs<ExtArgs> = {}>(args?: Subset<T, User$businessArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    memberships<T extends User$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    membership<T extends User$membershipArgs<ExtArgs> = {}>(args?: Subset<T, User$membershipArgs<ExtArgs>>): Prisma__MembershipClient<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3254,7 +3205,6 @@ export namespace Prisma {
     readonly email: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
     readonly image: FieldRef<"User", 'String'>
-    readonly onboarded: FieldRef<"User", 'Boolean'>
     readonly clerkUserId: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
@@ -3646,28 +3596,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.business
+   * User.membership
    */
-  export type User$businessArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Business
-     */
-    select?: BusinessSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Business
-     */
-    omit?: BusinessOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: BusinessInclude<ExtArgs> | null
-    where?: BusinessWhereInput
-  }
-
-  /**
-   * User.memberships
-   */
-  export type User$membershipsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$membershipArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Membership
      */
@@ -3681,11 +3612,6 @@ export namespace Prisma {
      */
     include?: MembershipInclude<ExtArgs> | null
     where?: MembershipWhereInput
-    orderBy?: MembershipOrderByWithRelationInput | MembershipOrderByWithRelationInput[]
-    cursor?: MembershipWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: MembershipScalarFieldEnum | MembershipScalarFieldEnum[]
   }
 
   /**
@@ -3741,6 +3667,7 @@ export namespace Prisma {
     zipCode: string | null
     phone: string | null
     email: string | null
+    onboarded: boolean | null
     logo: string | null
     minAdvanceBooking: number | null
     maxAdvanceBooking: number | null
@@ -3752,7 +3679,7 @@ export namespace Prisma {
     onboardingError: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    userId: string | null
+    organizationId: string | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -3765,6 +3692,7 @@ export namespace Prisma {
     zipCode: string | null
     phone: string | null
     email: string | null
+    onboarded: boolean | null
     logo: string | null
     minAdvanceBooking: number | null
     maxAdvanceBooking: number | null
@@ -3776,7 +3704,7 @@ export namespace Prisma {
     onboardingError: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    userId: string | null
+    organizationId: string | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -3790,6 +3718,7 @@ export namespace Prisma {
     phone: number
     email: number
     serviceArea: number
+    onboarded: number
     logo: number
     minAdvanceBooking: number
     maxAdvanceBooking: number
@@ -3803,7 +3732,7 @@ export namespace Prisma {
     onboardingError: number
     createdAt: number
     updatedAt: number
-    userId: number
+    organizationId: number
     _all: number
   }
 
@@ -3830,6 +3759,7 @@ export namespace Prisma {
     zipCode?: true
     phone?: true
     email?: true
+    onboarded?: true
     logo?: true
     minAdvanceBooking?: true
     maxAdvanceBooking?: true
@@ -3841,7 +3771,7 @@ export namespace Prisma {
     onboardingError?: true
     createdAt?: true
     updatedAt?: true
-    userId?: true
+    organizationId?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -3854,6 +3784,7 @@ export namespace Prisma {
     zipCode?: true
     phone?: true
     email?: true
+    onboarded?: true
     logo?: true
     minAdvanceBooking?: true
     maxAdvanceBooking?: true
@@ -3865,7 +3796,7 @@ export namespace Prisma {
     onboardingError?: true
     createdAt?: true
     updatedAt?: true
-    userId?: true
+    organizationId?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -3879,6 +3810,7 @@ export namespace Prisma {
     phone?: true
     email?: true
     serviceArea?: true
+    onboarded?: true
     logo?: true
     minAdvanceBooking?: true
     maxAdvanceBooking?: true
@@ -3892,7 +3824,7 @@ export namespace Prisma {
     onboardingError?: true
     createdAt?: true
     updatedAt?: true
-    userId?: true
+    organizationId?: true
     _all?: true
   }
 
@@ -3993,6 +3925,7 @@ export namespace Prisma {
     phone: string | null
     email: string | null
     serviceArea: string[]
+    onboarded: boolean
     logo: string | null
     minAdvanceBooking: number
     maxAdvanceBooking: number
@@ -4006,7 +3939,7 @@ export namespace Prisma {
     onboardingError: string | null
     createdAt: Date
     updatedAt: Date
-    userId: string
+    organizationId: string
     _count: BusinessCountAggregateOutputType | null
     _avg: BusinessAvgAggregateOutputType | null
     _sum: BusinessSumAggregateOutputType | null
@@ -4039,6 +3972,7 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     serviceArea?: boolean
+    onboarded?: boolean
     logo?: boolean
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
@@ -4052,8 +3986,7 @@ export namespace Prisma {
     onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    userId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    organizationId?: boolean
     inventory?: boolean | Business$inventoryArgs<ExtArgs>
     customers?: boolean | Business$customersArgs<ExtArgs>
     bookings?: boolean | Business$bookingsArgs<ExtArgs>
@@ -4063,7 +3996,7 @@ export namespace Prisma {
     waivers?: boolean | Business$waiversArgs<ExtArgs>
     invoices?: boolean | Business$invoicesArgs<ExtArgs>
     customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
-    organization?: boolean | Business$organizationArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -4078,6 +4011,7 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     serviceArea?: boolean
+    onboarded?: boolean
     logo?: boolean
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
@@ -4091,8 +4025,8 @@ export namespace Prisma {
     onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    userId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    organizationId?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -4106,6 +4040,7 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     serviceArea?: boolean
+    onboarded?: boolean
     logo?: boolean
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
@@ -4119,8 +4054,8 @@ export namespace Prisma {
     onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    userId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    organizationId?: boolean
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
   export type BusinessSelectScalar = {
@@ -4134,6 +4069,7 @@ export namespace Prisma {
     phone?: boolean
     email?: boolean
     serviceArea?: boolean
+    onboarded?: boolean
     logo?: boolean
     minAdvanceBooking?: boolean
     maxAdvanceBooking?: boolean
@@ -4147,12 +4083,11 @@ export namespace Prisma {
     onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    userId?: boolean
+    organizationId?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "logo" | "minAdvanceBooking" | "maxAdvanceBooking" | "minimumPurchase" | "timeZone" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError" | "createdAt" | "updatedAt" | "userId", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "onboarded" | "logo" | "minAdvanceBooking" | "maxAdvanceBooking" | "minimumPurchase" | "timeZone" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
     inventory?: boolean | Business$inventoryArgs<ExtArgs>
     customers?: boolean | Business$customersArgs<ExtArgs>
     bookings?: boolean | Business$bookingsArgs<ExtArgs>
@@ -4162,20 +4097,19 @@ export namespace Prisma {
     waivers?: boolean | Business$waiversArgs<ExtArgs>
     invoices?: boolean | Business$invoicesArgs<ExtArgs>
     customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
-    organization?: boolean | Business$organizationArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }
 
   export type $BusinessPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Business"
     objects: {
-      user: Prisma.$UserPayload<ExtArgs>
       inventory: Prisma.$InventoryPayload<ExtArgs>[]
       customers: Prisma.$CustomerPayload<ExtArgs>[]
       bookings: Prisma.$BookingPayload<ExtArgs>[]
@@ -4185,7 +4119,7 @@ export namespace Prisma {
       waivers: Prisma.$WaiverPayload<ExtArgs>[]
       invoices: Prisma.$InvoicePayload<ExtArgs>[]
       customerStripeAccounts: Prisma.$CustomerStripeAccountPayload<ExtArgs>[]
-      organization: Prisma.$OrganizationPayload<ExtArgs> | null
+      organization: Prisma.$OrganizationPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4198,6 +4132,7 @@ export namespace Prisma {
       phone: string | null
       email: string | null
       serviceArea: string[]
+      onboarded: boolean
       logo: string | null
       minAdvanceBooking: number
       maxAdvanceBooking: number
@@ -4211,7 +4146,7 @@ export namespace Prisma {
       onboardingError: string | null
       createdAt: Date
       updatedAt: Date
-      userId: string
+      organizationId: string
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -4606,7 +4541,6 @@ export namespace Prisma {
    */
   export interface Prisma__BusinessClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     inventory<T extends Business$inventoryArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     customers<T extends Business$customersArgs<ExtArgs> = {}>(args?: Subset<T, Business$customersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     bookings<T extends Business$bookingsArgs<ExtArgs> = {}>(args?: Subset<T, Business$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4616,7 +4550,7 @@ export namespace Prisma {
     waivers<T extends Business$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Business$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invoices<T extends Business$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     customerStripeAccounts<T extends Business$customerStripeAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Business$customerStripeAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    organization<T extends Business$organizationArgs<ExtArgs> = {}>(args?: Subset<T, Business$organizationArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4656,6 +4590,7 @@ export namespace Prisma {
     readonly phone: FieldRef<"Business", 'String'>
     readonly email: FieldRef<"Business", 'String'>
     readonly serviceArea: FieldRef<"Business", 'String[]'>
+    readonly onboarded: FieldRef<"Business", 'Boolean'>
     readonly logo: FieldRef<"Business", 'String'>
     readonly minAdvanceBooking: FieldRef<"Business", 'Int'>
     readonly maxAdvanceBooking: FieldRef<"Business", 'Int'>
@@ -4669,7 +4604,7 @@ export namespace Prisma {
     readonly onboardingError: FieldRef<"Business", 'String'>
     readonly createdAt: FieldRef<"Business", 'DateTime'>
     readonly updatedAt: FieldRef<"Business", 'DateTime'>
-    readonly userId: FieldRef<"Business", 'String'>
+    readonly organizationId: FieldRef<"Business", 'String'>
   }
     
 
@@ -5282,25 +5217,6 @@ export namespace Prisma {
   }
 
   /**
-   * Business.organization
-   */
-  export type Business$organizationArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Organization
-     */
-    select?: OrganizationSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Organization
-     */
-    omit?: OrganizationOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: OrganizationInclude<ExtArgs> | null
-    where?: OrganizationWhereInput
-  }
-
-  /**
    * Business without action
    */
   export type BusinessDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -5335,7 +5251,6 @@ export namespace Prisma {
     name: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    businessId: string | null
   }
 
   export type OrganizationMaxAggregateOutputType = {
@@ -5344,7 +5259,6 @@ export namespace Prisma {
     name: string | null
     createdAt: Date | null
     updatedAt: Date | null
-    businessId: string | null
   }
 
   export type OrganizationCountAggregateOutputType = {
@@ -5353,7 +5267,6 @@ export namespace Prisma {
     name: number
     createdAt: number
     updatedAt: number
-    businessId: number
     _all: number
   }
 
@@ -5364,7 +5277,6 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     updatedAt?: true
-    businessId?: true
   }
 
   export type OrganizationMaxAggregateInputType = {
@@ -5373,7 +5285,6 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     updatedAt?: true
-    businessId?: true
   }
 
   export type OrganizationCountAggregateInputType = {
@@ -5382,7 +5293,6 @@ export namespace Prisma {
     name?: true
     createdAt?: true
     updatedAt?: true
-    businessId?: true
     _all?: true
   }
 
@@ -5464,7 +5374,6 @@ export namespace Prisma {
     name: string | null
     createdAt: Date
     updatedAt: Date
-    businessId: string
     _count: OrganizationCountAggregateOutputType | null
     _min: OrganizationMinAggregateOutputType | null
     _max: OrganizationMaxAggregateOutputType | null
@@ -5490,8 +5399,7 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    businessId?: boolean
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    business?: boolean | Organization$businessArgs<ExtArgs>
     memberships?: boolean | Organization$membershipsArgs<ExtArgs>
     subscription?: boolean | Organization$subscriptionArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
@@ -5503,8 +5411,6 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    businessId?: boolean
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["organization"]>
 
   export type OrganizationSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -5513,8 +5419,6 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    businessId?: boolean
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["organization"]>
 
   export type OrganizationSelectScalar = {
@@ -5523,27 +5427,22 @@ export namespace Prisma {
     name?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    businessId?: boolean
   }
 
-  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clerkOrgId" | "name" | "createdAt" | "updatedAt" | "businessId", ExtArgs["result"]["organization"]>
+  export type OrganizationOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "clerkOrgId" | "name" | "createdAt" | "updatedAt", ExtArgs["result"]["organization"]>
   export type OrganizationInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    business?: boolean | Organization$businessArgs<ExtArgs>
     memberships?: boolean | Organization$membershipsArgs<ExtArgs>
     subscription?: boolean | Organization$subscriptionArgs<ExtArgs>
     _count?: boolean | OrganizationCountOutputTypeDefaultArgs<ExtArgs>
   }
-  export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
-  }
-  export type OrganizationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
-  }
+  export type OrganizationIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
+  export type OrganizationIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
 
   export type $OrganizationPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Organization"
     objects: {
-      business: Prisma.$BusinessPayload<ExtArgs>
+      business: Prisma.$BusinessPayload<ExtArgs> | null
       memberships: Prisma.$MembershipPayload<ExtArgs>[]
       subscription: Prisma.$SubscriptionPayload<ExtArgs> | null
     }
@@ -5553,7 +5452,6 @@ export namespace Prisma {
       name: string | null
       createdAt: Date
       updatedAt: Date
-      businessId: string
     }, ExtArgs["result"]["organization"]>
     composites: {}
   }
@@ -5948,7 +5846,7 @@ export namespace Prisma {
    */
   export interface Prisma__OrganizationClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    business<T extends Organization$businessArgs<ExtArgs> = {}>(args?: Subset<T, Organization$businessArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     memberships<T extends Organization$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, Organization$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     subscription<T extends Organization$subscriptionArgs<ExtArgs> = {}>(args?: Subset<T, Organization$subscriptionArgs<ExtArgs>>): Prisma__SubscriptionClient<$Result.GetResult<Prisma.$SubscriptionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
@@ -5985,7 +5883,6 @@ export namespace Prisma {
     readonly name: FieldRef<"Organization", 'String'>
     readonly createdAt: FieldRef<"Organization", 'DateTime'>
     readonly updatedAt: FieldRef<"Organization", 'DateTime'>
-    readonly businessId: FieldRef<"Organization", 'String'>
   }
     
 
@@ -6235,10 +6132,6 @@ export namespace Prisma {
      */
     data: OrganizationCreateManyInput | OrganizationCreateManyInput[]
     skipDuplicates?: boolean
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: OrganizationIncludeCreateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6309,10 +6202,6 @@ export namespace Prisma {
      * Limit how many Organizations to update.
      */
     limit?: number
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: OrganizationIncludeUpdateManyAndReturn<ExtArgs> | null
   }
 
   /**
@@ -6379,6 +6268,25 @@ export namespace Prisma {
      * Limit how many Organizations to delete.
      */
     limit?: number
+  }
+
+  /**
+   * Organization.business
+   */
+  export type Organization$businessArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Business
+     */
+    select?: BusinessSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Business
+     */
+    omit?: BusinessOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BusinessInclude<ExtArgs> | null
+    where?: BusinessWhereInput
   }
 
   /**
@@ -21116,7 +21024,6 @@ export namespace Prisma {
     email: 'email',
     name: 'name',
     image: 'image',
-    onboarded: 'onboarded',
     clerkUserId: 'clerkUserId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'
@@ -21136,6 +21043,7 @@ export namespace Prisma {
     phone: 'phone',
     email: 'email',
     serviceArea: 'serviceArea',
+    onboarded: 'onboarded',
     logo: 'logo',
     minAdvanceBooking: 'minAdvanceBooking',
     maxAdvanceBooking: 'maxAdvanceBooking',
@@ -21149,7 +21057,7 @@ export namespace Prisma {
     onboardingError: 'onboardingError',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    userId: 'userId'
+    organizationId: 'organizationId'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -21160,8 +21068,7 @@ export namespace Prisma {
     clerkOrgId: 'clerkOrgId',
     name: 'name',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    businessId: 'businessId'
+    updatedAt: 'updatedAt'
   };
 
   export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -21470,13 +21377,6 @@ export namespace Prisma {
 
 
   /**
-   * Reference to a field of type 'Boolean'
-   */
-  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
-    
-
-
-  /**
    * Reference to a field of type 'DateTime'
    */
   export type DateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime'>
@@ -21487,6 +21387,13 @@ export namespace Prisma {
    * Reference to a field of type 'DateTime[]'
    */
   export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'DateTime[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'Boolean'
+   */
+  export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -21683,12 +21590,10 @@ export namespace Prisma {
     email?: StringNullableFilter<"User"> | string | null
     name?: StringNullableFilter<"User"> | string | null
     image?: StringNullableFilter<"User"> | string | null
-    onboarded?: BoolFilter<"User"> | boolean
     clerkUserId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
-    memberships?: MembershipListRelationFilter
+    membership?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
   }
 
   export type UserOrderByWithRelationInput = {
@@ -21696,12 +21601,10 @@ export namespace Prisma {
     email?: SortOrderInput | SortOrder
     name?: SortOrderInput | SortOrder
     image?: SortOrderInput | SortOrder
-    onboarded?: SortOrder
     clerkUserId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    business?: BusinessOrderByWithRelationInput
-    memberships?: MembershipOrderByRelationAggregateInput
+    membership?: MembershipOrderByWithRelationInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -21713,11 +21616,9 @@ export namespace Prisma {
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringNullableFilter<"User"> | string | null
     image?: StringNullableFilter<"User"> | string | null
-    onboarded?: BoolFilter<"User"> | boolean
     createdAt?: DateTimeFilter<"User"> | Date | string
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
-    memberships?: MembershipListRelationFilter
+    membership?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
   }, "id" | "email" | "clerkUserId">
 
   export type UserOrderByWithAggregationInput = {
@@ -21725,7 +21626,6 @@ export namespace Prisma {
     email?: SortOrderInput | SortOrder
     name?: SortOrderInput | SortOrder
     image?: SortOrderInput | SortOrder
-    onboarded?: SortOrder
     clerkUserId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -21742,7 +21642,6 @@ export namespace Prisma {
     email?: StringNullableWithAggregatesFilter<"User"> | string | null
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
     image?: StringNullableWithAggregatesFilter<"User"> | string | null
-    onboarded?: BoolWithAggregatesFilter<"User"> | boolean
     clerkUserId?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
@@ -21762,6 +21661,7 @@ export namespace Prisma {
     phone?: StringNullableFilter<"Business"> | string | null
     email?: StringNullableFilter<"Business"> | string | null
     serviceArea?: StringNullableListFilter<"Business">
+    onboarded?: BoolFilter<"Business"> | boolean
     logo?: StringNullableFilter<"Business"> | string | null
     minAdvanceBooking?: IntFilter<"Business"> | number
     maxAdvanceBooking?: IntFilter<"Business"> | number
@@ -21775,8 +21675,7 @@ export namespace Prisma {
     onboardingError?: StringNullableFilter<"Business"> | string | null
     createdAt?: DateTimeFilter<"Business"> | Date | string
     updatedAt?: DateTimeFilter<"Business"> | Date | string
-    userId?: StringFilter<"Business"> | string
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    organizationId?: StringFilter<"Business"> | string
     inventory?: InventoryListRelationFilter
     customers?: CustomerListRelationFilter
     bookings?: BookingListRelationFilter
@@ -21786,7 +21685,7 @@ export namespace Prisma {
     waivers?: WaiverListRelationFilter
     invoices?: InvoiceListRelationFilter
     customerStripeAccounts?: CustomerStripeAccountListRelationFilter
-    organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -21800,6 +21699,7 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     email?: SortOrderInput | SortOrder
     serviceArea?: SortOrder
+    onboarded?: SortOrder
     logo?: SortOrderInput | SortOrder
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
@@ -21813,8 +21713,7 @@ export namespace Prisma {
     onboardingError?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    userId?: SortOrder
-    user?: UserOrderByWithRelationInput
+    organizationId?: SortOrder
     inventory?: InventoryOrderByRelationAggregateInput
     customers?: CustomerOrderByRelationAggregateInput
     bookings?: BookingOrderByRelationAggregateInput
@@ -21830,7 +21729,7 @@ export namespace Prisma {
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     subdomain?: string
-    userId?: string
+    organizationId?: string
     AND?: BusinessWhereInput | BusinessWhereInput[]
     OR?: BusinessWhereInput[]
     NOT?: BusinessWhereInput | BusinessWhereInput[]
@@ -21843,6 +21742,7 @@ export namespace Prisma {
     phone?: StringNullableFilter<"Business"> | string | null
     email?: StringNullableFilter<"Business"> | string | null
     serviceArea?: StringNullableListFilter<"Business">
+    onboarded?: BoolFilter<"Business"> | boolean
     logo?: StringNullableFilter<"Business"> | string | null
     minAdvanceBooking?: IntFilter<"Business"> | number
     maxAdvanceBooking?: IntFilter<"Business"> | number
@@ -21855,7 +21755,6 @@ export namespace Prisma {
     onboardingError?: StringNullableFilter<"Business"> | string | null
     createdAt?: DateTimeFilter<"Business"> | Date | string
     updatedAt?: DateTimeFilter<"Business"> | Date | string
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
     inventory?: InventoryListRelationFilter
     customers?: CustomerListRelationFilter
     bookings?: BookingListRelationFilter
@@ -21865,8 +21764,8 @@ export namespace Prisma {
     waivers?: WaiverListRelationFilter
     invoices?: InvoiceListRelationFilter
     customerStripeAccounts?: CustomerStripeAccountListRelationFilter
-    organization?: XOR<OrganizationNullableScalarRelationFilter, OrganizationWhereInput> | null
-  }, "id" | "subdomain" | "userId">
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+  }, "id" | "subdomain" | "organizationId">
 
   export type BusinessOrderByWithAggregationInput = {
     id?: SortOrder
@@ -21879,6 +21778,7 @@ export namespace Prisma {
     phone?: SortOrderInput | SortOrder
     email?: SortOrderInput | SortOrder
     serviceArea?: SortOrder
+    onboarded?: SortOrder
     logo?: SortOrderInput | SortOrder
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
@@ -21892,7 +21792,7 @@ export namespace Prisma {
     onboardingError?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    userId?: SortOrder
+    organizationId?: SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _avg?: BusinessAvgOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
@@ -21914,6 +21814,7 @@ export namespace Prisma {
     phone?: StringNullableWithAggregatesFilter<"Business"> | string | null
     email?: StringNullableWithAggregatesFilter<"Business"> | string | null
     serviceArea?: StringNullableListFilter<"Business">
+    onboarded?: BoolWithAggregatesFilter<"Business"> | boolean
     logo?: StringNullableWithAggregatesFilter<"Business"> | string | null
     minAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
     maxAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
@@ -21927,7 +21828,7 @@ export namespace Prisma {
     onboardingError?: StringNullableWithAggregatesFilter<"Business"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Business"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Business"> | Date | string
-    userId?: StringWithAggregatesFilter<"Business"> | string
+    organizationId?: StringWithAggregatesFilter<"Business"> | string
   }
 
   export type OrganizationWhereInput = {
@@ -21939,8 +21840,7 @@ export namespace Prisma {
     name?: StringNullableFilter<"Organization"> | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
-    businessId?: StringFilter<"Organization"> | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
     memberships?: MembershipListRelationFilter
     subscription?: XOR<SubscriptionNullableScalarRelationFilter, SubscriptionWhereInput> | null
   }
@@ -21951,7 +21851,6 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    businessId?: SortOrder
     business?: BusinessOrderByWithRelationInput
     memberships?: MembershipOrderByRelationAggregateInput
     subscription?: SubscriptionOrderByWithRelationInput
@@ -21960,17 +21859,16 @@ export namespace Prisma {
   export type OrganizationWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     clerkOrgId?: string
-    businessId?: string
     AND?: OrganizationWhereInput | OrganizationWhereInput[]
     OR?: OrganizationWhereInput[]
     NOT?: OrganizationWhereInput | OrganizationWhereInput[]
     name?: StringNullableFilter<"Organization"> | string | null
     createdAt?: DateTimeFilter<"Organization"> | Date | string
     updatedAt?: DateTimeFilter<"Organization"> | Date | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    business?: XOR<BusinessNullableScalarRelationFilter, BusinessWhereInput> | null
     memberships?: MembershipListRelationFilter
     subscription?: XOR<SubscriptionNullableScalarRelationFilter, SubscriptionWhereInput> | null
-  }, "id" | "clerkOrgId" | "businessId">
+  }, "id" | "clerkOrgId">
 
   export type OrganizationOrderByWithAggregationInput = {
     id?: SortOrder
@@ -21978,7 +21876,6 @@ export namespace Prisma {
     name?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    businessId?: SortOrder
     _count?: OrganizationCountOrderByAggregateInput
     _max?: OrganizationMaxOrderByAggregateInput
     _min?: OrganizationMinOrderByAggregateInput
@@ -21993,7 +21890,6 @@ export namespace Prisma {
     name?: StringNullableWithAggregatesFilter<"Organization"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Organization"> | Date | string
-    businessId?: StringWithAggregatesFilter<"Organization"> | string
   }
 
   export type MembershipWhereInput = {
@@ -22026,18 +21922,17 @@ export namespace Prisma {
   export type MembershipWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     clerkMembershipId?: string
-    userId_organizationId?: MembershipUserIdOrganizationIdCompoundUniqueInput
+    userId?: string
     AND?: MembershipWhereInput | MembershipWhereInput[]
     OR?: MembershipWhereInput[]
     NOT?: MembershipWhereInput | MembershipWhereInput[]
     role?: EnumRoleFilter<"Membership"> | $Enums.Role
     createdAt?: DateTimeFilter<"Membership"> | Date | string
     updatedAt?: DateTimeFilter<"Membership"> | Date | string
-    userId?: StringFilter<"Membership"> | string
     organizationId?: StringFilter<"Membership"> | string
     user?: XOR<UserScalarRelationFilter, UserWhereInput>
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
-  }, "id" | "clerkMembershipId" | "userId_organizationId">
+  }, "id" | "clerkMembershipId" | "userId">
 
   export type MembershipOrderByWithAggregationInput = {
     id?: SortOrder
@@ -23249,12 +23144,10 @@ export namespace Prisma {
     email?: string | null
     name?: string | null
     image?: string | null
-    onboarded?: boolean
     clerkUserId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business?: BusinessCreateNestedOneWithoutUserInput
-    memberships?: MembershipCreateNestedManyWithoutUserInput
+    membership?: MembershipCreateNestedOneWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
@@ -23262,12 +23155,10 @@ export namespace Prisma {
     email?: string | null
     name?: string | null
     image?: string | null
-    onboarded?: boolean
     clerkUserId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business?: BusinessUncheckedCreateNestedOneWithoutUserInput
-    memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
+    membership?: MembershipUncheckedCreateNestedOneWithoutUserInput
   }
 
   export type UserUpdateInput = {
@@ -23275,12 +23166,10 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneWithoutUserNestedInput
-    memberships?: MembershipUpdateManyWithoutUserNestedInput
+    membership?: MembershipUpdateOneWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
@@ -23288,12 +23177,10 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUncheckedUpdateOneWithoutUserNestedInput
-    memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
+    membership?: MembershipUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
@@ -23301,7 +23188,6 @@ export namespace Prisma {
     email?: string | null
     name?: string | null
     image?: string | null
-    onboarded?: boolean
     clerkUserId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
@@ -23312,7 +23198,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23323,7 +23208,6 @@ export namespace Prisma {
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -23340,6 +23224,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -23353,7 +23238,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -23363,7 +23247,7 @@ export namespace Prisma {
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -23377,6 +23261,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -23390,7 +23275,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -23400,7 +23285,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -23414,6 +23298,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -23427,7 +23312,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -23437,7 +23321,7 @@ export namespace Prisma {
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -23451,6 +23335,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -23464,7 +23349,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -23474,7 +23359,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -23488,6 +23372,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -23501,7 +23386,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -23515,6 +23400,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -23541,6 +23427,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -23554,7 +23441,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type OrganizationCreateInput = {
@@ -23563,7 +23450,7 @@ export namespace Prisma {
     name?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business: BusinessCreateNestedOneWithoutOrganizationInput
+    business?: BusinessCreateNestedOneWithoutOrganizationInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
     subscription?: SubscriptionCreateNestedOneWithoutOrganizationInput
   }
@@ -23574,7 +23461,7 @@ export namespace Prisma {
     name?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    businessId: string
+    business?: BusinessUncheckedCreateNestedOneWithoutOrganizationInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutOrganizationInput
     subscription?: SubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   }
@@ -23585,7 +23472,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutOrganizationNestedInput
+    business?: BusinessUpdateOneWithoutOrganizationNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
     subscription?: SubscriptionUpdateOneWithoutOrganizationNestedInput
   }
@@ -23596,7 +23483,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUncheckedUpdateOneWithoutOrganizationNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
     subscription?: SubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   }
@@ -23607,7 +23494,6 @@ export namespace Prisma {
     name?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    businessId: string
   }
 
   export type OrganizationUpdateManyMutationInput = {
@@ -23624,7 +23510,6 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MembershipCreateInput = {
@@ -23633,7 +23518,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clerkMembershipId: string
-    user: UserCreateNestedOneWithoutMembershipsInput
+    user: UserCreateNestedOneWithoutMembershipInput
     organization: OrganizationCreateNestedOneWithoutMembershipsInput
   }
 
@@ -23653,7 +23538,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
+    user?: UserUpdateOneRequiredWithoutMembershipNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
@@ -25065,11 +24950,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type BoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type DateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -25081,15 +24961,9 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type BusinessNullableScalarRelationFilter = {
-    is?: BusinessWhereInput | null
-    isNot?: BusinessWhereInput | null
-  }
-
-  export type MembershipListRelationFilter = {
-    every?: MembershipWhereInput
-    some?: MembershipWhereInput
-    none?: MembershipWhereInput
+  export type MembershipNullableScalarRelationFilter = {
+    is?: MembershipWhereInput | null
+    isNot?: MembershipWhereInput | null
   }
 
   export type SortOrderInput = {
@@ -25097,16 +24971,11 @@ export namespace Prisma {
     nulls?: NullsOrder
   }
 
-  export type MembershipOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrder
     image?: SortOrder
-    onboarded?: SortOrder
     clerkUserId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -25117,7 +24986,6 @@ export namespace Prisma {
     email?: SortOrder
     name?: SortOrder
     image?: SortOrder
-    onboarded?: SortOrder
     clerkUserId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -25128,7 +24996,6 @@ export namespace Prisma {
     email?: SortOrder
     name?: SortOrder
     image?: SortOrder
-    onboarded?: SortOrder
     clerkUserId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
@@ -25170,14 +25037,6 @@ export namespace Prisma {
     _max?: NestedStringNullableFilter<$PrismaModel>
   }
 
-  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
-
   export type DateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -25198,6 +25057,11 @@ export namespace Prisma {
     hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
     hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
     isEmpty?: boolean
+  }
+
+  export type BoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
   }
 
   export type IntFilter<$PrismaModel = never> = {
@@ -25268,11 +25132,6 @@ export namespace Prisma {
     not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
-  export type UserScalarRelationFilter = {
-    is?: UserWhereInput
-    isNot?: UserWhereInput
-  }
-
   export type InventoryListRelationFilter = {
     every?: InventoryWhereInput
     some?: InventoryWhereInput
@@ -25327,9 +25186,9 @@ export namespace Prisma {
     none?: CustomerStripeAccountWhereInput
   }
 
-  export type OrganizationNullableScalarRelationFilter = {
-    is?: OrganizationWhereInput | null
-    isNot?: OrganizationWhereInput | null
+  export type OrganizationScalarRelationFilter = {
+    is?: OrganizationWhereInput
+    isNot?: OrganizationWhereInput
   }
 
   export type InventoryOrderByRelationAggregateInput = {
@@ -25379,6 +25238,7 @@ export namespace Prisma {
     phone?: SortOrder
     email?: SortOrder
     serviceArea?: SortOrder
+    onboarded?: SortOrder
     logo?: SortOrder
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
@@ -25392,7 +25252,7 @@ export namespace Prisma {
     onboardingError?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    userId?: SortOrder
+    organizationId?: SortOrder
   }
 
   export type BusinessAvgOrderByAggregateInput = {
@@ -25411,6 +25271,7 @@ export namespace Prisma {
     zipCode?: SortOrder
     phone?: SortOrder
     email?: SortOrder
+    onboarded?: SortOrder
     logo?: SortOrder
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
@@ -25422,7 +25283,7 @@ export namespace Prisma {
     onboardingError?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    userId?: SortOrder
+    organizationId?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -25435,6 +25296,7 @@ export namespace Prisma {
     zipCode?: SortOrder
     phone?: SortOrder
     email?: SortOrder
+    onboarded?: SortOrder
     logo?: SortOrder
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
@@ -25446,13 +25308,21 @@ export namespace Prisma {
     onboardingError?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    userId?: SortOrder
+    organizationId?: SortOrder
   }
 
   export type BusinessSumOrderByAggregateInput = {
     minAdvanceBooking?: SortOrder
     maxAdvanceBooking?: SortOrder
     minimumPurchase?: SortOrder
+  }
+
+  export type BoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type IntWithAggregatesFilter<$PrismaModel = never> = {
@@ -25539,14 +25409,24 @@ export namespace Prisma {
     _max?: NestedJsonFilter<$PrismaModel>
   }
 
-  export type BusinessScalarRelationFilter = {
-    is?: BusinessWhereInput
-    isNot?: BusinessWhereInput
+  export type BusinessNullableScalarRelationFilter = {
+    is?: BusinessWhereInput | null
+    isNot?: BusinessWhereInput | null
+  }
+
+  export type MembershipListRelationFilter = {
+    every?: MembershipWhereInput
+    some?: MembershipWhereInput
+    none?: MembershipWhereInput
   }
 
   export type SubscriptionNullableScalarRelationFilter = {
     is?: SubscriptionWhereInput | null
     isNot?: SubscriptionWhereInput | null
+  }
+
+  export type MembershipOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
   export type OrganizationCountOrderByAggregateInput = {
@@ -25555,7 +25435,6 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    businessId?: SortOrder
   }
 
   export type OrganizationMaxOrderByAggregateInput = {
@@ -25564,7 +25443,6 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    businessId?: SortOrder
   }
 
   export type OrganizationMinOrderByAggregateInput = {
@@ -25573,7 +25451,6 @@ export namespace Prisma {
     name?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    businessId?: SortOrder
   }
 
   export type EnumRoleFilter<$PrismaModel = never> = {
@@ -25583,14 +25460,9 @@ export namespace Prisma {
     not?: NestedEnumRoleFilter<$PrismaModel> | $Enums.Role
   }
 
-  export type OrganizationScalarRelationFilter = {
-    is?: OrganizationWhereInput
-    isNot?: OrganizationWhereInput
-  }
-
-  export type MembershipUserIdOrganizationIdCompoundUniqueInput = {
-    userId: string
-    organizationId: string
+  export type UserScalarRelationFilter = {
+    is?: UserWhereInput
+    isNot?: UserWhereInput
   }
 
   export type MembershipCountOrderByAggregateInput = {
@@ -25645,6 +25517,11 @@ export namespace Prisma {
     in?: $Enums.InventoryStatus[] | ListEnumInventoryStatusFieldRefInput<$PrismaModel>
     notIn?: $Enums.InventoryStatus[] | ListEnumInventoryStatusFieldRefInput<$PrismaModel>
     not?: NestedEnumInventoryStatusFilter<$PrismaModel> | $Enums.InventoryStatus
+  }
+
+  export type BusinessScalarRelationFilter = {
+    is?: BusinessWhereInput
+    isNot?: BusinessWhereInput
   }
 
   export type BookingItemListRelationFilter = {
@@ -26577,30 +26454,16 @@ export namespace Prisma {
     businessId?: SortOrder
   }
 
-  export type BusinessCreateNestedOneWithoutUserInput = {
-    create?: XOR<BusinessCreateWithoutUserInput, BusinessUncheckedCreateWithoutUserInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutUserInput
-    connect?: BusinessWhereUniqueInput
+  export type MembershipCreateNestedOneWithoutUserInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
+    connect?: MembershipWhereUniqueInput
   }
 
-  export type MembershipCreateNestedManyWithoutUserInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
-    createMany?: MembershipCreateManyUserInputEnvelope
-    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-  }
-
-  export type BusinessUncheckedCreateNestedOneWithoutUserInput = {
-    create?: XOR<BusinessCreateWithoutUserInput, BusinessUncheckedCreateWithoutUserInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutUserInput
-    connect?: BusinessWhereUniqueInput
-  }
-
-  export type MembershipUncheckedCreateNestedManyWithoutUserInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
-    createMany?: MembershipCreateManyUserInputEnvelope
-    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+  export type MembershipUncheckedCreateNestedOneWithoutUserInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
+    connect?: MembershipWhereUniqueInput
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -26611,70 +26474,32 @@ export namespace Prisma {
     set?: string | null
   }
 
-  export type BoolFieldUpdateOperationsInput = {
-    set?: boolean
-  }
-
   export type DateTimeFieldUpdateOperationsInput = {
     set?: Date | string
   }
 
-  export type BusinessUpdateOneWithoutUserNestedInput = {
-    create?: XOR<BusinessCreateWithoutUserInput, BusinessUncheckedCreateWithoutUserInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutUserInput
-    upsert?: BusinessUpsertWithoutUserInput
-    disconnect?: BusinessWhereInput | boolean
-    delete?: BusinessWhereInput | boolean
-    connect?: BusinessWhereUniqueInput
-    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutUserInput, BusinessUpdateWithoutUserInput>, BusinessUncheckedUpdateWithoutUserInput>
+  export type MembershipUpdateOneWithoutUserNestedInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
+    upsert?: MembershipUpsertWithoutUserInput
+    disconnect?: MembershipWhereInput | boolean
+    delete?: MembershipWhereInput | boolean
+    connect?: MembershipWhereUniqueInput
+    update?: XOR<XOR<MembershipUpdateToOneWithWhereWithoutUserInput, MembershipUpdateWithoutUserInput>, MembershipUncheckedUpdateWithoutUserInput>
   }
 
-  export type MembershipUpdateManyWithoutUserNestedInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
-    upsert?: MembershipUpsertWithWhereUniqueWithoutUserInput | MembershipUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: MembershipCreateManyUserInputEnvelope
-    set?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    disconnect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    delete?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    update?: MembershipUpdateWithWhereUniqueWithoutUserInput | MembershipUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: MembershipUpdateManyWithWhereWithoutUserInput | MembershipUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
-  }
-
-  export type BusinessUncheckedUpdateOneWithoutUserNestedInput = {
-    create?: XOR<BusinessCreateWithoutUserInput, BusinessUncheckedCreateWithoutUserInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutUserInput
-    upsert?: BusinessUpsertWithoutUserInput
-    disconnect?: BusinessWhereInput | boolean
-    delete?: BusinessWhereInput | boolean
-    connect?: BusinessWhereUniqueInput
-    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutUserInput, BusinessUpdateWithoutUserInput>, BusinessUncheckedUpdateWithoutUserInput>
-  }
-
-  export type MembershipUncheckedUpdateManyWithoutUserNestedInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
-    upsert?: MembershipUpsertWithWhereUniqueWithoutUserInput | MembershipUpsertWithWhereUniqueWithoutUserInput[]
-    createMany?: MembershipCreateManyUserInputEnvelope
-    set?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    disconnect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    delete?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
-    update?: MembershipUpdateWithWhereUniqueWithoutUserInput | MembershipUpdateWithWhereUniqueWithoutUserInput[]
-    updateMany?: MembershipUpdateManyWithWhereWithoutUserInput | MembershipUpdateManyWithWhereWithoutUserInput[]
-    deleteMany?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
+  export type MembershipUncheckedUpdateOneWithoutUserNestedInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
+    upsert?: MembershipUpsertWithoutUserInput
+    disconnect?: MembershipWhereInput | boolean
+    delete?: MembershipWhereInput | boolean
+    connect?: MembershipWhereUniqueInput
+    update?: XOR<XOR<MembershipUpdateToOneWithWhereWithoutUserInput, MembershipUpdateWithoutUserInput>, MembershipUncheckedUpdateWithoutUserInput>
   }
 
   export type BusinessCreateserviceAreaInput = {
     set: string[]
-  }
-
-  export type UserCreateNestedOneWithoutBusinessInput = {
-    create?: XOR<UserCreateWithoutBusinessInput, UserUncheckedCreateWithoutBusinessInput>
-    connectOrCreate?: UserCreateOrConnectWithoutBusinessInput
-    connect?: UserWhereUniqueInput
   }
 
   export type InventoryCreateNestedManyWithoutBusinessInput = {
@@ -26809,15 +26634,13 @@ export namespace Prisma {
     connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
   }
 
-  export type OrganizationUncheckedCreateNestedOneWithoutBusinessInput = {
-    create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
-    connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
-    connect?: OrganizationWhereUniqueInput
-  }
-
   export type BusinessUpdateserviceAreaInput = {
     set?: string[]
     push?: string | string[]
+  }
+
+  export type BoolFieldUpdateOperationsInput = {
+    set?: boolean
   }
 
   export type IntFieldUpdateOperationsInput = {
@@ -26834,14 +26657,6 @@ export namespace Prisma {
     decrement?: number
     multiply?: number
     divide?: number
-  }
-
-  export type UserUpdateOneRequiredWithoutBusinessNestedInput = {
-    create?: XOR<UserCreateWithoutBusinessInput, UserUncheckedCreateWithoutBusinessInput>
-    connectOrCreate?: UserCreateOrConnectWithoutBusinessInput
-    upsert?: UserUpsertWithoutBusinessInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutBusinessInput, UserUpdateWithoutBusinessInput>, UserUncheckedUpdateWithoutBusinessInput>
   }
 
   export type InventoryUpdateManyWithoutBusinessNestedInput = {
@@ -26970,12 +26785,10 @@ export namespace Prisma {
     deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
   }
 
-  export type OrganizationUpdateOneWithoutBusinessNestedInput = {
+  export type OrganizationUpdateOneRequiredWithoutBusinessNestedInput = {
     create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
     connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
     upsert?: OrganizationUpsertWithoutBusinessInput
-    disconnect?: OrganizationWhereInput | boolean
-    delete?: OrganizationWhereInput | boolean
     connect?: OrganizationWhereUniqueInput
     update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutBusinessInput, OrganizationUpdateWithoutBusinessInput>, OrganizationUncheckedUpdateWithoutBusinessInput>
   }
@@ -27106,16 +26919,6 @@ export namespace Prisma {
     deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
   }
 
-  export type OrganizationUncheckedUpdateOneWithoutBusinessNestedInput = {
-    create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
-    connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
-    upsert?: OrganizationUpsertWithoutBusinessInput
-    disconnect?: OrganizationWhereInput | boolean
-    delete?: OrganizationWhereInput | boolean
-    connect?: OrganizationWhereUniqueInput
-    update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutBusinessInput, OrganizationUpdateWithoutBusinessInput>, OrganizationUncheckedUpdateWithoutBusinessInput>
-  }
-
   export type BusinessCreateNestedOneWithoutOrganizationInput = {
     create?: XOR<BusinessCreateWithoutOrganizationInput, BusinessUncheckedCreateWithoutOrganizationInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutOrganizationInput
@@ -27135,6 +26938,12 @@ export namespace Prisma {
     connect?: SubscriptionWhereUniqueInput
   }
 
+  export type BusinessUncheckedCreateNestedOneWithoutOrganizationInput = {
+    create?: XOR<BusinessCreateWithoutOrganizationInput, BusinessUncheckedCreateWithoutOrganizationInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutOrganizationInput
+    connect?: BusinessWhereUniqueInput
+  }
+
   export type MembershipUncheckedCreateNestedManyWithoutOrganizationInput = {
     create?: XOR<MembershipCreateWithoutOrganizationInput, MembershipUncheckedCreateWithoutOrganizationInput> | MembershipCreateWithoutOrganizationInput[] | MembershipUncheckedCreateWithoutOrganizationInput[]
     connectOrCreate?: MembershipCreateOrConnectWithoutOrganizationInput | MembershipCreateOrConnectWithoutOrganizationInput[]
@@ -27148,10 +26957,12 @@ export namespace Prisma {
     connect?: SubscriptionWhereUniqueInput
   }
 
-  export type BusinessUpdateOneRequiredWithoutOrganizationNestedInput = {
+  export type BusinessUpdateOneWithoutOrganizationNestedInput = {
     create?: XOR<BusinessCreateWithoutOrganizationInput, BusinessUncheckedCreateWithoutOrganizationInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutOrganizationInput
     upsert?: BusinessUpsertWithoutOrganizationInput
+    disconnect?: BusinessWhereInput | boolean
+    delete?: BusinessWhereInput | boolean
     connect?: BusinessWhereUniqueInput
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutOrganizationInput, BusinessUpdateWithoutOrganizationInput>, BusinessUncheckedUpdateWithoutOrganizationInput>
   }
@@ -27180,6 +26991,16 @@ export namespace Prisma {
     update?: XOR<XOR<SubscriptionUpdateToOneWithWhereWithoutOrganizationInput, SubscriptionUpdateWithoutOrganizationInput>, SubscriptionUncheckedUpdateWithoutOrganizationInput>
   }
 
+  export type BusinessUncheckedUpdateOneWithoutOrganizationNestedInput = {
+    create?: XOR<BusinessCreateWithoutOrganizationInput, BusinessUncheckedCreateWithoutOrganizationInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutOrganizationInput
+    upsert?: BusinessUpsertWithoutOrganizationInput
+    disconnect?: BusinessWhereInput | boolean
+    delete?: BusinessWhereInput | boolean
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutOrganizationInput, BusinessUpdateWithoutOrganizationInput>, BusinessUncheckedUpdateWithoutOrganizationInput>
+  }
+
   export type MembershipUncheckedUpdateManyWithoutOrganizationNestedInput = {
     create?: XOR<MembershipCreateWithoutOrganizationInput, MembershipUncheckedCreateWithoutOrganizationInput> | MembershipCreateWithoutOrganizationInput[] | MembershipUncheckedCreateWithoutOrganizationInput[]
     connectOrCreate?: MembershipCreateOrConnectWithoutOrganizationInput | MembershipCreateOrConnectWithoutOrganizationInput[]
@@ -27204,9 +27025,9 @@ export namespace Prisma {
     update?: XOR<XOR<SubscriptionUpdateToOneWithWhereWithoutOrganizationInput, SubscriptionUpdateWithoutOrganizationInput>, SubscriptionUncheckedUpdateWithoutOrganizationInput>
   }
 
-  export type UserCreateNestedOneWithoutMembershipsInput = {
-    create?: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutMembershipsInput
+  export type UserCreateNestedOneWithoutMembershipInput = {
+    create?: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMembershipInput
     connect?: UserWhereUniqueInput
   }
 
@@ -27220,12 +27041,12 @@ export namespace Prisma {
     set?: $Enums.Role
   }
 
-  export type UserUpdateOneRequiredWithoutMembershipsNestedInput = {
-    create?: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
-    connectOrCreate?: UserCreateOrConnectWithoutMembershipsInput
-    upsert?: UserUpsertWithoutMembershipsInput
+  export type UserUpdateOneRequiredWithoutMembershipNestedInput = {
+    create?: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMembershipInput
+    upsert?: UserUpsertWithoutMembershipInput
     connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMembershipsInput, UserUpdateWithoutMembershipsInput>, UserUncheckedUpdateWithoutMembershipsInput>
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMembershipInput, UserUpdateWithoutMembershipInput>, UserUncheckedUpdateWithoutMembershipInput>
   }
 
   export type OrganizationUpdateOneRequiredWithoutMembershipsNestedInput = {
@@ -27976,11 +27797,6 @@ export namespace Prisma {
     not?: NestedStringNullableFilter<$PrismaModel> | string | null
   }
 
-  export type NestedBoolFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolFilter<$PrismaModel> | boolean
-  }
-
   export type NestedDateTimeFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -28048,14 +27864,6 @@ export namespace Prisma {
     not?: NestedIntNullableFilter<$PrismaModel> | number | null
   }
 
-  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
-    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
-    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedBoolFilter<$PrismaModel>
-    _max?: NestedBoolFilter<$PrismaModel>
-  }
-
   export type NestedDateTimeWithAggregatesFilter<$PrismaModel = never> = {
     equals?: Date | string | DateTimeFieldRefInput<$PrismaModel>
     in?: Date[] | string[] | ListDateTimeFieldRefInput<$PrismaModel>
@@ -28070,6 +27878,11 @@ export namespace Prisma {
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
 
+  export type NestedBoolFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolFilter<$PrismaModel> | boolean
+  }
+
   export type NestedFloatFilter<$PrismaModel = never> = {
     equals?: number | FloatFieldRefInput<$PrismaModel>
     in?: number[] | ListFloatFieldRefInput<$PrismaModel>
@@ -28079,6 +27892,14 @@ export namespace Prisma {
     gt?: number | FloatFieldRefInput<$PrismaModel>
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
+  }
+
+  export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: boolean | BooleanFieldRefInput<$PrismaModel>
+    not?: NestedBoolWithAggregatesFilter<$PrismaModel> | boolean
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedBoolFilter<$PrismaModel>
+    _max?: NestedBoolFilter<$PrismaModel>
   }
 
   export type NestedIntWithAggregatesFilter<$PrismaModel = never> = {
@@ -28407,83 +28228,6 @@ export namespace Prisma {
     _max?: NestedEnumInvoiceStatusFilter<$PrismaModel>
   }
 
-  export type BusinessCreateWithoutUserInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
-    bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
-    coupons?: CouponCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
-  }
-
-  export type BusinessUncheckedCreateWithoutUserInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
-    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
-    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
-  }
-
-  export type BusinessCreateOrConnectWithoutUserInput = {
-    where: BusinessWhereUniqueInput
-    create: XOR<BusinessCreateWithoutUserInput, BusinessUncheckedCreateWithoutUserInput>
-  }
-
   export type MembershipCreateWithoutUserInput = {
     id?: string
     role: $Enums.Role
@@ -28507,150 +28251,33 @@ export namespace Prisma {
     create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
   }
 
-  export type MembershipCreateManyUserInputEnvelope = {
-    data: MembershipCreateManyUserInput | MembershipCreateManyUserInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type BusinessUpsertWithoutUserInput = {
-    update: XOR<BusinessUpdateWithoutUserInput, BusinessUncheckedUpdateWithoutUserInput>
-    create: XOR<BusinessCreateWithoutUserInput, BusinessUncheckedCreateWithoutUserInput>
-    where?: BusinessWhereInput
-  }
-
-  export type BusinessUpdateToOneWithWhereWithoutUserInput = {
-    where?: BusinessWhereInput
-    data: XOR<BusinessUpdateWithoutUserInput, BusinessUncheckedUpdateWithoutUserInput>
-  }
-
-  export type BusinessUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    state?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
-    bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
-  }
-
-  export type BusinessUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    state?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
-    bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
-  }
-
-  export type MembershipUpsertWithWhereUniqueWithoutUserInput = {
-    where: MembershipWhereUniqueInput
+  export type MembershipUpsertWithoutUserInput = {
     update: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
     create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+    where?: MembershipWhereInput
   }
 
-  export type MembershipUpdateWithWhereUniqueWithoutUserInput = {
-    where: MembershipWhereUniqueInput
+  export type MembershipUpdateToOneWithWhereWithoutUserInput = {
+    where?: MembershipWhereInput
     data: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
   }
 
-  export type MembershipUpdateManyWithWhereWithoutUserInput = {
-    where: MembershipScalarWhereInput
-    data: XOR<MembershipUpdateManyMutationInput, MembershipUncheckedUpdateManyWithoutUserInput>
+  export type MembershipUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clerkMembershipId?: StringFieldUpdateOperationsInput | string
+    organization?: OrganizationUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
-  export type MembershipScalarWhereInput = {
-    AND?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
-    OR?: MembershipScalarWhereInput[]
-    NOT?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
-    id?: StringFilter<"Membership"> | string
-    role?: EnumRoleFilter<"Membership"> | $Enums.Role
-    createdAt?: DateTimeFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeFilter<"Membership"> | Date | string
-    clerkMembershipId?: StringFilter<"Membership"> | string
-    userId?: StringFilter<"Membership"> | string
-    organizationId?: StringFilter<"Membership"> | string
-  }
-
-  export type UserCreateWithoutBusinessInput = {
-    id?: string
-    email?: string | null
-    name?: string | null
-    image?: string | null
-    onboarded?: boolean
-    clerkUserId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    memberships?: MembershipCreateNestedManyWithoutUserInput
-  }
-
-  export type UserUncheckedCreateWithoutBusinessInput = {
-    id?: string
-    email?: string | null
-    name?: string | null
-    image?: string | null
-    onboarded?: boolean
-    clerkUserId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
-  }
-
-  export type UserCreateOrConnectWithoutBusinessInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutBusinessInput, UserUncheckedCreateWithoutBusinessInput>
+  export type MembershipUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clerkMembershipId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type InventoryCreateWithoutBusinessInput = {
@@ -29098,41 +28725,6 @@ export namespace Prisma {
     create: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
   }
 
-  export type UserUpsertWithoutBusinessInput = {
-    update: XOR<UserUpdateWithoutBusinessInput, UserUncheckedUpdateWithoutBusinessInput>
-    create: XOR<UserCreateWithoutBusinessInput, UserUncheckedCreateWithoutBusinessInput>
-    where?: UserWhereInput
-  }
-
-  export type UserUpdateToOneWithWhereWithoutBusinessInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutBusinessInput, UserUncheckedUpdateWithoutBusinessInput>
-  }
-
-  export type UserUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    memberships?: MembershipUpdateManyWithoutUserNestedInput
-  }
-
-  export type UserUncheckedUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
-  }
-
   export type InventoryUpsertWithWhereUniqueWithoutBusinessInput = {
     where: InventoryWhereUniqueInput
     update: XOR<InventoryUpdateWithoutBusinessInput, InventoryUncheckedUpdateWithoutBusinessInput>
@@ -29511,6 +29103,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -29524,7 +29117,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -29547,6 +29139,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -29560,7 +29153,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -29583,7 +29175,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     clerkMembershipId: string
-    user: UserCreateNestedOneWithoutMembershipsInput
+    user: UserCreateNestedOneWithoutMembershipInput
   }
 
   export type MembershipUncheckedCreateWithoutOrganizationInput = {
@@ -29658,6 +29250,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -29671,7 +29264,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -29694,6 +29286,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -29707,7 +29300,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -29733,6 +29325,19 @@ export namespace Prisma {
   export type MembershipUpdateManyWithWhereWithoutOrganizationInput = {
     where: MembershipScalarWhereInput
     data: XOR<MembershipUpdateManyMutationInput, MembershipUncheckedUpdateManyWithoutOrganizationInput>
+  }
+
+  export type MembershipScalarWhereInput = {
+    AND?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
+    OR?: MembershipScalarWhereInput[]
+    NOT?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
+    id?: StringFilter<"Membership"> | string
+    role?: EnumRoleFilter<"Membership"> | $Enums.Role
+    createdAt?: DateTimeFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeFilter<"Membership"> | Date | string
+    clerkMembershipId?: StringFilter<"Membership"> | string
+    userId?: StringFilter<"Membership"> | string
+    organizationId?: StringFilter<"Membership"> | string
   }
 
   export type SubscriptionUpsertWithoutOrganizationInput = {
@@ -29772,33 +29377,29 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
-  export type UserCreateWithoutMembershipsInput = {
+  export type UserCreateWithoutMembershipInput = {
     id?: string
     email?: string | null
     name?: string | null
     image?: string | null
-    onboarded?: boolean
     clerkUserId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business?: BusinessCreateNestedOneWithoutUserInput
   }
 
-  export type UserUncheckedCreateWithoutMembershipsInput = {
+  export type UserUncheckedCreateWithoutMembershipInput = {
     id?: string
     email?: string | null
     name?: string | null
     image?: string | null
-    onboarded?: boolean
     clerkUserId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business?: BusinessUncheckedCreateNestedOneWithoutUserInput
   }
 
-  export type UserCreateOrConnectWithoutMembershipsInput = {
+  export type UserCreateOrConnectWithoutMembershipInput = {
     where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
+    create: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
   }
 
   export type OrganizationCreateWithoutMembershipsInput = {
@@ -29807,7 +29408,7 @@ export namespace Prisma {
     name?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business: BusinessCreateNestedOneWithoutOrganizationInput
+    business?: BusinessCreateNestedOneWithoutOrganizationInput
     subscription?: SubscriptionCreateNestedOneWithoutOrganizationInput
   }
 
@@ -29817,7 +29418,7 @@ export namespace Prisma {
     name?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    businessId: string
+    business?: BusinessUncheckedCreateNestedOneWithoutOrganizationInput
     subscription?: SubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
   }
 
@@ -29826,39 +29427,35 @@ export namespace Prisma {
     create: XOR<OrganizationCreateWithoutMembershipsInput, OrganizationUncheckedCreateWithoutMembershipsInput>
   }
 
-  export type UserUpsertWithoutMembershipsInput = {
-    update: XOR<UserUpdateWithoutMembershipsInput, UserUncheckedUpdateWithoutMembershipsInput>
-    create: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
+  export type UserUpsertWithoutMembershipInput = {
+    update: XOR<UserUpdateWithoutMembershipInput, UserUncheckedUpdateWithoutMembershipInput>
+    create: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
     where?: UserWhereInput
   }
 
-  export type UserUpdateToOneWithWhereWithoutMembershipsInput = {
+  export type UserUpdateToOneWithWhereWithoutMembershipInput = {
     where?: UserWhereInput
-    data: XOR<UserUpdateWithoutMembershipsInput, UserUncheckedUpdateWithoutMembershipsInput>
+    data: XOR<UserUpdateWithoutMembershipInput, UserUncheckedUpdateWithoutMembershipInput>
   }
 
-  export type UserUpdateWithoutMembershipsInput = {
+  export type UserUpdateWithoutMembershipInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneWithoutUserNestedInput
   }
 
-  export type UserUncheckedUpdateWithoutMembershipsInput = {
+  export type UserUncheckedUpdateWithoutMembershipInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
     image?: NullableStringFieldUpdateOperationsInput | string | null
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUncheckedUpdateOneWithoutUserNestedInput
   }
 
   export type OrganizationUpsertWithoutMembershipsInput = {
@@ -29878,7 +29475,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutOrganizationNestedInput
+    business?: BusinessUpdateOneWithoutOrganizationNestedInput
     subscription?: SubscriptionUpdateOneWithoutOrganizationNestedInput
   }
 
@@ -29888,7 +29485,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUncheckedUpdateOneWithoutOrganizationNestedInput
     subscription?: SubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   }
 
@@ -29903,6 +29500,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -29916,7 +29514,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
     payments?: PaymentCreateNestedManyWithoutBusinessInput
@@ -29925,7 +29522,7 @@ export namespace Prisma {
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryInput = {
@@ -29939,6 +29536,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -29952,7 +29550,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
@@ -29961,7 +29559,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryInput = {
@@ -30019,6 +29616,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -30032,7 +29630,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUpdateManyWithoutBusinessNestedInput
@@ -30041,7 +29638,7 @@ export namespace Prisma {
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryInput = {
@@ -30055,6 +29652,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -30068,7 +29666,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
@@ -30077,7 +29675,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type BookingItemUpsertWithWhereUniqueWithoutInventoryInput = {
@@ -30120,6 +29717,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -30133,7 +29731,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
     payments?: PaymentCreateNestedManyWithoutBusinessInput
@@ -30142,7 +29739,7 @@ export namespace Prisma {
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomersInput = {
@@ -30156,6 +29753,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -30169,7 +29767,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
@@ -30178,7 +29776,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomersInput = {
@@ -30396,6 +29993,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -30409,7 +30007,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUpdateManyWithoutBusinessNestedInput
@@ -30418,7 +30015,7 @@ export namespace Prisma {
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -30432,6 +30029,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -30445,7 +30043,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
@@ -30454,7 +30052,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type BookingUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -30532,6 +30129,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -30545,7 +30143,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     payments?: PaymentCreateNestedManyWithoutBusinessInput
@@ -30554,7 +30151,7 @@ export namespace Prisma {
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutBookingsInput = {
@@ -30568,6 +30165,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -30581,7 +30179,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
@@ -30590,7 +30188,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutBookingsInput = {
@@ -30822,6 +30419,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -30835,7 +30433,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUpdateManyWithoutBusinessNestedInput
@@ -30844,7 +30441,7 @@ export namespace Prisma {
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutBookingsInput = {
@@ -30858,6 +30455,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -30871,7 +30469,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
@@ -30880,7 +30478,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutBookingsInput = {
@@ -31377,6 +30974,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31390,7 +30988,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -31399,7 +30996,7 @@ export namespace Prisma {
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPaymentsInput = {
@@ -31413,6 +31010,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31426,7 +31024,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -31435,7 +31033,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPaymentsInput = {
@@ -31540,6 +31137,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -31553,7 +31151,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -31562,7 +31159,7 @@ export namespace Prisma {
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPaymentsInput = {
@@ -31576,6 +31173,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -31589,7 +31187,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -31598,7 +31196,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutCouponsInput = {
@@ -31612,6 +31209,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31625,7 +31223,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -31634,7 +31231,7 @@ export namespace Prisma {
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCouponsInput = {
@@ -31648,6 +31245,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31661,7 +31259,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -31670,7 +31268,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCouponsInput = {
@@ -31700,6 +31297,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -31713,7 +31311,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -31722,7 +31319,7 @@ export namespace Prisma {
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCouponsInput = {
@@ -31736,6 +31333,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -31749,7 +31347,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -31758,7 +31356,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutSalesFunnelsInput = {
@@ -31772,6 +31369,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31785,7 +31383,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -31794,7 +31391,7 @@ export namespace Prisma {
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSalesFunnelsInput = {
@@ -31808,6 +31405,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31821,7 +31419,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -31830,7 +31428,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSalesFunnelsInput = {
@@ -31860,6 +31457,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -31873,7 +31471,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -31882,7 +31479,7 @@ export namespace Prisma {
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSalesFunnelsInput = {
@@ -31896,6 +31493,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -31909,7 +31507,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -31918,7 +31516,6 @@ export namespace Prisma {
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type BusinessCreateWithoutWaiversInput = {
@@ -31932,6 +31529,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31945,7 +31543,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -31954,7 +31551,7 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutWaiversInput = {
@@ -31968,6 +31565,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -31981,7 +31579,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -31990,7 +31588,6 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutWaiversInput = {
@@ -32142,6 +31739,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -32155,7 +31753,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -32164,7 +31761,7 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutWaiversInput = {
@@ -32178,6 +31775,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -32191,7 +31789,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -32200,7 +31798,6 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutWaiversInput = {
@@ -32343,7 +31940,7 @@ export namespace Prisma {
     name?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business: BusinessCreateNestedOneWithoutOrganizationInput
+    business?: BusinessCreateNestedOneWithoutOrganizationInput
     memberships?: MembershipCreateNestedManyWithoutOrganizationInput
   }
 
@@ -32353,7 +31950,7 @@ export namespace Prisma {
     name?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    businessId: string
+    business?: BusinessUncheckedCreateNestedOneWithoutOrganizationInput
     memberships?: MembershipUncheckedCreateNestedManyWithoutOrganizationInput
   }
 
@@ -32379,7 +31976,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutOrganizationNestedInput
+    business?: BusinessUpdateOneWithoutOrganizationNestedInput
     memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
   }
 
@@ -32389,7 +31986,7 @@ export namespace Prisma {
     name?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
+    business?: BusinessUncheckedUpdateOneWithoutOrganizationNestedInput
     memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
@@ -32404,6 +32001,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -32417,7 +32015,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -32426,7 +32023,7 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoicesInput = {
@@ -32440,6 +32037,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -32453,7 +32051,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -32462,7 +32060,6 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoicesInput = {
@@ -32614,6 +32211,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -32627,7 +32225,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -32636,7 +32233,7 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoicesInput = {
@@ -32650,6 +32247,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -32663,7 +32261,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -32672,7 +32270,6 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutInvoicesInput = {
@@ -32873,6 +32470,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -32886,7 +32484,6 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    user: UserCreateNestedOneWithoutBusinessInput
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
     customers?: CustomerCreateNestedManyWithoutBusinessInput
     bookings?: BookingCreateNestedManyWithoutBusinessInput
@@ -32895,7 +32492,7 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationCreateNestedOneWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutCustomerStripeAccountsInput = {
@@ -32909,6 +32506,7 @@ export namespace Prisma {
     phone?: string | null
     email?: string | null
     serviceArea?: BusinessCreateserviceAreaInput | string[]
+    onboarded?: boolean
     logo?: string | null
     minAdvanceBooking?: number
     maxAdvanceBooking?: number
@@ -32922,7 +32520,7 @@ export namespace Prisma {
     onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    userId: string
+    organizationId: string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
@@ -32931,7 +32529,6 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    organization?: OrganizationUncheckedCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutCustomerStripeAccountsInput = {
@@ -33020,6 +32617,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -33033,7 +32631,6 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    user?: UserUpdateOneRequiredWithoutBusinessNestedInput
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
@@ -33042,7 +32639,7 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput = {
@@ -33056,6 +32653,7 @@ export namespace Prisma {
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
     minAdvanceBooking?: IntFieldUpdateOperationsInput | number
     maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
@@ -33069,7 +32667,7 @@ export namespace Prisma {
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    userId?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
@@ -33078,43 +32676,6 @@ export namespace Prisma {
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUncheckedUpdateOneWithoutBusinessNestedInput
-  }
-
-  export type MembershipCreateManyUserInput = {
-    id?: string
-    role: $Enums.Role
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    clerkMembershipId: string
-    organizationId: string
-  }
-
-  export type MembershipUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    organization?: OrganizationUpdateOneRequiredWithoutMembershipsNestedInput
-  }
-
-  export type MembershipUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    organizationId?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type MembershipUncheckedUpdateManyWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    organizationId?: StringFieldUpdateOperationsInput | string
   }
 
   export type InventoryCreateManyBusinessInput = {
@@ -33774,7 +33335,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
+    user?: UserUpdateOneRequiredWithoutMembershipNestedInput
   }
 
   export type MembershipUncheckedUpdateWithoutOrganizationInput = {
