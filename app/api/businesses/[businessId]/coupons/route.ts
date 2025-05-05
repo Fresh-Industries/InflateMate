@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -34,41 +34,31 @@ const couponSchema = z.object({
 });
 
 // GET /api/businesses/[businessId]/coupons
-export async function GET(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+export async function GET(
+  req: NextRequest,
+  props: { params: Promise<{ businessId: string }> }
+) {
   const params = await props.params;
   try {
     const { businessId } = params;
-    const user = await getCurrentUser();
-    
+    const user = await getCurrentUserWithOrgAndBusiness();
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
-    }
-    
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const coupons = await prisma.coupon.findMany({
-          where: {
-            businessId: business.id,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
-
-        return coupons;
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    return NextResponse.json(result.data);
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    const coupons = await prisma.coupon.findMany({
+      where: { businessId },
+      orderBy: { createdAt: "desc" },
+    });
+
+    return NextResponse.json(coupons);
   } catch (error) {
     console.error("Error fetching coupons:", error);
     return NextResponse.json(
@@ -78,69 +68,66 @@ export async function GET(req: NextRequest, props: { params: Promise<{ businessI
   }
 }
 
+
 // POST /api/businesses/[businessId]/coupons
-export async function POST(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+export async function POST(
+  req: NextRequest,
+  props: { params: Promise<{ businessId: string }> }
+) {
   const params = await props.params;
   try {
     const { businessId } = params;
-    const user = await getCurrentUser();
-    
+    const user = await getCurrentUserWithOrgAndBusiness();
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const body = await req.json();
-    
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const validatedData = couponSchema.parse(body);
+    const validatedData = couponSchema.parse(body);
 
-        // Check if coupon code already exists for this business
-        const existingCoupon = await prisma.coupon.findUnique({
-          where: {
-            code_businessId: {
-              code: validatedData.code,
-              businessId: business.id,
-            },
-          },
-        });
+    // Check if coupon code already exists for this business
+    const existingCoupon = await prisma.coupon.findUnique({
+      where: {
+        code_businessId: {
+          code: validatedData.code,
+          businessId: businessId,
+        },
+      },
+    });
 
-        if (existingCoupon) {
-          throw new Error("Coupon code already exists");
-        }
-
-        const coupon = await prisma.coupon.create({
-          data: {
-            ...validatedData,
-            businessId: business.id,
-            usedCount: 0,
-          },
-        });
-
-        return coupon;
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    if (existingCoupon) {
+      return NextResponse.json(
+        { error: "Coupon code already exists" },
+        { status: 400 }
+      );
     }
 
-    return NextResponse.json(result.data, { status: 201 });
+    const coupon = await prisma.coupon.create({
+      data: {
+        ...validatedData,
+        businessId: businessId,
+        usedCount: 0,
+      },
+    });
+
+    return NextResponse.json(coupon, { status: 201 });
   } catch (error) {
     console.error("Error creating coupon:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid input", details: error.errors },
         { status: 400 }
       );
     }
-    
+
     if (error instanceof Error && error.message === "Coupon code already exists") {
       return NextResponse.json(
         { error: error.message },
@@ -153,4 +140,4 @@ export async function POST(req: NextRequest, props: { params: Promise<{ business
       { status: 500 }
     );
   }
-} 
+}

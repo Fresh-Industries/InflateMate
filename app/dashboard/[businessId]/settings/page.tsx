@@ -1,7 +1,7 @@
 import React from 'react'
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { getCurrentUser } from "@/lib/auth/clerk-utils"
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils"
 import BusinessSettingsForm from "@/app/dashboard/[businessId]/settings/_components/BusinessSettingsForm"
 
 // Business interface for settings form
@@ -28,17 +28,20 @@ interface BusinessSettings {
 export const dynamic = "force-dynamic"
 
 async function getBusinessData(businessId: string): Promise<BusinessSettings | null> {
-  const user = await getCurrentUser();
-  
+  const user = await getCurrentUserWithOrgAndBusiness();
+
   if (!user) {
     redirect("/sign-in");
   }
 
-  const business = await prisma.business.findFirst({
-    where: {
-      id: businessId,
-      userId: user.id,
-    },
+  // Check that the user has access to this business
+  const userBusinessId = user.membership?.organization?.business?.id;
+  if (!userBusinessId || userBusinessId !== businessId) {
+    redirect("/dashboard");
+  }
+
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
   });
 
   if (!business) {
@@ -54,13 +57,12 @@ export default async function Settings({
   params: Promise<{ businessId: string }>, 
 }) {
   const resolvedParams = await params;
-  
   const business = await getBusinessData(resolvedParams.businessId);
-  
+
   if (!business) {
     redirect("/dashboard");
   }
-  
+
   return (
     <div className="container mx-auto py-8">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
@@ -72,12 +74,6 @@ export default async function Settings({
       <div className="mt-8">
         <BusinessSettingsForm business={business} />
       </div>
-      
-      
-        
-        
-        
-      
     </div>
   )
 }

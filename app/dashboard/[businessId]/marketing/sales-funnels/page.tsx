@@ -3,7 +3,7 @@ import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import SalesFunnelList from "../_components/SalesFunnelList";
 
 export const metadata: Metadata = {
@@ -17,23 +17,12 @@ export default async function SalesFunnelsPage(
   }
 ) {
   const params = await props.params;
-  const user = await getCurrentUser();
+  const user = await getCurrentUserWithOrgAndBusiness();
 
   if (!user) {
     redirect("/auth/signin");
   }
 
-  const result = await withBusinessAuth<{ hasAccess: boolean }>(
-    params.businessId,
-    user.id,
-    async () => {
-      return { hasAccess: true };
-    }
-  );
-
-  if (result.error) {
-    redirect("/");
-  }
 
   return (
     <div className="min-h-screen">
