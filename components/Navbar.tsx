@@ -3,133 +3,160 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Menu, X, ChevronDown, Star, Zap, LifeBuoy } from "lucide-react";
+import { Button } from "@/components/ui/button"; // Assuming your Button component handles variants
+import { Menu, X, ArrowRight, Zap, LifeBuoy, Info, Mail, Rocket } from "lucide-react"; // Added more icons for relevant pages
 import { useAuth } from "@clerk/nextjs";
 
+// Map nav items to your sitemap structure
 const navItems = [
-  { label: "Features", href: "/features", icon: <Star className="w-4 h-4" /> },
+  { label: "Features", href: "/features", icon: <Rocket className="w-4 h-4" /> }, // Using Rocket icon
   { label: "Pricing", href: "/pricing", icon: <Zap className="w-4 h-4" /> },
-  { label: "Resources", href: "/resources", icon: <LifeBuoy className="w-4 h-4" /> },
+  { label: "Resources", href: "/resources", icon: <LifeBuoy className="w-4 h-4" /> }, // Blog Index
+  { label: "About Us", href: "/about", icon: <Info className="w-4 h-4" /> },
+  { label: "Contact", href: "/contact", icon: <Mail className="w-4 h-4" /> },
+  // Add Testimonials link if you want it in the main nav
+  // { label: "Testimonials", href: "/testimonials", icon: <Trophy className="w-4 h-4" /> },
+  // Comparison pages are dynamic, usually not in the main nav
 ];
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [dashboardHref, setDashboardHref] = useState("/dashboard");
-  const [loading, setLoading] = useState(true);
+  const [dashboardHref, setDashboardHref] = useState("/dashboard"); // Default/loading state
+  const [loadingUserStatus, setLoadingUserStatus] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
-  const { isLoaded, userId } = useAuth();
+  const { isLoaded: isClerkLoaded, userId } = useAuth();
 
+  // Handle scroll to change navbar appearance
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    const handleScroll = () => setIsScrolled(window.scrollY > 50); // Adjust scroll threshold
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Fetch user status for Dashboard link (Keeping your logic structure)
   useEffect(() => {
     async function fetchUserStatus() {
-      if (!userId) {
-        setLoading(false);
-        return;
+      if (!isClerkLoaded) { // Wait for Clerk to load first
+         setLoadingUserStatus(false); // If Clerk isn't loaded, user isn't logged in
+         return;
       }
+
+      if (!userId) { // Clerk loaded, but no user ID (logged out)
+         setLoadingUserStatus(false);
+         // If user is not logged in, dashboard link should likely go to sign-in or homepage
+         setDashboardHref("/sign-in");
+         return;
+      }
+
+      // If user is logged in, fetch their specific status
+      setLoadingUserStatus(true); // Start loading status if userId exists
       try {
-        const response = await fetch('/api/me');
+        // Assume /api/me returns { business: { id: string } | null, subscription: { status: string } | null, orgId: string | null }
+        const response = await fetch('/api/me'); // Your API endpoint
         if (response.ok) {
           const data = await response.json();
-          // 1. Not onboarded
-          if (!data.business) {
-            setDashboardHref("/onboarding");
-          }
-          // 2. Onboarded but not subscribed
-          else if (
-            !data.subscription?.status ||
+          if (!data.business) { // User exists but no business created
+            setDashboardHref("/onboarding"); // Link to onboarding if no business
+          } else if (
+            !data.subscription?.status || // Business created but no active/trialing subscription
             !["active", "trialing"].includes(data.subscription.status)
           ) {
-            setDashboardHref(`/pricing?orgId=${data.orgId}`);
+            setDashboardHref(`/pricing?orgId=${data.orgId || ''}`); // Link to pricing with orgId
+          } else { // Onboarded and subscribed
+            setDashboardHref(`/dashboard/${data.business.id}`); // Link to user's specific dashboard
           }
-          // 3. Onboarded and subscribed
-          else {
-            setDashboardHref(`/dashboard/${data.business.id}`);
-          }
+        } else {
+           // Handle API errors (shouldn't happen if userId exists and API is protected, but good practice)
+           console.error("Failed to fetch user status:", response.status);
+           setDashboardHref("/dashboard"); // Fallback on API error
         }
       } catch (error) {
         console.error("Error fetching user status:", error);
+        setDashboardHref("/dashboard"); // Fallback on network errors etc.
       } finally {
-        setLoading(false);
+        setLoadingUserStatus(false); // Done loading status
       }
     }
-    if (isLoaded) {
-      fetchUserStatus();
-    }
-  }, [isLoaded, userId]);
+
+    fetchUserStatus(); // Call fetch status when Clerk loaded state or userId changes
+  }, [isClerkLoaded, userId]);
 
   const toggleMenu = () => setIsMenuOpen((prev) => !prev);
-  const isLoadingUser = !isLoaded || loading;
+  const handleNavLinkClick = () => setIsMenuOpen(false); // Close menu on link click
+
+  // Show skeleton loading state until Clerk is loaded and user status is fetched
+  const showAuthLoading = !isClerkLoaded || loadingUserStatus;
+
 
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white/90 backdrop-blur-xl shadow-lg' : 'bg-transparent'
+        isScrolled ? 'bg-white/90 backdrop-blur-xl shadow-sm border-b border-muted/40' : 'bg-transparent border-b border-transparent'
       }`}
     >
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-20 items-center justify-between">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8"> {/* Standard container padding */}
+        <div className="flex h-16 md:h-20 items-center justify-between"> {/* Standard navbar height */}
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2 group">
-            <div className="relative flex items-center">
-              <div className="absolute -inset-3 bg-gradient-to-r from-blue-600/20 to-purple-600/20 rounded-full opacity-80 group-hover:opacity-100 blur-md transition-all duration-300"></div>
-              <div className="relative flex items-center">
-                <Image
-                  src="/images/inflatemate-logo.PNG"
-                  alt="InflateMate Logo"
-                  width={50}
-                  height={50}
-                />
-                <span className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-                  InflateMate
-                </span>
-              </div>
-            </div>
+          <Link href="/" className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary rounded-md">
+             {/* Simplified logo styling, relying on core gradient and image */}
+             <Image
+               src="/images/inflatemate-logo.PNG" // Ensure this path is correct and image exists
+               alt="InflateMate Logo"
+               width={40} // Adjusted size
+               height={40} // Adjusted size
+               className="object-contain"
+             />
+             <span className="text-2xl md:text-3xl font-extrabold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+               InflateMate
+             </span>
           </Link>
 
           {/* Desktop Navigation */}
-          <div className="hidden lg:flex items-center space-x-8 text-sm font-medium">
+          <div className="hidden lg:flex items-center space-x-6"> {/* Standard spacing */}
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                className="relative px-5 py-2 text-gray-700 hover:text-blue-600 transition-colors duration-200 group flex items-center gap-2"
+                className="relative px-3 py-2 text-text-light hover:text-primary transition-colors duration-200 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary font-medium"
               >
-                <div className="absolute inset-0 rounded-full transition-all duration-200 group-hover:bg-blue-50/80"></div>
+                 {/* Removed icon from desktop nav links for cleaner look */}
                 <span className="relative z-10">{item.label}</span>
-                <span className="relative z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  {item.icon}
-                </span>
               </Link>
             ))}
           </div>
 
           {/* Desktop Action Buttons */}
           <div className="hidden lg:flex items-center space-x-4">
-            {isLoadingUser ? (
-              <div className="h-10 w-24 bg-gradient-to-r from-blue-100 to-purple-100 animate-pulse rounded-full"></div>
-            ) : userId ? (
+            {showAuthLoading ? (
+              <div className="h-10 w-24 bg-muted/60 animate-pulse rounded-full"></div> // Loading skeleton
+            ) : userId ? ( // Logged In
               <Link href={dashboardHref}>
-                <Button variant="ghost" className="h-12 px-6 rounded-full hover:bg-blue-50 border border-blue-100/50 shadow-sm">
+                <Button
+                   variant="outline" // Using outline for secondary action
+                   className="h-10 px-5 rounded-full border border-muted hover:bg-muted/60 text-text-DEFAULT shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+                >
                   Dashboard
                 </Button>
               </Link>
-            ) : (
+            ) : ( // Logged Out
               <>
                 <Link href="/sign-in">
-                  <Button variant="ghost" className="h-12 px-6 rounded-full hover:bg-blue-50 border border-blue-100/50 shadow-sm">
+                  <Button
+                     variant="ghost" // Using ghost for less emphasis
+                     className="h-10 px-5 rounded-full hover:bg-muted/60 text-text-DEFAULT transition-colors focus-visible:ring-2 focus-visible:ring-primary"
+                  >
                     Sign In
                   </Button>
                 </Link>
                 <Link href="/sign-up">
-                  <Button className="h-12 px-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg transition-transform duration-300 transform hover:scale-105">
+                   {/* Use the primary-gradient style - assuming Button component supports this variant */}
+                  <Button
+                     variant="primary-gradient" // Ensure you have this variant defined in your Button component
+                     className="h-10 px-5 rounded-full shadow-md transition-transform duration-300 hover:scale-105 focus-visible:ring-2 focus-visible:ring-primary" // Shadow on primary button
+                  >
                     Get Started
-                    <ChevronDown className="ml-2 w-4 h-4 text-white transition-transform duration-300 group-hover:rotate-90" />
+                    {/* Use ArrowRight icon */}
+                    <ArrowRight className="ml-2 w-4 h-4 text-white transition-transform duration-300 group-hover:translate-x-1" />
                   </Button>
                 </Link>
               </>
@@ -140,55 +167,69 @@ export default function Navbar() {
           <div className="lg:hidden">
             <button
               onClick={toggleMenu}
-              className="p-2 rounded-full bg-gradient-to-r from-blue-50 to-purple-50 hover:from-blue-100 hover:to-purple-100 transition-colors shadow-sm"
+              className="p-2 rounded-md transition-colors hover:bg-muted/60 text-text-DEFAULT outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              aria-label="Toggle mobile menu"
             >
               {isMenuOpen ? (
-                <X className="h-6 w-6 text-blue-600" />
+                <X className="h-6 w-6" />
               ) : (
-                <Menu className="h-6 w-6 text-blue-600" />
+                <Menu className="h-6 w-6" />
               )}
             </button>
           </div>
         </div>
       </div>
 
-      {/* Mobile Navigation */}
+      {/* Mobile Navigation (slide-down panel) */}
       {isMenuOpen && (
-        <div className="lg:hidden bg-white/95 backdrop-blur-xl border-t border-blue-100 shadow-lg">
-          <div className="container mx-auto px-4 py-6 space-y-5">
+        <div className="lg:hidden absolute top-16 md:top-20 left-0 right-0 bg-surface/95 backdrop-blur-xl border-b border-muted/40 shadow-lg animate-in slide-in-from-top-8 duration-300 ease-out">
+          <div className="container mx-auto px-4 py-6 space-y-4">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
-                onClick={() => setIsMenuOpen(false)}
-                className="flex items-center gap-3 px-4 py-3 text-gray-700 hover:text-blue-600 rounded-xl hover:bg-blue-50/80 transition-all"
+                onClick={handleNavLinkClick}
+                className="flex items-center gap-3 px-4 py-3 text-text-DEFAULT hover:text-primary rounded-md hover:bg-muted/40 transition-all font-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
               >
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-r from-blue-500/10 to-purple-500/10 flex items-center justify-center">
-                  {item.icon}
-                </div>
-                <span className="font-medium">{item.label}</span>
+                 {/* Icon on mobile nav links */}
+                 <div className="w-8 h-8 rounded-md bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                   {item.icon}
+                 </div>
+                <span>{item.label}</span>
               </Link>
             ))}
-            <div className="border-t border-blue-100 pt-5 space-y-4">
-              {isLoadingUser ? (
-                <div className="h-14 bg-gradient-to-r from-blue-100 to-purple-100 animate-pulse rounded-xl"></div>
+            <div className="border-t border-muted/60 pt-4 space-y-4">
+              {showAuthLoading ? (
+                <div className="h-12 bg-muted/60 animate-pulse rounded-md"></div> // Loading skeleton
               ) : userId ? (
                 <Link href={dashboardHref}>
-                  <Button variant="ghost" className="w-full justify-center h-14 rounded-xl border border-blue-100 shadow-sm">
+                  <Button
+                     variant="outline"
+                     className="w-full justify-center h-12 rounded-md border border-muted hover:bg-muted/60 text-text-DEFAULT shadow-sm focus-visible:ring-2 focus-visible:ring-primary"
+                     onClick={handleNavLinkClick}
+                  >
                     Dashboard
                   </Button>
                 </Link>
               ) : (
                 <>
                   <Link href="/sign-in">
-                    <Button variant="ghost" className="w-full justify-center h-14 rounded-xl border border-blue-100 shadow-sm">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-center h-12 rounded-md hover:bg-muted/60 text-text-DEFAULT focus-visible:ring-2 focus-visible:ring-primary"
+                      onClick={handleNavLinkClick}
+                    >
                       Sign In
                     </Button>
                   </Link>
                   <Link href="/sign-up">
-                    <Button className="w-full justify-center h-14 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg">
+                    <Button
+                      variant="primary-gradient" // Ensure this variant is defined
+                      className="w-full justify-center h-12 rounded-md shadow-md focus-visible:ring-2 focus-visible:ring-primary"
+                      onClick={handleNavLinkClick}
+                    >
                       Get Started
-                      <ChevronDown className="ml-2 w-4 h-4 text-white" />
+                      <ArrowRight className="ml-2 w-4 h-4 text-white" />
                     </Button>
                   </Link>
                 </>
