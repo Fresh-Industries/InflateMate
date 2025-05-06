@@ -8,6 +8,7 @@ export default function AuthPage() {
         <SignIn 
           fallbackRedirectUrl="/callback" 
           signUpFallbackRedirectUrl="/sign-up"
+          waitlistUrl='/waitlist'
           appearance={{
             elements: {
               formButtonPrimary: 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white rounded-xl transition-all',

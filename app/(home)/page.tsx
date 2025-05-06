@@ -1,24 +1,26 @@
 import Hero from "./_components/Hero";
-import Features from "./_components/Features";
-import Explainer from "./_components/Explainer";
-import OperatorTypes from "./_components/OperatorTypes";
-import Testimonial from "./_components/Testimonial";
-import PricingPreview from "./_components/PricingPreview";
-import FAQAccordion from "./_components/FAQAccordion";
-import FinalCTA from "./_components/FinalCTA";
-
+import FeaturesBento from "./_components/FeaturesBento";
+import ProblemSolutionStrip from "./_components/ProblemSolutionStrip";
+import WorkflowStoryboard from "./_components/WorkflowStoryboard";
+import DemoPlayer from "./_components/DemoPlayer";
+import DifferentiatorTable from "./_components/DifferentiatorTable";
+import PricingList from "./_components/PricingList";
+import FoundersRoadmap from "./_components/FoundersRoadmap";
+import Faq from "./_components/Faq";
+import SecondaryCTA from "./_components/SecondaryCTA";
 export default function Home() {
   return (
     <main className="relative overflow-hidden">
       <Hero />
-      <Features />
-      <Explainer />
-      <OperatorTypes />
-      <Testimonial />
-      <PricingPreview />
-      <FAQAccordion />
-      <FinalCTA />
-
+      <FeaturesBento />
+      <ProblemSolutionStrip />
+      <WorkflowStoryboard />
+      <DemoPlayer />
+      <DifferentiatorTable />
+      <PricingList />
+      <FoundersRoadmap />
+      <Faq />
+      <SecondaryCTA />
     </main>
   );
 }
