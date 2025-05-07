@@ -246,11 +246,11 @@ model Payment {
   stripePaymentId    String?
   createdAt          DateTime      @default(now())
   updatedAt          DateTime      @default(now())
-
-  booking    Booking  @relation(fields: [bookingId], references: [id])
-  bookingId  String
-  business   Business @relation(fields: [businessId], references: [id])
-  businessId String
+  paidAt             DateTime?
+  booking            Booking       @relation(fields: [bookingId], references: [id])
+  bookingId          String
+  business           Business      @relation(fields: [businessId], references: [id])
+  businessId         String
 }
 
 model Coupon {

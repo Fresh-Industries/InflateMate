@@ -272,6 +272,7 @@ exports.Prisma.PaymentScalarFieldEnum = {
   stripePaymentId: 'stripePaymentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  paidAt: 'paidAt',
   bookingId: 'bookingId',
   businessId: 'businessId'
 };

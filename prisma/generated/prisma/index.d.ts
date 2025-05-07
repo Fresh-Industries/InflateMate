@@ -13047,6 +13047,7 @@ export namespace Prisma {
     stripePaymentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    paidAt: Date | null
     bookingId: string | null
     businessId: string | null
   }
@@ -13061,6 +13062,7 @@ export namespace Prisma {
     stripePaymentId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    paidAt: Date | null
     bookingId: string | null
     businessId: string | null
   }
@@ -13076,6 +13078,7 @@ export namespace Prisma {
     stripePaymentId: number
     createdAt: number
     updatedAt: number
+    paidAt: number
     bookingId: number
     businessId: number
     _all: number
@@ -13100,6 +13103,7 @@ export namespace Prisma {
     stripePaymentId?: true
     createdAt?: true
     updatedAt?: true
+    paidAt?: true
     bookingId?: true
     businessId?: true
   }
@@ -13114,6 +13118,7 @@ export namespace Prisma {
     stripePaymentId?: true
     createdAt?: true
     updatedAt?: true
+    paidAt?: true
     bookingId?: true
     businessId?: true
   }
@@ -13129,6 +13134,7 @@ export namespace Prisma {
     stripePaymentId?: true
     createdAt?: true
     updatedAt?: true
+    paidAt?: true
     bookingId?: true
     businessId?: true
     _all?: true
@@ -13231,6 +13237,7 @@ export namespace Prisma {
     stripePaymentId: string | null
     createdAt: Date
     updatedAt: Date
+    paidAt: Date | null
     bookingId: string
     businessId: string
     _count: PaymentCountAggregateOutputType | null
@@ -13265,6 +13272,7 @@ export namespace Prisma {
     stripePaymentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    paidAt?: boolean
     bookingId?: boolean
     businessId?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
@@ -13282,6 +13290,7 @@ export namespace Prisma {
     stripePaymentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    paidAt?: boolean
     bookingId?: boolean
     businessId?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
@@ -13299,6 +13308,7 @@ export namespace Prisma {
     stripePaymentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    paidAt?: boolean
     bookingId?: boolean
     businessId?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
@@ -13316,11 +13326,12 @@ export namespace Prisma {
     stripePaymentId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    paidAt?: boolean
     bookingId?: boolean
     businessId?: boolean
   }
 
-  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "type" | "status" | "currency" | "metadata" | "stripeClientSecret" | "stripePaymentId" | "createdAt" | "updatedAt" | "bookingId" | "businessId", ExtArgs["result"]["payment"]>
+  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "type" | "status" | "currency" | "metadata" | "stripeClientSecret" | "stripePaymentId" | "createdAt" | "updatedAt" | "paidAt" | "bookingId" | "businessId", ExtArgs["result"]["payment"]>
   export type PaymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13351,6 +13362,7 @@ export namespace Prisma {
       stripePaymentId: string | null
       createdAt: Date
       updatedAt: Date
+      paidAt: Date | null
       bookingId: string
       businessId: string
     }, ExtArgs["result"]["payment"]>
@@ -13788,6 +13800,7 @@ export namespace Prisma {
     readonly stripePaymentId: FieldRef<"Payment", 'String'>
     readonly createdAt: FieldRef<"Payment", 'DateTime'>
     readonly updatedAt: FieldRef<"Payment", 'DateTime'>
+    readonly paidAt: FieldRef<"Payment", 'DateTime'>
     readonly bookingId: FieldRef<"Payment", 'String'>
     readonly businessId: FieldRef<"Payment", 'String'>
   }
@@ -22680,6 +22693,7 @@ export namespace Prisma {
     stripePaymentId: 'stripePaymentId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    paidAt: 'paidAt',
     bookingId: 'bookingId',
     businessId: 'businessId'
   };
@@ -24033,6 +24047,7 @@ export namespace Prisma {
     stripePaymentId?: StringNullableFilter<"Payment"> | string | null
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
+    paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     bookingId?: StringFilter<"Payment"> | string
     businessId?: StringFilter<"Payment"> | string
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
@@ -24050,6 +24065,7 @@ export namespace Prisma {
     stripePaymentId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    paidAt?: SortOrderInput | SortOrder
     bookingId?: SortOrder
     businessId?: SortOrder
     booking?: BookingOrderByWithRelationInput
@@ -24070,6 +24086,7 @@ export namespace Prisma {
     stripePaymentId?: StringNullableFilter<"Payment"> | string | null
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
+    paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     bookingId?: StringFilter<"Payment"> | string
     businessId?: StringFilter<"Payment"> | string
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
@@ -24087,6 +24104,7 @@ export namespace Prisma {
     stripePaymentId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    paidAt?: SortOrderInput | SortOrder
     bookingId?: SortOrder
     businessId?: SortOrder
     _count?: PaymentCountOrderByAggregateInput
@@ -24110,6 +24128,7 @@ export namespace Prisma {
     stripePaymentId?: StringNullableWithAggregatesFilter<"Payment"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
+    paidAt?: DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
     bookingId?: StringWithAggregatesFilter<"Payment"> | string
     businessId?: StringWithAggregatesFilter<"Payment"> | string
   }
@@ -25888,6 +25907,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     booking: BookingCreateNestedOneWithoutPaymentsInput
     business: BusinessCreateNestedOneWithoutPaymentsInput
   }
@@ -25903,6 +25923,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     bookingId: string
     businessId: string
   }
@@ -25918,6 +25939,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     booking?: BookingUpdateOneRequiredWithoutPaymentsNestedInput
     business?: BusinessUpdateOneRequiredWithoutPaymentsNestedInput
   }
@@ -25933,6 +25955,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingId?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
   }
@@ -25948,6 +25971,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     bookingId: string
     businessId: string
   }
@@ -25963,6 +25987,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type PaymentUncheckedUpdateManyInput = {
@@ -25976,6 +26001,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingId?: StringFieldUpdateOperationsInput | string
     businessId?: StringFieldUpdateOperationsInput | string
   }
@@ -27851,6 +27877,7 @@ export namespace Prisma {
     stripePaymentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    paidAt?: SortOrder
     bookingId?: SortOrder
     businessId?: SortOrder
   }
@@ -27869,6 +27896,7 @@ export namespace Prisma {
     stripePaymentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    paidAt?: SortOrder
     bookingId?: SortOrder
     businessId?: SortOrder
   }
@@ -27883,6 +27911,7 @@ export namespace Prisma {
     stripePaymentId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    paidAt?: SortOrder
     bookingId?: SortOrder
     businessId?: SortOrder
   }
@@ -30587,6 +30616,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     booking: BookingCreateNestedOneWithoutPaymentsInput
   }
 
@@ -30601,6 +30631,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     bookingId: string
   }
 
@@ -31041,6 +31072,7 @@ export namespace Prisma {
     stripePaymentId?: StringNullableFilter<"Payment"> | string | null
     createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
+    paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
     bookingId?: StringFilter<"Payment"> | string
     businessId?: StringFilter<"Payment"> | string
   }
@@ -32561,6 +32593,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutPaymentsInput
   }
 
@@ -32575,6 +32608,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     businessId: string
   }
 
@@ -35615,6 +35649,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     bookingId: string
   }
 
@@ -35957,6 +35992,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     booking?: BookingUpdateOneRequiredWithoutPaymentsNestedInput
   }
 
@@ -35971,6 +36007,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -35985,6 +36022,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     bookingId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -36712,6 +36750,7 @@ export namespace Prisma {
     stripePaymentId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    paidAt?: Date | string | null
     businessId: string
   }
 
@@ -36765,6 +36804,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutPaymentsNestedInput
   }
 
@@ -36779,6 +36819,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -36793,6 +36834,7 @@ export namespace Prisma {
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
