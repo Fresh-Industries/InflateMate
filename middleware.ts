@@ -19,7 +19,8 @@ const internalRoute = createRouteMatcher([
 
 export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
-  const host = (req.headers.get('host') ?? '').toLowerCase();
+  const host = (req.headers.get('host') ?? '').toLowerCase().replace(/^www\./, '');
+
  
 
   /* ── A. skip Next.js internals & static assets ─────────────────────── */
