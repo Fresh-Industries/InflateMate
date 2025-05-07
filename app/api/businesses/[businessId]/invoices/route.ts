@@ -15,7 +15,8 @@ const invoiceSchema = z.object({
     id: z.string(),
     name: z.string(),
     price: z.number(),
-    quantity: z.number().min(1)
+    quantity: z.number().min(1),
+    stripeProductId: z.string(),
   })).min(1, "At least one item must be selected"),
   totalAmount: z.number().positive("Total amount must be positive"),
   subtotalAmount: z.number().nonnegative(),
@@ -133,6 +134,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         customerEmail,
         customerName,
         customerPhone,
+        eventCity,
+        eventState,
+        eventAddress,
+        eventZipCode,
         businessId,
         stripeConnectedAccountId
       );
@@ -162,8 +167,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       const stripeInvoice = await stripe.invoices.create({
         customer: stripeCustomerId, // Use the ID obtained from the helper
         collection_method: 'send_invoice',
+
         days_until_due: 7, 
-        auto_advance: false, // Keep as draft until finalized
+        auto_advance: false, 
         metadata: {
           prismaBookingId: bookingId,
           prismaBusinessId: businessId,

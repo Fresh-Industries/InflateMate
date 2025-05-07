@@ -3,6 +3,7 @@ import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
+
 const customerSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   email: z.string().email("Invalid email address"),
@@ -46,6 +47,7 @@ export async function POST(
       },
     });
 
+    
     return NextResponse.json(customer, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {

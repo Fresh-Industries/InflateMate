@@ -188,6 +188,8 @@ exports.Prisma.InventoryScalarFieldEnum = {
   teardownTime: 'teardownTime',
   images: 'images',
   primaryImage: 'primaryImage',
+  stripeProductId: 'stripeProductId',
+  stripePriceId: 'stripePriceId',
   status: 'status',
   minimumSpace: 'minimumSpace',
   weightLimit: 'weightLimit',
@@ -356,6 +358,25 @@ exports.Prisma.InvoiceScalarFieldEnum = {
   bookingId: 'bookingId'
 };
 
+exports.Prisma.QuoteScalarFieldEnum = {
+  id: 'id',
+  stripeQuoteId: 'stripeQuoteId',
+  status: 'status',
+  amountTotal: 'amountTotal',
+  amountSubtotal: 'amountSubtotal',
+  amountTax: 'amountTax',
+  currency: 'currency',
+  hostedQuoteUrl: 'hostedQuoteUrl',
+  pdfUrl: 'pdfUrl',
+  expiresAt: 'expiresAt',
+  metadata: 'metadata',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  bookingId: 'bookingId'
+};
+
 exports.Prisma.CustomerStripeAccountScalarFieldEnum = {
   id: 'id',
   stripeCustomerId: 'stripeCustomerId',
@@ -456,6 +477,15 @@ exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
   UNCOLLECTIBLE: 'UNCOLLECTIBLE'
 };
 
+exports.QuoteStatus = exports.$Enums.QuoteStatus = {
+  DRAFT: 'DRAFT',
+  OPEN: 'OPEN',
+  SENT: 'SENT',
+  ACCEPTED: 'ACCEPTED',
+  CANCELED: 'CANCELED',
+  EXPIRED: 'EXPIRED'
+};
+
 exports.Prisma.ModelName = {
   User: 'User',
   Business: 'Business',
@@ -471,6 +501,7 @@ exports.Prisma.ModelName = {
   Waiver: 'Waiver',
   Subscription: 'Subscription',
   Invoice: 'Invoice',
+  Quote: 'Quote',
   CustomerStripeAccount: 'CustomerStripeAccount'
 };
 

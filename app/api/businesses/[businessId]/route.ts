@@ -7,12 +7,13 @@ import { Prisma } from "@prisma/client";
 // Cached business data fetcher
 const getCachedBusiness = unstable_cache(
   async (businessId: string, isPublic: boolean) => {
-    const select = isPublic ? {
+    const select = isPublic ? ({
       id: true,
       name: true,
       stripeAccountId: true,
       inventory: true,
-    } : {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as Prisma.Payload<any, any>) : ({
       id: true,
       name: true,
       description: true,
@@ -42,10 +43,11 @@ const getCachedBusiness = unstable_cache(
         },
         take: 5,
         orderBy: {
-          eventDate: Prisma.SortOrder.asc,
+          eventDate: 'asc',
         },
       },
-    };
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as Prisma.Payload<any, any>);
 
     return prisma.business.findUnique({
       where: { id: businessId },

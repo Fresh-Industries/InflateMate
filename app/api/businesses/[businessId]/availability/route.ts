@@ -128,6 +128,7 @@ export async function GET(
       ageRange: item.ageRange,
       primaryImage: item.primaryImage,
       quantity: item.quantity,
+      stripeProductId: item.stripeProductId,
     }));
 
   return NextResponse.json({ availableInventory }, { status: 200 });

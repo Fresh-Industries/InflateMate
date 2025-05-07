@@ -3,6 +3,7 @@ import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { UTApi } from "uploadthing/server";
+import { stripe } from "@/lib/stripe-server";
 
 const utapi = new UTApi();
 
@@ -98,6 +99,14 @@ export async function PATCH(
         finalPrimaryImageUrl = finalImageUrls.length > 0 ? finalImageUrls[0] : null;
       }
     }
+
+    await stripe.products.update(currentInventory.stripeProductId || "", {
+      name: validatedData.name ?? currentInventory.name,
+      description: validatedData.description ?? currentInventory.description,
+      images: finalImageUrls,
+    }, {
+      stripeAccount: user.membership?.organization?.business?.stripeAccountId || undefined,
+    });
 
     // Update the inventory item in the database
     const updatedInventory = await prisma.inventory.update({
@@ -202,6 +211,12 @@ export async function DELETE(
     await prisma.inventory.delete({
       where: { id: inventoryId },
     });
+
+    if (inventoryItem.stripeProductId) {
+      await stripe.products.del(inventoryItem.stripeProductId, {
+        stripeAccount: user.membership?.organization?.business?.stripeAccountId || undefined,
+      });
+    }
 
     return NextResponse.json({ message: "Inventory item deleted successfully" });
   } catch (error) {

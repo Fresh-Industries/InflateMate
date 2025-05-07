@@ -20,6 +20,10 @@ export async function findOrCreateStripeCustomer(
   customerEmail: string,
   customerName: string, 
   customerPhone: string,
+  customerCity: string,
+  customerState: string,
+  customerAddress: string,
+  customerZip: string,
   businessId: string,
   stripeConnectedAccountId: string
 ): Promise<string> {
@@ -64,7 +68,17 @@ export async function findOrCreateStripeCustomer(
       email: customerEmail,
       name: customerName, // Use name passed to function
       phone: customerPhone, // Use phone passed to function
+      address: {
+        city: customerCity,
+        country: 'US',
+        line1: customerAddress,
+        postal_code: customerZip,
+        state: customerState,
+      },
       description: `Customer for Business ID: ${businessId}`,
+      tax: {
+        validate_location: 'immediately',
+      },
       metadata: {
         prismaCustomerId: customer.id,
         prismaBusinessId: businessId,

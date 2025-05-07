@@ -50,11 +50,19 @@ export async function POST(
       // Extract name and phone from metadata, providing defaults
       const customerName = metadata.customerName as string || 'Customer';
       const customerPhone = metadata.customerPhone as string || ''; 
+      const eventCity = metadata.eventCity as string || '';
+      const eventState = metadata.eventState as string || '';
+      const eventAddress = metadata.eventAddress as string || '';
+      const eventZipCode = metadata.eventZipCode as string || '';
       
       const stripeCustomerId = await findOrCreateStripeCustomer(
           customerEmail,
           customerName,
           customerPhone,
+          eventCity,
+          eventState,
+          eventAddress,
+          eventZipCode,
           businessId,
           stripeConnectedAccountId
       );
@@ -69,6 +77,8 @@ export async function POST(
           receipt_email: customerEmail,
           metadata: sanitizedMetadata,
           customer: stripeCustomerId,
+        
+          
         },
         {
           stripeAccount: stripeConnectedAccountId,

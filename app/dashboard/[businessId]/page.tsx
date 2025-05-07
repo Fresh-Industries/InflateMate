@@ -91,16 +91,16 @@ interface DashboardData {
   topCustomers: Customer[];
 }
 
-const chartColors = {
-  primary: '#6366f1',
-  secondary: '#22c55e',
-  tertiary: '#f59e0b',
-  quaternary: '#ec4899',
-  background: '#f8fafc',
-  text: '#64748b',
-  grid: '#e2e8f0',
-  gradient: ['rgba(99, 102, 241, 0.2)', 'rgba(99, 102, 241, 0)']
-};
+
+
+const pieChartColors = [
+  'hsl(var(--primary))',
+  'hsl(var(--accent))',
+  '#f59e0b',
+  '#ec4899',
+  '#8b5cf6',
+  '#06b6d4'
+];
 
 export default function DashboardPage() {
   const params = useParams();
@@ -341,21 +341,20 @@ export default function DashboardPage() {
     return (
       <div className="space-y-8">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
-        <div>
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Overview</h1>
-          <p className="text-base text-muted-foreground mt-1">
-            Get a quick glance at your business performance and key metrics.
-          </p>
+          <div>
+            <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">Overview</h1>
+            <p className="text-base text-muted-foreground mt-1">
+              Get a quick glance at your business performance and key metrics.
+            </p>
+          </div>
+          <Button variant="outline" className="bg-white shadow-sm border-border hover:bg-muted/50 w-full sm:w-auto">
+            <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+            {format(new Date(), 'MMM dd, yyyy')}
+          </Button>
         </div>
-        {/* Date button as direct child of flex container */}
-        <Button variant="outline" className="bg-white shadow-sm border-gray-200 hover:bg-gray-50 w-full sm:w-auto">
-          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
-          {format(new Date(), 'MMM dd, yyyy')}
-        </Button>
-      </div>
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
           {[1, 2, 3, 4].map((i) => (
-            <Card key={i}>
+            <Card key={i} className="overflow-hidden border-none shadow-md animate-pulse">
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <Skeleton className="h-4 w-24" />
                 <Skeleton className="h-4 w-4 rounded-full" />
@@ -367,7 +366,7 @@ export default function DashboardPage() {
             </Card>
           ))}
         </div>
-        <Card>
+        <Card className="overflow-hidden border-none shadow-md">
           <CardHeader>
             <Skeleton className="h-6 w-40" />
           </CardHeader>
@@ -391,92 +390,100 @@ export default function DashboardPage() {
   const isRevenueUp = revenueChangePercent >= 0;
 
   return (
-    <div className="p-8 bg-[#fafbff] min-h-screen">
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b pb-6">
+    <div className="p-6 md:p-8  min-h-screen">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/40 pb-6">
         <div>
-          <h1 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">Overview</h1>
-          <p className="text-base text-muted-foreground mt-1">
-            Get a quick glance at your business performance and key metrics.
+          <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+            Overview
+          </h1>
+          <p className="text-base text-muted-foreground mt-1 max-w-2xl">
+            Get a quick glance at your business performance and key metrics for InflateMate.
           </p>
         </div>
-        {/* Date button as direct child of flex container */}
-        <Button variant="outline" className="bg-white shadow-sm border-gray-200 hover:bg-gray-50 w-full sm:w-auto">
-          <Calendar className="h-4 w-4 mr-2 text-gray-500" />
+        <Button 
+          variant="outline" 
+          className="bg-card shadow-sm border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 w-full sm:w-auto group"
+        >
+          <Calendar className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary transition-colors" />
           {format(new Date(), 'MMM dd, yyyy')}
         </Button>
       </div>
       
       {/* Stats Overview */}
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4 mb-8 mt-8">
-        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+      <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-4 mb-6 md:mb-8 mt-6 md:mt-8">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border-none relative group">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Monthly Revenue</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-blue-50 flex items-center justify-center">
-              <DollarSign className="h-5 w-5 text-blue-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Monthly Revenue</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+              <DollarSign className="h-5 w-5 text-primary" />
             </div>
           </CardHeader>
           <CardContent>
             <div className="flex items-center">
-              <div className="text-2xl font-bold text-[#1a1f36]">{formatCurrency(data.monthlyRevenue)}</div>
+              <div className="text-2xl font-bold text-foreground">{formatCurrency(data.monthlyRevenue)}</div>
               {revenueChangePercent !== 0 && (
                 <div className={cn(
-                  "ml-2 flex items-center text-xs px-2 py-1 rounded-full",
-                  isRevenueUp ? "text-green-700 bg-green-50" : "text-red-700 bg-red-50"
+                  "ml-2 flex items-center text-xs px-2 py-1 rounded-full transition-transform group-hover:scale-105",
+                  isRevenueUp ? "text-green-700 bg-green-100" : "text-red-700 bg-red-100"
                 )}>
                   {isRevenueUp ? <ArrowUpRight className="h-3 w-3 mr-1" /> : <ArrowDownRight className="h-3 w-3 mr-1" />}
                   {Math.abs(revenueChangePercent)}%
                 </div>
               )}
             </div>
-            <p className="text-sm text-gray-500 mt-1">
+            <p className="text-sm text-muted-foreground mt-1">
               vs. last month ({formatCurrency(data.lastMonthRevenue)})
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border-none relative group">
+          <div className="absolute inset-0 bg-gradient-to-br from-accent/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Active Bookings</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-purple-50 flex items-center justify-center">
-              <CalendarCheck className="h-5 w-5 text-purple-500" />
+            <CardTitle className="text-sm font-medium text-muted-foreground">Active Bookings</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-accent/10 flex items-center justify-center">
+              <CalendarCheck className="h-5 w-5 text-accent" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#1a1f36]">{data.activeBookings || 0}</div>
+            <div className="text-2xl font-bold text-foreground">{data.activeBookings || 0}</div>
             <div className="flex items-center mt-1">
               <div className="h-2 w-2 rounded-full bg-yellow-400 mr-2" />
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-muted-foreground">
                 {data.pendingBookings || 0} pending approval
               </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border-none relative group">
+          <div className="absolute inset-0 bg-gradient-to-br from-green-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Total Customers</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-green-50 flex items-center justify-center">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Total Customers</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
               <Users className="h-5 w-5 text-green-500" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#1a1f36]">{data.totalCustomers || 0}</div>
-            <p className="text-sm text-gray-500 mt-1">
+            <div className="text-2xl font-bold text-foreground">{data.totalCustomers || 0}</div>
+            <p className="text-sm text-muted-foreground mt-1">
               Lifetime customers
             </p>
           </CardContent>
         </Card>
 
-        <Card className="bg-white rounded-xl shadow-sm border-none hover:shadow-md transition-all">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 border-none relative group">
+          <div className="absolute inset-0 bg-gradient-to-br from-red-400/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-gray-600">Inventory Status</CardTitle>
-            <div className="h-10 w-10 rounded-full bg-red-50 flex items-center justify-center">
+            <CardTitle className="text-sm font-medium text-muted-foreground">Inventory Status</CardTitle>
+            <div className="h-10 w-10 rounded-full bg-red-100 flex items-center justify-center">
               <Package className="h-5 w-5 text-red-500" />
             </div>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-[#1a1f36]">{data.availableUnits || 0}</div>
-            <p className="text-sm text-gray-500 mt-1">
+            <div className="text-2xl font-bold text-foreground">{data.availableUnits || 0}</div>
+            <p className="text-sm text-muted-foreground mt-1">
               {data.maintenanceUnits || 0} in maintenance
             </p>
           </CardContent>
@@ -484,12 +491,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Revenue Chart */}
-      <Card className="col-span-full bg-white rounded-xl shadow-sm border-none mb-6">
+      <Card className="col-span-full bg-card rounded-xl overflow-hidden shadow-md border-none mb-6 hover:shadow-lg transition-all duration-300">
         <CardHeader>
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <CardTitle className="text-xl font-semibold text-[#1a1f36]">Revenue Trends</CardTitle>
-              <CardDescription className="text-gray-500">
+              <CardTitle className="text-xl font-semibold text-foreground">Revenue Trends</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 {timeframe === 'week' ? 'Last 7 days' : 'Last 30 days'} revenue
               </CardDescription>
             </div>
@@ -498,16 +505,16 @@ export default function DashboardPage() {
               className="w-[200px]"
               onValueChange={(value) => setTimeframe(value as 'week' | 'month')}
             >
-              <TabsList className="grid w-full grid-cols-2 bg-gray-100/50 p-1 rounded-lg">
+              <TabsList className="grid w-full grid-cols-2 bg-muted/30 p-1 rounded-lg">
                 <TabsTrigger 
                   value="week"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary"
+                  className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary data-[state=active]:font-medium"
                 >
                   Week
                 </TabsTrigger>
                 <TabsTrigger 
                   value="month"
-                  className="rounded-md data-[state=active]:bg-white data-[state=active]:shadow-sm data-[state=active]:text-primary"
+                  className="rounded-md data-[state=active]:bg-card data-[state=active]:shadow-sm data-[state=active]:text-primary data-[state=active]:font-medium"
                 >
                   Month
                 </TabsTrigger>
@@ -523,13 +530,13 @@ export default function DashboardPage() {
             >
               <defs>
                 <linearGradient id="revenueGradient" x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor={chartColors.primary} stopOpacity={0.2}/>
-                  <stop offset="100%" stopColor={chartColors.primary} stopOpacity={0}/>
+                  <stop offset="0%" stopColor="hsl(var(--primary))" stopOpacity={0.3}/>
+                  <stop offset="100%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
                 </linearGradient>
               </defs>
               <CartesianGrid 
                 strokeDasharray="3 3" 
-                stroke={chartColors.grid} 
+                stroke="hsl(var(--border))" 
                 vertical={false}
                 opacity={0.3}
               />
@@ -537,24 +544,24 @@ export default function DashboardPage() {
                 dataKey="date" 
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: chartColors.text, fontSize: 12, dy: 10 }}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12, dy: 10 }}
                 tickMargin={10}
               />
               <YAxis 
                 tickFormatter={(value) => `$${value}`}
                 axisLine={false}
                 tickLine={false}
-                tick={{ fill: chartColors.text, fontSize: 12 }}
+                tick={{ fill: "hsl(var(--muted-foreground))", fontSize: 12 }}
                 tickMargin={10}
               />
               <RechartsTooltip
-                cursor={{ stroke: chartColors.primary, strokeWidth: 1, strokeDasharray: "4 4" }}
+                cursor={{ stroke: "hsl(var(--primary))", strokeWidth: 1, strokeDasharray: "4 4" }}
                 content={({ active, payload, label }) => {
                   if (active && payload?.[0]?.value !== undefined) {
                     return (
-                      <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
-                        <p className="text-sm text-gray-600">{label}</p>
-                        <p className="text-lg font-semibold text-gray-900">
+                      <div className="bg-card p-3 rounded-lg shadow-lg border border-border/50">
+                        <p className="text-sm text-muted-foreground">{label}</p>
+                        <p className="text-lg font-semibold text-foreground">
                           ${payload[0].value.toLocaleString()}
                         </p>
                       </div>
@@ -566,14 +573,14 @@ export default function DashboardPage() {
               <Area
                 type="monotone"
                 dataKey="amount"
-                stroke={chartColors.primary}
+                stroke="hsl(var(--primary))"
                 strokeWidth={2.5}
                 fill="url(#revenueGradient)"
                 dot={false}
                 activeDot={{ 
                   r: 6, 
                   fill: 'white',
-                  stroke: chartColors.primary,
+                  stroke: "hsl(var(--primary))",
                   strokeWidth: 2
                 }}
               />
@@ -582,12 +589,12 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Booking Status Chart */}
-        <Card className="bg-white rounded-xl shadow-sm border-none">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md border-none hover:shadow-lg transition-all duration-300">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-[#1a1f36]">Booking Status</CardTitle>
-            <CardDescription className="text-gray-500">Distribution of bookings</CardDescription>
+            <CardTitle className="text-xl font-semibold text-foreground">Booking Status</CardTitle>
+            <CardDescription className="text-muted-foreground">Distribution of bookings</CardDescription>
           </CardHeader>
           <CardContent className="h-[300px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -606,14 +613,7 @@ export default function DashboardPage() {
                   {data.bookingsByStatus.map((entry, index) => (
                     <Cell 
                       key={`cell-${index}`} 
-                      fill={[
-                        '#6366f1',
-                        '#22c55e',
-                        '#f59e0b',
-                        '#ec4899',
-                        '#8b5cf6',
-                        '#06b6d4'
-                      ][index % 6]}
+                      fill={pieChartColors[index % pieChartColors.length]}
                       stroke="white"
                       strokeWidth={2}
                     />
@@ -626,16 +626,16 @@ export default function DashboardPage() {
                   iconType="circle"
                   iconSize={8}
                   formatter={(value) => (
-                    <span className="text-sm text-gray-600">{value}</span>
+                    <span className="text-sm text-muted-foreground">{value}</span>
                   )}
                 />
                 <RechartsTooltip
                   content={({ active, payload }) => {
                     if (active && payload && payload.length) {
                       return (
-                        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100">
-                          <p className="text-sm text-gray-600">{payload[0].name}</p>
-                          <p className="text-lg font-semibold text-gray-900">
+                        <div className="bg-card p-3 rounded-lg shadow-lg border border-border/50">
+                          <p className="text-sm text-muted-foreground">{payload[0].name}</p>
+                          <p className="text-lg font-semibold text-foreground">
                             {payload[0].value} bookings
                           </p>
                         </div>
@@ -650,28 +650,28 @@ export default function DashboardPage() {
         </Card>
 
         {/* Top Inventory */}
-        <Card className="bg-white rounded-xl shadow-sm border-none">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md border-none hover:shadow-lg transition-all duration-300">
           <CardHeader>
-            <CardTitle className="text-xl font-semibold text-[#1a1f36]">Top Inventory</CardTitle>
-            <CardDescription className="text-gray-500">Most booked items</CardDescription>
+            <CardTitle className="text-xl font-semibold text-foreground">Top Inventory</CardTitle>
+            <CardDescription className="text-muted-foreground">Most booked items</CardDescription>
           </CardHeader>
           <CardContent>
             {data.topInventory.length === 0 ? (
               <div className="flex flex-col items-center justify-center h-[300px] text-center">
-                <Package className="h-12 w-12 text-gray-300 mb-3" />
-                <p className="text-gray-500 font-medium">No inventory data available</p>
-                <p className="text-sm text-gray-400">Start adding items to track their performance</p>
+                <Package className="h-12 w-12 text-muted mb-3" />
+                <p className="text-muted-foreground font-medium">No inventory data available</p>
+                <p className="text-sm text-muted-foreground/70">Start adding items to track their performance</p>
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-5">
                 {data.topInventory.map((item, index) => (
-                  <div key={index} className="relative">
+                  <div key={index} className="relative group">
                     <div className="flex items-center justify-between mb-2">
                       <div className="flex items-center gap-3 flex-1">
                         <div className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center",
-                          index === 0 ? "bg-blue-100 text-blue-600" :
-                          index === 1 ? "bg-purple-100 text-purple-600" :
+                          "w-10 h-10 rounded-lg flex items-center justify-center transition-transform group-hover:scale-110 duration-300",
+                          index === 0 ? "bg-primary/20 text-primary" :
+                          index === 1 ? "bg-accent/20 text-accent" :
                           index === 2 ? "bg-pink-100 text-pink-600" :
                           index === 3 ? "bg-orange-100 text-orange-600" :
                           "bg-green-100 text-green-600"
@@ -679,30 +679,30 @@ export default function DashboardPage() {
                           <Package className="w-5 h-5" />
                         </div>
                         <div className="flex-1">
-                          <p className="font-medium text-gray-900 truncate">{item.name}</p>
-                          <p className="text-sm text-gray-500">{item.bookings} bookings</p>
+                          <p className="font-medium text-foreground truncate">{item.name}</p>
+                          <p className="text-sm text-muted-foreground">{item.bookings} bookings</p>
                         </div>
                       </div>
                       <div className="text-right">
                         <span className={cn(
-                          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium",
-                          index === 0 ? "bg-blue-50 text-blue-700" :
-                          index === 1 ? "bg-purple-50 text-purple-700" :
-                          index === 2 ? "bg-pink-50 text-pink-700" :
-                          index === 3 ? "bg-orange-50 text-orange-700" :
-                          "bg-green-50 text-green-700"
+                          "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium transition-all duration-300 group-hover:shadow-sm",
+                          index === 0 ? "bg-primary/10 text-primary group-hover:bg-primary/20" :
+                          index === 1 ? "bg-accent/10 text-accent group-hover:bg-accent/20" :
+                          index === 2 ? "bg-pink-50 text-pink-700 group-hover:bg-pink-100" :
+                          index === 3 ? "bg-orange-50 text-orange-700 group-hover:bg-orange-100" :
+                          "bg-green-50 text-green-700 group-hover:bg-green-100"
                         )}>
                           #{index + 1} Most Booked
                         </span>
                       </div>
                     </div>
                     {/* Progress bar */}
-                    <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-2 w-full bg-muted/50 rounded-full overflow-hidden">
                       <div 
                         className={cn(
-                          "h-full rounded-full transition-all duration-500",
-                          index === 0 ? "bg-gradient-to-r from-blue-500 to-blue-600" :
-                          index === 1 ? "bg-gradient-to-r from-purple-500 to-purple-600" :
+                          "h-full rounded-full transition-all duration-500 ease-out origin-left",
+                          index === 0 ? "bg-gradient-to-r from-primary/80 to-primary" :
+                          index === 1 ? "bg-gradient-to-r from-accent/80 to-accent" :
                           index === 2 ? "bg-gradient-to-r from-pink-500 to-pink-600" :
                           index === 3 ? "bg-gradient-to-r from-orange-500 to-orange-600" :
                           "bg-gradient-to-r from-green-500 to-green-600"
@@ -720,11 +720,11 @@ export default function DashboardPage() {
               <Button 
                 variant="ghost" 
                 size="sm" 
-                className="w-full mt-6 text-blue-600 hover:text-blue-700 hover:bg-blue-50"
+                className="w-full mt-6 text-primary hover:text-primary hover:bg-primary/10 transition-all font-medium"
                 onClick={() => router.push(`/dashboard/${businessId}/inventory`)}
               >
                 View All Inventory
-                <ChevronRight className="ml-1 h-4 w-4" />
+                <ChevronRight className="ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" />
               </Button>
             )}
           </CardContent>
@@ -732,45 +732,46 @@ export default function DashboardPage() {
       </div>
 
       {/* Today's Bookings and Upcoming Bookings */}
-      <div className="grid gap-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* Today's Bookings */}
-        <Card className="bg-white rounded-xl shadow-sm border-none">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md border-none hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle>Today&apos;s Bookings</CardTitle>
-              <CardDescription>
+              <CardTitle className="text-xl font-semibold text-foreground">Today&apos;s Bookings</CardTitle>
+              <CardDescription className="text-muted-foreground">
                 {format(new Date(), 'EEEE, MMMM d, yyyy')}
               </CardDescription>
             </div>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="gap-1"
+              className="gap-1 hover:bg-primary/10 hover:text-primary transition-all"
               onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
             >
               <span>View All</span>
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </CardHeader>
           <CardContent>
             {data.todayBookings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <Calendar className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No bookings scheduled for today</p>
+              <div className="flex flex-col items-center justify-center py-10 text-center bg-muted/5 rounded-lg border border-dashed border-muted">
+                <Calendar className="h-12 w-12 text-muted-foreground mb-3" />
+                <p className="text-muted-foreground font-medium">No bookings scheduled for today</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">Your schedule is clear</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {data.todayBookings.slice(0, 3).map((booking) => (
-                  <div key={booking.id} className="flex items-center justify-between border-b pb-2">
+                  <div key={booking.id} className="flex items-center justify-between border-b border-border/40 pb-3 group hover:bg-muted/5 p-2 rounded-md transition-colors">
                     <div>
-                      <p className="font-medium">{booking.customer?.name || 'Customer'}</p>
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">{booking.customer?.name || 'Customer'}</p>
                       <div className="flex items-center text-sm text-muted-foreground">
                         <Clock className="mr-1 h-3 w-3" />
                         {format(new Date(booking.startTime), 'h:mm a')} - {format(new Date(booking.endTime), 'h:mm a')}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-medium">{formatCurrency(booking.totalAmount)}</p>
+                      <p className="text-sm font-medium text-foreground">{formatCurrency(booking.totalAmount)}</p>
                       <p className="text-xs text-muted-foreground">
                         {booking.inventoryItems?.[0]?.inventory?.name || 'Item'}
                       </p>
@@ -781,7 +782,7 @@ export default function DashboardPage() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="w-full"
+                    className="w-full text-primary hover:bg-primary/10 hover:text-primary font-medium"
                     onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
                   >
                     View {data.todayBookings.length - 3} more
@@ -793,42 +794,43 @@ export default function DashboardPage() {
         </Card>
 
         {/* Upcoming Bookings */}
-        <Card className="bg-white rounded-xl shadow-sm border-none">
+        <Card className="bg-card rounded-xl overflow-hidden shadow-md border-none hover:shadow-lg transition-all duration-300">
           <CardHeader className="flex flex-row items-center justify-between space-y-0">
             <div>
-              <CardTitle>Upcoming Bookings</CardTitle>
-              <CardDescription>Next 7 days</CardDescription>
+              <CardTitle className="text-xl font-semibold text-foreground">Upcoming Bookings</CardTitle>
+              <CardDescription className="text-muted-foreground">Next 7 days</CardDescription>
             </div>
             <Button 
               variant="ghost" 
               size="sm" 
-              className="gap-1"
+              className="gap-1 hover:bg-primary/10 hover:text-primary transition-all"
               onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
             >
               <span>View All</span>
-              <ChevronRight className="h-4 w-4" />
+              <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
           </CardHeader>
           <CardContent>
             {data.upcomingBookings.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-6 text-center">
-                <Calendar className="h-10 w-10 text-muted-foreground mb-2" />
-                <p className="text-sm text-muted-foreground">No upcoming bookings in the next 7 days</p>
+              <div className="flex flex-col items-center justify-center py-10 text-center bg-muted/5 rounded-lg border border-dashed border-muted">
+                <Calendar className="h-12 w-12 text-muted-foreground mb-3" />
+                <p className="text-muted-foreground font-medium">No upcoming bookings</p>
+                <p className="text-sm text-muted-foreground/70 mt-1">Your week ahead is clear</p>
               </div>
             ) : (
               <div className="space-y-4">
                 {data.upcomingBookings.slice(0, 3).map((booking) => (
-                  <div key={booking.id} className="flex items-center justify-between border-b pb-2">
+                  <div key={booking.id} className="flex items-center justify-between border-b border-border/40 pb-3 group hover:bg-muted/5 p-2 rounded-md transition-colors">
                     <div>
-                      <p className="font-medium text-[#1a1f36]">{booking.customer?.name || 'Anonymous'}</p>
-                      <div className="flex items-center text-sm text-gray-500">
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">{booking.customer?.name || 'Anonymous'}</p>
+                      <div className="flex items-center text-sm text-muted-foreground">
                         <Calendar className="mr-1 h-3 w-3" />
                         {format(new Date(booking.eventDate), 'EEE, MMM d')}
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="text-sm font-semibold text-[#1a1f36]">{formatCurrency(booking.totalAmount)}</p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-sm font-semibold text-foreground">{formatCurrency(booking.totalAmount)}</p>
+                      <p className="text-xs text-muted-foreground">
                         {booking.inventoryItems?.[0]?.inventory?.name || 'Item'}
                       </p>
                     </div>
@@ -838,7 +840,7 @@ export default function DashboardPage() {
                   <Button 
                     variant="ghost" 
                     size="sm" 
-                    className="w-full"
+                    className="w-full text-primary hover:bg-primary/10 hover:text-primary font-medium"
                     onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
                   >
                     View {data.upcomingBookings.length - 3} more
@@ -851,38 +853,49 @@ export default function DashboardPage() {
       </div>
 
       {/* Top Customers */}
-      <Card className="bg-white rounded-xl shadow-sm border-none mt-6">
+      <Card className="bg-card rounded-xl overflow-hidden shadow-md border-none hover:shadow-lg transition-all duration-300 mt-6">
         <CardHeader className="flex flex-row items-center justify-between space-y-0">
           <div>
-            <CardTitle>Top Customers</CardTitle>
-            <CardDescription>By total spent</CardDescription>
+            <CardTitle className="text-xl font-semibold text-foreground">Top Customers</CardTitle>
+            <CardDescription className="text-muted-foreground">By total spent</CardDescription>
           </div>
           <Button 
             variant="ghost" 
             size="sm" 
-            className="gap-1"
+            className="gap-1 hover:bg-primary/10 hover:text-primary transition-all"
             onClick={() => router.push(`/dashboard/${businessId}/customers`)}
           >
             <span>View All</span>
-            <ChevronRight className="h-4 w-4" />
+            <ChevronRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </Button>
         </CardHeader>
         <CardContent>
           {data.topCustomers.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-6 text-center">
-              <Users className="h-10 w-10 text-muted-foreground mb-2" />
-              <p className="text-sm text-muted-foreground">No customer data available</p>
+            <div className="flex flex-col items-center justify-center py-10 text-center bg-muted/5 rounded-lg border border-dashed border-muted">
+              <Users className="h-12 w-12 text-muted-foreground mb-3" />
+              <p className="text-muted-foreground font-medium">No customer data available</p>
+              <p className="text-sm text-muted-foreground/70 mt-1">Start adding customers to see top spenders</p>
             </div>
           ) : (
             <div className="space-y-4">
-              {data.topCustomers.map((customer) => (
-                <div key={customer.id} className="flex items-center justify-between border-b pb-2">
-                  <div>
-                    <p className="font-medium">{customer.name}</p>
-                    <p className="text-sm text-muted-foreground">{customer.email}</p>
+              {data.topCustomers.map((customer, index) => (
+                <div key={customer.id} className="flex items-center justify-between border-b border-border/40 pb-3 group hover:bg-muted/5 p-2 rounded-md transition-colors">
+                  <div className="flex items-center gap-3">
+                    <div className={cn(
+                      "w-10 h-10 rounded-full flex items-center justify-center text-white font-medium",
+                      index === 0 ? "bg-gradient-to-br from-primary to-accent" :
+                      index === 1 ? "bg-gradient-to-br from-accent to-purple-500" :
+                      "bg-gradient-to-br from-muted-foreground to-muted"
+                    )}>
+                      {customer.name.charAt(0).toUpperCase()}
+                    </div>
+                    <div>
+                      <p className="font-medium text-foreground group-hover:text-primary transition-colors">{customer.name}</p>
+                      <p className="text-sm text-muted-foreground">{customer.email}</p>
+                    </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm font-medium">{formatCurrency(customer.totalSpent)}</p>
+                    <p className="text-sm font-medium text-foreground">{formatCurrency(customer.totalSpent)}</p>
                     <p className="text-xs text-muted-foreground">
                       {customer.bookingCount} bookings
                     </p>
@@ -895,4 +908,4 @@ export default function DashboardPage() {
       </Card>
     </div>
   );
-} 
+}

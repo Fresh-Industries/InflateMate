@@ -3,6 +3,7 @@ import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { InventoryStatus, InventoryType } from "../../../../../prisma/generated/prisma";
+import { stripe } from "@/lib/stripe-server"; // Make sure stripe client is initialized
 
 // Base schema with common fields for all inventory types
 const baseInventorySchema = z.object({
@@ -91,6 +92,14 @@ export async function POST(
       validatedData.images.find(img => img.isPrimary)?.url ||
       (imageUrls.length > 0 ? imageUrls[0] : undefined);
 
+    const stripeProduct = await stripe.products.create({
+      name: validatedData.name,
+      description: validatedData.description || "",
+      images: imageUrls,
+    }, {
+      stripeAccount: user.membership?.organization?.business?.stripeAccountId || undefined,
+    });
+
     // Create the inventory record
     const inventory = await prisma.inventory.create({
       data: {
@@ -109,6 +118,8 @@ export async function POST(
         teardownTime: (validatedData as any).teardownTime || 0,
         images: imageUrls,
         primaryImage: primaryImageUrl,
+        stripeProductId: stripeProduct.id,
+        stripePriceId: stripeProduct.default_price as string,
         status: validatedData.status as InventoryStatus,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         minimumSpace: (validatedData as any).minimumSpace || "",

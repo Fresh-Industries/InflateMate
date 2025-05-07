@@ -73,9 +73,10 @@ model Business {
   salesFunnels        SalesFunnel[]
   waivers             Waiver[]
   invoices            Invoice[]
+  quotes              Quote[] // ADDED: Relation back to Quote model
   customerStripeAccounts CustomerStripeAccount[]
 
-  organizationId    String        @unique 
+  organizationId    String        @unique
   organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
 }
@@ -88,7 +89,7 @@ model Organization {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @default(now())
 
-  business      Business?    
+  business      Business?
   memberships   Membership[]
   subscription  Subscription?
 
@@ -124,6 +125,8 @@ model Inventory {
   teardownTime Int
   images       String[]
   primaryImage String?
+  stripeProductId String?   @unique
+  stripePriceId String?
   status       InventoryStatus
   minimumSpace String
   weightLimit  Int
@@ -168,6 +171,7 @@ model Customer {
   bookings     Booking[]
   waivers      Waiver[]
   invoices     Invoice[]
+  quotes       Quote[] // ADDED: Relation back to Quote model
   customerStripeAccounts CustomerStripeAccount[]
 
   @@unique([email, businessId])
@@ -211,6 +215,7 @@ model Booking {
   payments       Payment[]
   waivers        Waiver[]
   invoice        Invoice?
+  quote          Quote?
 
   @@index([businessId])
   @@index([customerId])
@@ -368,7 +373,43 @@ model Invoice {
   @@index([stripeInvoiceId])
 }
 
+model Quote {
+  id                 String         @id @default(cuid())
+  stripeQuoteId      String         @unique
+  status             QuoteStatus    // Link to QuoteStatus enum
+  amountTotal        Float
+  amountSubtotal     Float
+  amountTax          Float
+  currency           String
+  hostedQuoteUrl     String?        // URL provided by Stripe for the customer
+  pdfUrl             String?        // URL provided by Stripe for the PDF version
+  expiresAt          DateTime?      // Expiration date from Stripe quote
+  metadata           Json?          // Store relevant metadata (e.g., prisma IDs)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  business           Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId         String
+  customer           Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId         String
+  booking            Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId          String         @unique // Each booking might have one associated quote
+
+  @@index([businessId])
+  @@index([customerId])
+  @@index([bookingId])
+  @@index([status])
+}
+
 // Enums
+
+enum QuoteStatus {
+  DRAFT
+  OPEN
+  SENT
+  ACCEPTED
+  CANCELED
+  EXPIRED
+}
 
 enum InventoryType {
   BOUNCE_HOUSE
