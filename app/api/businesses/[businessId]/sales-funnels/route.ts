@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -21,41 +21,28 @@ export async function GET(
 ) {
   try {
     const businessId = (await params).businessId;
-    console.log("businessId", businessId);
-    const user = await getCurrentUser();
-    console.log("user", user);
-    
+    const user = await getCurrentUserWithOrgAndBusiness();
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-
-    
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const salesFunnels = await prisma.salesFunnel.findMany({
-          where: {
-            businessId: business.id,
-          },
-          orderBy: {
-            createdAt: "desc",
-          },
-        });
-
-        return salesFunnels;
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json(result.data);
+    const salesFunnels = await prisma.salesFunnel.findMany({
+      where: {
+        businessId: businessId,
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return NextResponse.json(salesFunnels);
   } catch (error) {
     console.error("Error fetching sales funnels:", error);
     return NextResponse.json(
@@ -72,63 +59,53 @@ export async function POST(
 ) {
   try {
     const businessId = (await params).businessId;
-    const user = await getCurrentUser();
-    
+    const user = await getCurrentUserWithOrgAndBusiness();
+
     if (!user) {
-      return NextResponse.json(
-        { error: "Unauthorized" },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const body = await req.json();
-    
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async (business) => {
-        const validatedData = salesFunnelSchema.parse(body);
+    const validatedData = salesFunnelSchema.parse(body);
 
-        // If a couponId is provided, verify it exists and belongs to this business
-        if (validatedData.couponId) {
-          const coupon = await prisma.coupon.findUnique({
-            where: {
-              id: validatedData.couponId,
-              businessId: business.id,
-            },
-          });
+    // If a couponId is provided, verify it exists and belongs to this business
+    if (validatedData.couponId) {
+      const coupon = await prisma.coupon.findUnique({
+        where: {
+          id: validatedData.couponId,
+          businessId: businessId,
+        },
+      });
 
-          if (!coupon) {
-            throw new Error("Coupon not found");
-          }
-        }
-
-        const salesFunnel = await prisma.salesFunnel.create({
-          data: {
-            ...validatedData,
-            businessId: business.id,
-          },
-        });
-
-        return salesFunnel;
+      if (!coupon) {
+        return NextResponse.json({ error: "Coupon not found" }, { status: 400 });
       }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
     }
 
-    return NextResponse.json(result.data, { status: 201 });
+    const salesFunnel = await prisma.salesFunnel.create({
+      data: {
+        ...validatedData,
+        businessId: businessId,
+      },
+    });
+
+    return NextResponse.json(salesFunnel, { status: 201 });
   } catch (error) {
     console.error("Error creating sales funnel:", error);
-    
+
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid input", details: error.errors },
         { status: 400 }
       );
     }
-    
+
     if (error instanceof Error && error.message === "Coupon not found") {
       return NextResponse.json(
         { error: error.message },
@@ -141,4 +118,4 @@ export async function POST(
       { status: 500 }
     );
   }
-} 
+}

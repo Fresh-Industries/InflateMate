@@ -76,7 +76,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { createLocalDate } from "@/lib/utils";
+import { utcToLocal } from "@/lib/utils";
 
 interface Customer {
   id: string;
@@ -101,6 +101,7 @@ interface CustomerBooking {
   eventDate: string;
   startTime: string;
   endTime: string;
+  eventTimeZone: string;
   status: string;
   totalAmount: number;
   eventType: string;
@@ -858,13 +859,7 @@ export default function CustomersPage() {
                                     <div className="flex items-center mt-1 space-x-1 text-sm text-muted-foreground">
                                       <Calendar className="h-4 w-4" />
                                       <span>
-                                        {(() => {
-                                          const date = createLocalDate(booking.eventDate);
-                                          const dateString = date instanceof Date && !isNaN(date.getTime()) 
-                                            ? date.toLocaleDateString() 
-                                            : "Invalid Date"; 
-                                          return `${dateString}, ${formatTime(booking.startTime)} - ${formatTime(booking.endTime)}`; 
-                                        })()}
+                                      {utcToLocal(new Date(booking.eventDate), booking.eventTimeZone, 'MMM d, yyyy')}
                                       </span>
                                     </div>
                                   </div>
@@ -930,25 +925,6 @@ export default function CustomersPage() {
   );
 }
 
-// Helper function to format time (HH:MM to AM/PM)
-const formatTime = (dateTimeString: string): string => {
-  if (!dateTimeString) return '';
-  
-  try {
-    const date = new Date(dateTimeString);
-    // Check if the date object is valid
-    if (isNaN(date.getTime())) {
-      console.warn(`Invalid date/time string passed to formatTime: ${dateTimeString}`);
-      return ''; // Return empty string for invalid date
-    }
-    
-    // Use toLocaleTimeString to format the time according to locale and in AM/PM
-    return date.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
-  } catch (error) {
-    console.error(`Error formatting time for string: ${dateTimeString}`, error);
-    return ''; // Return empty string on error
-  }
-};
 
 // Helper function to determine badge variant based on booking status
 const getStatusBadgeVariant = (status: string): "default" | "secondary" | "destructive" | "success" | "outline" => {

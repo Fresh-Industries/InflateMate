@@ -3,10 +3,24 @@ import { getBusinessByDomain } from '@/lib/business/domain-utils';
 import { DomainLayoutClient } from './layout-client';
 import { Metadata } from 'next';
 import { prisma } from '@/lib/prisma';
-import { SalesFunnel } from '@prisma/client';
-import { themeConfig } from './_themes/themeConfig';
 
 export const dynamic = 'force-dynamic';
+
+interface SalesFunnel {
+  id: string;
+  name: string;
+  description?: string;
+  isActive: boolean;
+  popupTitle: string;
+  popupText: string;
+  popupImage: string | null;
+  formTitle: string;
+  thankYouMessage: string;
+  couponId: string | null;
+  businessId: string;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 export async function generateMetadata(
   { params }: { params: Promise<{ domain: string }> }
@@ -77,15 +91,15 @@ export default async function DomainLayout({
     };
     console.log('Colors:', colors.text);
     const themeName = siteConfig.themeName?.name || 'modern';
-    const selectedTheme = themeConfig[themeName.toLowerCase()] || themeConfig.modern;
     
     
-    let activeFunnel: SalesFunnel | null = null;
+    let activeFunnelData: SalesFunnel | null = null; 
     try {
-      activeFunnel = await prisma.salesFunnel.findFirst({
+      activeFunnelData = await prisma.salesFunnel.findFirst({
         where: {
           businessId: business.id,
           isActive: true,
+          
         },
       });
     } catch (error) {
@@ -98,7 +112,7 @@ export default async function DomainLayout({
         domain={domain}
         themeName={themeName as string}
         colors={colors}
-        activeFunnel={activeFunnel ? {...activeFunnel, theme: selectedTheme} : undefined}
+        activeFunnel={activeFunnelData ? {...activeFunnelData} : undefined}
       >
         {children}
       </DomainLayoutClient>

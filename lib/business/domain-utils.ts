@@ -2,11 +2,6 @@ import { headers } from 'next/headers';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 
-// Define types for different section content structures
-export interface TextSectionContent {
-  title?: string;
-  text: string;
-}
 
 export interface ImageTextSectionContent {
   title?: string;
@@ -42,9 +37,9 @@ export interface TextCardsSectionContent {
 // Define the structure for a dynamic section
 export interface DynamicSection {
   id: string; // Unique identifier for the section
-  type: 'text' | 'imageText' | 'videoText' | 'textCards';
+  type: 'Image' | 'Video' | 'Cards';
   page: 'landing' | 'about'; // Or other page identifiers
-  content: TextSectionContent | ImageTextSectionContent | VideoTextSectionContent | TextCardsSectionContent;
+  content: ImageTextSectionContent | VideoTextSectionContent | TextCardsSectionContent;
   backgroundColor?: string;
 }
 
@@ -111,53 +106,71 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
   const host = headersList.get('host') || '';
   const domainWithoutPort = host.split(':')[0];
   
-  // console.log('Getting business by domain:', domainParam);
-  // console.log('Host header:', host);
+  console.log('Getting business by domain:', domainParam);
+  console.log('Host header:', host);
   
   let business = null;
   
-  // First check if this is a subdomain of localhost
-  if (domainWithoutPort.includes('.localhost')) {
+  // 1. First check if this is a subdomain of the root domain or localhost
+  if (domainWithoutPort.includes('.')) {
     const subdomain = domainWithoutPort.split('.')[0];
-    // console.log('Checking subdomain:', subdomain);
+    console.log('Checking subdomain:', subdomain);
     
-    // Try to find by formatted business name
+    // Check subdomain field in DB directly
     business = await prisma.business.findFirst({
       where: {
-        OR: [
-          // Try to match by name (with formatting similar to what we do in the UI)
-          {
-            name: {
-              contains: subdomain.replace(/-/g, ' '),
-              mode: 'insensitive'
-            }
-          },
-          // Also try to match by name with hyphens replaced by spaces
-          {
-            name: {
-              contains: subdomain.replace(/-/g, ''),
-              mode: 'insensitive'
-            }
-          },
-          // Fallback to business ID
-          {
-            id: subdomain
-          }
-        ]
+        subdomain,
       }
     });
+
+    console.log('Business:', business);
     
     if (business) {
-      // console.log('Found business by subdomain:', business.name);
+      console.log('Found business by subdomain field:', business.name);
       return {
         ...business,
         siteConfig: business.siteConfig as SiteConfig || {},
       };
     }
+    
+    // Fallback to name-based subdomain matching for localhost testing
+    if (domainWithoutPort.includes('.localhost')) {
+      business = await prisma.business.findFirst({
+        where: {
+          OR: [
+            // Try to match by name (with formatting similar to what we do in the UI)
+            {
+              name: {
+                contains: subdomain.replace(/-/g, ' '),
+                mode: 'insensitive'
+              }
+            },
+            // Also try to match by name with hyphens replaced by spaces
+            {
+              name: {
+                contains: subdomain.replace(/-/g, ''),
+                mode: 'insensitive'
+              }
+            },
+            // Fallback to business ID
+            {
+              id: subdomain
+            }
+          ]
+        }
+      });
+      
+      if (business) {
+        console.log('Found business by name-based subdomain:', business.name);
+        return {
+          ...business,
+          siteConfig: business.siteConfig as SiteConfig || {},
+        };
+      }
+    }
   }
   
-  // If not found by subdomain, try to find by custom domain
-  // For testing, we'll also check if the custom domain is set to the domain parameter
+  // 2. Try to find by custom domain
   business = await prisma.business.findFirst({
     where: {
       customDomain: domainWithoutPort,
@@ -165,59 +178,41 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
   });
   
   if (business) {
-    // console.log('Found business by custom domain:', business.name);
+    console.log('Found business by custom domain:', business.name);
     return {
       ...business,
       siteConfig: business.siteConfig as SiteConfig || {},
     };
   }
   
-  // If not found by host, try to find by the domain parameter
-  business = await prisma.business.findFirst({
-    where: {
-      customDomain: domainParam,
-    },
-  });
-  
-  if (business) {
-    // console.log('Found business by domain parameter:', business.name);
-    return {
-      ...business,
-      siteConfig: business.siteConfig as SiteConfig || {},
-    };
-  }
-  
-  // If still not found, check if domain parameter is a business name subdomain
-  if (domainParam.includes('.localhost')) {
+  // 3. Try to find by the domain parameter (for direct subdomain access)
+  // Extract subdomain if the domainParam is a subdomain format
+  if (domainParam.includes('.')) {
     const subdomain = domainParam.split('.')[0];
     
     business = await prisma.business.findFirst({
       where: {
-        OR: [
-          // Try to match by name (with formatting similar to what we do in the UI)
-          {
-            name: {
-              contains: subdomain.replace(/-/g, ' '),
-              mode: 'insensitive'
-            }
-          },
-          // Also try to match by name with hyphens replaced by spaces
-          {
-            name: {
-              contains: subdomain.replace(/-/g, ''),
-              mode: 'insensitive'
-            }
-          },
-          // Fallback to business ID
-          {
-            id: subdomain
-          }
-        ]
+        subdomain,
       }
     });
     
     if (business) {
-      // console.log('Found business by domain parameter subdomain:', business.name);
+      console.log('Found business by domain parameter subdomain:', business.name);
+      return {
+        ...business,
+        siteConfig: business.siteConfig as SiteConfig || {},
+      };
+    }
+  } else {
+    // 4. Try direct matching with domainParam as a subdomain
+    business = await prisma.business.findFirst({
+      where: {
+        subdomain: domainParam,
+      }
+    });
+    
+    if (business) {
+      console.log('Found business by direct subdomain match:', business.name);
       return {
         ...business,
         siteConfig: business.siteConfig as SiteConfig || {},

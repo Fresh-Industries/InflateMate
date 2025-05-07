@@ -3,7 +3,6 @@
 import { useState, useMemo, memo } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +10,8 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
 import { useStripeConnect } from "@/hooks/use-stripe-connect";
+import { useAuth } from "@clerk/nextjs";
+
 
 const step1Schema = z.object({
   businessName: z.string().min(2, "Business name must be at least 2 characters"),
@@ -145,12 +146,15 @@ Step2.displayName = 'Step2';
 export default function OnboardingPage() {
   const { toast } = useToast();
   const router = useRouter();
+  const { userId, isLoaded: isAuthLoaded } = useAuth(); // Use isAuthLoaded
 
   const [currentStep, setCurrentStep] = useState(1);
   const [isLoading, setIsLoading] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [businessId, setBusinessId] = useState<string | null>(null);
   const [error, setError] = useState(false);
   const [connectedAccountId, setConnectedAccountId] = useState<string | null>(null);
+  const [ newlyCreatedOrg, setNewlyCreatedOrg] = useState<string | null>(null);
 
   const [formData, setFormData] = useState({
     businessName: "",
@@ -202,6 +206,16 @@ export default function OnboardingPage() {
       setIsLoading(true);
       setError(false);
 
+      if (!isAuthLoaded || !userId) { // Use isAuthLoaded here
+        toast({
+          title: "Error",
+          description: "You must be logged in to onboard.",
+          variant: "destructive",
+        });
+        router.replace('/sign-in');
+        return;
+      }
+
       const response = await fetch("/api/auth/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -216,12 +230,14 @@ export default function OnboardingPage() {
 
       setConnectedAccountId(data.stripeAccountId);
       setBusinessId(data.business.id);
+      setNewlyCreatedOrg(data.orgId); // Store the returned Clerk Org ID
 
-      setCurrentStep(3);
+      setCurrentStep(3); // Move to Stripe Connect onboarding step
       toast({
         title: "Success!",
         description: "Business created. Let's complete your payment setup.",
       });
+
     } catch (error) {
       setError(true);
       if (error instanceof z.ZodError) {
@@ -242,6 +258,18 @@ export default function OnboardingPage() {
     }
   };
 
+  const handleOnboardingExit = async () => {
+    // Redirect to the pricing page and pass the newly created Clerk Org ID as a search parameter
+    if (newlyCreatedOrg) {
+        console.log("Stripe Connect exited. Redirecting to pricing with orgId:", newlyCreatedOrg);
+        router.replace(`/pricing?orgId=${newlyCreatedOrg}`);
+    } else {
+        console.warn("Stripe Connect exited, but no newlyCreatedClerkOrgId available. Redirecting to pricing without orgId.");
+        // Fallback redirect if for some reason the orgId wasn't captured
+         router.replace('/');
+    }
+};
+
   const renderStep = () => {
     switch (currentStep) {
       case 1:
@@ -258,37 +286,32 @@ export default function OnboardingPage() {
             onFieldChange={handleFieldChange} 
           />
         );
-      case 3:
-        return (
-          <div className="space-y-4">
-            <p className="text-xl font-semibold text-center">
-              <GradientText>Complete Your Onboarding</GradientText>
-            </p>
-            {stripeConnectInstance ? (
-              <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
-                <ConnectAccountOnboarding
-                  onExit={() => {
-                    toast({
-                      title: "Success!",
-                      description: "Onboarding completed successfully.",
-                    });
-                    router.push(`/dashboard/${businessId}`);
-                  }}
-                />
-              </ConnectComponentsProvider>
-            ) : (
-              <div className="text-center py-6">
-                <div className="w-12 h-12 mx-auto border-4 border-t-transparent border-blue-500 rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-600">Loading payment setup...</p>
-              </div>
-            )}
-            {error && <p className="text-red-600 text-center mt-2 font-medium">Something went wrong!</p>}
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
+        case 3:
+          return (
+            <div className="space-y-4">
+              <p className="text-xl font-semibold text-center">
+                <GradientText>Complete Your Onboarding</GradientText>
+              </p>
+              {/* Ensure stripeConnectInstance is ready */}
+              {stripeConnectInstance && connectedAccountId ? (
+                <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
+                  <ConnectAccountOnboarding
+                    onExit={handleOnboardingExit} // Use the new handler
+                  />
+                </ConnectComponentsProvider>
+              ) : (
+                <div className="text-center py-6">
+                  <div className="w-12 h-12 mx-auto border-4 border-t-transparent border-blue-500 rounded-full animate-spin mb-4"></div>
+                  <p className="text-gray-600">Loading payment setup...</p>
+                </div>
+              )}
+              {error && <p className="text-red-600 text-center mt-2 font-medium">Something went wrong!</p>}
+            </div>
+          );
+        default:
+          return null;
+      }
+    };
 
   const progressWidth = useMemo(() => 
     `${(currentStep / 3) * 100}%`
@@ -296,6 +319,14 @@ export default function OnboardingPage() {
 
   return (
     <main className="min-h-screen flex items-center justify-center p-6">
+      {isLoading && newlyCreatedOrg && (
+           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+               <div className="flex flex-col items-center text-white">
+                   <div className="w-12 h-12 border-4 border-t-transparent border-white rounded-full animate-spin mb-4"></div>
+                   <p>Setting up your organization...</p>
+               </div>
+           </div>
+       )}
       <Card className="w-full max-w-lg shadow-xl rounded-2xl border border-gray-100 bg-white/90 backdrop-blur-sm">
         <CardHeader className="text-center pb-2">
           <CardTitle className="text-3xl font-extrabold">
@@ -314,36 +345,39 @@ export default function OnboardingPage() {
           </div>
           <form onSubmit={handleSubmit} className="space-y-8">
             {renderStep()}
-            <div className="flex justify-between">
-              {currentStep > 1 && currentStep < 3 && (
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  onClick={handleBack}
-                  className="border-gray-300 hover:bg-gray-100 hover:text-gray-900 transition-all"
-                >
-                  Back
-                </Button>
-              )}
-              {currentStep === 1 && (
-                <Button 
-                  type="button" 
-                  onClick={handleNext}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-md hover:shadow-lg transition-all ml-auto"
-                >
-                  Next
-                </Button>
-              )}
-              {currentStep === 2 && (
-                <Button 
-                  type="submit" 
-                  disabled={isLoading}
-                  className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-md hover:shadow-lg transition-all ml-auto disabled:opacity-70 disabled:cursor-not-allowed"
-                >
-                  {isLoading ? "Creating Business..." : "Set Up Payments"}
-                </Button>
-              )}
-            </div>
+            {/* Buttons only for steps 1 and 2 */}
+            {currentStep < 3 && (
+              <div className="flex justify-between">
+                {currentStep > 1 && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBack}
+                    className="border-gray-300 hover:bg-gray-100 hover:text-gray-900 transition-all"
+                  >
+                    Back
+                  </Button>
+                )}
+                {currentStep === 1 && (
+                  <Button
+                    type="button"
+                    onClick={handleNext}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-md hover:shadow-lg transition-all ml-auto"
+                  >
+                    Next
+                  </Button>
+                )}
+                {currentStep === 2 && (
+                  <Button
+                    type="submit"
+                    disabled={isLoading}
+                    className="bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-md hover:shadow-lg transition-all ml-auto disabled:opacity-70 disabled:cursor-not-allowed"
+                  >
+                    {isLoading ? "Creating Business..." : "Set Up Payments"}
+                  </Button>
+                )}
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>

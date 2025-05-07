@@ -95,7 +95,7 @@ export default function Header({ business, colors, theme }: HeaderProps) {
   }
   return (
     <header
-      className="sticky top-0 z-50 transition-all duration-300"
+      className="sticky top-0 z-[100] shadow-md"
       style={headerStyle}
     >
       <div className="container mx-auto px-4 relative">

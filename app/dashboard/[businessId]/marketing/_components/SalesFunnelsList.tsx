@@ -175,7 +175,7 @@ export function SalesFunnelsList({ businessId }: SalesFunnelsListProps) {
             <p className="text-muted-foreground mb-4">
               Create your first sales funnel to start capturing leads and offering discounts.
             </p>
-            <Button onClick={() => setIsCreating(true)}>
+            <Button variant="outline" onClick={() => setIsCreating(true)}>
               <Plus className="mr-2 h-4 w-4" />
               Create Your First Funnel
             </Button>

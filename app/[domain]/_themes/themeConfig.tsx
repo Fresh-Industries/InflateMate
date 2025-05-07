@@ -311,16 +311,16 @@ export const themeConfig: { [key: string]: ThemeDefinition } = {
     // Header: Nearly white bg, minimal scroll shadow, thin bottom border
     headerBg: (colors) => `${colors.primary}`,
     headerTextColor: (colors) => colors.text,
-    boxShadow: (_colors, scrolled) => scrolled ? '0 2px 6px rgba(0,0,0,0.08)' : 'none',
+    boxShadow: (_colors, scrolled) => scrolled ? '0 2px 6px rgba(0,0,0,0.08)' : '0 6px 6px rgba(0,0,0,0.08)',
     extraBorderStyle: (colors) => ({ borderBottom: `1px solid ${colors.primary}50` }),
     
     // Buttons: Primary bg, secondary hover, rounded, subtle shadow
     buttonStyles: {
-      background: (colors) => colors.secondary,
+      background: () => 'transparent',
       textColor: (colors) => colors.text,
-      border: () => `none`,
+      border: (colors) => `3px solid ${colors.accent}`,
       boxShadow: () => `none`,
-      hoverBackground: (colors) => colors.primary,
+      hoverBackground: (colors) => colors.accent,
       hoverTextColor: (colors) => colors.text,
       hoverBoxShadow: (colors) => `0 4px 10px ${colors.primary}20`,
       transition: standardTransition,

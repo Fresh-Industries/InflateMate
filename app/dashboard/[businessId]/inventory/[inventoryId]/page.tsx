@@ -192,48 +192,45 @@ export default function EditInventoryPage() {
       const currentImages = [...existingImages];
       const currentImageUrls = currentImages.map(img => img.url);
 
-      // Ensure only one primary image is selected before sending
-      const primaryCount = currentImages.filter(img => img.isPrimary).length;
-      let primaryImageUrl: string | null = null;
+      // Ensure only one primary image is marked
+      let primaryFound = false;
+      const imagesPayload = currentImages.map(img => {
+        if (img.isPrimary && !primaryFound) {
+          primaryFound = true;
+          return { url: img.url, isPrimary: true };
+        }
+        return { url: img.url, isPrimary: false };
+      });
 
-      if (primaryCount > 1) {
-        // If multiple are marked primary (shouldn't happen with UI logic, but safeguard)
-        // Keep the first one found as primary
-        let foundPrimary = false;
-        currentImages.forEach(img => {
-          if (img.isPrimary) {
-            if (!foundPrimary) {
-              primaryImageUrl = img.url;
-              foundPrimary = true;
-            } else {
-              img.isPrimary = false; // Unmark others
-            }
-          }
-        });
-      } else if (primaryCount === 1) {
-        primaryImageUrl = currentImages.find(img => img.isPrimary)?.url || null;
-      } else if (currentImages.length > 0) {
-        // If none are primary, make the first one primary
-        currentImages[0].isPrimary = true;
-        primaryImageUrl = currentImages[0].url;
+      // If no primary was found but there are images, mark the first one as primary
+      if (!primaryFound && imagesPayload.length > 0) {
+        imagesPayload[0].isPrimary = true;
       }
-       // If primaryImageUrl is still null and there are images, default to first
-       if (!primaryImageUrl && currentImages.length > 0) {
-          primaryImageUrl = currentImages[0].url;
-       }
 
+      // Calculate images to be removed from storage
       const removedImageUrls = initialImageUrls.filter(url => !currentImageUrls.includes(url));
-      const newImageUrls = currentImageUrls.filter(url => !initialImageUrls.includes(url));
 
-      // Construct payload with delta
+      // Construct payload matching the backend schema
       const payload = {
-        ...inventoryItem,
-        newImages: newImageUrls,
+        // Include all editable fields from inventoryItem
+        name: inventoryItem.name,
+        description: inventoryItem.description,
+        dimensions: inventoryItem.dimensions,
+        capacity: inventoryItem.capacity,
+        price: inventoryItem.price,
+        setupTime: inventoryItem.setupTime,
+        teardownTime: inventoryItem.teardownTime,
+        status: inventoryItem.status,
+        minimumSpace: inventoryItem.minimumSpace,
+        weightLimit: inventoryItem.weightLimit,
+        ageRange: inventoryItem.ageRange,
+        weatherRestrictions: inventoryItem.weatherRestrictions, // Assuming this is handled correctly
+        quantity: inventoryItem.quantity,
+        // Send the desired final state of images
+        images: imagesPayload,
+        // Send URLs that need to be deleted from storage
         removedImages: removedImageUrls,
-        primaryImage: primaryImageUrl,
       };
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      delete (payload as any).images;
 
       const response = await fetch(`/api/businesses/${businessId}/inventory/${inventoryId}`, {
         method: 'PATCH',
@@ -480,7 +477,7 @@ export default function EditInventoryPage() {
                         existingImages.length === 0 &&
                         !existingImages.some(img => img.isPrimary) &&
                         index === 0;
-                      return { url: file.url, isPrimary };
+                      return { url: file.ufsUrl, isPrimary };
                     });
                     if (newImages.some(img => img.isPrimary)) {
                       setExistingImages(existingImages.map(img => ({ ...img, isPrimary: false })));

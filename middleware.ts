@@ -1,62 +1,70 @@
-import { NextResponse } from "next/server";
-import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+// middleware.ts
+import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
+import { NextResponse } from 'next/server';
 
-const isPublicRoute = createRouteMatcher([
+const ROOT = process.env.NEXT_PUBLIC_ROOT_DOMAIN!;
+const publicRoute = createRouteMatcher([
   '/sign-in(.*)',
   '/sign-up(.*)',
   '/:domain(.*)',
   '/api/webhook(.*)',
-  '/api(.*)'
-])
+  '/api(.*)',
+  '/public(.*)'
+]);
 
-// Inlined at build time
-const ROOT_DOMAIN = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+const internalRoute = createRouteMatcher([
+  '/dashboard(.*)',           // keep dashboard on the root app
+  '/api(.*)',                 // your API
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
-  const hostname = req.headers.get("host") || "";
-  const domainOnly = hostname.split(":")[0];
-  const path = url.pathname;
+  const host = (req.headers.get('host') ?? '').toLowerCase();
+ 
 
-  // 1️⃣ Main app root domain (dev or prod)
+  /* ── A. skip Next.js internals & static assets ─────────────────────── */
   if (
-    domainOnly === ROOT_DOMAIN ||
-    domainOnly === `www.${ROOT_DOMAIN}`
+    url.pathname.startsWith('/_next/') || 
+    url.pathname === '/favicon.ico' ||
+    url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|css|js)$/)
   ) {
-    if (!isPublicRoute(req)) {
-      await auth.protect();
-    }
     return NextResponse.next();
   }
 
-  // 2️⃣ API routes bypass
-  if (path.startsWith("/api")) {
+  if (url.pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 
-  // 3️⃣ Tenant subdomain (e.g. foo.inflatemate.co)
-  if (domainOnly.endsWith(`.${ROOT_DOMAIN}`)) {
-    const subdomain = domainOnly.replace(`.${ROOT_DOMAIN}`, "");
-    return NextResponse.rewrite(
-      new URL(`/${subdomain}${path}`, req.url)
-    );
+  // if (process.env.NODE_ENV === 'development') {
+  //   const colocalHost = 'localhost:3000';
+  //   if (!publicRoute(req) && host === colocalHost) await auth.protect();
+  //   return NextResponse.next();
+  // }
+
+  /* ── B. root domain (marketing & dashboard live here) ─────────────── */
+  if (host === ROOT || internalRoute(req)) {
+    if (!publicRoute(req)) await auth.protect();
+    return NextResponse.next();
   }
 
-  if (!isPublicRoute(req)) {
-    await auth.protect();
-  }
-  return NextResponse.next();
+  /* ── C. tenant sites (sub-domain or custom domain) ────────────────── */
+  const segment = host.endsWith('.' + ROOT)
+    ? host.replace('.' + ROOT, '')   // sub-domain → slug only
+    : host;                          // custom domain → whole host
+
+  const rewritten = `/${segment}${url.pathname === '/' ? '' : url.pathname}${url.search}`;
+  return NextResponse.rewrite(new URL(rewritten, req.url));
 });
 
 export const config = {
   matcher: [
     /*
-     * Match all paths except for:
-     * 1. /api routes (except those we want to protect)
-     * 2. /_next (Next.js internals)
-     * 3. all static files (e.g. /favicon.ico)
+     * Match all request paths except for the ones starting with:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
      */
-    "/((?!api/webhook|_next/|[\\w-]+\\.\\w+).*)",
-    "/api/((?!webhook).*)",
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
 };

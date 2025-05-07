@@ -9,11 +9,12 @@ import { SiteConfig, BusinessWithSiteConfig, Theme, DynamicSection } from "@/lib
 import { Save, Loader2, PlusCircle, Edit, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-} from "@/components/ui/dialog";
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetDescription,
+} from "@/components/ui/sheet";
 import AboutSettings from "./about-settings";
 import ContactSettings from "./contact-settings";
 import ColorSettings from "./color-settings";
@@ -27,7 +28,6 @@ interface WebsiteCustomizerProps {
   initialData: Record<string, unknown>;
 }
 
-// Helper to get page section key
 type PageSectionKey = 'landing' | 'about';
 type PageConfig = {
   sections?: DynamicSection[];
@@ -47,7 +47,6 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   const [isLoading, setIsLoading] = useState(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
-  // State for managing the section form dialog
   const [isSectionFormOpen, setIsSectionFormOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<DynamicSection | null>(null);
   const [activeTab, setActiveTab] = useState<PageSectionKey>('landing');
@@ -139,26 +138,64 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
     }
   };
   
-  // Allow 'about' section updates for base settings (title, description)
-  // Update the type to include 'about' in allowed sections
-  const updateSiteConfig = useCallback((section: Exclude<keyof SiteConfig, 'themeName' | 'landing'>, data: Record<string, unknown>) => {
+  // Allow updates for hero, about, colors, etc.
+  const updateSiteConfig = useCallback((sectionKey: Exclude<keyof SiteConfig, 'themeName'>, data: Record<string, unknown>) => {
     if (updateTimeoutRef.current) {
       clearTimeout(updateTimeoutRef.current);
     }
     updateTimeoutRef.current = setTimeout(() => {
       setSiteConfig(prev => {
         const newConfig = { ...prev };
-        if (!newConfig[section]) {
-          newConfig[section] = {};
+        
+        // Type safely handle updates for different sections
+        switch (sectionKey) {
+          case 'hero':
+            newConfig.hero = { ...(newConfig.hero || {}), ...data };
+            break;
+          case 'about':
+            newConfig.about = { ...(newConfig.about || {}), ...data };
+            break;
+          case 'landing':
+             newConfig.landing = { ...(newConfig.landing || {}), ...data };
+             break;
+          case 'contact':
+            newConfig.contact = { ...(newConfig.contact || {}), ...data };
+            break;
+          case 'colors':
+            newConfig.colors = { ...(newConfig.colors || {}), ...data };
+            break;
+
+          case 'pages':
+            // Ensure data is treated appropriately for the Record<string, PageData> structure
+            const pagesUpdate = { ...(newConfig.pages || {}) };
+            for (const [pageSlug, pageData] of Object.entries(data)) {
+                if (typeof pageData === 'object' && pageData !== null) {
+                    // Merge new page data with existing data for that slug
+                    pagesUpdate[pageSlug] = { 
+                        ...(pagesUpdate[pageSlug] || {}), 
+                        ...(pageData as { title?: string; content?: string; imageUrl?: string }) // Type assertion 
+                    };
+                } else {
+                   // Handle cases where data[pageSlug] is not an object, maybe log warning?
+                   console.warn(`Invalid data type for page '${pageSlug}' in updateSiteConfig:`, pageData);
+                }
+            }
+            newConfig.pages = pagesUpdate;
+            break;
+            
+          // Add cases for other top-level keys if they exist and need updating
+          default:
+             // For keys not explicitly handled, maybe log a warning or handle differently
+             console.warn(`Unhandled section key in updateSiteConfig: ${sectionKey}`);
+             // Example: Direct assignment if it's a simple value (use with caution)
+             // if (sectionKey in newConfig) { 
+             //    (newConfig as any)[sectionKey] = data[sectionKey] ?? newConfig[sectionKey];
+             // }
+             break;
         }
-        newConfig[section] = {
-          ...(newConfig[section] as Record<string, unknown>),
-          ...data,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } as any;
         return newConfig;
       });
-    }, 100); 
+    }, 100);
   }, []);
   
   // New handler for theme changes
@@ -169,14 +206,52 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
     }));
   };
 
-  // -- Handlers for Dynamic Sections --
+  const handleTabChange = (value: string) => {
+    if (value === 'landing' || value === 'about' || value === 'contact' || value === 'colors' || value === 'themeSettings') {
+      setActiveTab(value as PageSectionKey);
+    }
+  };
+
+  const handleDeleteSection = async (sectionId: string, page: PageSectionKey) => {
+    setIsLoading(true);
+    try {
+       // --- TEMPORARY CLIENT-SIDE UPDATE (Replace with server action ideally) ---
+       setSiteConfig(prev => {
+         const pageKey = getPageSectionKey(page);
+         const sectionArrayKey = getSectionArrayKey(page);
+         
+         // Ensure the page config exists and is treated as PageConfig
+         const currentPageConfig = (prev[pageKey] as PageConfig | undefined) || {}; 
+         // Ensure the section array exists
+         const currentSections = (currentPageConfig[sectionArrayKey] as SectionArray | undefined) || []; 
+         
+         const updatedSections = currentSections.filter((section) => section.id !== sectionId);
+         
+         return {
+           ...prev,
+           [pageKey]: {
+             ...currentPageConfig,
+             [sectionArrayKey]: updatedSections,
+           },
+         };
+       });
+       // --- END TEMPORARY ---
+       toast({ title: "Section Deleted", description: "Remember to save your changes.", variant: "destructive" });
+       // If using server action: await deleteSection(businessId, sectionId); router.refresh();
+    } catch (error) { 
+        console.error("Error deleting section:", error); 
+        toast({ title: "Error", description: "Could not delete section.", variant: "destructive", });
+    } finally { 
+        setIsLoading(false); 
+    }
+  };
+
   const handleOpenAddSection = (page: PageSectionKey) => {
     setEditingSection(null);
-    setIsSectionFormOpen(true);
-    // Ensure that activeTab is set to the current page being edited
     if (page !== activeTab) {
-      setActiveTab(page);
+      setActiveTab(page); 
     }
+    setIsSectionFormOpen(true);
   };
 
   const handleOpenEditSection = (section: DynamicSection) => {
@@ -184,26 +259,22 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
     setIsSectionFormOpen(true);
   };
 
-  const handleTabChange = (value: string) => {
-    // Only update activeTab if the value is a valid PageSectionKey
-    if (value === 'landing' || value === 'about') {
-      setActiveTab(value);
-    }
+  const handleCloseSectionForm = () => {
+    setIsSectionFormOpen(false);
+    setEditingSection(null);
   };
 
   const handleAddSection = (sectionData: Omit<DynamicSection, 'id'>) => {
     const newSection: DynamicSection = {
       ...sectionData,
-      id: crypto.randomUUID(), // Generate unique ID
+      id: crypto.randomUUID(),
     };
 
     setSiteConfig(prev => {
       const pageKey = getPageSectionKey(newSection.page as PageSectionKey);
       const sectionArrayKey = getSectionArrayKey(newSection.page as PageSectionKey);
-      
-      const currentPageConfig = prev[pageKey] as PageConfig || {};
-      const currentSections = currentPageConfig[sectionArrayKey] as SectionArray || []; 
-
+      const currentPageConfig = (prev[pageKey] as PageConfig | undefined) || {};
+      const currentSections = (currentPageConfig[sectionArrayKey] as SectionArray | undefined) || [];
       return {
         ...prev,
         [pageKey]: {
@@ -212,7 +283,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
         },
       };
     });
-    setIsSectionFormOpen(false);
+    handleCloseSectionForm();
     toast({ title: "Section Added", description: "Remember to save your changes." });
   };
 
@@ -220,14 +291,11 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
      setSiteConfig(prev => {
       const pageKey = getPageSectionKey(updatedSectionData.page as PageSectionKey);
       const sectionArrayKey = getSectionArrayKey(updatedSectionData.page as PageSectionKey);
-      
-      const currentPageConfig = prev[pageKey] as PageConfig || {};
-      const currentSections = currentPageConfig[sectionArrayKey] as SectionArray || [];
-
-      const updatedSections = currentSections.map((section: DynamicSection) => 
+      const currentPageConfig = (prev[pageKey] as PageConfig | undefined) || {};
+      const currentSections = (currentPageConfig[sectionArrayKey] as SectionArray | undefined) || [];
+      const updatedSections = currentSections.map(section => 
         section.id === updatedSectionData.id ? updatedSectionData : section
       );
-
       return {
         ...prev,
         [pageKey]: {
@@ -236,32 +304,10 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
         },
       };
     });
-    setIsSectionFormOpen(false);
+    handleCloseSectionForm();
     toast({ title: "Section Updated", description: "Remember to save your changes." });
   };
-  
-  const handleDeleteSection = (sectionId: string, page: PageSectionKey) => {
-     setSiteConfig(prev => {
-      const pageKey = getPageSectionKey(page);
-      const sectionArrayKey = getSectionArrayKey(page);
-      
-      const currentPageConfig = prev[pageKey] as PageConfig || {};
-      const currentSections = currentPageConfig[sectionArrayKey] as SectionArray || [];
 
-      const updatedSections = currentSections.filter((section: DynamicSection) => section.id !== sectionId);
-
-      return {
-        ...prev,
-        [pageKey]: {
-          ...currentPageConfig,
-          [sectionArrayKey]: updatedSections,
-        },
-      };
-    });
-     toast({ title: "Section Deleted", description: "Remember to save your changes.", variant: "destructive" });
-  };
-
-  // Helper to render sections for a given page
   const renderSections = (page: PageSectionKey) => {
     const pageKey = getPageSectionKey(page);
     const sectionArrayKey = getSectionArrayKey(page);
@@ -276,15 +322,17 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
             <div>
               <p className="font-medium capitalize">{section.type.replace(/([A-Z])/g, ' $1')} Section</p>
               <p className="text-sm text-muted-foreground truncate max-w-md">
-                {section.content.title || 
-                 ('text' in section.content ? section.content.text : 'Section Content')}
+                {section.content?.title ||
+                 (section.content && 'text' in section.content && section.content.text) ||
+                 (section.content && 'cards' in section.content && `${section.content.cards?.length || 0} Card(s)`) ||
+                 'Section Content'}
               </p>
             </div>
             <div className="flex space-x-2">
                <Button variant="outline" size="icon" onClick={() => handleOpenEditSection(section)}>
                  <Edit className="h-4 w-4" />
                </Button>
-               <Button variant="destructive" size="icon" onClick={() => handleDeleteSection(section.id, page)}>
+               <Button variant="destructive" size="icon" onClick={() => handleDeleteSection(section.id, page)} disabled={isLoading}>
                  <Trash2 className="h-4 w-4" />
                </Button>
             </div>
@@ -298,7 +346,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   };
 
   return (
-    <Dialog open={isSectionFormOpen} onOpenChange={setIsSectionFormOpen}>
+    <Sheet open={isSectionFormOpen} onOpenChange={setIsSectionFormOpen}>
       <div className="space-y-8">
         <div className="flex justify-end mb-6">
           <Button
@@ -320,7 +368,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
           </Button>
         </div>
       
-        <Tabs defaultValue="landing" className="w-full" onValueChange={handleTabChange}>
+        <Tabs defaultValue="landing" className="w-full" value={activeTab} onValueChange={handleTabChange}>
           <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto border-b rounded-none p-0">
             <TabsTrigger
               value="landing"
@@ -446,29 +494,32 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
 
           </div>
         </Tabs>
-      </div>
+    </div>
 
-      {/* Dialog for Add/Edit Section Form */}
-      <DialogContent className="sm:max-w-[600px]">
-        <DialogHeader>
-          <DialogTitle>{editingSection ? 'Edit Section' : 'Add New Section'}</DialogTitle>
-        </DialogHeader>
-        <AddSectionForm 
-          key={editingSection?.id || 'new'} // Add key to reset form state when switching between add/edit
-          initialData={editingSection} 
-          onAddSection={handleAddSection} 
-          onEditSection={handleEditSection} 
-          onCancel={() => setIsSectionFormOpen(false)}
-          businessId={businessId} // Pass businessId
-          page={editingSection ? editingSection.page as PageSectionKey : activeTab}
-          presetColors={{
-            primary: siteConfig.colors?.primary,
-            secondary: siteConfig.colors?.secondary,
-            accent: siteConfig.colors?.accent,
-            background: siteConfig.colors?.background
-          }}
-        />
-      </DialogContent>
-    </Dialog>
+    <SheetContent className="sm:max-w-xl w-full overflow-y-auto">
+      <SheetHeader>
+        <SheetTitle>{editingSection ? 'Edit Section' : 'Add New Section'}</SheetTitle>
+        <SheetDescription>
+           Make changes to the section details here. Click save when you&apos;re done.
+        </SheetDescription>
+      </SheetHeader>
+      <div className="py-4">
+          <AddSectionForm 
+            key={editingSection?.id || 'new'}
+            initialData={editingSection} 
+            onAddSection={handleAddSection} 
+            onEditSection={handleEditSection} 
+            onCancel={handleCloseSectionForm}
+            page={editingSection ? editingSection.page as PageSectionKey : activeTab}
+            presetColors={{
+              primary: siteConfig.colors?.primary,
+              secondary: siteConfig.colors?.secondary,
+              accent: siteConfig.colors?.accent,
+              background: siteConfig.colors?.background
+            }}
+          />
+      </div>
+    </SheetContent>
+    </Sheet>
   );
 } 

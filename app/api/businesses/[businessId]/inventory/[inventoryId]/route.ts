@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
-import { z, ZodError } from "zod";
+import { z } from "zod";
 import { UTApi } from "uploadthing/server";
+import { stripe } from "@/lib/stripe-server";
 
-// Initialize the UploadThing API client
 const utapi = new UTApi();
 
 const updateInventorySchema = z.object({
@@ -29,7 +29,7 @@ const updateInventorySchema = z.object({
   ageRange: z.string().min(1, "Age range is required").optional(),
   weatherRestrictions: z.array(z.string()).optional(),
   quantity: z.number().int().min(0).optional(),
-  removedImages: z.array(z.string()).optional(), // Array of image URLs to remove
+  removedImages: z.array(z.string()).optional(),
 });
 
 export async function PATCH(
@@ -38,135 +38,99 @@ export async function PATCH(
 ) {
   const params = await props.params;
   try {
-    const { businessId, inventoryId } = await Promise.resolve(params);
-    const user = await getCurrentUser();
+    const { businessId, inventoryId } = params;
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    if (!businessId || !inventoryId) {
-      return NextResponse.json(
-        { message: "Business ID and Inventory ID are required" },
-        { status: 400 }
-      );
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ message: "Access denied" }, { status: 403 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async () => {
+    const body = await req.json();
+    const validatedData = updateInventorySchema.parse(body);
+
+    // Get the current inventory item to compare changes
+    const currentInventory = await prisma.inventory.findUnique({
+      where: { id: inventoryId },
+    });
+
+    if (!currentInventory) {
+      return NextResponse.json({ message: "Inventory item not found" }, { status: 404 });
+    }
+
+    // Initialize variables for final image state
+    let finalImageUrls: string[] = currentInventory.images;
+    let finalPrimaryImageUrl: string | null = currentInventory.primaryImage;
+
+    // 1. Handle removed images (delete from storage)
+    if (validatedData.removedImages && validatedData.removedImages.length > 0) {
+      for (const imageUrl of validatedData.removedImages) {
         try {
-          const body = await req.json();
-          const validatedData = updateInventorySchema.parse(body);
-
-          // Get the current inventory item to compare changes
-          const currentInventory = await prisma.inventory.findUnique({
-            where: { id: inventoryId },
-          });
-
-          if (!currentInventory) {
-            return { error: "Inventory item not found" };
+          const fileKey = imageUrl.split('/').pop();
+          if (fileKey) {
+            await utapi.deleteFiles(fileKey);
           }
-
-          // Handle image updates if provided
-          let imageUrls = currentInventory.images;
-          let primaryImageUrl = currentInventory.primaryImage;
-
-          // Handle removed images if specified
-          if (validatedData.removedImages && validatedData.removedImages.length > 0) {
-            // Delete images from UploadThing
-            for (const imageUrl of validatedData.removedImages) {
-              try {
-                // Extract the file key from the URL
-                const fileKey = imageUrl.split('/').pop();
-                if (fileKey) {
-                  // Use the UTApi directly to delete the file
-                  await utapi.deleteFiles(fileKey);
-                }
-              } catch (error) {
-                console.error(`Failed to delete image from UploadThing: ${imageUrl}`, error);
-                // Continue with the update even if image deletion fails
-              }
-            }
-
-            // Remove the deleted images from the imageUrls array
-            imageUrls = currentInventory.images.filter(
-              (url) => !validatedData.removedImages?.includes(url)
-            );
-
-            // If the primary image was deleted, update it
-            if (
-              primaryImageUrl &&
-              validatedData.removedImages.includes(primaryImageUrl)
-            ) {
-              primaryImageUrl = imageUrls.length > 0 ? imageUrls[0] : null;
-            }
-          }
-
-          // Handle new images if provided
-          if (validatedData.images) {
-            const newImageUrls = validatedData.images.map((img) => img.url);
-            
-            // Combine existing images (minus removed ones) with new images
-            imageUrls = [...imageUrls, ...newImageUrls];
-            
-            // Update primary image if specified
-            const primaryImage = validatedData.images.find((img) => img.isPrimary);
-            if (primaryImage) {
-              primaryImageUrl = primaryImage.url;
-            } else if (!primaryImageUrl && newImageUrls.length > 0) {
-              // If no primary image exists and we have new images, use the first new one
-              primaryImageUrl = newImageUrls[0];
-            }
-          }
-
-          // Update the inventory item
-          const updatedInventory = await prisma.inventory.update({
-            where: { id: inventoryId },
-            data: {
-              name: validatedData.name,
-              description: validatedData.description,
-              dimensions: validatedData.dimensions,
-              capacity: validatedData.capacity,
-              price: validatedData.price,
-              setupTime: validatedData.setupTime,
-              teardownTime: validatedData.teardownTime,
-              images: imageUrls,
-              primaryImage: primaryImageUrl,
-              status: validatedData.status,
-              minimumSpace: validatedData.minimumSpace,
-              weightLimit: validatedData.weightLimit,
-              ageRange: validatedData.ageRange,
-              weatherRestrictions: validatedData.weatherRestrictions,
-              quantity: validatedData.quantity,
-            },
-          });
-
-          return updatedInventory;
         } catch (error) {
-          console.error("Error updating inventory item:", error);
-          
-          // Check for specific Prisma errors
-          if (error instanceof Error && error.message.includes('P2025')) {
-            return { error: "Inventory item not found or already deleted." };
-          }
-          
-          // Handle validation errors
-          if (error instanceof ZodError) {
-            return { error: "Invalid input data: " + JSON.stringify(error.errors) };
-          }
-          
-          // Generic error
-          return { error: error instanceof Error ? error.message : "Failed to update inventory item" };
+          console.error(`Failed to delete image from UploadThing: ${imageUrl}`, error);
         }
       }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ message: result.error }, { status: 403 });
     }
 
-    return NextResponse.json(result.data);
+    // 2. Determine the final image state from the request payload
+    if (validatedData.images) {
+      finalImageUrls = validatedData.images.map((img) => img.url);
+      const primaryImage = validatedData.images.find((img) => img.isPrimary);
+      if (primaryImage) {
+        finalPrimaryImageUrl = primaryImage.url;
+      } else if (finalImageUrls.length > 0) {
+        finalPrimaryImageUrl = finalImageUrls[0];
+      } else {
+        finalPrimaryImageUrl = null;
+      }
+    } else if (validatedData.removedImages && validatedData.removedImages.length > 0) {
+      finalImageUrls = currentInventory.images.filter(
+        (url) => !validatedData.removedImages?.includes(url)
+      );
+      if (finalPrimaryImageUrl && validatedData.removedImages.includes(finalPrimaryImageUrl)) {
+        finalPrimaryImageUrl = finalImageUrls.length > 0 ? finalImageUrls[0] : null;
+      }
+    }
+
+    await stripe.products.update(currentInventory.stripeProductId || "", {
+      name: validatedData.name ?? currentInventory.name,
+      description: validatedData.description ?? currentInventory.description,
+      images: finalImageUrls,
+    }, {
+      stripeAccount: user.membership?.organization?.business?.stripeAccountId || undefined,
+    });
+
+    // Update the inventory item in the database
+    const updatedInventory = await prisma.inventory.update({
+      where: { id: inventoryId },
+      data: {
+        name: validatedData.name ?? currentInventory.name,
+        description: validatedData.description ?? currentInventory.description,
+        dimensions: validatedData.dimensions ?? currentInventory.dimensions,
+        capacity: validatedData.capacity ?? currentInventory.capacity,
+        price: validatedData.price ?? currentInventory.price,
+        setupTime: validatedData.setupTime ?? currentInventory.setupTime,
+        teardownTime: validatedData.teardownTime ?? currentInventory.teardownTime,
+        status: validatedData.status ?? currentInventory.status,
+        minimumSpace: validatedData.minimumSpace ?? currentInventory.minimumSpace,
+        weightLimit: validatedData.weightLimit ?? currentInventory.weightLimit,
+        ageRange: validatedData.ageRange ?? currentInventory.ageRange,
+        weatherRestrictions: validatedData.weatherRestrictions ?? currentInventory.weatherRestrictions,
+        quantity: validatedData.quantity ?? currentInventory.quantity,
+        images: finalImageUrls,
+        primaryImage: finalPrimaryImageUrl,
+      },
+    });
+
+    return NextResponse.json(updatedInventory);
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -174,7 +138,6 @@ export async function PATCH(
         { status: 400 }
       );
     }
-
     console.error("[INVENTORY_UPDATE]", error);
     return NextResponse.json(
       { message: "Internal server error" },
@@ -189,96 +152,70 @@ export async function DELETE(
 ) {
   const params = await props.params;
   try {
-    const { businessId, inventoryId } = await Promise.resolve(params);
-    const user = await getCurrentUser();
+    const { businessId, inventoryId } = params;
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    if (!businessId || !inventoryId) {
-      return NextResponse.json(
-        { message: "Business ID and Inventory ID are required" },
-        { status: 400 }
-      );
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ message: "Access denied" }, { status: 403 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async () => {
-        try {
-          // Get the inventory item to delete its images
-          const inventoryItem = await prisma.inventory.findUnique({
-            where: { id: inventoryId },
-            include: {
-              bookingItems: {
-                include: {
-                  booking: true
-                }
-              }
-            }
-          });
-
-          if (!inventoryItem) {
-            return { error: "Inventory item not found" };
+    // Get the inventory item to delete its images
+    const inventoryItem = await prisma.inventory.findUnique({
+      where: { id: inventoryId },
+      include: {
+        bookingItems: {
+          include: {
+            booking: true
           }
-
-          // Check if the inventory item has any upcoming bookings
-          const now = new Date();
-          const hasUpcomingBookings = inventoryItem.bookingItems.some(item => {
-            const booking = item.booking;
-            return booking && new Date(booking.startTime) > now;
-          });
-
-          if (hasUpcomingBookings) {
-            return { 
-              error: "Cannot delete inventory item with upcoming bookings. Please cancel or reschedule the bookings first." 
-            };
-          }
-
-          // Delete images from UploadThing
-          if (inventoryItem.images && inventoryItem.images.length > 0) {
-            for (const imageUrl of inventoryItem.images) {
-              try {
-                // Extract the file key from the URL
-                const fileKey = imageUrl.split('/').pop();
-                if (fileKey) {
-                  // Use the UTApi directly to delete the file
-                  await utapi.deleteFiles(fileKey);
-                }
-              } catch (error) {
-                console.error(`Failed to delete image from UploadThing: ${imageUrl}`, error);
-                // Continue with the deletion even if image deletion fails
-              }
-            }
-          }
-
-          // Delete the inventory item
-          const deletedInventory = await prisma.inventory.delete({
-            where: { id: inventoryId },
-          });
-
-          return deletedInventory;
-        } catch (error) {
-          console.error("Error in inventory deletion:", error);
-          
-          // Check for specific Prisma errors
-          if (error instanceof Error && error.message.includes('P2003')) {
-            return { error: "This inventory item cannot be deleted because it is referenced by other records in the system." };
-          }
-          
-          if (error instanceof Error && error.message.includes('P2025')) {
-            return { error: "Inventory item not found or already deleted." };
-          }
-          
-          // Generic error
-          return { error: error instanceof Error ? error.message : "Failed to delete inventory item" };
         }
       }
-    );
+    });
 
-    if (result.error) {
-      return NextResponse.json({ message: result.error }, { status: 403 });
+    if (!inventoryItem) {
+      return NextResponse.json({ message: "Inventory item not found" }, { status: 404 });
+    }
+
+    // Check if the inventory item has any upcoming bookings
+    const now = new Date();
+    const hasUpcomingBookings = inventoryItem.bookingItems.some(item => {
+      const booking = item.booking;
+      return booking && new Date(booking.startTime) > now;
+    });
+
+    if (hasUpcomingBookings) {
+      return NextResponse.json({
+        message: "Cannot delete inventory item with upcoming bookings. Please cancel or reschedule the bookings first."
+      }, { status: 400 });
+    }
+
+    // Delete images from UploadThing
+    if (inventoryItem.images && inventoryItem.images.length > 0) {
+      for (const imageUrl of inventoryItem.images) {
+        try {
+          const fileKey = imageUrl.split('/').pop();
+          if (fileKey) {
+            await utapi.deleteFiles(fileKey);
+          }
+        } catch (error) {
+          console.error(`Failed to delete image from UploadThing: ${imageUrl}`, error);
+        }
+      }
+    }
+
+    // Delete the inventory item
+    await prisma.inventory.delete({
+      where: { id: inventoryId },
+    });
+
+    if (inventoryItem.stripeProductId) {
+      await stripe.products.del(inventoryItem.stripeProductId, {
+        stripeAccount: user.membership?.organization?.business?.stripeAccountId || undefined,
+      });
     }
 
     return NextResponse.json({ message: "Inventory item deleted successfully" });
@@ -297,45 +234,33 @@ export async function GET(
 ) {
   const params = await props.params;
   try {
-    const { businessId, inventoryId } = await Promise.resolve(params);
-    const user = await getCurrentUser();
-    
+    const { businessId, inventoryId } = params;
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const result = await withBusinessAuth(
-      businessId,
-      user.id,
-      async () => {
-        try {
-          const inventoryItem = await prisma.inventory.findFirst({
-            where: {
-              id: inventoryId,
-              businessId: businessId,
-            },
-            include: {
-              bookingItems: true
-            }
-          });
-
-          if (!inventoryItem) {
-            return { error: "Inventory item not found" };
-          }
-
-          return inventoryItem;
-        } catch (error) {
-          console.error("Error fetching inventory item:", error);
-          return { error: error instanceof Error ? error.message : "Failed to fetch inventory item" };
-        }
-      }
-    );
-
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    return NextResponse.json(result.data);
+    const inventoryItem = await prisma.inventory.findFirst({
+      where: {
+        id: inventoryId,
+        businessId: businessId,
+      },
+      include: {
+        bookingItems: true
+      }
+    });
+
+    if (!inventoryItem) {
+      return NextResponse.json({ error: "Inventory item not found" }, { status: 404 });
+    }
+
+    return NextResponse.json(inventoryItem);
   } catch (error) {
     console.error("Error fetching inventory item:", error);
     return NextResponse.json(
@@ -343,4 +268,4 @@ export async function GET(
       { status: 500 }
     );
   }
-} 
+}

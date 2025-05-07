@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { SalesFunnelFormWrapper } from "../../_components/SalesFunnelFormWrapper";
 import { Card } from "@/components/ui/card";
 
@@ -12,22 +12,10 @@ export default async function NewSalesFunnelPage(
   }
 ) {
   const params = await props.params;
-  const user = await getCurrentUser();
+  const user = await getCurrentUserWithOrgAndBusiness();
 
   if (!user) {
     redirect("/auth/signin");
-  }
-
-  const result = await withBusinessAuth<{ hasAccess: boolean }>(
-    params.businessId,
-    user.id,
-    async () => {
-      return { hasAccess: true };
-    }
-  );
-
-  if (result.error) {
-    redirect("/");
   }
 
   return (

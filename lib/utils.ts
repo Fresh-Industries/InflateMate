@@ -1,5 +1,7 @@
 import { type ClassValue, clsx } from "clsx"
 import { twMerge } from "tailwind-merge"
+import { format } from 'date-fns';
+import { fromZonedTime, toZonedTime } from 'date-fns-tz';
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs))
@@ -11,23 +13,6 @@ export function formatCurrency(amount: number) {
     currency: 'USD',
   }).format(amount);
 }
-
-// Add a helper function to create a UTC date
-export const createLocalDate = (dateString: string) => {
-  // Split the date string (format: YYYY-MM-DD)
-  const [year, month, day] = dateString.split('-').map(Number);
-  // Note: month is 0-indexed in JavaScript Date constructor
-  return new Date(year, month - 1, day);
-};
-
-export const createLocalDateTime = (dateString: string, timeString: string) => {
-  // Split the date string (format: YYYY-MM-DD)
-  const [year, month, day] = dateString.split('-').map(Number);
-  // Split the time string (format: HH:MM)
-  const [hours, minutes] = timeString.split(':').map(Number);
-  return new Date(year, month - 1, day, hours, minutes, 0);
-};
-
 export class FileEsque extends Blob {
   name: string;
   lastModified: number;
@@ -40,5 +25,9 @@ export class FileEsque extends Blob {
     this.customId = null; // optional, if needed
   }
 }
+
+export const dateOnlyUTC = (d:string)=> new Date(`${d}T00:00:00Z`);
+export const localToUTC  = (d:string,t:string,tz:string)=> fromZonedTime(`${d}T${t}:00`, tz);
+export const utcToLocal  = (dt:Date,tz:string,f='Pp')=> format(toZonedTime(dt,tz),f);
 
 

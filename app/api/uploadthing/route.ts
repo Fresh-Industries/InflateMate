@@ -2,7 +2,7 @@ import { createRouteHandler } from "uploadthing/next";
 import { ourFileRouter } from "./core";
 import { NextRequest, NextResponse } from "next/server";
 import { UTApi } from "uploadthing/server";
-import { getCurrentUser } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 
 const utapi = new UTApi();
 
@@ -16,7 +16,7 @@ export const { GET, POST } = createRouteHandler({
 export async function DELETE(req: NextRequest) {
   try {
     // Authenticate the user
-    const user = await getCurrentUser();
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json(
         { message: "Unauthorized" },

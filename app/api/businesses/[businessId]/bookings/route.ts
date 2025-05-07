@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
 import { prisma } from "@/lib/prisma";
+import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
 
 // Define a schema for the expected payload
 const paymentIntentSchema = z.object({
@@ -35,10 +36,38 @@ export async function POST(
     if (!business || !business.stripeAccountId) {
       return NextResponse.json({ error: "Business not found or Stripe account not set up" }, { status: 404 });
     }
+    const stripeConnectedAccountId = business.stripeAccountId;
 
-    console.log("Creating PaymentIntent for connected account:", business.stripeAccountId);
+    console.log("Creating PaymentIntent for connected account:", stripeConnectedAccountId);
 
     try {
+      // Ensure all metadata values are strings for PaymentIntent
+      const sanitizedMetadata: Record<string, string> = {};
+      Object.entries(metadata).forEach(([key, value]) => {
+        sanitizedMetadata[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      });
+
+      // Extract name and phone from metadata, providing defaults
+      const customerName = metadata.customerName as string || 'Customer';
+      const customerPhone = metadata.customerPhone as string || ''; 
+      const eventCity = metadata.eventCity as string || '';
+      const eventState = metadata.eventState as string || '';
+      const eventAddress = metadata.eventAddress as string || '';
+      const eventZipCode = metadata.eventZipCode as string || '';
+      
+      const stripeCustomerId = await findOrCreateStripeCustomer(
+          customerEmail,
+          customerName,
+          customerPhone,
+          eventCity,
+          eventState,
+          eventAddress,
+          eventZipCode,
+          businessId,
+          stripeConnectedAccountId
+      );
+      console.log(`Using Stripe Customer ID: ${stripeCustomerId}`);
+      
       // Create a PaymentIntent on behalf of the connected account
       const paymentIntent = await stripe.paymentIntents.create(
         {
@@ -46,10 +75,13 @@ export async function POST(
           currency: "usd",
           payment_method_types: ["card"],
           receipt_email: customerEmail,
-          metadata,
+          metadata: sanitizedMetadata,
+          customer: stripeCustomerId,
+        
+          
         },
         {
-          stripeAccount: business.stripeAccountId,
+          stripeAccount: stripeConnectedAccountId,
         }
       );
 
@@ -104,7 +136,7 @@ export async function GET(
           select: {
             id: true,
             status: true, // Get the waiver status
-            openSignDocumentId: true // Include for potential linking/viewing
+            docuSealDocumentId: true // Include for potential linking/viewing
           }
         }
       },

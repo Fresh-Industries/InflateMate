@@ -1,5 +1,5 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
-import { getCurrentUser } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 
 const f = createUploadthing();
 
@@ -19,7 +19,7 @@ export const ourFileRouter = {
     // Set permissions and file types for this FileRoute
     .middleware(async () => {
       // This code runs on your server before upload
-      const user = await getCurrentUser();
+      const user = await getCurrentUserWithOrgAndBusiness();
 
       // If you throw, the user will not be able to upload
       if (!user) throw new Error("Unauthorized");
@@ -30,10 +30,10 @@ export const ourFileRouter = {
     .onUploadComplete(async ({ metadata, file }) => {
       // This code RUNS ON YOUR SERVER after upload
       console.log("Upload complete for userId:", metadata.userId);
-      console.log("file url:", file.url);
+      console.log("file url:", file.ufsUrl);
 
       // Return data relevant to the upload
-      return { uploadedBy: metadata.userId, url: file.url };
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
   
     videoUploader: f({
@@ -49,7 +49,7 @@ export const ourFileRouter = {
       // Set permissions and file types for this FileRoute
       .middleware(async () => {
         // This code runs on your server before upload
-        const user = await getCurrentUser();
+        const user = await getCurrentUserWithOrgAndBusiness();
   
         // If you throw, the user will not be able to upload
         if (!user) throw new Error("Unauthorized");
@@ -60,10 +60,10 @@ export const ourFileRouter = {
       .onUploadComplete(async ({ metadata, file }) => {
         // This code RUNS ON YOUR SERVER after upload
         console.log("Upload complete for userId:", metadata.userId);
-        console.log("file url:", file.url);
+        console.log("file url:", file.ufsUrl);
   
         // Return data relevant to the upload
-        return { uploadedBy: metadata.userId, url: file.url };
+        return { uploadedBy: metadata.userId, url: file.ufsUrl };
       }),
   // Business logo uploader with different settings
   logoUploader: f({
@@ -73,27 +73,27 @@ export const ourFileRouter = {
     },
   })
     .middleware(async () => {
-      const user = await getCurrentUser();
+      const user = await getCurrentUserWithOrgAndBusiness();
       if (!user) throw new Error("Unauthorized");
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Logo upload complete for userId:", metadata.userId);
-      console.log("Logo file url:", file.url);
-      return { uploadedBy: metadata.userId, url: file.url };
+      console.log("Logo file url:", file.ufsUrl);
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 
   // PDF document uploader for waivers and other documents
   documentUploader: f({ pdf: { maxFileSize: "8MB", maxFileCount: 1 } })
     .middleware(async () => {
-      const user = await getCurrentUser();
+      const user = await getCurrentUserWithOrgAndBusiness();
       if (!user) throw new Error("Unauthorized");
       return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Document upload complete for userId:", metadata.userId);
-      console.log("Document file url:", file.url);
-      return { uploadedBy: metadata.userId, url: file.url };
+      console.log("Document file url:", file.ufsUrl);
+      return { uploadedBy: metadata.userId, url: file.ufsUrl };
     }),
 } satisfies FileRouter;
 

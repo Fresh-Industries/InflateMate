@@ -1,9 +1,9 @@
-// /api/businesses/[businessId]/inventory/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { InventoryStatus, InventoryType } from "@prisma/client";
+import { InventoryStatus, InventoryType } from "../../../../../prisma/generated/prisma";
+import { stripe } from "@/lib/stripe-server"; // Make sure stripe client is initialized
 
 // Base schema with common fields for all inventory types
 const baseInventorySchema = z.object({
@@ -51,7 +51,7 @@ export async function POST(
 ) {
   try {
     const { businessId } = await context.params;
-    const user = await getCurrentUser();
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json(
         { error: "Unauthorized" },
@@ -59,82 +59,83 @@ export async function POST(
       );
     }
 
-    if (!businessId) {
-      return NextResponse.json(
-        { error: "Business ID is required" },
-        { status: 400 }
-      );
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const result = await withBusinessAuth(businessId, user.id, async (business) => {
-      const body = await req.json();
-      
-      // Validate based on inventory type
-      let validatedData;
-      const { type } = body;
-      
-      switch (type) {
-        case "BOUNCE_HOUSE":
-        case "INFLATABLE":
-          validatedData = bounceHouseSchema.parse(body);
-          break;
-        case "GAME":
-          validatedData = gameSchema.parse(body);
-          break;
-        case "OTHER":
-          validatedData = otherSchema.parse(body);
-          break;
-        default:
-          throw new Error("Invalid inventory type");
-      }
+    const body = await req.json();
 
-      // Transform image data to get an array of URLs and determine the primary image.
-      const imageUrls = validatedData.images.map(img => img.url);
-      const primaryImageUrl =
-        validatedData.images.find(img => img.isPrimary)?.url ||
-        (imageUrls.length > 0 ? imageUrls[0] : undefined);
+    // Validate based on inventory type
+    let validatedData;
+    const { type } = body;
 
-      // Create the inventory record
-      const inventory = await prisma.inventory.create({
-        data: {
-          name: validatedData.name,
-          description: validatedData.description || "",
-          dimensions: validatedData.dimensions as string || "",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          capacity: (validatedData as any).capacity || 1,
-          price: validatedData.price,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          setupTime: (validatedData as any).setupTime || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          teardownTime: (validatedData as any).teardownTime || 0,
-          images: imageUrls,
-          primaryImage: primaryImageUrl,
-          status: validatedData.status as InventoryStatus,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          minimumSpace: (validatedData as any).minimumSpace || "",
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          weightLimit: (validatedData as any).weightLimit || 0,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ageRange: (validatedData as any).ageRange || "",
-          businessId: business.id,
-          type: validatedData.type as InventoryType,
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          weatherRestrictions: (validatedData as any).weatherRestrictions || [],
-          quantity: validatedData.quantity,
-        },
-      });
+    switch (type) {
+      case "BOUNCE_HOUSE":
+      case "INFLATABLE":
+        validatedData = bounceHouseSchema.parse(body);
+        break;
+      case "GAME":
+        validatedData = gameSchema.parse(body);
+        break;
+      case "OTHER":
+        validatedData = otherSchema.parse(body);
+        break;
+      default:
+        return NextResponse.json({ error: "Invalid inventory type" }, { status: 400 });
+    }
 
-      return inventory;
+    // Transform image data to get an array of URLs and determine the primary image.
+    const imageUrls = validatedData.images.map(img => img.url);
+    const primaryImageUrl =
+      validatedData.images.find(img => img.isPrimary)?.url ||
+      (imageUrls.length > 0 ? imageUrls[0] : undefined);
+
+    const stripeProduct = await stripe.products.create({
+      name: validatedData.name,
+      description: validatedData.description || "",
+      images: imageUrls,
+    }, {
+      stripeAccount: user.membership?.organization?.business?.stripeAccountId || undefined,
     });
 
-    if (result.error) {
-      return NextResponse.json(
-        { error: result.error },
-        { status: 403 }
-      );
-    }
+    // Create the inventory record
+    const inventory = await prisma.inventory.create({
+      data: {
+        name: validatedData.name,
+        description: validatedData.description || "",
+      
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        dimensions: (validatedData as any).dimensions || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        capacity: (validatedData as any).capacity || 1,
 
-    return NextResponse.json(result.data, { status: 201 });
+        price: validatedData.price,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        setupTime: (validatedData as any).setupTime || 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        teardownTime: (validatedData as any).teardownTime || 0,
+        images: imageUrls,
+        primaryImage: primaryImageUrl,
+        stripeProductId: stripeProduct.id,
+        stripePriceId: stripeProduct.default_price as string,
+        status: validatedData.status as InventoryStatus,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        minimumSpace: (validatedData as any).minimumSpace || "",
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        weightLimit: (validatedData as any).weightLimit || 0,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ageRange: (validatedData as any).ageRange || "",
+        businessId: businessId,
+        type: validatedData.type as InventoryType,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        weatherRestrictions: (validatedData as any).weatherRestrictions || [],
+        quantity: validatedData.quantity,
+      },
+    });
+
+    return NextResponse.json(inventory, { status: 201 });
   } catch (error) {
     if (error instanceof z.ZodError) {
       return NextResponse.json(
@@ -156,29 +157,16 @@ export async function GET(
   { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    const businessId  = (await params).businessId;
-    const user = await getCurrentUser();
+    const { businessId } = await params;
+    const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
-    if (!businessId) {
-      return NextResponse.json(
-        { message: "Business ID is required" },
-        { status: 400 }
-      );
-    }
-
-    // Ensure the user has access to this business.
-    const business = await prisma.business.findFirst({
-      where: { id: businessId, userId: user.id },
-    });
-
-    if (!business) {
-      return NextResponse.json(
-        { message: "Business not found" },
-        { status: 404 }
-      );
+    // Check that the user has access to this business
+    const userBusinessId = user.membership?.organization?.business?.id;
+    if (!userBusinessId || userBusinessId !== businessId) {
+      return NextResponse.json({ message: "Access denied" }, { status: 403 });
     }
 
     // Get query parameters for filtering
@@ -192,11 +180,11 @@ export async function GET(
       type?: InventoryType;
       status?: InventoryStatus;
     } = { businessId };
-    
+
     if (typeFilter) {
       whereClause.type = typeFilter;
     }
-    
+
     if (statusFilter) {
       whereClause.status = statusFilter;
     }

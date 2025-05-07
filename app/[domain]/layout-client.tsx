@@ -1,10 +1,10 @@
 'use client';
-import { ReactNode, useState, useEffect } from 'react';
+import { ReactNode, useState, useEffect, useMemo } from 'react';
 import { SalesFunnel as SalesFunnelType, SalesFunnelPopup } from '@/app/[domain]/_components/SalesFunnel';
 import Header from '@/app/[domain]/_components/Header';
 import Footer from '@/app/[domain]/_components/Footer';
 import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
-import { themeConfig, ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeDefinition, ThemeColors, themeConfig } from '@/app/[domain]/_themes/themeConfig';
 
 interface DomainLayoutClientProps {
   children: ReactNode;
@@ -12,7 +12,7 @@ interface DomainLayoutClientProps {
   domain: string;
   themeName: string;
   colors: ThemeColors;
-  activeFunnel?: SalesFunnelType;
+  activeFunnel?: Omit<SalesFunnelType, 'theme'>;
 }
 
 export function DomainLayoutClient({ 
@@ -24,7 +24,9 @@ export function DomainLayoutClient({
 }: DomainLayoutClientProps) {
   const [isMounted, setIsMounted] = useState(false);
   
-  const selectedTheme: ThemeDefinition = themeConfig[themeName.toLowerCase()] || themeConfig.modern;
+  const selectedTheme: ThemeDefinition = useMemo(() => {
+    return themeConfig[themeName.toLowerCase()] || themeConfig.modern;
+  }, [themeName]);
   
   useEffect(() => {
     setIsMounted(true);
@@ -47,7 +49,7 @@ export function DomainLayoutClient({
       {isMounted && activeFunnel && (
         <SalesFunnelPopup 
           businessId={business.id}
-          funnel={activeFunnel}
+          funnel={{...activeFunnel, theme: selectedTheme}}
           colors={colors}
           theme={selectedTheme}
         />

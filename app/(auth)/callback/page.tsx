@@ -1,36 +1,46 @@
+// app/callback/page.tsx
 'use client';
-
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@clerk/nextjs';
 
 export default function CallbackPage() {
+  const { isLoaded, userId } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    const checkBusinesses = async () => {
-      try {
-        const response = await fetch('/api/businesses');
-        if (!response.ok) {
-          router.push('/onboarding');
-          return;
-        }
-        
-        const businesses = await response.json();
-        
-        if (businesses?.length > 0) {
-          router.push(`/dashboard/${businesses[0].id}`);
-        } else {
-          router.push('/onboarding');
-        }
-      } catch (error) {
-        console.error('Error in callback:', error);
-        router.push('/onboarding');
+    if (!isLoaded) return;
+    if (!userId) {
+      router.replace('/sign-in');
+      return;
+    }
+
+    (async () => {
+      const res = await fetch('/api/me');
+      
+      const data = await res.json();
+      console.log(data);
+      // 1. unpaid and onboarded → pricing
+      if (
+        data.business &&
+        (!data.subscription?.status || !['active', 'trialing'].includes(data.subscription.status))
+      ) {
+        router.replace(`/pricing?orgId=${data.orgId}`);
+        return;
       }
-    };
 
-    checkBusinesses();
-  }, [router]);
+      // 2. not onboarded → onboarding
+      if (!data.business) {
+        router.replace('/onboarding');
+        return;
+      }
 
+      // 3. paid & onboarded → dashboard
+      router.replace(`/dashboard/${data.business.id}`);
+
+      
+    })();
+  }, [isLoaded, userId, router]);
   return (
     <div className="min-h-screen flex items-center justify-center">
       <div className="flex flex-col items-center gap-6">

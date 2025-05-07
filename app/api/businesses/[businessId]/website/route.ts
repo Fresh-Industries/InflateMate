@@ -1,16 +1,24 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
-import { withBusinessAuth } from "@/lib/auth/clerk-utils";
 
 // PUT /api/businesses/[businessId]/website
-export async function PUT(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+export async function PUT(
+  req: NextRequest,
+  props: { params: Promise<{ businessId: string }> }
+) {
   const params = await props.params;
   const { businessId } = params;
-  const { userId } = await auth();
+  const user = await getCurrentUserWithOrgAndBusiness();
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Check that the user has access to this business
+  const userBusinessId = user.membership?.organization?.business?.id;
+  if (!userBusinessId || userBusinessId !== businessId) {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 
   try {
@@ -24,26 +32,17 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ businessI
       );
     }
 
-    // Use withBusinessAuth to ensure the user has access to this business
-    const result = await withBusinessAuth(businessId, userId, async () => {
-      // Update the business with the new site configuration
-      const updatedBusiness = await prisma.business.update({
-        where: {
-          id: businessId,
-        },
-        data: {
-          siteConfig,
-        },
-      });
-
-      return updatedBusiness;
+    // Update the business with the new site configuration
+    const updatedBusiness = await prisma.business.update({
+      where: {
+        id: businessId,
+      },
+      data: {
+        siteConfig,
+      },
     });
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
-    }
-
-    return NextResponse.json(result.data);
+    return NextResponse.json(updatedBusiness);
   } catch (error) {
     console.error("Error updating website configuration:", error);
     return NextResponse.json(
@@ -54,29 +53,38 @@ export async function PUT(req: NextRequest, props: { params: Promise<{ businessI
 }
 
 // GET /api/businesses/[businessId]/website
-export async function GET(req: NextRequest, props: { params: Promise<{ businessId: string }> }) {
+export async function GET(
+  req: NextRequest,
+  props: { params: Promise<{ businessId: string }> }
+) {
   const params = await props.params;
   const { businessId } = params;
-  const { userId } = await auth();
+  const user = await getCurrentUserWithOrgAndBusiness();
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  // Check that the user has access to this business
+  const userBusinessId = user.membership?.organization?.business?.id;
+  if (!userBusinessId || userBusinessId !== businessId) {
+    return NextResponse.json({ error: "Access denied" }, { status: 403 });
+  }
+
   try {
-    // Use withBusinessAuth to ensure the user has access to this business
-    const result = await withBusinessAuth(businessId, userId, async (business) => {
-      return {
-        siteConfig: business.siteConfig || {},
-        customDomain: business.customDomain,
-      };
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+      select: { siteConfig: true, customDomain: true },
     });
 
-    if (result.error) {
-      return NextResponse.json({ error: result.error }, { status: 403 });
+    if (!business) {
+      return NextResponse.json({ error: "Business not found" }, { status: 404 });
     }
 
-    return NextResponse.json(result.data);
+    return NextResponse.json({
+      siteConfig: business.siteConfig || {},
+      customDomain: business.customDomain,
+    });
   } catch (error) {
     console.error("Error fetching website configuration:", error);
     return NextResponse.json(
@@ -84,4 +92,4 @@ export async function GET(req: NextRequest, props: { params: Promise<{ businessI
       { status: 500 }
     );
   }
-} 
+}

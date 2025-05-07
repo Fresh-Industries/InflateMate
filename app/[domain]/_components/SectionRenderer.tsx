@@ -2,8 +2,7 @@ import React, { Suspense } from 'react';
 import { DynamicSection } from '@/lib/business/domain-utils';
 import { ThemeDefinition, ThemeColors } from '../_themes/themeConfig';
 
-// Lazy load section components
-const TextSection = React.lazy(() => import('./sections/TextSection'));
+
 const ImageTextSection = React.lazy(() => import('./sections/ImageTextSection'));
 const VideoTextSection = React.lazy(() => import('./sections/VideoTextSection'));
 const TextCardsSection = React.lazy(() => import('./sections/TextCardsSection'));
@@ -16,10 +15,9 @@ export interface SectionRendererProps {
 
 // Map section types to components
 const sectionComponentMap = {
-  text: TextSection,
-  imageText: ImageTextSection,
-  videoText: VideoTextSection,
-  textCards: TextCardsSection,
+  Image: ImageTextSection,
+  Video: VideoTextSection,
+  Cards: TextCardsSection,
 };
 
 // Renders a dynamic section based on its type
@@ -36,7 +34,7 @@ export default function SectionRenderer({ section, theme, colors }: SectionRende
 
   return (
     <Suspense fallback={<div>Loading section...</div>}>
-      <Component content={content} colors={colors} theme={theme} section={section} />
+      <Component content={content} colors={colors} theme={theme}  />
     </Suspense>
   );
 } 

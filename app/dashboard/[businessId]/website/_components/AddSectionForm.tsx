@@ -13,10 +13,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UploadDropzone } from "@/lib/uploadthing";
 import { useToast } from '@/hooks/use-toast';
-import { X, PlusCircle, Loader2 } from 'lucide-react';
+import { X, PlusCircle, Loader2, Palette } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { IconPicker } from '@/components/IconPicker';
 
 // Define section types and pages
-const sectionTypes = ['text', 'imageText', 'videoText', 'textCards'] as const;
+const sectionTypes = ['Image', 'Video', 'Cards'] as const;
 type SectionType = typeof sectionTypes[number];
 type PageType = 'landing' | 'about';
 
@@ -61,12 +63,11 @@ export default function AddSectionForm({
   page: initialPage
 }: AddSectionFormProps) {
   const { toast } = useToast();
-  const [sectionType, setSectionType] = useState<SectionType>(initialData?.type || 'text');
+  const [sectionType, setSectionType] = useState<SectionType>(initialData?.type || 'Image');
   const [content, setContent] = useState<CommonContentFields>(initialData?.content || {});
   const [backgroundColor, setBackgroundColor] = useState<string>(initialData?.backgroundColor || '#ffffff');
   const page = initialData?.page as PageType || initialPage;
 
-  console.log('page',page)
 
   
   // Restore original loading states
@@ -76,6 +77,9 @@ export default function AddSectionForm({
   useEffect(() => {
     if (!initialData) {
       setContent({});
+    }
+    else if (initialData && initialData.type !== sectionType) {
+       setContent(initialData.content || {});
     }
   }, [sectionType, initialData]);
 
@@ -98,7 +102,13 @@ export default function AddSectionForm({
   const addCard = () => {
     // Cast prev to CommonContentFields
     setContent((prev) => {
-      const newCard: TextCard = { id: crypto.randomUUID(), title: '', description: '' };
+      const newCard: TextCard = {
+        id: crypto.randomUUID(),
+        title: '',
+        description: '',
+        icon: '',
+        backgroundColor: '#ffffff'
+      };
       const updatedCards = [...(prev.cards || []), newCard];
       return { ...prev, cards: updatedCards } as CommonContentFields;
     });
@@ -115,21 +125,21 @@ export default function AddSectionForm({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (sectionType === 'imageText' && !content.imageUrl) {
+    if (sectionType === 'Image' && !content.imageUrl) {
       toast({ title: "Missing Image", description: "Please upload an image.", variant: "destructive" });
       return;
     }
-    if (sectionType === 'videoText' && !content.videoUrl) {
+    if (sectionType === 'Video' && !content.videoUrl) {
       toast({ title: "Missing Video", description: "Please upload a video.", variant: "destructive" });
       return;
     }
-    if (sectionType === 'textCards' && (!content.cards || content.cards.length === 0)) {
+    if (sectionType === 'Cards' && (!content.cards || content.cards.length === 0)) {
       toast({ title: "Missing Cards", description: "Please add at least one card.", variant: "destructive" });
       return;
     }
 
     const finalSectionData: Omit<DynamicSection, 'id'> = {
-      type: sectionType,
+      type: sectionType as 'Image' | 'Video' | 'Cards',
       page,
       content: content as ContentData, 
       backgroundColor: backgroundColor,
@@ -138,7 +148,7 @@ export default function AddSectionForm({
     if (initialData) {
       onEditSection({ 
         ...initialData, 
-        type: sectionType, 
+        type: sectionType as 'Image' | 'Video' | 'Cards',
         page,
         content: content as ContentData, 
         backgroundColor: backgroundColor,
@@ -152,20 +162,7 @@ export default function AddSectionForm({
   const renderContentFields = () => {
     // Directly use 'content' state object, properties are optional
     switch (sectionType) {
-      case 'text':
-        return (
-          <>
-            <div className="space-y-2">
-              <Label htmlFor="text-title">Title (Optional)</Label>
-              <Input id="text-title" value={content.title || ''} onChange={(e) => handleContentChange('title', e.target.value)} />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="text-content">Text</Label>
-              <Textarea id="text-content" value={content.text || ''} onChange={(e) => handleContentChange('text', e.target.value)} required />
-            </div>
-          </>
-        );
-      case 'imageText':
+      case 'Image':
         const currentImageUrl = content.imageUrl;
         
         return (
@@ -228,7 +225,7 @@ export default function AddSectionForm({
             </div>
           </>
         );
-      case 'videoText':
+      case 'Video':
         const currentVideoUrl = content.videoUrl;
         
         return (
@@ -289,7 +286,7 @@ export default function AddSectionForm({
             </div>
           </>
         );
-      case 'textCards':
+      case 'Cards':
         const cards = (content.cards || []) as TextCard[];
         return (
           <>
@@ -298,29 +295,56 @@ export default function AddSectionForm({
               <Input id="cards-title" value={content.title || ''} onChange={(e) => handleContentChange('title', e.target.value)} />
             </div>
             <div className="space-y-4">
-              <Label>Cards</Label>
-              {cards.map((card: TextCard) => (
-                <Card key={card.id} className="relative p-4 pt-8">
-                   <Button 
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-1 right-1 text-destructive hover:bg-destructive/10"
-                    onClick={() => removeCard(card.id)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                  <div className="space-y-2 mb-2">
-                    <Label htmlFor={`card-title-${card.id}`}>Card Title</Label>
-                    <Input id={`card-title-${card.id}`} value={card.title} onChange={(e) => handleCardChange(card.id, 'title', e.target.value)} required />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor={`card-desc-${card.id}`}>Card Description</Label>
-                    <Textarea id={`card-desc-${card.id}`} value={card.description} onChange={(e) => handleCardChange(card.id, 'description', e.target.value)} required />
-                  </div>
-                </Card>
-              ))}
-              <Button type="button" variant="outline" onClick={addCard}><PlusCircle className="mr-2 h-4 w-4"/> Add Card</Button>
+              <Label className="text-base font-medium">Cards</Label>
+              <ScrollArea className="h-[400px] w-full rounded-md border p-4">
+                <div className="space-y-6">
+                  {cards.map((card: TextCard) => (
+                    <Card key={card.id} className="relative p-4 border border-border shadow-sm overflow-visible">
+                      <div className="absolute top-2 right-2 flex items-center gap-1 z-10">
+                          <Label htmlFor={`card-bg-${card.id}`} className="cursor-pointer p-1.5 rounded hover:bg-muted" title="Change Card Background">
+                            <Palette className="h-4 w-4 text-muted-foreground" />
+                          </Label>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-destructive hover:bg-destructive/10 rounded-full"
+                            onClick={() => removeCard(card.id)}
+                            aria-label="Remove Card"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                      </div>
+
+                      <div className="flex flex-col space-y-4 pt-6" style={{ backgroundColor: card.backgroundColor || 'transparent' }}>
+                        <div className="flex flex-col items-center space-y-2">
+                           <Label className="self-start mb-1">Icon</Label>
+                           <IconPicker
+                              value={card.icon || 'Sparkles'}
+                              onChange={(iconName) => handleCardChange(card.id, 'icon', iconName)}
+                              className="w-full max-w-xs"
+                           />
+                           <p className="text-xs text-muted-foreground pt-1">Select an icon</p>
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`card-title-${card.id}`}>Card Title</Label>
+                          <Input id={`card-title-${card.id}`} value={card.title} onChange={(e) => handleCardChange(card.id, 'title', e.target.value)} required />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label htmlFor={`card-desc-${card.id}`}>Card Description</Label>
+                          <Textarea id={`card-desc-${card.id}`} value={card.description} onChange={(e) => handleCardChange(card.id, 'description', e.target.value)} required rows={4} />
+                        </div>
+                      </div>
+                    </Card>
+                  ))}
+                 </div>
+               </ScrollArea>
+
+              <Button type="button" variant="outline" onClick={addCard} className="w-full md:w-auto">
+                  <PlusCircle className="mr-2 h-4 w-4"/> Add Card
+              </Button>
             </div>
           </>
         );
@@ -330,117 +354,116 @@ export default function AddSectionForm({
   };
 
   return (
-    <Card>
+    <Card className="max-w-3xl mx-auto">
       <CardHeader>
         <CardTitle>{initialData ? 'Edit Section' : 'Add New Section'}</CardTitle>
         <div className="text-sm text-muted-foreground mt-1 flex items-center">
           <span>Adding to: </span>
-          <span className="ml-1 font-medium capitalize bg-primary/10 text-primary px-2 py-0.5 rounded-full text-xs">
+          <span className="ml-1.5 font-medium capitalize bg-primary/10 text-primary px-2 py-1 rounded-full text-xs">
             {page} page
           </span>
         </div>
       </CardHeader>
       <form onSubmit={handleSubmit}>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="section-type">Section Type</Label>
-            <Select 
-              value={sectionType}
-              onValueChange={(value: SectionType) => setSectionType(value)}
-              disabled={!!initialData} // Don't allow changing type when editing
-            >
-              <SelectTrigger id="section-type">
-                <SelectValue placeholder="Select type" />
-              </SelectTrigger>
-              <SelectContent>
-                {sectionTypes.map(type => (
-                  <SelectItem key={type} value={type} className="capitalize">{type.replace(/([A-Z])/g, ' $1')}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+        <CardContent className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="section-type">Section Type</Label>
+                <Select
+                  value={sectionType}
+                  onValueChange={(value: SectionType) => setSectionType(value)}
+                  disabled={!!initialData} // Don't allow changing type when editing
+                >
+                  <SelectTrigger id="section-type">
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {sectionTypes.map(type => (
+                      <SelectItem key={type} value={type} className="capitalize">{type.replace(/([A-Z])/g, ' $1')}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="backgroundColor">Section Background Color</Label>
+                <div className="flex items-center gap-2">
+                    <Input
+                      id="backgroundColor"
+                      type="color"
+                      value={backgroundColor}
+                      onChange={(e) => setBackgroundColor(e.target.value)}
+                      className="w-10 h-10 p-1 border-0 cursor-pointer"
+                    />
+                    <span className="text-sm font-mono bg-muted px-2 py-1 rounded">{backgroundColor}</span>
+                 </div>
+              </div>
+           </div>
+
+          <div className="border-t border-border pt-6 mt-6">
+             <h3 className="text-lg font-medium mb-4">Content Details</h3>
+            {renderContentFields()}
           </div>
-         
-          {/* Render dynamic fields based on type */} 
-          {renderContentFields()}
-          <div className="space-y-2">
-            <Label htmlFor="backgroundColor">Background Color</Label>
-            <Input 
-              id="backgroundColor"
-              type="color"
-              value={backgroundColor}
-              onChange={(e) => setBackgroundColor(e.target.value)}
-              className="w-full h-10 p-1"
-            />
-          </div>
-      
-            <div className="space-y-2">
-              <Label>Color Presets</Label>
-              <div className="flex flex-wrap gap-2">
+
+          <div className="space-y-3 pt-6 border-t border-border">
+             <Label className="text-base font-medium">Section Background Presets</Label>
+              <div className="flex flex-wrap gap-3">
                 {presetColors?.background && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    className="flex items-center justify-start gap-2 p-2 h-auto text-sm hover:bg-muted"
                     onClick={() => setBackgroundColor(presetColors.background || '#ffffff')}
+                    title={`Set background to Background color (${presetColors.background})`}
                   >
-                    <div 
+                    <div
                       className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
                       style={{ backgroundColor: presetColors.background || '#ffffff' }}
                     />
-                    <span className="text-sm">Background</span> 
+                    <span>Background</span>
                   </Button>
                 )}
-                
-                {presetColors?.primary && (
+                 {presetColors?.primary && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    className="flex items-center justify-start gap-2 p-2 h-auto text-sm hover:bg-muted"
                     onClick={() => setBackgroundColor(presetColors.primary || '#3b82f6')}
+                    title={`Set background to Primary color (${presetColors.primary})`}
                   >
-                    <div 
-                      className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
-                      style={{ backgroundColor: presetColors.primary || '#3b82f6' }}
-                    />
-                    <span className="text-sm">Primary</span> 
+                     <div style={{ backgroundColor: presetColors.primary || '#3b82f6' }} className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300" />
+                     <span>Primary</span>
                   </Button>
-                )}
-                
-                {presetColors?.secondary && (
+                 )}
+                 {presetColors?.secondary && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    className="flex items-center justify-start gap-2 p-2 h-auto text-sm hover:bg-muted"
                     onClick={() => setBackgroundColor(presetColors.secondary || '#6b7280')}
+                    title={`Set background to Secondary color (${presetColors.secondary})`}
                   >
-                    <div 
-                      className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
-                      style={{ backgroundColor: presetColors.secondary || '#6b7280' }}
-                    />
-                    <span className="text-sm">Secondary</span> 
+                    <div style={{ backgroundColor: presetColors.secondary || '#6b7280' }} className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300" />
+                    <span>Secondary</span>
                   </Button>
-                )}
-                
-                {presetColors?.accent && (
+                 )}
+                 {presetColors?.accent && (
                   <Button
                     type="button"
                     variant="outline"
-                    className="flex items-center justify-start gap-2 p-2 h-auto"
+                    className="flex items-center justify-start gap-2 p-2 h-auto text-sm hover:bg-muted"
                     onClick={() => setBackgroundColor(presetColors.accent || '#f59e0b')}
+                    title={`Set background to Accent color (${presetColors.accent})`}
                   >
-                    <div 
-                      className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300"
-                      style={{ backgroundColor: presetColors.accent || '#f59e0b' }}
-                    />
-                    <span className="text-sm">Accent</span> 
+                     <div style={{ backgroundColor: presetColors.accent || '#f59e0b' }} className="w-5 h-5 rounded-full ring-1 ring-offset-1 ring-gray-300" />
+                     <span>Accent</span>
                   </Button>
-                )}
-                
-                
+                 )}
+
               </div>
             </div>
         </CardContent>
-        <CardFooter className="flex justify-end space-x-2">
+        <CardFooter className="flex justify-end space-x-3 border-t border-border pt-6">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isUploadingImage || isUploadingVideo}>Cancel</Button>
           <Button type="submit" disabled={isUploadingImage || isUploadingVideo} variant="primary-gradient">
             {(isUploadingImage || isUploadingVideo) && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}

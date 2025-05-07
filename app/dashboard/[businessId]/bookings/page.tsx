@@ -16,7 +16,6 @@ interface BounceHouse {
   status: string;
 }
 
-// We'll use the API's response type directly
 
 async function getInitialData(businessId: string) {
   const { userId } = await auth();
@@ -39,7 +38,13 @@ async function getInitialData(businessId: string) {
   });
 
   // Add origin for server-side requests
-  const origin = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const url = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+  let origin = '';
+  if (process.env.NODE_ENV === 'development') {
+    origin = `http://${url}`;
+  } else {
+    origin = `https://${url}`;
+  }
   const response = await fetch(`${origin}/api/businesses/${businessId}/bookings`, {
     cache: 'no-store',
     next: { tags: ['bookings'] }

@@ -46,6 +46,7 @@ type InventoryItem = {
   id: string;
   name: string;
   type: string;
+  stripeProductId: string;
   description: string | null;
   price: number;
   dimensions: string;
@@ -89,6 +90,7 @@ type BookingMetadata = {
   customerPhone: string;
   businessId: string;
   bookingId?: string;
+  eventTimeZone: string;
 };
 
 type SelectedItem = {
@@ -157,6 +159,8 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [taxRate, setTaxRate] = useState(0);
   const [applyTax, setApplyTax] = useState(false);
   const sheetCloseRef = React.useRef<HTMLButtonElement>(null);
+  // const [isInvoicing, setIsInvoicing] = useState(false);
+  const [isProcessingQuote, setIsProcessingQuote] = useState(false);
   
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
@@ -305,7 +309,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     if (currentStep === 1 && !validateEventDetails()) return;
     if (currentStep === 2 && !validateCustomerInfo()) return;
     if (currentStep === 3) {
-      handleSubmit();
+      handlePaymentProceed();
       return;
     }
     setCurrentStep((prev) => Math.min(3, prev + 1));
@@ -352,7 +356,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
 
 
   // Modify the handleSubmit function to use UTC dates
-  const handleSubmit = async () => {
+  const handlePaymentProceed = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
 
@@ -364,12 +368,16 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       
       if (isNaN(amount) || amount <= 0) throw new Error("Invalid total amount.");
 
+      // Get browser timezone
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
       // Create an array of selected items with their details
       const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
         id: item.id,
         name: item.name,
         price: item.price,
-        quantity: quantity
+        quantity: quantity,
+        stripeProductId: item.stripeProductId,
       }));
       
       const metadata: BookingMetadata = {
@@ -394,6 +402,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         customerPhone: newBooking.customerPhone,
         businessId: businessId,
         bookingId: crypto.randomUUID(),
+        eventTimeZone: tz,
       };
       
 
@@ -431,7 +440,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
           customerEmail: newBooking.customerEmail,
           metadata: {
             ...metadata,
-            selectedItems: selectedItemsArray
+            selectedItems: JSON.stringify(selectedItemsArray)
           },
         }),
       });
@@ -478,6 +487,196 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     }
   };
 
+
+  // const handleSendAsInvoice = async () => {
+  //   if (isInvoicing) return;
+  //   setIsInvoicing(true); // Set invoicing loading state
+
+  //   try {
+  //       const subtotal = calculateSubtotal();
+  //       const taxAmount = calculateTaxAmount();
+  //       const total = calculateTotal();
+
+  //       const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
+  //         id: item.id,
+  //         name: item.name,
+  //         price: item.price,
+  //         quantity: quantity,
+  //         stripeProductId: item.stripeProductId,
+  //       }));
+
+  //       const bookingDetails = {
+  //         ...newBooking, // Include all booking form data
+  //         selectedItems: selectedItemsArray,
+  //         subtotalAmount: subtotal,
+  //         taxAmount: taxAmount,
+  //         taxRate: taxRate,
+  //         totalAmount: total,
+  //         businessId: businessId,
+  //         bookingId: crypto.randomUUID(), // Generate a booking ID client-side
+  //         eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Include browser timezone
+  //       };
+
+  //       console.log("Sending request to create invoice:", `/api/businesses/${businessId}/invoices`);
+
+  //       const response = await fetch(`/api/businesses/${businessId}/invoices`, {
+  //         method: "POST",
+  //         headers: { "Content-Type": "application/json" },
+  //         body: JSON.stringify(bookingDetails),
+  //       });
+
+  //       const data = await response.json();
+
+  //       if (!response.ok) {
+  //         console.error("Invoice API error:", data.error);
+  //         throw new Error(data.error || "Failed to create invoice");
+  //       }
+
+  //       console.log("Invoice created successfully:", data.invoiceId);
+
+  //       // Update UI and potentially redirect
+  //       toast({
+  //         title: "Invoice Sent",
+  //         description: `Invoice for ${newBooking.customerName} has been sent. Booking ID: ${data.bookingId}`,
+  //       });
+
+  //       // Close the sheet
+  //       if (sheetCloseRef.current) {
+  //         sheetCloseRef.current.click();
+  //       }
+
+  //       // Redirect to the bookings list page and trigger a refresh
+  //       router.push(`/dashboard/${businessId}/bookings`);
+
+
+  //   } catch (error) {
+  //       console.error("Invoicing error:", error);
+  //       toast({
+  //         title: "Error",
+  //         description: error instanceof Error ? error.message : "Failed to send invoice",
+  //         variant: "destructive",
+  //       });
+  //   } finally {
+  //       setIsInvoicing(false); // Reset invoicing loading state
+  //   }
+  // };
+
+  const handleSendAsQuote = async () => {
+    // Prevent double submission or submitting while invoicing
+    if (isProcessingQuote) return;
+
+
+    // Optional: Re-validate steps 1 and 2 before sending
+    if (!validateEventDetails() || !validateCustomerInfo()) {
+         // Validation messages are shown by the validation functions
+         return;
+    }
+
+    setIsProcessingQuote(true); // Set quote processing loading state
+
+    try {
+        const subtotal = calculateSubtotal();
+        const taxAmount = calculateTaxAmount();
+        const total = calculateTotal();
+
+        console.log("Selected items:", selectedItems);
+
+        const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
+            id: item.id, // Correctly access item ID
+            name: item.name, // Correctly access item name
+            price: item.price, // Correctly access item price
+            quantity: quantity,
+            stripeProductId: item.stripeProductId,
+        }));
+
+         if (selectedItemsArray.length === 0) {
+             toast({
+                 title: "Selection Needed",
+                 description: "Please select at least one item for the quote.",
+                 variant: "destructive",
+             });
+             return;
+         }
+
+        const quoteDetails = {
+            ...newBooking, // Include all booking form data
+            selectedItems: selectedItemsArray,
+            subtotalAmount: subtotal,
+            taxAmount: taxAmount,
+            taxRate: taxRate,
+            totalAmount: total,
+            businessId: businessId,
+            bookingId: crypto.randomUUID(), // Generate a *new* booking ID for this quote
+            eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone, // Include browser timezone
+        };
+
+        console.log("Sending request to create quote:", `/api/businesses/${businessId}/quotes`);
+
+        const response = await fetch(`/api/businesses/${businessId}/quotes`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(quoteDetails),
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error("Quote API error:", data.error);
+             // Check if error is a validation error with details
+            if (response.status === 400 && data.details) {
+                // Optionally show specific Zod validation errors if needed
+                 toast({
+                     title: "Validation Error",
+                     description: "Please check the form for errors.", // Or format data.details
+                     variant: "destructive",
+                 });
+            } else if (response.status === 409 && data.field === 'bookingId') {
+                 toast({
+                     title: "Duplicate Quote Attempt",
+                     description: data.error,
+                     variant: "destructive",
+                 });
+            }
+             else {
+               toast({
+                 title: "Error Sending Quote",
+                 description: data.error || "Failed to create and send quote.",
+                 variant: "destructive",
+               });
+            }
+            throw new Error(data.error || "Failed to create quote");
+        }
+
+        console.log("Quote created and sent successfully:", data.stripeQuoteId);
+        console.log("Hosted Quote URL:", data.hostedQuoteUrl);
+
+        // Update UI and potentially redirect/close
+        toast({
+            title: "Quote Sent",
+            description: `A quote has been sent to ${newBooking.customerEmail}.`,
+        });
+
+        // Close the sheet
+        if (sheetCloseRef.current) {
+            sheetCloseRef.current.click();
+        }
+
+        // Optional: Redirect to the bookings list or a quotes list page
+        // router.push(`/dashboard/${businessId}/quotes`);
+        router.refresh(); // Refresh the current view to show potential booking/quote
+
+    } catch (error) {
+        console.error("Quote processing error:", error);
+        toast({
+            title: "Error",
+            description: error instanceof Error ? error.message : "Failed to send quote",
+            variant: "destructive",
+        });
+    } finally {
+        setIsProcessingQuote(false); // Reset quote processing loading state
+    }
+};
+
   // Add a function to handle successful payment
   const handlePaymentSuccess = async () => {
     // Close the sheet
@@ -503,11 +702,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     setHasSearched(false);
   }, [newBooking.eventDate, newBooking.startTime, newBooking.endTime]);
 
-  // Show loading or error states when needed
-  if (showPaymentForm && isSubmitting) {
+      // Show loading or error states when needed
+      if (isSubmitting || isProcessingQuote) {
     return (
       <div className="space-y-4 text-center p-6 border rounded-lg">
-        <h2 className="text-2xl font-semibold">Preparing Payment...</h2>
+        <h2 className="text-2xl font-semibold">{ isProcessingQuote ? "Preparing Quote..." : "Preparing Payment..."}</h2>
         <div className="flex justify-center">
           <Loader2 className="h-8 w-8 animate-spin" />
         </div>
@@ -515,7 +714,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     );
   }
 
-  if (showPaymentForm && clientSecret && pendingBookingData) {
+  if (showPaymentForm && clientSecret && pendingBookingData ) {
     // Make sure we have the business data with Stripe information
     if (!businessData) {
       return (
@@ -1132,33 +1331,59 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         )}
       </div>
 
-      {/* Navigation Buttons */}
-      <div className="flex justify-between mt-8">
+{/* Navigation Buttons */}
+       {/* Modify buttons to show 'Send as Invoice' on Step 3 */}
+       <div className="flex justify-between mt-8">
         {currentStep > 1 ? (
-          <Button onClick={handleBack} variant="outline">
+          <Button onClick={handleBack} variant="outline" disabled={isSubmitting || isProcessingQuote}>
             <ChevronLeft className="mr-2 h-4 w-4" /> Back
           </Button>
         ) : (
-          <div />
+          <div /> // Empty div to maintain space
         )}
-        <Button onClick={handleNext} disabled={isSubmitting} variant="primary-gradient">
-          {isSubmitting ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Processing...
-            </>
-          ) : currentStep === 3 ? (
-            <>
-              Proceed to Payment
-              <CreditCard className="ml-2 h-4 w-4" />
-            </>
-          ) : (
-            <>
-              Continue
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </>
-          )}
-        </Button>
+
+        {currentStep < 3 ? (
+          <Button onClick={handleNext} disabled={isSubmitting || isProcessingQuote} variant="primary-gradient" className="ml-auto"> {/* Use ml-auto to push to the right if only one button */}
+             Continue
+             <ChevronRight className="ml-2 h-4 w-4" />
+          </Button>
+        ) : (
+           <div className="flex flex-col sm:flex-row gap-4 ml-auto w-full sm:w-auto"> {/* Container for both buttons */}
+           <Button
+                   onClick={handleSendAsQuote}
+                   disabled={isSubmitting || isProcessingQuote}
+                   variant="outline" // Or a different variant for quotes
+                   className="w-full sm:w-auto"
+               >
+                   {isProcessingQuote ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Sending Quote...
+                      </>
+                   ) : (
+                      "Send as Quote"
+                   )}
+               </Button>
+              
+              <Button
+                  onClick={handlePaymentProceed}
+                  disabled={isSubmitting || isProcessingQuote}
+                  variant="primary-gradient"
+              >
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Processing...
+                    </>
+                  ) : (
+                    <>
+                       Proceed to Payment
+                       <CreditCard className="ml-2 h-4 w-4" />
+                    </>
+                  )}
+              </Button>
+           </div>
+        )}
       </div>
     </div>
   );

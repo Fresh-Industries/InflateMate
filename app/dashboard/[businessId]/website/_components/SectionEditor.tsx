@@ -74,7 +74,7 @@ export default function SectionEditor({ business }: SectionEditorProps) {
     setSiteConfig({ ...siteConfig, landing: { sections: updatedSections } });
     
     // If it's an image section with a key, delete the image from UploadThing
-    if (sectionToDelete?.type === 'imageText' && 'imageKey' in sectionToDelete.content && sectionToDelete.content.imageKey) {
+    if (sectionToDelete?.type === 'Image' && 'imageKey' in sectionToDelete.content && sectionToDelete.content.imageKey) {
       try {
         toast({ title: "Image Deleted", description: "Associated image removed from storage." });
       } catch (error) {

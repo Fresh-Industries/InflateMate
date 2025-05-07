@@ -231,7 +231,7 @@ export default function CouponsList({ businessId }: CouponsListProps) {
             <CardContent className="flex flex-col items-center justify-center h-40">
               <p className="text-muted-foreground mb-4">No coupons found</p>
               <Link href={`/dashboard/${businessId}/marketing/coupons/new`}>
-                <Button>Create Coupon</Button>
+                <Button variant="outline">Create Coupon</Button>
               </Link>
             </CardContent>
           </Card>

@@ -200,7 +200,7 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
             <CardContent className="flex flex-col items-center justify-center h-40">
               <p className="text-muted-foreground mb-4">No sales funnels found</p>
               <Link href={`/dashboard/${businessId}/marketing/sales-funnels/new`}>
-                <Button>Create Sales Funnel</Button>
+                <Button variant="outline">Create Sales Funnel</Button>
               </Link>
             </CardContent>
           </Card>

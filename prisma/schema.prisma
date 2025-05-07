@@ -9,95 +9,143 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  ADMIN
+  MEMBER
+}
+
 model User {
-  id          String     @id @default(cuid())
-  email       String?    @unique
-  name        String?
-  createdAt   DateTime   @default(now())
-  image       String?
-  updatedAt   DateTime   @updatedAt
-  onboarded   Boolean    @default(false)
-  clerkUserId String?    @unique
-  businesses  Business[]
+  id            String        @id @default(cuid())
+  email         String?       @unique
+  name          String?
+  image         String?
+  clerkUserId   String?       @unique
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now())
+  membership    Membership?
 
   @@index([email])
 }
 
+
 model Business {
-  id          String  @id @default(cuid())
-  name        String
-  description String?
+  id                  String          @id @default(cuid())
+  name                String
+  description         String?
 
   // Contact info
-  address     String?
-  city        String?
-  state       String?
-  zipCode     String?
-  phone       String?
-  email       String?
-  serviceArea String[]
-  // Brand assets
-  logo        String?
+  address             String?
+  city                String?
+  state               String?
+  zipCode             String?
+  phone               String?
+  email               String?
+  serviceArea         String[]        @default([])
+  onboarded           Boolean         @default(false)
 
-  // Core timestamps
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  // Brand assets
+  logo                String?
 
   // Booking settings
-  minAdvanceBooking Int   @default(24)
-  maxAdvanceBooking Int   @default(90)
-  minimumPurchase   Float @default(0) // New field for minimum booking amount
+  minAdvanceBooking   Int             @default(24)
+  maxAdvanceBooking   Int             @default(90)
+  minimumPurchase     Float           @default(0)
+  timeZone            String          @default("America/Chicago")
 
-  // Relationships & integrations
-  userId          String
-  stripeAccountId String?
+  // Integrations
+  stripeAccountId     String?
 
-  socialMedia  Json?
-  customDomain String?
-  siteConfig   Json?
+  socialMedia         Json?
+  customDomain        String?
+  subdomain           String?         @unique
+  siteConfig          Json
+  onboardingError     String?
 
-  // Relations
-  bookings     Booking[]
-  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  customers    Customer[]
-  inventory    Inventory[]
-  payments     Payment[]
-  coupons      Coupon[]
-  salesFunnels SalesFunnel[]
-  waivers      Waiver[]
+  // Timestamps
+  createdAt           DateTime        @default(now())
+  updatedAt           DateTime        @default(now())
+
+  inventory           Inventory[]
+  customers           Customer[]
+  bookings            Booking[]
+  payments            Payment[]
+  coupons             Coupon[]
+  salesFunnels        SalesFunnel[]
+  waivers             Waiver[]
+  invoices            Invoice[]
+  quotes              Quote[] // ADDED: Relation back to Quote model
+  customerStripeAccounts CustomerStripeAccount[]
+
+  organizationId    String        @unique
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+}
+
+
+model Organization {
+  id            String        @id @default(cuid())
+  clerkOrgId    String        @unique
+  name          String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @default(now())
+
+  business      Business?
+  memberships   Membership[]
+  subscription  Subscription?
+
+  @@index([clerkOrgId])
+}
+
+model Membership {
+  id                String       @id @default(cuid())
+  role              Role
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @default(now())
+  clerkMembershipId String       @unique
+
+  userId            String       @unique
+  user              User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  organizationId    String
+  organization      Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
 
   @@index([userId])
+  @@index([organizationId])
 }
 
 model Inventory {
-  id                  String          @id @default(cuid())
-  type                InventoryType
-  name                String
-  description         String?
-  dimensions          String
-  capacity            Int
-  price               Float
-  setupTime           Int
-  teardownTime        Int
-  images              String[]
-  primaryImage        String?
-  status              InventoryStatus
-  minimumSpace        String
-  weightLimit         Int
-  ageRange            String
+  id           String          @id @default(cuid())
+  type         InventoryType
+  name         String
+  description  String?
+  dimensions   String
+  capacity     Int
+  price        Float
+  setupTime    Int
+  teardownTime Int
+  images       String[]
+  primaryImage String?
+  stripeProductId String?   @unique
+  stripePriceId String?
+  status       InventoryStatus
+  minimumSpace String
+  weightLimit  Int
+  ageRange     String
   weatherRestrictions String[]
-  businessId          String
-  createdAt           DateTime        @default(now())
-  updatedAt           DateTime        @updatedAt
-  quantity            Int             @default(1)
-  bookingItems        BookingItem[]
-  business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  quantity     Int             @default(1)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @default(now())
+
+  business     Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId   String
+
+  bookingItems BookingItem[]
 
   @@index([businessId])
 }
 
 model Customer {
-  id           String    @id @default(cuid())
+  id           String      @id @default(cuid())
   name         String
   email        String
   phone        String
@@ -106,18 +154,25 @@ model Customer {
   state        String?
   zipCode      String?
   notes        String?
-  bookingCount Int       @default(0)
-  totalSpent   Float     @default(0)
+  bookingCount Int         @default(0)
+  totalSpent   Float       @default(0)
   lastBooking  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-  businessId   String
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @default(now())
+
   isLead       Boolean   @default(false)
   status       String    @default("Active")
   type         String    @default("Regular")
+
+  business     Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId   String
+
+
   bookings     Booking[]
   waivers      Waiver[]
-  business     Business  @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  invoices     Invoice[]
+  quotes       Quote[] // ADDED: Relation back to Quote model
+  customerStripeAccounts CustomerStripeAccount[]
 
   @@unique([email, businessId])
   @@index([businessId])
@@ -126,36 +181,41 @@ model Customer {
 }
 
 model Booking {
-  id                  String        @id @default(cuid())
-  eventDate           DateTime
-  startTime           DateTime
-  endTime             DateTime
-  status              BookingStatus @default(PENDING)
-  totalAmount         Float
-  depositAmount       Float?
-  depositPaid         Boolean       @default(false)
-  eventType           String?
-  eventAddress        String
-  eventCity           String
-  eventState          String
-  eventZipCode        String
-  participantAge      Int?
-  participantCount    Int
-  createdAt           DateTime      @default(now())
-  updatedAt           DateTime      @updatedAt
-  businessId          String
-  customerId          String
-  isCompleted         Boolean       @default(false)
-  isCancelled         Boolean       @default(false)
+  id            String         @id @default(cuid())
+  eventDate     DateTime       @db.Date
+  startTime     DateTime       @db.Timestamp(3)
+  endTime       DateTime       @db.Timestamp(3)
+  status        BookingStatus  @default(PENDING)
+  totalAmount   Float
+  depositAmount Float?
+  depositPaid   Boolean        @default(false)
+  eventType     String?
+  eventAddress  String
+  eventCity     String
+  eventState    String
+  eventZipCode  String
+  eventTimeZone String         @default("America/Chicago")
+  participantAge   Int?
+  participantCount Int
+  subtotalAmount Float @default(0)
+  taxAmount      Float @default(0)
+  taxRate        Float @default(0)
+  isCompleted      Boolean     @default(false)
+  isCancelled      Boolean     @default(false)
   specialInstructions String?
-  subtotalAmount      Float         @default(0)
-  taxAmount           Float         @default(0)
-  taxRate             Float         @default(0)
-  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer            Customer      @relation(fields: [customerId], references: [id])
-  inventoryItems      BookingItem[]
-  payments            Payment[]
-  waivers             Waiver[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @default(now())
+
+  business       Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId     String
+  customer       Customer       @relation(fields: [customerId], references: [id])
+  customerId     String
+
+  inventoryItems BookingItem[]
+  payments       Payment[]
+  waivers        Waiver[]
+  invoice        Invoice?
+  quote          Quote?
 
   @@index([businessId])
   @@index([customerId])
@@ -164,13 +224,16 @@ model Booking {
 }
 
 model BookingItem {
-  id          String    @id @default(cuid())
-  bookingId   String
-  inventoryId String
-  quantity    Int       @default(1)
-  price       Float
-  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  id           String    @id @default(cuid())
+  quantity     Int       @default(1)
+  price        Float
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @default(now())
+
+  booking      Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId    String
+  inventory    Inventory @relation(fields: [inventoryId], references: [id])
+  inventoryId  String
 
   @@index([bookingId])
   @@index([inventoryId])
@@ -181,19 +244,17 @@ model Payment {
   amount             Decimal       @db.Decimal(10, 2)
   type               PaymentType
   status             PaymentStatus
-  createdAt          DateTime      @default(now())
-  bookingId          String
-  businessId         String
   currency           String        @default("USD")
   metadata           Json?
-  paidAt             DateTime?
-  refundAmount       Decimal?      @db.Decimal(10, 2)
-  refundReason       String?
   stripeClientSecret String?
   stripePaymentId    String?
-  updatedAt          DateTime      @updatedAt
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @default(now())
+
   booking            Booking       @relation(fields: [bookingId], references: [id])
+  bookingId          String
   business           Business      @relation(fields: [businessId], references: [id])
+  businessId         String
 }
 
 model Coupon {
@@ -237,19 +298,101 @@ model SalesFunnel {
 
 model Waiver {
   id                 String       @id @default(cuid())
-  businessId         String
-  customerId         String
-  bookingId          String
   status             WaiverStatus @default(PENDING)
   templateVersion    String
   documentUrl        String
-  openSignDocumentId String       @unique
+  docuSealDocumentId String       @unique
   createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  updatedAt          DateTime     @default(now())
 
-  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  booking  Booking  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  business           Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId         String
+  customer           Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId         String
+  booking            Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId          String
+
+
+  @@unique([customerId, businessId, bookingId])
+  @@index([businessId])
+  @@index([customerId])
+  @@index([bookingId])
+  @@index([status])
+}
+
+model Subscription {
+  id                     String   @id @default(cuid())
+  stripeCustomerId       String   @unique
+  stripeSubscriptionId   String   @unique
+  status                 String
+  priceId                String
+  currentPeriodStart     DateTime
+  currentPeriodEnd       DateTime
+  cancelAtPeriodEnd      Boolean
+  organization           Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId         String   @unique
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
+
+  @@index([organizationId])
+  @@index([stripeCustomerId])
+  @@index([stripeSubscriptionId])
+}
+
+// ADDED: Invoice model
+model Invoice {
+  id               String           @id @default(uuid())
+  stripeInvoiceId  String?          @unique
+  status           InvoiceStatus
+  amountDue        Float
+  amountPaid       Float @default(0)
+  amountRemaining  Float @default(0)
+  currency         String
+  invoicePdfUrl    String?
+  hostedInvoiceUrl String?
+  issuedAt         DateTime?
+  paidAt           DateTime?
+  voidedAt         DateTime?
+  dueAt            DateTime?
+  expiresAt        DateTime?        // For the 24-hour hold
+  metadata         Json?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  business         Business         @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId       String
+  customer         Customer         @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId       String
+  booking          Booking          @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId        String           @unique
+
+  @@index([businessId])
+  @@index([customerId])
+  @@index([bookingId])
+  @@index([status])
+  @@index([stripeInvoiceId])
+}
+
+model Quote {
+  id                 String         @id @default(cuid())
+  stripeQuoteId      String         @unique
+  status             QuoteStatus    // Link to QuoteStatus enum
+  amountTotal        Float
+  amountSubtotal     Float
+  amountTax          Float
+  currency           String
+  hostedQuoteUrl     String?        // URL provided by Stripe for the customer
+  pdfUrl             String?        // URL provided by Stripe for the PDF version
+  expiresAt          DateTime?      // Expiration date from Stripe quote
+  metadata           Json?          // Store relevant metadata (e.g., prisma IDs)
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
+  business           Business       @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId         String
+  customer           Customer       @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  customerId         String
+  booking            Booking        @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  bookingId          String         @unique // Each booking might have one associated quote
 
   @@index([businessId])
   @@index([customerId])
@@ -257,18 +400,15 @@ model Waiver {
   @@index([status])
 }
 
-enum WaiverStatus {
-  PENDING
-  SIGNED
-  REJECTED
-  EXPIRED
-}
+// Enums
 
-enum InventoryStatus {
-  AVAILABLE
-  BOOKED
-  MAINTENANCE
-  RETIRED
+enum QuoteStatus {
+  DRAFT
+  OPEN
+  SENT
+  ACCEPTED
+  CANCELED
+  EXPIRED
 }
 
 enum InventoryType {
@@ -276,6 +416,14 @@ enum InventoryType {
   INFLATABLE
   GAME
   OTHER
+}
+
+enum InventoryStatus {
+  AVAILABLE
+  PENDING
+  BOOKED
+  MAINTENANCE
+  RETIRED
 }
 
 enum BookingStatus {
@@ -303,4 +451,41 @@ enum PaymentStatus {
 enum DiscountType {
   PERCENTAGE
   FIXED
+}
+
+enum WaiverStatus {
+  PENDING
+  SIGNED
+  REJECTED
+  EXPIRED
+}
+
+// ADDED: InvoiceStatusEnum
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  UNCOLLECTIBLE
+}
+
+// ADDED: Linking table for Customer <-> Business specific Stripe Customer IDs
+model CustomerStripeAccount {
+  id               String   @id @default(uuid())
+  stripeCustomerId String   @unique // The Stripe Customer ID for this specific business relationship
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  // Foreign Keys & Relations
+  customerId       String
+  customer         Customer @relation(fields: [customerId], references: [id], onDelete: Cascade)
+
+  businessId       String
+  business         Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  // Constraints & Indexes
+  @@unique([customerId, businessId]) // Ensure one Stripe ID per customer per business
+  @@index([customerId])
+  @@index([businessId])
+  @@index([stripeCustomerId])
 }

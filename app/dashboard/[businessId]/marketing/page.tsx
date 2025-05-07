@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Users, Percent, TrendingUp, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getCurrentUser, withBusinessAuth } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 
 // Define the SalesFunnel type
@@ -20,107 +20,75 @@ export default async function MarketingPage(
   }
 ) {
   const params = await props.params;
-  const user = await getCurrentUser();
+  const user = await getCurrentUserWithOrgAndBusiness();
 
   if (!user) {
     redirect("/auth/signin");
   }
 
-  const result = await withBusinessAuth<{
-    activeFunnel: SalesFunnel | null;
-    funnelsCount: number;
-    couponsCount: number;
-    leadsCount: number;
-    conversionRate: number;
-  }>(
-    params.businessId,
-    user.id,
-    async () => {
-      // Initialize default values
-      let activeFunnel = null;
-      let funnelsCount = 0;
-      let couponsCount = 0;
-      let leadsCount = 0;
-      let conversionRate = 0;
-      
-      try {
-        // Check if the salesFunnel model exists and has active funnels
-        if (prisma.salesFunnel) {
-          // Get active funnel
-          activeFunnel = await prisma.salesFunnel.findFirst({
-            where: {
-              businessId: params.businessId,
-              isActive: true,
-            },
-          });
-          
-          // Count total funnels
-          funnelsCount = await prisma.salesFunnel.count({
-            where: {
-              businessId: params.businessId,
-            },
-          });
-        }
-        
-        // Count coupons if model exists
-        if (prisma.coupon) {
-          couponsCount = await prisma.coupon.count({
-            where: {
-              businessId: params.businessId,
-            },
-          });
-        }
-        
-        // Count leads (Customers with isLead = true)
-        leadsCount = await prisma.customer.count({
-          where: {
-            businessId: params.businessId,
-            isLead: true, // Count customers marked as leads
-          },
-        });
-          
-        // Calculate conversion rate if there are leads
-        if (leadsCount > 0) {
-          // Count leads that have at least one booking
-          const convertedLeadsCount = await prisma.customer.count({
-            where: {
-              businessId: params.businessId,
-              isLead: true,
-              bookings: { // Check if the customer has any related bookings
-                some: {},
-              },
-            },
-          });
-          
-          conversionRate = Math.round((convertedLeadsCount / leadsCount) * 100);
-        }
-      } catch (error) {
-        console.error("Error fetching marketing data:", error);
-        // Continue with default values
-      }
-
-      return { 
-        activeFunnel,
-        funnelsCount,
-        couponsCount,
-        leadsCount,
-        conversionRate
-      };
-    }
-  );
-
-  if (result.error) {
+  // Check that the user has access to this business
+  const userBusinessId = user.membership?.organization?.business?.id;
+  if (!userBusinessId || userBusinessId !== params.businessId) {
     redirect("/");
   }
 
-  // Ensure result.data exists before destructuring
-  const { 
-    activeFunnel, 
-    funnelsCount = 0, 
-    couponsCount = 0, 
-    leadsCount = 0, 
-    conversionRate = 0 
-  } = result.data || {};
+  // Initialize default values
+  let activeFunnel: SalesFunnel | null = null;
+  let funnelsCount = 0;
+  let couponsCount = 0;
+  let leadsCount = 0;
+  let conversionRate = 0;
+
+  try {
+    // Get active funnel
+    activeFunnel = await prisma.salesFunnel.findFirst({
+      where: {
+        businessId: params.businessId,
+        isActive: true,
+      },
+    });
+
+    // Count total funnels
+    funnelsCount = await prisma.salesFunnel.count({
+      where: {
+        businessId: params.businessId,
+      },
+    });
+
+    // Count coupons
+    couponsCount = await prisma.coupon.count({
+      where: {
+        businessId: params.businessId,
+      },
+    });
+
+    // Count leads (Customers with isLead = true)
+    leadsCount = await prisma.customer.count({
+      where: {
+        businessId: params.businessId,
+        isLead: true,
+      },
+    });
+
+    // Calculate conversion rate if there are leads
+    if (leadsCount > 0) {
+      // Count leads that have at least one booking
+      const convertedLeadsCount = await prisma.customer.count({
+        where: {
+          businessId: params.businessId,
+          isLead: true,
+          bookings: {
+            some: {},
+          },
+        },
+      });
+
+      conversionRate = Math.round((convertedLeadsCount / leadsCount) * 100);
+    }
+  } catch (error) {
+    console.error("Error fetching marketing data:", error);
+    // Continue with default values
+  }
 
   return (
     <div className="min-h-screen">

@@ -1,34 +1,35 @@
 import { Suspense } from "react";
-import { getCurrentUser } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import WebsiteCustomizer from "./_components/website-customizer";
 import WebsiteHeader from "./_components/website-header";
 import { Skeleton } from "@/components/ui/skeleton";
 
-
 export const dynamic = 'force-dynamic';
 
 async function getBusinessData(businessId: string) {
-  const user = await getCurrentUser();
+  const user = await getCurrentUserWithOrgAndBusiness();
   if (!user) {
     redirect('/sign-in');
   }
 
-  const business = await prisma.business.findFirst({
-    where: {
-      id: businessId,
-      userId: user.id,
-    },
+  // Check that the user has access to this business
+  const userBusinessId = user.membership?.organization?.business?.id;
+  if (!userBusinessId || userBusinessId !== businessId) {
+    redirect('/dashboard');
+  }
+
+  const business = await prisma.business.findUnique({
+    where: { id: businessId },
   });
 
   if (!business) {
-    redirect('/sign-in');
+    redirect('/dashboard');
   }
 
   return business;
 }
-
 
 export default async function WebsitePage({ params }: { params: Promise<{ businessId: string }> }) {
   const { businessId } = await params;
@@ -64,10 +65,9 @@ function WebsiteCustomizerSkeleton() {
 
         {/* Skeleton for TabsContent wrapped in Card */}
         <div className="mt-8">
-          <div className="rounded-xl border bg-card text-card-foreground shadow-md p-6 space-y-6"> {/* Mimic Card style */}
+          <div className="rounded-xl border bg-card text-card-foreground shadow-md p-6 space-y-6">
             {/* Skeleton for CardHeader */}
             <Skeleton className="h-7 w-1/3 mb-4" />
-            
             {/* Skeleton for CardContent - example for a typical settings form */}
             <div className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

@@ -20,7 +20,7 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
     .toLowerCase()
     .replace(/[^\w-]/g, '');
   
-  const domain = customDomain || `${formattedBusinessName}.inflatemate.app`;
+  const domain = customDomain || `${formattedBusinessName}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
   
   
   const handlePreview = () => {
@@ -31,8 +31,13 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
       .replace(/[^\w-]/g, '');
     
     // Open the business website using the subdomain format
-    const subdomainUrl = `http://${formattedBusinessName}.localhost:3000`;
-    window.open(subdomainUrl, '_blank');
+    if (process.env.NODE_ENV === 'development') {
+      const subdomainUrl = `http://${formattedBusinessName}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+      window.open(subdomainUrl, '_blank');
+    } else {
+      const subdomainUrl = `https://${formattedBusinessName}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
+      window.open(subdomainUrl, '_blank');
+    }
   };
   
   const handleCopyDomain = () => {
