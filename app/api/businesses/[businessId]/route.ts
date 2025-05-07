@@ -1,6 +1,63 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { unstable_cache, revalidateTag } from "next/cache";
+import { Prisma } from "@prisma/client";
+
+// Cached business data fetcher
+const getCachedBusiness = unstable_cache(
+  async (businessId: string, isPublic: boolean) => {
+    const select = isPublic ? {
+      id: true,
+      name: true,
+      stripeAccountId: true,
+      inventory: true,
+    } : {
+      id: true,
+      name: true,
+      description: true,
+      address: true,
+      city: true,
+      state: true,
+      zipCode: true,
+      phone: true,
+      email: true,
+      logo: true,
+      minAdvanceBooking: true,
+      maxAdvanceBooking: true,
+      minimumPurchase: true,
+      timeZone: true,
+      stripeAccountId: true,
+      socialMedia: true,
+      customDomain: true,
+      subdomain: true,
+      siteConfig: true,
+      inventory: true,
+      customers: true,
+      bookings: {
+        where: {
+          eventDate: {
+            gte: new Date(),
+          },
+        },
+        take: 5,
+        orderBy: {
+          eventDate: Prisma.SortOrder.asc,
+        },
+      },
+    };
+
+    return prisma.business.findUnique({
+      where: { id: businessId },
+      select,
+    });
+  },
+  ['business-data'],
+  {
+    revalidate: 60 * 60 * 24, // 24 hours
+    tags: ['business-data'],
+  }
+);
 
 // GET /api/businesses/[businessId]
 export async function GET(
@@ -13,15 +70,7 @@ export async function GET(
 
     // If user is not authenticated, treat as a public request
     if (!user) {
-      const business = await prisma.business.findUnique({
-        where: { id: businessId },
-        select: {
-          id: true,
-          name: true,
-          stripeAccountId: true,
-          inventory: true,
-        },
-      });
+      const business = await getCachedBusiness(businessId, true);
 
       if (!business) {
         return NextResponse.json(
@@ -42,24 +91,7 @@ export async function GET(
       );
     }
 
-    const business = await prisma.business.findUnique({
-      where: { id: businessId },
-      include: {
-        inventory: true,
-        customers: true,
-        bookings: {
-          where: {
-            eventDate: {
-              gte: new Date(),
-            },
-          },
-          take: 5,
-          orderBy: {
-            eventDate: 'asc',
-          },
-        },
-      },
-    });
+    const business = await getCachedBusiness(businessId, false);
 
     if (!business) {
       return NextResponse.json(
@@ -166,6 +198,9 @@ export async function PATCH(
       where: { id: businessId },
       data: updateData,
     });
+
+    // Revalidate cache
+    revalidateTag('business-data');
 
     return NextResponse.json({
       message: "Business updated successfully",

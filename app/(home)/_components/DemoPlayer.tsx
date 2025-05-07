@@ -257,7 +257,7 @@ export default function DemoPlayer() {
                     animate={{ opacity: 1, scale: 1 }}
                     exit={{ opacity: 0, scale: 0.8 }}
                     transition={{ type: "spring", damping: 15 }}
-                    className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10"
+                    className="absolute inset-0 flex items-center justify-center z-10"
                     onClick={togglePlay}
                   >
                     <div className="w-20 h-20 rounded-full bg-primary/90 text-white flex items-center justify-center shadow-lg cursor-pointer hover:bg-primary transition-colors">

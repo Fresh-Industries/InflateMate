@@ -1,19 +1,19 @@
 // app/api/stripe/customer-portal/route.ts
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
+import { getCurrentUserWithOrgAndBusiness } from '@/lib/auth/clerk-utils';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
 
 export async function POST() {
-  const { userId, orgId } = await auth();
+  const user = await getCurrentUserWithOrgAndBusiness();
 
-  if (!userId || !orgId) {
+  if (!user) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   try {
     const organization = await prisma.organization.findUnique({
-      where: { clerkOrgId: orgId },
+      where: { clerkOrgId: user.membership?.organizationId },
       select: {
         id: true,
         business: { // Include business to get its ID for the return URL
@@ -28,7 +28,7 @@ export async function POST() {
     });
 
     if (!organization || !organization.business?.id || !organization.subscription?.stripeCustomerId) {
-      console.warn(`Customer Portal request for user ${userId} in org ${orgId}: No organization, business, or linked Stripe customer found.`);
+      console.warn(`Customer Portal request for user ${user.id} in org ${user.membership?.organizationId}: No organization, business, or linked Stripe customer found.`);
       return NextResponse.json({ error: 'Subscription or business information not found.' }, { status: 404 });
     }
 

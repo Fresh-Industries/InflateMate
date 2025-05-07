@@ -8,7 +8,8 @@ const publicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/:domain(.*)',
   '/api/webhook(.*)',
-  '/api(.*)'
+  '/api(.*)',
+  '/public(.*)'
 ]);
 
 const internalRoute = createRouteMatcher([

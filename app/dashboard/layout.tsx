@@ -90,6 +90,7 @@ function DashboardUI({ children }: { children: React.ReactNode }) {
         }
         
         setCurrentBusiness(data);
+        
       } catch (error) {
         console.error('Error fetching business details:', error);
         toast({
@@ -221,6 +222,7 @@ function DashboardUI({ children }: { children: React.ReactNode }) {
       <div className="mt-auto p-4 border-t border-gray-100">
         <OrganizationSwitcher 
           hidePersonal={true} 
+          
           appearance={{ 
             elements: { 
               avatarBox: "w-8 h-8",

@@ -14,10 +14,14 @@ import {
   LifeBuoy,
   Info,
   Mail,
+  Book,
+  Video,
+  Lightbulb,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
+import { useAuth } from "@clerk/nextjs";
 
 
 
@@ -50,20 +54,81 @@ const FEATURES = [
   },
 ];
 
+
+
+const RESOURCES = [
+  {
+    name: 'Blog',
+    href: '/resources/blog',
+    icon: <Book className="size-4" />,
+  },
+  {
+    name: 'Tutorials',
+    href: '/resources/tutorials',
+    icon: <Video className="size-4" />,
+  },
+  {
+    name: 'Feature Requests',
+    href: '/resources/feature-requests',
+    icon: <Lightbulb className="size-4" />,
+  }
+];
+
 const MAIN_LINKS = [
   { label: 'Pricing', href: '/pricing' },
-  { label: 'Resources', href: '/resources' },
-  { label: 'About', href: '/about' },
   { label: 'Contact', href: '/contact' },
 ];
 
 export default function Navbar() {
+  const { isLoaded, userId, isSignedIn } = useAuth();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [resourcesDropdownOpen, setResourcesDropdownOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const resourcesDropdownRef = useRef<HTMLDivElement>(null);
   const mobileMenuRef = useRef<HTMLDivElement>(null);
+  const [loadingUserStatus, setLoadingUserStatus] = useState(false);
+  const [dashboardHref, setDashboardHref] = useState<string | null>(null);
   const pathname = usePathname();
+
+  useEffect(() => {
+    async function fetchUserStatus() {
+      if (!isLoaded || !isSignedIn) {
+        setLoadingUserStatus(false);
+        setDashboardHref("/sign-in");
+        return;
+      }
+
+      setLoadingUserStatus(true);
+      try {
+        const response = await fetch('/api/me');
+        if (response.ok) {
+          const data = await response.json();
+          if (!data.business) {
+            setDashboardHref("/onboarding");
+          } else if (
+            !data.subscription?.status ||
+            !["active", "trialing"].includes(data.subscription.status)
+          ) {
+            setDashboardHref(`/pricing?orgId=${data.orgId || ''}`);
+          } else {
+            setDashboardHref(`/dashboard/${data.business.id}`);
+          }
+        } else {
+          console.error("Failed to fetch user status:", response.status);
+          setDashboardHref("/sign-in");
+        }
+      } catch (error) {
+        console.error("Error fetching user status:", error);
+        setDashboardHref("/sign-in");
+      } finally {
+        setLoadingUserStatus(false);
+      }
+    }
+
+    fetchUserStatus();
+  }, [isLoaded, isSignedIn]);
 
   // Close mobile menu when navigating to a new page
   useEffect(() => {
@@ -111,6 +176,8 @@ export default function Navbar() {
     document.addEventListener('keydown', handleEscape);
     return () => document.removeEventListener('keydown', handleEscape);
   }, []);
+
+  const showAuthLoading = !isLoaded || loadingUserStatus;
 
   return (
     <>
@@ -188,6 +255,53 @@ export default function Navbar() {
               </AnimatePresence>
             </div>
 
+            <div
+              className="relative"
+              onMouseEnter={() => setResourcesDropdownOpen(true)}
+              onMouseLeave={() => setResourcesDropdownOpen(false)}
+              ref={resourcesDropdownRef}
+            >
+              <button
+                className="flex items-center gap-1 text-foreground hover:text-primary transition-colors"
+                onClick={() => setResourcesDropdownOpen(!resourcesDropdownOpen)}
+                aria-expanded={resourcesDropdownOpen}
+                aria-haspopup="true"
+              >
+                Resources{" "}
+                <ChevronDown
+                  className={cn(
+                    "size-4 transition-transform",
+                    resourcesDropdownOpen && "transform rotate-180"
+                  )}
+                />
+              </button>
+
+              <AnimatePresence>
+                {resourcesDropdownOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.18 }}
+                    className="absolute left-0 mt-3 w-56 rounded-md border border-border bg-card shadow-lg"
+                    role="menu"
+                  >
+                    {RESOURCES.map((f) => (
+                      <Link
+                        key={f.href}
+                        href={f.href}
+                        className="flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-accent/10"
+                        role="menuitem"
+                      >
+                        {f.icon}
+                        {f.name}
+                      </Link>
+                    ))}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+
             {/* Static links */}
             {MAIN_LINKS.map((link) => (
               <Link
@@ -202,24 +316,31 @@ export default function Navbar() {
 
           {/* Desktop CTAs */}
           <div className="hidden lg:flex items-center gap-3">
-          <Link href="/waitlist" className="block w-full">
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-center bg-white dark:bg-transparent"
+            {showAuthLoading ? (
+              <div className="h-10 w-24 bg-muted/60 animate-pulse rounded-full"></div>
+            ) : userId ? (
+              <Link href={dashboardHref || ""}>
+                <Button
+                  variant="outline"
+                  className="h-10 px-5 rounded-full border border-muted hover:bg-muted/60 text-text-DEFAULT shadow-sm transition-colors focus-visible:ring-2 focus-visible:ring-primary"
                 >
-                 Join Waitlist
+                  Dashboard
                 </Button>
-            </Link>
-            {/* <Link href="/sign-in">
-              <Button variant="outline" size="sm">
-                Sign In
-              </Button>
-            </Link>
-            <Link href="/sign-up">
-              <Button variant="primary-gradient" size="sm">
-                Get Started <ArrowRight className="size-4 ml-1" />
-              </Button>
-            </Link> */}
+              </Link>
+            ) : (
+              <>
+                <Link href="/sign-in">
+                  <Button variant="outline" size="sm">
+                    Sign In
+                  </Button>
+                </Link>
+                <Link href="/waitlist">
+                  <Button variant="outline" size="sm">
+                    Join Waitlist
+                  </Button>
+                </Link>
+              </>
+            )}
           </div>
 
           {/* Mobile toggle */}
@@ -288,6 +409,25 @@ export default function Navbar() {
                 </nav>
               </div>
 
+              {/* Resources group */}
+              <div className="mb-6">
+                <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
+                  Resources
+                </h3>
+                <nav className="space-y-1">
+                  {RESOURCES.map((f) => (
+                    <Link
+                      key={f.href}
+                      href={f.href}
+                      className="flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800"
+                    >
+                      {f.icon}
+                      {f.name}
+                    </Link>
+                  ))}
+                </nav>
+              </div>
+
               {/* Pages group */}
               <div>
                 <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
@@ -309,34 +449,41 @@ export default function Navbar() {
 
             {/* Footer CTAs */}
             <div className="p-4 border-t border-gray-200 dark:border-gray-800 space-y-3">
-              <Link href="/waitlist" className="block w-full">
-                  <Button 
-                    variant="outline" 
+              {showAuthLoading ? (
+                <div className="h-10 w-24 bg-muted/60 animate-pulse rounded-full"></div>
+              ) : userId ? (
+                <Link href={dashboardHref || ""}>
+                  <Button
+                    variant="outline"
                     className="w-full justify-center bg-white dark:bg-transparent"
-                >
-                 Join Waitlist
-                </Button>
-              </Link>
-              {/* <Link href="/sign-in" className="block w-full">
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-center bg-white dark:bg-transparent"
-                >
-                  Sign In
-                </Button>
-              </Link>
-              <Link href="/sign-up" className="block w-full">
-                <Button 
-                  variant="primary-gradient" 
-                  className="w-full justify-center"
-                >
-                  Get Started <ArrowRight className="size-4 ml-1" />
-                </Button>
-              </Link> */}
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+              ) : (
+                <>
+                  <Link href="/sign-in" className="block w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-center bg-white dark:bg-transparent"
+                    >
+                      Sign In
+                    </Button>
+                  </Link>
+                  <Link href="/waitlist" className="block w-full">
+                    <Button 
+                      variant="outline" 
+                      className="w-full justify-center bg-white dark:bg-transparent"
+                    >
+                      Join Waitlist
+                    </Button>
+                  </Link>
+                </>
+              )}
             </div>
           </div>
         </div>
       )}
     </>
   );
-}
+} 
