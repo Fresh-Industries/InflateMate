@@ -466,10 +466,10 @@ export async function POST(
 // This GET route is separate from availability and hold placement.
 export async function GET(
   req: NextRequest,
-  { params }: { params: { businessId: string } } // Use direct params
+  { params }: { params: Promise<{ businessId: string }> } // Use direct params
 ) {
   try {
-    const { businessId } = params;
+    const { businessId } = await params;
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
