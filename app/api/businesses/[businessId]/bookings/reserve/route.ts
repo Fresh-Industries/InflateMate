@@ -35,10 +35,10 @@ const createHoldSchema = z.object({
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: { businessId: string } } // Use direct params
+  { params }: { params: Promise<{ businessId: string }> } // Use direct params
 ) {
   try {
-    const { businessId } = params;
+    const { businessId } = await params;
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
