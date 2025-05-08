@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,8 +159,10 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [taxRate, setTaxRate] = useState(0);
   const [applyTax, setApplyTax] = useState(false);
   const sheetCloseRef = React.useRef<HTMLButtonElement>(null);
-  // const [isInvoicing, setIsInvoicing] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [isProcessingQuote, setIsProcessingQuote] = useState(false);
+  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const [isPollingSuspended, setIsPollingSuspended] = useState(false);
   
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
@@ -191,6 +193,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     { number: 3, title: "Review & Pay", icon: CreditCard },
   ];
 
+  // Add coupon state
+  const [couponCode, setCouponCode] = useState("");
+  const [appliedCoupon, setAppliedCoupon] = useState<{ code: string; amount: number } | null>(null);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [isApplyingCoupon, setIsApplyingCoupon] = useState(false);
 
   useEffect(() => {
     const fetchBusinessData = async () => {
@@ -212,18 +219,23 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   }, []);
 
   // Search for available inventory
-  const searchAvailability = async () => {
+  const searchAvailability = async (silent = false) => {
     if (!newBooking.eventDate) {
-      toast({ 
-        title: "Missing Information", 
-        description: "Please select a date first", 
-        variant: "destructive" 
-      });
+      if (!silent) {
+        toast({ 
+          title: "Missing Information", 
+          description: "Please select a date first", 
+          variant: "destructive" 
+        });
+      }
       return;
     }
 
-    setIsSearchingAvailability(true);
-    setHasSearched(true);
+    if (!silent) {
+      setIsSearchingAvailability(true);
+      setHasSearched(true);
+    }
+    
     try {
       const params = new URLSearchParams({
         date: newBooking.eventDate,
@@ -238,25 +250,128 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         throw new Error(data.error || "Failed to search availability");
       }
       
-      setAvailableInventory(data.availableInventory || []);
-      
-      if (data.availableInventory.length === 0) {
-        toast({ 
-          title: "No Availability", 
-          description: "No inventory items are available for your selected date. Please try a different date.", 
-          variant: "destructive" 
-        });
+      if (silent) {
+        // When in polling mode, check for unavailable items before updating
+        checkForUnavailableItems(data.availableInventory || []);
+      } else {
+        setAvailableInventory(data.availableInventory || []);
+        
+        if (data.availableInventory.length === 0) {
+          toast({ 
+            title: "No Availability", 
+            description: "No inventory items are available for your selected date. Please try a different date.", 
+            variant: "destructive" 
+          });
+        }
       }
     } catch (error) {
-      toast({ 
-        title: "Error", 
-        description: error instanceof Error ? error.message : "Failed to search availability", 
-        variant: "destructive" 
-      });
+      if (!silent) {
+        toast({ 
+          title: "Error", 
+          description: error instanceof Error ? error.message : "Failed to search availability", 
+          variant: "destructive" 
+        });
+      } else {
+        console.error("Silent availability check failed:", error);
+      }
     } finally {
-      setIsSearchingAvailability(false);
+      if (!silent) {
+        setIsSearchingAvailability(false);
+      }
     }
   };
+
+  // Check if previously selected items are still available
+  const checkForUnavailableItems = (currentlyAvailable: InventoryItem[]) => {
+    // Create a map of currently available inventory for quick lookup
+    const availableMap = new Map<string, InventoryItem>();
+    currentlyAvailable.forEach(item => {
+      availableMap.set(item.id, item);
+    });
+
+    // Check if any of the selected items are no longer available
+    const unavailableItems: SelectedItem[] = [];
+    const updatedSelectedItems = new Map(selectedItems);
+
+    selectedItems.forEach((selectedItem, itemId) => {
+      const availableItem = availableMap.get(itemId);
+      
+      // Item is completely unavailable
+      if (!availableItem) {
+        unavailableItems.push(selectedItem);
+        updatedSelectedItems.delete(itemId);
+      } 
+      // Quantity has decreased below what's selected
+      else if (availableItem.quantity < selectedItem.quantity) {
+        unavailableItems.push({
+          item: selectedItem.item, 
+          quantity: selectedItem.quantity - availableItem.quantity
+        });
+        
+        // Update to the max available quantity
+        if (availableItem.quantity > 0) {
+          updatedSelectedItems.set(itemId, {
+            item: selectedItem.item,
+            quantity: availableItem.quantity
+          });
+        } else {
+          updatedSelectedItems.delete(itemId);
+        }
+      }
+    });
+
+    // If any items became unavailable, notify user and update selection
+    if (unavailableItems.length > 0) {
+      // Update the available inventory list
+      setAvailableInventory(currentlyAvailable);
+      
+      // Update the selected items map
+      setSelectedItems(updatedSelectedItems);
+
+      // Show toast with unavailable items
+      const itemNames = unavailableItems.map(item => item.item.name).join(", ");
+      toast({
+        title: "Items No Longer Available",
+        description: `These items were just booked by someone else: ${itemNames}`,
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Set up polling for availability
+  useEffect(() => {
+    // Start polling when on step 1 and has searched
+    const shouldPoll = currentStep === 1 && hasSearched && !isPollingSuspended;
+    
+    // Clear any existing interval
+    if (pollIntervalRef.current) {
+      clearInterval(pollIntervalRef.current);
+      pollIntervalRef.current = null;
+    }
+    
+    // Set up new polling if needed
+    if (shouldPoll) {
+      pollIntervalRef.current = setInterval(() => {
+        searchAvailability(true); // silent mode
+      }, 5000); // 5 seconds
+    }
+    
+    // Cleanup on component unmount
+    return () => {
+      if (pollIntervalRef.current) {
+        clearInterval(pollIntervalRef.current);
+      }
+    };
+  }, [currentStep, hasSearched, newBooking.eventDate, newBooking.startTime, newBooking.endTime, isPollingSuspended]);
+
+  // Suspend polling during other operations
+  useEffect(() => {
+    if (isSearchingAvailability) {
+      setIsPollingSuspended(true);
+    } else {
+      setIsPollingSuspended(false);
+    }
+  }, [isSearchingAvailability]);
 
   // Select an inventory item
   const selectInventoryItem = (item: InventoryItem, quantity: number = 1) => {
@@ -354,139 +469,50 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     return subtotal;
   };
 
-
-  // Modify the handleSubmit function to use UTC dates
-  const handlePaymentProceed = async () => {
-    if (isSubmitting) return;
-    setIsSubmitting(true);
-
+  // Coupon apply handler
+  const handleApplyCoupon = async () => {
+    setCouponError(null);
+    setIsApplyingCoupon(true);
     try {
-      const subtotal = calculateSubtotal();
-      const taxAmount = calculateTaxAmount();
-      const total = calculateTotal();
-      const amount = Math.round(total * 100); // convert to cents
-      
-      if (isNaN(amount) || amount <= 0) throw new Error("Invalid total amount.");
-
-      // Get browser timezone
-      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-
-      // Create an array of selected items with their details
-      const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: quantity,
-        stripeProductId: item.stripeProductId,
-      }));
-      
-      const metadata: BookingMetadata = {
-        bounceHouseId: selectedItemsArray.map(item => item.id).join(','),
-        eventDate: newBooking.eventDate,
-        startTime: newBooking.startTime,
-        endTime: newBooking.endTime,
-        eventType: newBooking.eventType,
-        eventAddress: newBooking.eventAddress,
-        eventCity: newBooking.eventCity,
-        eventState: newBooking.eventState,
-        eventZipCode: newBooking.eventZipCode,
-        participantCount: String(newBooking.participantCount),
-        participantAge: String(newBooking.participantAge || ""),
-        specialInstructions: newBooking.specialInstructions,
-        totalAmount: String(total),
-        subtotalAmount: String(subtotal),
-        taxAmount: String(taxAmount),
-        taxRate: String(taxRate),
-        customerName: newBooking.customerName,
-        customerEmail: newBooking.customerEmail,
-        customerPhone: newBooking.customerPhone,
-        businessId: businessId,
-        bookingId: crypto.randomUUID(),
-        eventTimeZone: tz,
-      };
-      
-
-      console.log("Sending request to:", `/api/businesses/${businessId}/bookings`);
-      
-      // Fetch business data first
-      console.log("Fetching business data...");
-      const businessResponse = await fetch(`/api/businesses/${businessId}`);
-      if (!businessResponse.ok) {
-        throw new Error("Failed to fetch business data");
-      }
-      const businessData = await businessResponse.json();      
-      
-      if (!businessData) {
-        console.error("Business data is missing");
-        throw new Error("Failed to load business data");
-      }
-      
-      // Check for Stripe account ID in either field
-      const hasStripeAccount = !!(businessData.stripeAccountId || businessData.stripeConnectedAccountId);
-      if (!hasStripeAccount) {
-        console.error("Business data missing Stripe account ID:", businessData);
-        throw new Error("Stripe is not set up for this business");
-      }
-      
-      // Set business data in state
-      setBusinessData(businessData);
-
-      // Create payment intent
-      const paymentResponse = await fetch(`/api/businesses/${businessId}/bookings`, {
+      const res = await fetch(`/api/businesses/${businessId}/coupons/validate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          amount,
-          customerEmail: newBooking.customerEmail,
-          metadata: {
-            ...metadata,
-            selectedItems: JSON.stringify(selectedItemsArray)
-          },
-        }),
+        body: JSON.stringify({ code: couponCode, amountBeforeTax: calculateSubtotal() }),
       });
-      
-      console.log("Response status:", paymentResponse.status);
-      const paymentData = await paymentResponse.json();
-      console.log("Payment data:", paymentData);
-      
-      if (!paymentResponse.ok) {
-        console.error("Payment API error:", paymentData.error);
-        throw new Error(paymentData.error || "Payment intent failed");
+      const data = await res.json();
+      if (!res.ok || !data.valid) {
+        setCouponError(data.reason || "Invalid coupon");
+        setAppliedCoupon(null);
+      } else {
+        setAppliedCoupon({ code: couponCode, amount: data.discountAmount });
+        setCouponError(null);
       }
-
-      // Extract client secret from response - handle different response formats
-      let clientSecret = null;
-      // Try multiple possible locations for the client secret
-      if (typeof paymentData.clientSecret === 'string') {
-        clientSecret = paymentData.clientSecret;
-      } else if (paymentData.data && typeof paymentData.data.clientSecret === 'string') {
-        clientSecret = paymentData.data.clientSecret;
-      } else if (paymentData.result && typeof paymentData.result.clientSecret === 'string') {
-        clientSecret = paymentData.result.clientSecret;
-      }
-      
-      if (!clientSecret) {
-        console.error("Missing client secret in API response:", paymentData);
-        throw new Error("Missing client secret in API response");
-      }
-      
-      // Set clientSecret and pendingBookingData
-      setClientSecret(clientSecret);
-
-      setPendingBookingData(metadata);
-      setShowPaymentForm(true);
-    } catch (error) {
-      console.error("Submission error:", error);
-      toast({ 
-        title: "Error", 
-        description: error instanceof Error ? error.message : "Failed to process booking", 
-        variant: "destructive" 
-      });
+    } catch {
+      setCouponError("Error validating coupon");
+      setAppliedCoupon(null);
     } finally {
-      setIsSubmitting(false);
+      setIsApplyingCoupon(false);
     }
   };
 
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponCode("");
+    setCouponError(null);
+  };
+
+  // Adjusted subtotal/tax/total with coupon
+  const getDiscountedSubtotal = () => {
+    if (!appliedCoupon) return calculateSubtotal();
+    return Math.max(0, calculateSubtotal() - appliedCoupon.amount);
+  };
+  const getDiscountedTax = () => {
+    if (!applyTax || taxRate <= 0) return 0;
+    return getDiscountedSubtotal() * (taxRate / 100);
+  };
+  const getDiscountedTotal = () => {
+    return getDiscountedSubtotal() + getDiscountedTax();
+  };
 
   // const handleSendAsInvoice = async () => {
   //   if (isInvoicing) return;
@@ -676,6 +702,138 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         setIsProcessingQuote(false); // Reset quote processing loading state
     }
 };
+
+  // Modify the handleSubmit function to use UTC dates
+  const handlePaymentProceed = async () => {
+    if (isSubmitting) return;
+    setIsSubmitting(true);
+
+    try {
+      const subtotal = calculateSubtotal();
+      const taxAmount = calculateTaxAmount();
+      const total = calculateTotal();
+      const amount = Math.round(total * 100); // convert to cents
+      
+      if (isNaN(amount) || amount <= 0) throw new Error("Invalid total amount.");
+
+      // Get browser timezone
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+      // Create an array of selected items with their details
+      const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
+        id: item.id,
+        name: item.name,
+        price: item.price,
+        quantity: quantity,
+        stripeProductId: item.stripeProductId,
+      }));
+      
+      const metadata: BookingMetadata = {
+        bounceHouseId: selectedItemsArray.map(item => item.id).join(','),
+        eventDate: newBooking.eventDate,
+        startTime: newBooking.startTime,
+        endTime: newBooking.endTime,
+        eventType: newBooking.eventType,
+        eventAddress: newBooking.eventAddress,
+        eventCity: newBooking.eventCity,
+        eventState: newBooking.eventState,
+        eventZipCode: newBooking.eventZipCode,
+        participantCount: String(newBooking.participantCount),
+        participantAge: String(newBooking.participantAge || ""),
+        specialInstructions: newBooking.specialInstructions,
+        totalAmount: String(total),
+        subtotalAmount: String(subtotal),
+        taxAmount: String(taxAmount),
+        taxRate: String(taxRate),
+        customerName: newBooking.customerName,
+        customerEmail: newBooking.customerEmail,
+        customerPhone: newBooking.customerPhone,
+        businessId: businessId,
+        bookingId: crypto.randomUUID(),
+        eventTimeZone: tz,
+      };
+      
+
+      console.log("Sending request to:", `/api/businesses/${businessId}/bookings`);
+      
+      // Fetch business data first
+      console.log("Fetching business data...");
+      const businessResponse = await fetch(`/api/businesses/${businessId}`);
+      if (!businessResponse.ok) {
+        throw new Error("Failed to fetch business data");
+      }
+      const businessData = await businessResponse.json();      
+      
+      if (!businessData) {
+        console.error("Business data is missing");
+        throw new Error("Failed to load business data");
+      }
+      
+      // Check for Stripe account ID in either field
+      const hasStripeAccount = !!(businessData.stripeAccountId || businessData.stripeConnectedAccountId);
+      if (!hasStripeAccount) {
+        console.error("Business data missing Stripe account ID:", businessData);
+        throw new Error("Stripe is not set up for this business");
+      }
+      
+      // Set business data in state
+      setBusinessData(businessData);
+
+      // Create payment intent
+      const paymentResponse = await fetch(`/api/businesses/${businessId}/bookings`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          amount,
+          customerEmail: newBooking.customerEmail,
+          metadata: {
+            ...metadata,
+            selectedItems: JSON.stringify(selectedItemsArray)
+          },
+        }),
+      });
+      
+      console.log("Response status:", paymentResponse.status);
+      const paymentData = await paymentResponse.json();
+      console.log("Payment data:", paymentData);
+      
+      if (!paymentResponse.ok) {
+        console.error("Payment API error:", paymentData.error);
+        throw new Error(paymentData.error || "Payment intent failed");
+      }
+
+      // Extract client secret from response - handle different response formats
+      let clientSecret = null;
+      // Try multiple possible locations for the client secret
+      if (typeof paymentData.clientSecret === 'string') {
+        clientSecret = paymentData.clientSecret;
+      } else if (paymentData.data && typeof paymentData.data.clientSecret === 'string') {
+        clientSecret = paymentData.data.clientSecret;
+      } else if (paymentData.result && typeof paymentData.result.clientSecret === 'string') {
+        clientSecret = paymentData.result.clientSecret;
+      }
+      
+      if (!clientSecret) {
+        console.error("Missing client secret in API response:", paymentData);
+        throw new Error("Missing client secret in API response");
+      }
+      
+      // Set clientSecret and pendingBookingData
+      setClientSecret(clientSecret);
+
+      setPendingBookingData(metadata);
+      setShowPaymentForm(true);
+    } catch (error) {
+      console.error("Submission error:", error);
+      toast({ 
+        title: "Error", 
+        description: error instanceof Error ? error.message : "Failed to process booking", 
+        variant: "destructive" 
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Add a function to handle successful payment
   const handlePaymentSuccess = async () => {
@@ -919,7 +1077,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
             {/* Check Availability */}
             <div className="flex justify-center my-6">
               <Button
-                onClick={searchAvailability}
+                onClick={() => searchAvailability(false)}
                 disabled={
                   isSearchingAvailability ||
                   !newBooking.eventDate
@@ -1307,23 +1465,53 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                 <CardTitle>Payment Summary</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Coupon input */}
+                <div className="flex items-end gap-2">
+                  <div className="flex-1">
+                    <Label htmlFor="coupon">Coupon Code</Label>
+                    <Input
+                      id="coupon"
+                      value={couponCode}
+                      onChange={e => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="Enter coupon code"
+                      disabled={!!appliedCoupon}
+                      className={couponError ? "border-red-500" : ""}
+                    />
+                    {couponError && <div className="text-red-500 text-xs mt-1">{couponError}</div>}
+                  </div>
+                  {!appliedCoupon ? (
+                    <Button
+                      onClick={handleApplyCoupon}
+                      disabled={!couponCode || isApplyingCoupon}
+                      variant="outline"
+                    >
+                      {isApplyingCoupon ? <Loader2 className="h-4 w-4 animate-spin" /> : "Apply"}
+                    </Button>
+                  ) : (
+                    <Button onClick={handleRemoveCoupon} variant="ghost" type="button">Remove coupon</Button>
+                  )}
+                </div>
+                {/* Payment summary lines */}
                 <div className="flex justify-between">
                   <span>Subtotal:</span>
                   <span>${calculateSubtotal().toFixed(2)}</span>
                 </div>
-                
+                {appliedCoupon && (
+                  <div className="flex justify-between text-green-600">
+                    <span>-{appliedCoupon.code} coupon:</span>
+                    <span>- ${appliedCoupon.amount.toFixed(2)}</span>
+                  </div>
+                )}
                 {applyTax && taxRate > 0 && (
                   <div className="flex justify-between text-muted-foreground">
                     <span>Tax ({taxRate}%):</span>
-                    <span>${calculateTaxAmount().toFixed(2)}</span>
+                    <span>${getDiscountedTax().toFixed(2)}</span>
                   </div>
                 )}
-                
                 <Separator />
-                
                 <div className="flex justify-between font-bold">
                   <span>Total:</span>
-                  <span>${calculateTotal().toFixed(2)}</span>
+                  <span>${getDiscountedTotal().toFixed(2)}</span>
                 </div>
               </CardContent>
             </Card>

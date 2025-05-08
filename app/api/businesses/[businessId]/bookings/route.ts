@@ -4,12 +4,40 @@ import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
 import { prisma } from "@/lib/prisma";
 import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
+import { createBookingSafely } from "@/lib/createBookingSafely";
+import { BookingStatus } from "@/prisma/generated/prisma";
 
 // Define a schema for the expected payload
-const paymentIntentSchema = z.object({
+const bookingSchema = z.object({
   amount: z.number(), // amount in cents
   customerEmail: z.string().email(),
-  metadata: z.record(z.any()), // booking details stored as metadata
+  customerName: z.string(),
+  customerPhone: z.string(),
+  eventDate: z.string(),
+  startTime: z.string(),
+  endTime: z.string(),
+  eventAddress: z.string(),
+  eventCity: z.string(),
+  eventState: z.string(),
+  eventZipCode: z.string(),
+  eventTimeZone: z.string().optional(),
+  eventType: z.string().optional(),
+  participantCount: z.number(),
+  participantAge: z.number().optional(),
+  subtotalAmount: z.number(),
+  taxAmount: z.number(),
+  taxRate: z.number(),
+  specialInstructions: z.string().optional(),
+  selectedItems: z.array(z.object({
+    id: z.string(),
+    quantity: z.number(),
+    price: z.number(),
+    startUTC: z.string(),
+    endUTC: z.string(),
+    status: z.string()
+  })),
+  couponCode: z.string().optional(),
+  couponAmount: z.number().optional(),
 });
 
 export async function POST(
@@ -24,10 +52,9 @@ export async function POST(
 
     // Parse and validate the request payload
     const body = await req.json();
-    console.log("Received payment intent request body:", body);
-    const { amount, customerEmail, metadata } = paymentIntentSchema.parse(body);
-    console.log("Validated payment intent data:", { amount, customerEmail });
-
+    console.log("Received booking request body:", body);
+    const bookingData = bookingSchema.parse(body);
+    
     // Fetch the business to ensure it exists and has a Stripe account
     const business = await prisma.business.findUnique({
       where: { id: businessId },
@@ -38,47 +65,189 @@ export async function POST(
     }
     const stripeConnectedAccountId = business.stripeAccountId;
 
-    console.log("Creating PaymentIntent for connected account:", stripeConnectedAccountId);
-
+    // Try to create the booking using the safe transaction approach
     try {
-      // Ensure all metadata values are strings for PaymentIntent
-      const sanitizedMetadata: Record<string, string> = {};
-      Object.entries(metadata).forEach(([key, value]) => {
-        sanitizedMetadata[key] = typeof value === 'string' ? value : JSON.stringify(value);
+      // First find or create the customer
+      const customer = await prisma.customer.upsert({
+        where: {
+          email_businessId: {
+            email: bookingData.customerEmail,
+            businessId
+          }
+        },
+        update: {
+          name: bookingData.customerName,
+          phone: bookingData.customerPhone,
+          address: bookingData.eventAddress,
+          city: bookingData.eventCity,
+          state: bookingData.eventState,
+          zipCode: bookingData.eventZipCode,
+        },
+        create: {
+          name: bookingData.customerName,
+          email: bookingData.customerEmail,
+          phone: bookingData.customerPhone,
+          address: bookingData.eventAddress,
+          city: bookingData.eventCity,
+          state: bookingData.eventState,
+          zipCode: bookingData.eventZipCode,
+          businessId,
+        }
       });
 
-      // Extract name and phone from metadata, providing defaults
-      const customerName = metadata.customerName as string || 'Customer';
-      const customerPhone = metadata.customerPhone as string || ''; 
-      const eventCity = metadata.eventCity as string || '';
-      const eventState = metadata.eventState as string || '';
-      const eventAddress = metadata.eventAddress as string || '';
-      const eventZipCode = metadata.eventZipCode as string || '';
+      // Get the date parts
+      const eventDate = new Date(bookingData.eventDate);
+      const timezone = bookingData.eventTimeZone || business.timeZone;
       
+      // Parse start and end times
+      const [startHour, startMinute] = bookingData.startTime.split(':').map(Number);
+      const [endHour, endMinute] = bookingData.endTime.split(':').map(Number);
+      
+      // Create start and end DateTime objects
+      const startTime = new Date(eventDate);
+      startTime.setHours(startHour, startMinute, 0, 0);
+      
+      const endTime = new Date(eventDate);
+      endTime.setHours(endHour, endMinute, 0, 0);
+
+      // Coupon logic
+      let couponDiscount = 0;
+      let couponCode: string | undefined = undefined;
+      if (bookingData.couponCode) {
+        // Look up coupon for this business
+        const coupon = await prisma.coupon.findUnique({
+          where: { code_businessId: { code: bookingData.couponCode, businessId } },
+        });
+        const now = new Date();
+        if (!coupon || !coupon.isActive) {
+          return NextResponse.json({ error: "Coupon not found or inactive" }, { status: 400 });
+        }
+        if (coupon.startDate && now < coupon.startDate) {
+          return NextResponse.json({ error: "Coupon not yet active" }, { status: 400 });
+        }
+        if (coupon.endDate && now > coupon.endDate) {
+          return NextResponse.json({ error: "Coupon expired" }, { status: 400 });
+        }
+        if (typeof coupon.maxUses === "number" && coupon.usedCount >= coupon.maxUses) {
+          return NextResponse.json({ error: "Coupon max uses reached" }, { status: 400 });
+        }
+        if (typeof coupon.minimumAmount === "number" && bookingData.subtotalAmount < coupon.minimumAmount) {
+          return NextResponse.json({ error: `Minimum order: $${coupon.minimumAmount}` }, { status: 400 });
+        }
+        // Compute discount
+        if (coupon.discountType === "PERCENTAGE") {
+          couponDiscount = Math.round(bookingData.subtotalAmount * (coupon.discountAmount / 100) * 100) / 100;
+        } else if (coupon.discountType === "FIXED") {
+          couponDiscount = Math.min(coupon.discountAmount, bookingData.subtotalAmount);
+        }
+        if (couponDiscount <= 0) {
+          return NextResponse.json({ error: "No discount for this amount" }, { status: 400 });
+        }
+        couponCode = coupon.code;
+      }
+      // Adjust amount (in cents)
+      let finalAmount = bookingData.amount;
+      if (couponDiscount > 0) {
+        // Only apply to subtotal, not tax
+        const discountedSubtotal = Math.max(0, bookingData.subtotalAmount - couponDiscount);
+        const newTotal = discountedSubtotal + bookingData.taxAmount;
+        finalAmount = Math.round(newTotal * 100); // cents
+      }
+
+      // Create booking with BookingItems in a transaction that respects exclusion constraints
+      const booking = await createBookingSafely({
+        eventDate,
+        startTime,
+        endTime,
+        eventTimeZone: timezone,
+        status: "HOLD" as BookingStatus,
+        totalAmount: finalAmount / 100, // Convert cents to dollars
+        subtotalAmount: bookingData.subtotalAmount,
+        taxAmount: bookingData.taxAmount,
+        taxRate: bookingData.taxRate,
+        depositPaid: false,
+        eventType: bookingData.eventType || "OTHER",
+        eventAddress: bookingData.eventAddress,
+        eventCity: bookingData.eventCity,
+        eventState: bookingData.eventState,
+        eventZipCode: bookingData.eventZipCode,
+        participantCount: bookingData.participantCount,
+        participantAge: bookingData.participantAge,
+        specialInstructions: bookingData.specialInstructions,
+        business: {
+          connect: { id: businessId }
+        },
+        customer: {
+          connect: { id: customer.id }
+        },
+        inventoryItems: bookingData.selectedItems.map(item => ({
+          quantity: item.quantity,
+          price: item.price,
+          startUTC: startTime,
+          endUTC: endTime,
+          status: "HOLD",
+          inventory: { connect: { id: item.id } }
+
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        })) as any,
+      });
+
+      // Ensure booking was created successfully
+      if (!booking) {
+        return NextResponse.json({ error: "Failed to create booking record" }, { status: 500 });
+      }
+
+      // Now create the Stripe customer and payment intent
       const stripeCustomerId = await findOrCreateStripeCustomer(
-          customerEmail,
-          customerName,
-          customerPhone,
-          eventCity,
-          eventState,
-          eventAddress,
-          eventZipCode,
-          businessId,
-          stripeConnectedAccountId
+        bookingData.customerEmail,
+        bookingData.customerName,
+        bookingData.customerPhone,
+        bookingData.eventCity,
+        bookingData.eventState,
+        bookingData.eventAddress,
+        bookingData.eventZipCode,
+        businessId,
+        stripeConnectedAccountId
       );
-      console.log(`Using Stripe Customer ID: ${stripeCustomerId}`);
+      
+      // Prepare metadata for the payment intent
+      const metadata = {
+        bookingId: booking.id,
+        businessId,
+        customerId: customer.id,
+        customerName: bookingData.customerName,
+        customerEmail: bookingData.customerEmail,
+        customerPhone: bookingData.customerPhone,
+        eventDate: bookingData.eventDate,
+        startTime: bookingData.startTime,
+        endTime: bookingData.endTime,
+        eventAddress: bookingData.eventAddress,
+        eventCity: bookingData.eventCity,
+        eventState: bookingData.eventState,
+        eventZipCode: bookingData.eventZipCode,
+        eventTimeZone: timezone,
+        eventType: bookingData.eventType || "OTHER",
+        participantCount: bookingData.participantCount.toString(),
+        participantAge: bookingData.participantAge?.toString() || "",
+        subtotalAmount: bookingData.subtotalAmount.toString(),
+        taxAmount: bookingData.taxAmount.toString(),
+        taxRate: bookingData.taxRate.toString(),
+        totalAmount: ((finalAmount / 100).toString()),
+        specialInstructions: bookingData.specialInstructions || "",
+        selectedItems: JSON.stringify(bookingData.selectedItems),
+        ...(couponCode ? { couponCode } : {}),
+        ...(couponDiscount > 0 ? { couponAmount: couponDiscount.toString() } : {}),
+      };
       
       // Create a PaymentIntent on behalf of the connected account
       const paymentIntent = await stripe.paymentIntents.create(
         {
-          amount,
+          amount: finalAmount,
           currency: "usd",
           payment_method_types: ["card"],
-          receipt_email: customerEmail,
-          metadata: sanitizedMetadata,
+          receipt_email: bookingData.customerEmail,
+          metadata,
           customer: stripeCustomerId,
-        
-          
         },
         {
           stripeAccount: stripeConnectedAccountId,
@@ -86,16 +255,26 @@ export async function POST(
       );
 
       if (!paymentIntent.client_secret) {
+        // If we couldn't get a client secret, mark the booking as cancelled
+        await prisma.booking.update({
+          where: { id: booking.id },
+          data: { status: "CANCELLED" }
+        });
         return NextResponse.json({ error: "Failed to get client secret from Stripe" }, { status: 500 });
       }
 
-      return NextResponse.json({ clientSecret: paymentIntent.client_secret }, { status: 200 });
-    } catch (stripeError) {
-      console.error("Stripe error creating payment intent:", stripeError);
-      return NextResponse.json({ error: stripeError instanceof Error ? stripeError.message : "Stripe payment intent creation failed" }, { status: 500 });
+      return NextResponse.json({ 
+        bookingId: booking.id,
+        clientSecret: paymentIntent.client_secret 
+      }, { status: 200 });
+    } catch (error) {
+      console.error("Error creating booking or payment intent:", error);
+      return NextResponse.json({ 
+        error: error instanceof Error ? error.message : "Failed to create booking" 
+      }, { status: 500 });
     }
   } catch (error) {
-    console.error("Error creating PaymentIntent:", error);
+    console.error("Error in POST /api/businesses/[businessId]/bookings:", error);
     if (error instanceof z.ZodError) {
       return NextResponse.json(
         { error: "Invalid input", details: error.errors },

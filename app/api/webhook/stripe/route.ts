@@ -328,6 +328,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             inventoryId: item.id,
             quantity: item.quantity || 1,
             price: item.price || 0,
+            status: 'CONFIRMED',
+            startUTC: startUTC,
+            endUTC: endUTC,
           }));
         } else {
           // Fallback to legacy bounceHouseId for backwards compatibility
@@ -335,6 +338,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             inventoryId: metadata.bounceHouseId,
             quantity: 1,
             price: subtotalAmount,
+            status: 'CONFIRMED',
+            startUTC: startUTC,
+            endUTC: endUTC,
           }];
         }
       } catch (parseError) {
@@ -344,6 +350,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           inventoryId: metadata.bounceHouseId,
           quantity: 1,
           price: subtotalAmount,
+          status: 'CONFIRMED',
+          startUTC: startUTC,
+          endUTC: endUTC,
         }];
       }
 
@@ -372,6 +381,8 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         inventoryItems: {
           create: inventoryItems,
         },
+        business: { connect: { id: metadata.businessId } },
+        customer: { connect: { id: customer.id } },
       };
 
       booking = await prisma.booking.upsert({
@@ -380,7 +391,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           status: 'CONFIRMED',
           depositPaid: true,
         },
-        create: bookingData,
+        create: bookingData as import("@/prisma/generated/prisma").Prisma.BookingCreateInput,
         include: {
           inventoryItems: true,
         },
@@ -422,6 +433,16 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     }
 
     console.log(`[handlePaymentIntentSucceeded] Booking ${booking?.id} confirmed successfully via Payment Intent`);
+
+    const invoiceMeta = paymentIntent.metadata ?? null;
+    if (invoiceMeta && invoiceMeta.couponCode && metadata.businessId) {
+      await prisma.$transaction(async (tx) => {
+        await tx.coupon.update({
+          where: { code_businessId: { code: invoiceMeta.couponCode, businessId: metadata.businessId } },
+          data: { usedCount: { increment: 1 } },
+        });
+      });
+    }
 
   } catch (error) {
     // --- MODIFIED CATCH BLOCK --- 
@@ -860,7 +881,7 @@ async function handleBookingConfirmation(bookingId: string) {
       <p>The ${business.name} Team</p>
     `; // Improved email content
     await sendSignatureEmail({
-      from: `${business.name} <onboarding@resend.dev>`, // Use dynamic business name
+      from: `${business.name} <noreply@inflatmate.co>`, // Use dynamic business name
       to: customer.email,
       subject: `Action Required: Sign Your Waiver for Booking with ${business.name}`, // More specific subject
       html: emailHtml,
@@ -979,6 +1000,16 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     // Call the confirmation handler
     console.log(`[HANDLER] Calling handleBookingConfirmation for Booking ID: ${bookingIdToConfirm}`);
     await handleBookingConfirmation(bookingIdToConfirm);
+
+    const invoiceMeta = invoice.metadata ?? null;
+    if (invoiceMeta && invoiceMeta.couponCode && internalInvoice.booking?.businessId) {
+      await prisma.$transaction(async (tx) => {
+        await tx.coupon.update({
+          where: { code_businessId: { code: invoiceMeta.couponCode, businessId: internalInvoice.booking.businessId } },
+          data: { usedCount: { increment: 1 } },
+        });
+      });
+    }
 
   } catch (error) {
     // --- MODIFIED CATCH BLOCK --- 

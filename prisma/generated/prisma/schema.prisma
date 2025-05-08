@@ -201,35 +201,39 @@ model Booking {
   specialInstructions String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @default(now())
-
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String
-  customer   Customer @relation(fields: [customerId], references: [id])
-  customerId String
-
-  inventoryItems BookingItem[]
-  payments       Payment[]
-  waivers        Waiver[]
-  invoice        Invoice?
-  quote          Quote?
+  couponId            String?
+  coupon              Coupon?       @relation(fields: [couponId], references: [id])
+  business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId          String
+  customer            Customer      @relation(fields: [customerId], references: [id])
+  customerId          String
+  inventoryItems      BookingItem[]
+  payments            Payment[]
+  waivers             Waiver[]
+  invoice             Invoice?
+  quote               Quote?
 
   @@index([businessId])
   @@index([customerId])
   @@index([eventDate])
+  @@index([couponId])
   @@index([startTime, endTime])
 }
 
 model BookingItem {
-  id        String   @id @default(cuid())
-  quantity  Int      @default(1)
-  price     Float
-  createdAt DateTime @default(now())
-  updatedAt DateTime @default(now())
-
-  booking     Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  id          String                   @id @default(cuid())
+  quantity    Int                      @default(1)
+  price       Float
+  createdAt   DateTime                 @default(now())
+  updatedAt   DateTime                 @default(now())
+  startUTC    DateTime
+  endUTC      DateTime
+  booking     Booking                  @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   bookingId   String
-  inventory   Inventory @relation(fields: [inventoryId], references: [id])
+  status      String                   @map("bookingStatus")
+  inventory   Inventory                @relation(fields: [inventoryId], references: [id])
   inventoryId String
+  period      Unsupported("tstzrange")
 
   @@index([bookingId])
   @@index([inventoryId])
@@ -254,21 +258,24 @@ model Payment {
 }
 
 model Coupon {
-  id             String       @id @default(cuid())
-  code           String
-  description    String?
-  discountType   DiscountType
-  discountAmount Float
-  maxUses        Int?
-  usedCount      Int          @default(0)
-  startDate      DateTime?
-  endDate        DateTime?
-  isActive       Boolean      @default(true)
-  minimumAmount  Float?
-  businessId     String
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  business       Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  id                String       @id @default(cuid())
+  code              String
+  description       String?
+  discountType      DiscountType
+  discountAmount    Float
+  maxUses           Int?
+  usedCount         Int          @default(0)
+  startDate         DateTime?
+  endDate           DateTime?
+  isActive          Boolean      @default(true)
+  minimumAmount     Float?
+  businessId        String
+  stripeCouponId    String?
+  stripePromotionId String?
+  createdAt         DateTime     @default(now())
+  updatedAt         DateTime     @updatedAt
+  business          Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  booking           Booking[]
 
   @@unique([code, businessId])
   @@index([businessId])
@@ -426,8 +433,7 @@ enum BookingStatus {
   CONFIRMED
   CANCELLED
   COMPLETED
-  NO_SHOW
-  WEATHER_HOLD
+  HOLD
 }
 
 enum PaymentType {

@@ -4,7 +4,6 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { AnimatePresence, motion } from 'framer-motion';
 import {
   Menu as MenuIcon,
   X as XIcon,
@@ -22,7 +21,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { usePathname } from 'next/navigation';
 import { useAuth } from "@clerk/nextjs";
-
+import { AnimatePresence, motion } from 'framer-motion';
 
 
 const FEATURES = [
@@ -77,6 +76,8 @@ const RESOURCES = [
 const MAIN_LINKS = [
   { label: 'Pricing', href: '/pricing' },
   { label: 'Contact', href: '/contact' },
+  { label: 'Features', href: '/features' },
+  { label: 'Resources', href: '/resources' },
 ];
 
 export default function Navbar() {
@@ -227,7 +228,7 @@ export default function Navbar() {
                     dropdownOpen && "transform rotate-180"
                   )}
                 />
-              </button>
+              </button> 
 
               <AnimatePresence>
                 {dropdownOpen && (
@@ -253,7 +254,7 @@ export default function Navbar() {
                   </motion.div>
                 )}
               </AnimatePresence>
-            </div>
+            </div> 
 
             <div
               className="relative"
@@ -430,9 +431,6 @@ export default function Navbar() {
 
               {/* Pages group */}
               <div>
-                <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
-                  Pages
-                </h3>
                 <nav className="space-y-1">
                   {MAIN_LINKS.map((link) => (
                     <Link

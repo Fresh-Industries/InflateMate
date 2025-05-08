@@ -247,6 +247,7 @@ exports.Prisma.BookingScalarFieldEnum = {
   specialInstructions: 'specialInstructions',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  couponId: 'couponId',
   businessId: 'businessId',
   customerId: 'customerId'
 };
@@ -257,7 +258,10 @@ exports.Prisma.BookingItemScalarFieldEnum = {
   price: 'price',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  startUTC: 'startUTC',
+  endUTC: 'endUTC',
   bookingId: 'bookingId',
+  status: 'status',
   inventoryId: 'inventoryId'
 };
 
@@ -290,6 +294,8 @@ exports.Prisma.CouponScalarFieldEnum = {
   isActive: 'isActive',
   minimumAmount: 'minimumAmount',
   businessId: 'businessId',
+  stripeCouponId: 'stripeCouponId',
+  stripePromotionId: 'stripePromotionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -441,8 +447,7 @@ exports.BookingStatus = exports.$Enums.BookingStatus = {
   CONFIRMED: 'CONFIRMED',
   CANCELLED: 'CANCELLED',
   COMPLETED: 'COMPLETED',
-  NO_SHOW: 'NO_SHOW',
-  WEATHER_HOLD: 'WEATHER_HOLD'
+  HOLD: 'HOLD'
 };
 
 exports.PaymentType = exports.$Enums.PaymentType = {
