@@ -52,10 +52,10 @@ const finalizeBookingSchema = z.object({
 // --- POST: Finalize Booking and Create Payment Intent ---
 export async function POST(
   req: NextRequest,
-  { params }: { params: { businessId: string } }
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    const { businessId } = params;
+    const { businessId } = await params;
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
