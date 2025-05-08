@@ -8,7 +8,7 @@ import { cache } from "react"; // Import cache from react
  *
  * @returns The full User object with relations, or null if not authenticated or found.
  */
-export const getCurrentUserWithOrgAndBusiness = cache(async () => { // Wrap with cache
+export const getCurrentUserWithOrgAndBusiness = cache(async () => { 
   const { userId } = await auth();
 
   if (!userId) {

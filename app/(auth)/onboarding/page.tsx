@@ -62,7 +62,8 @@ const Step2 = memo(({ formData, onFieldChange }: {
     businessCity: string; 
     businessState: string; 
     businessZip: string; 
-    businessPhone: string; 
+    businessPhone: string;
+    businessEmail: string;
   }; 
   onFieldChange: (field: string, value: string) => void 
 }) => (
@@ -139,6 +140,19 @@ const Step2 = memo(({ formData, onFieldChange }: {
         required
       />
     </div>
+    <div>
+      <Label htmlFor="businessEmail" className="mb-1 block text-gray-700 font-medium">
+        Business Email
+      </Label>
+      <Input
+        id="businessEmail"
+        value={formData.businessEmail}
+        onChange={(e) => onFieldChange('businessEmail', e.target.value)}
+        placeholder="business@example.com"
+        className="rounded-lg border-gray-200 focus:border-purple-400 focus:ring-2 focus:ring-purple-400 transition-all"
+        required
+      />
+    </div>
   </div>
 ));
 Step2.displayName = 'Step2';
@@ -163,6 +177,7 @@ export default function OnboardingPage() {
     businessState: "",
     businessZip: "",
     businessPhone: "",
+    businessEmail: "",
   });
 
   const stripeConnectInstance = useStripeConnect(connectedAccountId || "");
@@ -201,6 +216,7 @@ export default function OnboardingPage() {
         businessState: formData.businessState,
         businessZip: formData.businessZip,
         businessPhone: formData.businessPhone,
+        businessEmail: formData.businessEmail,
       });
 
       setIsLoading(true);

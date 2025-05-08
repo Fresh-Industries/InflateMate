@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { supabase } from "@/lib/supabaseClient";
 import { useToast } from "@/hooks/use-toast";
 import { format } from "date-fns";
 import { Elements } from "@stripe/react-stripe-js";
@@ -40,6 +41,7 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { SheetClose } from "@/components/ui/sheet";
 import React from "react";
+
 
 // Inventory item type
 type InventoryItem = {
@@ -157,12 +159,15 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const [selectedItems, setSelectedItems] = useState<Map<string, SelectedItem>>(new Map());
   const [businessData, setBusinessData] = useState<Business | null>(null);
   const [taxRate, setTaxRate] = useState(0);
+  
   const [applyTax, setApplyTax] = useState(false);
-  const sheetCloseRef = React.useRef<HTMLButtonElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [realtimeChannel, setRealtimeChannel] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [isProcessingQuote, setIsProcessingQuote] = useState(false);
-  const pollIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const [isPollingSuspended, setIsPollingSuspended] = useState(false);
+  const sheetCloseRef = React.useRef<HTMLButtonElement>(null);
+ // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isProcessingQuote, setIsProcessingQuote] = useState(false);
   
   const [newBooking, setNewBooking] = useState({
     bounceHouseId: "",
@@ -185,6 +190,8 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
 
   // Add pagination state
   const [currentPage, setCurrentPage] = useState(1);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const [recentlyUnavailableItems, setRecentlyUnavailableItems] = useState<any>(new Set());
 
   // Steps for progress indicator
   const steps = [
@@ -281,18 +288,18 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     }
   };
 
-  // Check if previously selected items are still available
   const checkForUnavailableItems = (currentlyAvailable: InventoryItem[]) => {
     // Create a map of currently available inventory for quick lookup
     const availableMap = new Map<string, InventoryItem>();
     currentlyAvailable.forEach(item => {
       availableMap.set(item.id, item);
     });
-
+  
     // Check if any of the selected items are no longer available
     const unavailableItems: SelectedItem[] = [];
+    const newUnavailableItemIds: string[] = [];
     const updatedSelectedItems = new Map(selectedItems);
-
+  
     selectedItems.forEach((selectedItem, itemId) => {
       const availableItem = availableMap.get(itemId);
       
@@ -300,6 +307,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       if (!availableItem) {
         unavailableItems.push(selectedItem);
         updatedSelectedItems.delete(itemId);
+        newUnavailableItemIds.push(itemId); // Track for animation
       } 
       // Quantity has decreased below what's selected
       else if (availableItem.quantity < selectedItem.quantity) {
@@ -316,10 +324,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
           });
         } else {
           updatedSelectedItems.delete(itemId);
+          newUnavailableItemIds.push(itemId); // Track for animation
         }
       }
     });
-
+  
     // If any items became unavailable, notify user and update selection
     if (unavailableItems.length > 0) {
       // Update the available inventory list
@@ -327,7 +336,14 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       
       // Update the selected items map
       setSelectedItems(updatedSelectedItems);
-
+  
+      // Add these to recently unavailable for animation
+      setRecentlyUnavailableItems((prev: Set<string>) => {
+        const newSet = new Set(prev);
+        newUnavailableItemIds.forEach(id => newSet.add(id));
+        return newSet;
+      });
+  
       // Show toast with unavailable items
       const itemNames = unavailableItems.map(item => item.item.name).join(", ");
       toast({
@@ -335,44 +351,74 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         description: `These items were just booked by someone else: ${itemNames}`,
         variant: "destructive"
       });
+      
+      // Remove from recently unavailable after animation
+      setTimeout(() => {
+        setRecentlyUnavailableItems((prev: Set<string>) => {
+          const newSet = new Set(prev);
+          newUnavailableItemIds.forEach(id => newSet.delete(id));
+          return newSet;
+        });
+      }, 3000);
     }
   };
 
   // Set up polling for availability
   useEffect(() => {
-    // Start polling when on step 1 and has searched
-    const shouldPoll = currentStep === 1 && hasSearched && !isPollingSuspended;
-    
-    // Clear any existing interval
-    if (pollIntervalRef.current) {
-      clearInterval(pollIntervalRef.current);
-      pollIntervalRef.current = null;
+    // Only set up subscription when on step 1 and has searched
+    if (currentStep === 1 && hasSearched && !isPollingSuspended) {
+      // Format date for channel name (to keep channels specific to date/time)
+      const channelIdentifier = `availability:${newBooking.eventDate}:${newBooking.startTime}:${newBooking.endTime}`;
+      
+      // Set up Supabase subscription
+      const channel = supabase.channel(channelIdentifier)
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'Booking',
+          filter: `businessId=eq.${businessId}` 
+        }, (payload) => {
+          console.log('Booking change detected:', payload);
+          // When a booking changes, check availability silently
+          searchAvailability(true);
+        })
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'BookingItem' 
+        }, (payload) => {
+          console.log('BookingItem change detected:', payload);
+          // When booking items change, check availability silently
+          searchAvailability(true);
+        })
+        .on('postgres_changes', { 
+          event: '*', 
+          schema: 'public', 
+          table: 'Inventory',
+          filter: `businessId=eq.${businessId}` 
+        }, (payload) => {
+          console.log('Inventory change detected:', payload);
+          // When inventory changes, check availability silently
+          searchAvailability(true);
+        })
+        .subscribe();
+      
+      setRealtimeChannel(channel);
+      
+      // Cleanup function
+      return () => {
+        channel.unsubscribe();
+      };
     }
     
-    // Set up new polling if needed
-    if (shouldPoll) {
-      pollIntervalRef.current = setInterval(() => {
-        searchAvailability(true); // silent mode
-      }, 5000); // 5 seconds
-    }
-    
-    // Cleanup on component unmount
+    // Cleanup when component unmounts or conditions change
     return () => {
-      if (pollIntervalRef.current) {
-        clearInterval(pollIntervalRef.current);
+      if (realtimeChannel) {
+        realtimeChannel.unsubscribe();
+        setRealtimeChannel(null);
       }
     };
-  }, [currentStep, hasSearched, newBooking.eventDate, newBooking.startTime, newBooking.endTime, isPollingSuspended]);
-
-  // Suspend polling during other operations
-  useEffect(() => {
-    if (isSearchingAvailability) {
-      setIsPollingSuspended(true);
-    } else {
-      setIsPollingSuspended(false);
-    }
-  }, [isSearchingAvailability]);
-
+  }, [currentStep, hasSearched, isPollingSuspended, newBooking.eventDate, newBooking.startTime, newBooking.endTime]);
   // Select an inventory item
   const selectInventoryItem = (item: InventoryItem, quantity: number = 1) => {
     setSelectedItems(prev => {
@@ -1118,12 +1164,14 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
                       
                       return (
                         <Card
-                          key={item.id}
-                          className={`group overflow-hidden transition-all duration-300 ${
-                            isSelected
-                              ? "ring-2 ring-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
-                              : "hover:border-primary/50 hover:shadow-md"
-                          }`}
+                        key={item.id}
+                        className={`group overflow-hidden transition-all duration-300 ${
+                          isSelected
+                            ? "ring-2 ring-gradient-to-r from-blue-600 to-purple-600 shadow-lg"
+                            : recentlyUnavailableItems.has(item.id)
+                            ? "animate-pulse border-red-500 bg-red-50"
+                            : "hover:border-primary/50 hover:shadow-md"
+                        }`}
                         >
                           <div className="relative">
                             {item.primaryImage ? (

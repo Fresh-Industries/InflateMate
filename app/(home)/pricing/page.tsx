@@ -2,8 +2,7 @@
 // Keep this as a Server Component
 
 import { Suspense } from 'react';
-import PricingClient from '../_components/pricing-client'; // Import the new client component
-
+import PricingList from '../_components/PricingList';
 // Optional: Define a loading component
 function PricingSkeleton() {
   return (
@@ -22,16 +21,19 @@ function PricingSkeleton() {
     </section>
   );
 }
-
 export default function PricingPage() {
   return (
-    <Suspense fallback={<PricingSkeleton />}>
-      {/* 
-        Pass searchParams as props if needed by the client component, 
-        but here PricingClient uses useSearchParams() directly. 
-        So we just render it inside Suspense.
-       */}
-      <PricingClient />
-    </Suspense>
+    <section className="py-24 bg-white">
+      <div className="container mx-auto px-4 text-center mb-16">
+        <h2 className="text-4xl font-bold mb-6">One Simple Pricing for Everyone</h2>
+        <p className="text-xl text-gray-600 leading-relaxed max-w-3xl mx-auto">
+          No hidden fees, no complicated tiers—just the features you need.
+        </p>
+      </div>
+
+      <Suspense fallback={<PricingSkeleton />}>
+        <PricingList />
+      </Suspense>
+    </section>
   );
 }

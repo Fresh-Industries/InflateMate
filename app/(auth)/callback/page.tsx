@@ -20,6 +20,7 @@ export default function CallbackPage() {
       
       const data = await res.json();
       console.log(data);
+      console.log(data.subscription)
       // 1. unpaid and onboarded → pricing
       if (
         data.business &&

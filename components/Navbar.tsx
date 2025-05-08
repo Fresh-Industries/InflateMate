@@ -106,6 +106,8 @@ export default function Navbar() {
         const response = await fetch('/api/me');
         if (response.ok) {
           const data = await response.json();
+          console.log(data)
+          console.log(data.orgId)
           if (!data.business) {
             setDashboardHref("/onboarding");
           } else if (
@@ -335,7 +337,7 @@ export default function Navbar() {
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/waitlist">
+                <Link href="/sign-up">
                   <Button variant="outline" size="sm">
                     Join Waitlist
                   </Button>

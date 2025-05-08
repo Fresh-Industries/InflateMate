@@ -339,7 +339,8 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   cancelAtPeriodEnd: 'cancelAtPeriodEnd',
   organizationId: 'organizationId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  type: 'type'
 };
 
 exports.Prisma.InvoiceScalarFieldEnum = {
@@ -473,6 +474,11 @@ exports.WaiverStatus = exports.$Enums.WaiverStatus = {
   SIGNED: 'SIGNED',
   REJECTED: 'REJECTED',
   EXPIRED: 'EXPIRED'
+};
+
+exports.SubscriptionType = exports.$Enums.SubscriptionType = {
+  SOLO: 'SOLO',
+  GROWTH: 'GROWTH'
 };
 
 exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {

@@ -98,6 +98,17 @@ export async function GET(
             status: 'OPEN',
             expiresAt: { gt: now } 
           }
+        },
+        // Condition 3: Confirmed booking with a hold
+        {
+          status: 'HOLD',
+          startTime: { lt: requestedEndUTC },
+          endTime: { gt: requestedStartUTC },
+          inventoryItems: {
+            every: {
+              status: 'HOLD',
+            }
+          }
         }
       ]
     },

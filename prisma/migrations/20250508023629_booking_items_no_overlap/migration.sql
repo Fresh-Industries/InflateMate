@@ -19,4 +19,4 @@ alter table "BookingItem"
     "inventoryId" with =,
     period        with &&
   )
-  where ("bookingStatus" in ('CONFIRMED','PENDING'));   
+  where ("bookingStatus" in ('CONFIRMED','PENDING', 'HOLD'));   

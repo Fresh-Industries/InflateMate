@@ -199,10 +199,28 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleSubscription(subscription: Stripe.Subscription) {
-  console.log(`Subscription: ${subscription.id}`);
+  console.log(`Subscription event: ${subscription.id}`);
 
+  // 1️⃣ Get the customer
   const customerId = subscription.customer as string;
-  await syncStripeDataToDB(customerId);
+
+  // 2️⃣ Extract the priceId from the first line item
+  const priceId = subscription.items.data[0]?.price.id;
+  console.log(` → priceId: ${priceId}`);
+
+  // 3️⃣ Map that back to your plan key
+  let plan: string;
+  if (priceId === process.env.STRIPE_SOLO_PRICE_ID) {
+    plan = 'solo';
+  } else if (priceId === process.env.STRIPE_GROWTH_PRICE_ID) {
+    plan = 'growth';
+  } else {
+    console.warn(`Unrecognized priceId for subscription ${subscription.id}:`, priceId);
+    plan = 'unknown';
+  }
+
+  // 4️⃣ Now sync, passing the plan
+  await syncStripeDataToDB(customerId, plan);
 }
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent succeeded: ${paymentIntent.id}`);
@@ -821,11 +839,11 @@ async function handleBookingConfirmation(bookingId: string) {
     const docuSealBooking: Booking = {
       id: booking.id,
       eventDate: formattedEventDate, // Use formatted string date
-      eventAddress: booking.eventAddress,
-      eventCity: booking.eventCity,
-      eventState: booking.eventState,
-      eventZipCode: booking.eventZipCode,
-      participantCount: booking.participantCount,
+      eventAddress: booking.eventAddress || '',
+      eventCity: booking.eventCity || '',
+      eventState: booking.eventState || '',
+      eventZipCode: booking.eventZipCode || '',
+      participantCount: booking.participantCount || 1,
       participantAge: booking.participantAge ?? undefined,
     };
 

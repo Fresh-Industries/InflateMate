@@ -106,6 +106,14 @@ export namespace $Enums {
 export type Role = (typeof Role)[keyof typeof Role]
 
 
+export const SubscriptionType: {
+  SOLO: 'SOLO',
+  GROWTH: 'GROWTH'
+};
+
+export type SubscriptionType = (typeof SubscriptionType)[keyof typeof SubscriptionType]
+
+
 export const QuoteStatus: {
   DRAFT: 'DRAFT',
   OPEN: 'OPEN',
@@ -202,6 +210,10 @@ export type InvoiceStatus = (typeof InvoiceStatus)[keyof typeof InvoiceStatus]
 export type Role = $Enums.Role
 
 export const Role: typeof $Enums.Role
+
+export type SubscriptionType = $Enums.SubscriptionType
+
+export const SubscriptionType: typeof $Enums.SubscriptionType
 
 export type QuoteStatus = $Enums.QuoteStatus
 
@@ -10699,20 +10711,20 @@ export namespace Prisma {
     startTime: Date
     endTime: Date
     status: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount: number | null
     depositAmount: number | null
     depositPaid: boolean
     eventType: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress: string | null
+    eventCity: string | null
+    eventState: string | null
+    eventZipCode: string | null
     eventTimeZone: string
     participantAge: number | null
-    participantCount: number
-    subtotalAmount: number
-    taxAmount: number
-    taxRate: number
+    participantCount: number | null
+    subtotalAmount: number | null
+    taxAmount: number | null
+    taxRate: number | null
     isCompleted: boolean
     isCancelled: boolean
     specialInstructions: string | null
@@ -10720,7 +10732,7 @@ export namespace Prisma {
     updatedAt: Date
     couponId: string | null
     businessId: string
-    customerId: string
+    customerId: string | null
     _count: BookingCountAggregateOutputType | null
     _avg: BookingAvgAggregateOutputType | null
     _sum: BookingSumAggregateOutputType | null
@@ -10772,7 +10784,7 @@ export namespace Prisma {
     customerId?: boolean
     coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    customer?: boolean | Booking$customerArgs<ExtArgs>
     inventoryItems?: boolean | Booking$inventoryItemsArgs<ExtArgs>
     payments?: boolean | Booking$paymentsArgs<ExtArgs>
     waivers?: boolean | Booking$waiversArgs<ExtArgs>
@@ -10811,7 +10823,7 @@ export namespace Prisma {
     customerId?: boolean
     coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    customer?: boolean | Booking$customerArgs<ExtArgs>
   }, ExtArgs["result"]["booking"]>
 
   export type BookingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10844,7 +10856,7 @@ export namespace Prisma {
     customerId?: boolean
     coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    customer?: boolean | Booking$customerArgs<ExtArgs>
   }, ExtArgs["result"]["booking"]>
 
   export type BookingSelectScalar = {
@@ -10881,7 +10893,7 @@ export namespace Prisma {
   export type BookingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    customer?: boolean | Booking$customerArgs<ExtArgs>
     inventoryItems?: boolean | Booking$inventoryItemsArgs<ExtArgs>
     payments?: boolean | Booking$paymentsArgs<ExtArgs>
     waivers?: boolean | Booking$waiversArgs<ExtArgs>
@@ -10892,12 +10904,12 @@ export namespace Prisma {
   export type BookingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    customer?: boolean | Booking$customerArgs<ExtArgs>
   }
   export type BookingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
+    customer?: boolean | Booking$customerArgs<ExtArgs>
   }
 
   export type $BookingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -10905,7 +10917,7 @@ export namespace Prisma {
     objects: {
       coupon: Prisma.$CouponPayload<ExtArgs> | null
       business: Prisma.$BusinessPayload<ExtArgs>
-      customer: Prisma.$CustomerPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs> | null
       inventoryItems: Prisma.$BookingItemPayload<ExtArgs>[]
       payments: Prisma.$PaymentPayload<ExtArgs>[]
       waivers: Prisma.$WaiverPayload<ExtArgs>[]
@@ -10918,20 +10930,20 @@ export namespace Prisma {
       startTime: Date
       endTime: Date
       status: $Enums.BookingStatus
-      totalAmount: number
+      totalAmount: number | null
       depositAmount: number | null
       depositPaid: boolean
       eventType: string | null
-      eventAddress: string
-      eventCity: string
-      eventState: string
-      eventZipCode: string
+      eventAddress: string | null
+      eventCity: string | null
+      eventState: string | null
+      eventZipCode: string | null
       eventTimeZone: string
       participantAge: number | null
-      participantCount: number
-      subtotalAmount: number
-      taxAmount: number
-      taxRate: number
+      participantCount: number | null
+      subtotalAmount: number | null
+      taxAmount: number | null
+      taxRate: number | null
       isCompleted: boolean
       isCancelled: boolean
       specialInstructions: string | null
@@ -10939,7 +10951,7 @@ export namespace Prisma {
       updatedAt: Date
       couponId: string | null
       businessId: string
-      customerId: string
+      customerId: string | null
     }, ExtArgs["result"]["booking"]>
     composites: {}
   }
@@ -11336,7 +11348,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     coupon<T extends Booking$couponArgs<ExtArgs> = {}>(args?: Subset<T, Booking$couponArgs<ExtArgs>>): Prisma__CouponClient<$Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends Booking$customerArgs<ExtArgs> = {}>(args?: Subset<T, Booking$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     inventoryItems<T extends Booking$inventoryItemsArgs<ExtArgs> = {}>(args?: Subset<T, Booking$inventoryItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends Booking$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Booking$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     waivers<T extends Booking$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Booking$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -11810,6 +11822,25 @@ export namespace Prisma {
      */
     include?: CouponInclude<ExtArgs> | null
     where?: CouponWhereInput
+  }
+
+  /**
+   * Booking.customer
+   */
+  export type Booking$customerArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Customer
+     */
+    select?: CustomerSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Customer
+     */
+    omit?: CustomerOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CustomerInclude<ExtArgs> | null
+    where?: CustomerWhereInput
   }
 
   /**
@@ -17722,6 +17753,7 @@ export namespace Prisma {
     organizationId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    type: $Enums.SubscriptionType | null
   }
 
   export type SubscriptionMaxAggregateOutputType = {
@@ -17736,6 +17768,7 @@ export namespace Prisma {
     organizationId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    type: $Enums.SubscriptionType | null
   }
 
   export type SubscriptionCountAggregateOutputType = {
@@ -17750,6 +17783,7 @@ export namespace Prisma {
     organizationId: number
     createdAt: number
     updatedAt: number
+    type: number
     _all: number
   }
 
@@ -17766,6 +17800,7 @@ export namespace Prisma {
     organizationId?: true
     createdAt?: true
     updatedAt?: true
+    type?: true
   }
 
   export type SubscriptionMaxAggregateInputType = {
@@ -17780,6 +17815,7 @@ export namespace Prisma {
     organizationId?: true
     createdAt?: true
     updatedAt?: true
+    type?: true
   }
 
   export type SubscriptionCountAggregateInputType = {
@@ -17794,6 +17830,7 @@ export namespace Prisma {
     organizationId?: true
     createdAt?: true
     updatedAt?: true
+    type?: true
     _all?: true
   }
 
@@ -17881,6 +17918,7 @@ export namespace Prisma {
     organizationId: string
     createdAt: Date
     updatedAt: Date
+    type: $Enums.SubscriptionType
     _count: SubscriptionCountAggregateOutputType | null
     _min: SubscriptionMinAggregateOutputType | null
     _max: SubscriptionMaxAggregateOutputType | null
@@ -17912,6 +17950,7 @@ export namespace Prisma {
     organizationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    type?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subscription"]>
 
@@ -17927,6 +17966,7 @@ export namespace Prisma {
     organizationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    type?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subscription"]>
 
@@ -17942,6 +17982,7 @@ export namespace Prisma {
     organizationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    type?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["subscription"]>
 
@@ -17957,9 +17998,10 @@ export namespace Prisma {
     organizationId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    type?: boolean
   }
 
-  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeCustomerId" | "stripeSubscriptionId" | "status" | "priceId" | "currentPeriodStart" | "currentPeriodEnd" | "cancelAtPeriodEnd" | "organizationId" | "createdAt" | "updatedAt", ExtArgs["result"]["subscription"]>
+  export type SubscriptionOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeCustomerId" | "stripeSubscriptionId" | "status" | "priceId" | "currentPeriodStart" | "currentPeriodEnd" | "cancelAtPeriodEnd" | "organizationId" | "createdAt" | "updatedAt" | "type", ExtArgs["result"]["subscription"]>
   export type SubscriptionInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }
@@ -17987,6 +18029,7 @@ export namespace Prisma {
       organizationId: string
       createdAt: Date
       updatedAt: Date
+      type: $Enums.SubscriptionType
     }, ExtArgs["result"]["subscription"]>
     composites: {}
   }
@@ -18422,6 +18465,7 @@ export namespace Prisma {
     readonly organizationId: FieldRef<"Subscription", 'String'>
     readonly createdAt: FieldRef<"Subscription", 'DateTime'>
     readonly updatedAt: FieldRef<"Subscription", 'DateTime'>
+    readonly type: FieldRef<"Subscription", 'SubscriptionType'>
   }
     
 
@@ -22746,7 +22790,8 @@ export namespace Prisma {
     cancelAtPeriodEnd: 'cancelAtPeriodEnd',
     organizationId: 'organizationId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    type: 'type'
   };
 
   export type SubscriptionScalarFieldEnum = (typeof SubscriptionScalarFieldEnum)[keyof typeof SubscriptionScalarFieldEnum]
@@ -23065,6 +23110,20 @@ export namespace Prisma {
    * Reference to a field of type 'WaiverStatus[]'
    */
   export type ListEnumWaiverStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'WaiverStatus[]'>
+    
+
+
+  /**
+   * Reference to a field of type 'SubscriptionType'
+   */
+  export type EnumSubscriptionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionType'>
+    
+
+
+  /**
+   * Reference to a field of type 'SubscriptionType[]'
+   */
+  export type ListEnumSubscriptionTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'SubscriptionType[]'>
     
 
 
@@ -23772,20 +23831,20 @@ export namespace Prisma {
     startTime?: DateTimeFilter<"Booking"> | Date | string
     endTime?: DateTimeFilter<"Booking"> | Date | string
     status?: EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
-    totalAmount?: FloatFilter<"Booking"> | number
+    totalAmount?: FloatNullableFilter<"Booking"> | number | null
     depositAmount?: FloatNullableFilter<"Booking"> | number | null
     depositPaid?: BoolFilter<"Booking"> | boolean
     eventType?: StringNullableFilter<"Booking"> | string | null
-    eventAddress?: StringFilter<"Booking"> | string
-    eventCity?: StringFilter<"Booking"> | string
-    eventState?: StringFilter<"Booking"> | string
-    eventZipCode?: StringFilter<"Booking"> | string
+    eventAddress?: StringNullableFilter<"Booking"> | string | null
+    eventCity?: StringNullableFilter<"Booking"> | string | null
+    eventState?: StringNullableFilter<"Booking"> | string | null
+    eventZipCode?: StringNullableFilter<"Booking"> | string | null
     eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
-    participantCount?: IntFilter<"Booking"> | number
-    subtotalAmount?: FloatFilter<"Booking"> | number
-    taxAmount?: FloatFilter<"Booking"> | number
-    taxRate?: FloatFilter<"Booking"> | number
+    participantCount?: IntNullableFilter<"Booking"> | number | null
+    subtotalAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxRate?: FloatNullableFilter<"Booking"> | number | null
     isCompleted?: BoolFilter<"Booking"> | boolean
     isCancelled?: BoolFilter<"Booking"> | boolean
     specialInstructions?: StringNullableFilter<"Booking"> | string | null
@@ -23793,10 +23852,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Booking"> | Date | string
     couponId?: StringNullableFilter<"Booking"> | string | null
     businessId?: StringFilter<"Booking"> | string
-    customerId?: StringFilter<"Booking"> | string
+    customerId?: StringNullableFilter<"Booking"> | string | null
     coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
-    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     inventoryItems?: BookingItemListRelationFilter
     payments?: PaymentListRelationFilter
     waivers?: WaiverListRelationFilter
@@ -23810,20 +23869,20 @@ export namespace Prisma {
     startTime?: SortOrder
     endTime?: SortOrder
     status?: SortOrder
-    totalAmount?: SortOrder
+    totalAmount?: SortOrderInput | SortOrder
     depositAmount?: SortOrderInput | SortOrder
     depositPaid?: SortOrder
     eventType?: SortOrderInput | SortOrder
-    eventAddress?: SortOrder
-    eventCity?: SortOrder
-    eventState?: SortOrder
-    eventZipCode?: SortOrder
+    eventAddress?: SortOrderInput | SortOrder
+    eventCity?: SortOrderInput | SortOrder
+    eventState?: SortOrderInput | SortOrder
+    eventZipCode?: SortOrderInput | SortOrder
     eventTimeZone?: SortOrder
     participantAge?: SortOrderInput | SortOrder
-    participantCount?: SortOrder
-    subtotalAmount?: SortOrder
-    taxAmount?: SortOrder
-    taxRate?: SortOrder
+    participantCount?: SortOrderInput | SortOrder
+    subtotalAmount?: SortOrderInput | SortOrder
+    taxAmount?: SortOrderInput | SortOrder
+    taxRate?: SortOrderInput | SortOrder
     isCompleted?: SortOrder
     isCancelled?: SortOrder
     specialInstructions?: SortOrderInput | SortOrder
@@ -23831,7 +23890,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     couponId?: SortOrderInput | SortOrder
     businessId?: SortOrder
-    customerId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
     coupon?: CouponOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
@@ -23851,20 +23910,20 @@ export namespace Prisma {
     startTime?: DateTimeFilter<"Booking"> | Date | string
     endTime?: DateTimeFilter<"Booking"> | Date | string
     status?: EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
-    totalAmount?: FloatFilter<"Booking"> | number
+    totalAmount?: FloatNullableFilter<"Booking"> | number | null
     depositAmount?: FloatNullableFilter<"Booking"> | number | null
     depositPaid?: BoolFilter<"Booking"> | boolean
     eventType?: StringNullableFilter<"Booking"> | string | null
-    eventAddress?: StringFilter<"Booking"> | string
-    eventCity?: StringFilter<"Booking"> | string
-    eventState?: StringFilter<"Booking"> | string
-    eventZipCode?: StringFilter<"Booking"> | string
+    eventAddress?: StringNullableFilter<"Booking"> | string | null
+    eventCity?: StringNullableFilter<"Booking"> | string | null
+    eventState?: StringNullableFilter<"Booking"> | string | null
+    eventZipCode?: StringNullableFilter<"Booking"> | string | null
     eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
-    participantCount?: IntFilter<"Booking"> | number
-    subtotalAmount?: FloatFilter<"Booking"> | number
-    taxAmount?: FloatFilter<"Booking"> | number
-    taxRate?: FloatFilter<"Booking"> | number
+    participantCount?: IntNullableFilter<"Booking"> | number | null
+    subtotalAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxRate?: FloatNullableFilter<"Booking"> | number | null
     isCompleted?: BoolFilter<"Booking"> | boolean
     isCancelled?: BoolFilter<"Booking"> | boolean
     specialInstructions?: StringNullableFilter<"Booking"> | string | null
@@ -23872,10 +23931,10 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Booking"> | Date | string
     couponId?: StringNullableFilter<"Booking"> | string | null
     businessId?: StringFilter<"Booking"> | string
-    customerId?: StringFilter<"Booking"> | string
+    customerId?: StringNullableFilter<"Booking"> | string | null
     coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
-    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
+    customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     inventoryItems?: BookingItemListRelationFilter
     payments?: PaymentListRelationFilter
     waivers?: WaiverListRelationFilter
@@ -23889,20 +23948,20 @@ export namespace Prisma {
     startTime?: SortOrder
     endTime?: SortOrder
     status?: SortOrder
-    totalAmount?: SortOrder
+    totalAmount?: SortOrderInput | SortOrder
     depositAmount?: SortOrderInput | SortOrder
     depositPaid?: SortOrder
     eventType?: SortOrderInput | SortOrder
-    eventAddress?: SortOrder
-    eventCity?: SortOrder
-    eventState?: SortOrder
-    eventZipCode?: SortOrder
+    eventAddress?: SortOrderInput | SortOrder
+    eventCity?: SortOrderInput | SortOrder
+    eventState?: SortOrderInput | SortOrder
+    eventZipCode?: SortOrderInput | SortOrder
     eventTimeZone?: SortOrder
     participantAge?: SortOrderInput | SortOrder
-    participantCount?: SortOrder
-    subtotalAmount?: SortOrder
-    taxAmount?: SortOrder
-    taxRate?: SortOrder
+    participantCount?: SortOrderInput | SortOrder
+    subtotalAmount?: SortOrderInput | SortOrder
+    taxAmount?: SortOrderInput | SortOrder
+    taxRate?: SortOrderInput | SortOrder
     isCompleted?: SortOrder
     isCancelled?: SortOrder
     specialInstructions?: SortOrderInput | SortOrder
@@ -23910,7 +23969,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     couponId?: SortOrderInput | SortOrder
     businessId?: SortOrder
-    customerId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
     _count?: BookingCountOrderByAggregateInput
     _avg?: BookingAvgOrderByAggregateInput
     _max?: BookingMaxOrderByAggregateInput
@@ -23927,20 +23986,20 @@ export namespace Prisma {
     startTime?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
     endTime?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
     status?: EnumBookingStatusWithAggregatesFilter<"Booking"> | $Enums.BookingStatus
-    totalAmount?: FloatWithAggregatesFilter<"Booking"> | number
+    totalAmount?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
     depositAmount?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
     depositPaid?: BoolWithAggregatesFilter<"Booking"> | boolean
     eventType?: StringNullableWithAggregatesFilter<"Booking"> | string | null
-    eventAddress?: StringWithAggregatesFilter<"Booking"> | string
-    eventCity?: StringWithAggregatesFilter<"Booking"> | string
-    eventState?: StringWithAggregatesFilter<"Booking"> | string
-    eventZipCode?: StringWithAggregatesFilter<"Booking"> | string
+    eventAddress?: StringNullableWithAggregatesFilter<"Booking"> | string | null
+    eventCity?: StringNullableWithAggregatesFilter<"Booking"> | string | null
+    eventState?: StringNullableWithAggregatesFilter<"Booking"> | string | null
+    eventZipCode?: StringNullableWithAggregatesFilter<"Booking"> | string | null
     eventTimeZone?: StringWithAggregatesFilter<"Booking"> | string
     participantAge?: IntNullableWithAggregatesFilter<"Booking"> | number | null
-    participantCount?: IntWithAggregatesFilter<"Booking"> | number
-    subtotalAmount?: FloatWithAggregatesFilter<"Booking"> | number
-    taxAmount?: FloatWithAggregatesFilter<"Booking"> | number
-    taxRate?: FloatWithAggregatesFilter<"Booking"> | number
+    participantCount?: IntNullableWithAggregatesFilter<"Booking"> | number | null
+    subtotalAmount?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
+    taxAmount?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
+    taxRate?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
     isCompleted?: BoolWithAggregatesFilter<"Booking"> | boolean
     isCancelled?: BoolWithAggregatesFilter<"Booking"> | boolean
     specialInstructions?: StringNullableWithAggregatesFilter<"Booking"> | string | null
@@ -23948,7 +24007,7 @@ export namespace Prisma {
     updatedAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
     couponId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
     businessId?: StringWithAggregatesFilter<"Booking"> | string
-    customerId?: StringWithAggregatesFilter<"Booking"> | string
+    customerId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
   }
 
   export type BookingItemWhereInput = {
@@ -24444,6 +24503,7 @@ export namespace Prisma {
     organizationId?: StringFilter<"Subscription"> | string
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
+    type?: EnumSubscriptionTypeFilter<"Subscription"> | $Enums.SubscriptionType
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
   }
 
@@ -24459,6 +24519,7 @@ export namespace Prisma {
     organizationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    type?: SortOrder
     organization?: OrganizationOrderByWithRelationInput
   }
 
@@ -24477,6 +24538,7 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFilter<"Subscription"> | boolean
     createdAt?: DateTimeFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeFilter<"Subscription"> | Date | string
+    type?: EnumSubscriptionTypeFilter<"Subscription"> | $Enums.SubscriptionType
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
   }, "id" | "stripeCustomerId" | "stripeSubscriptionId" | "organizationId">
 
@@ -24492,6 +24554,7 @@ export namespace Prisma {
     organizationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    type?: SortOrder
     _count?: SubscriptionCountOrderByAggregateInput
     _max?: SubscriptionMaxOrderByAggregateInput
     _min?: SubscriptionMinOrderByAggregateInput
@@ -24512,6 +24575,7 @@ export namespace Prisma {
     organizationId?: StringWithAggregatesFilter<"Subscription"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Subscription"> | Date | string
+    type?: EnumSubscriptionTypeWithAggregatesFilter<"Subscription"> | $Enums.SubscriptionType
   }
 
   export type InvoiceWhereInput = {
@@ -25629,20 +25693,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -25650,7 +25714,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
@@ -25664,20 +25728,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -25685,7 +25749,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     couponId?: string | null
     businessId: string
-    customerId: string
+    customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
@@ -25699,20 +25763,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25720,7 +25784,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
@@ -25734,20 +25798,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25755,7 +25819,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
@@ -25769,20 +25833,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -25790,7 +25854,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     couponId?: string | null
     businessId: string
-    customerId: string
+    customerId?: string | null
   }
 
   export type BookingUpdateManyMutationInput = {
@@ -25799,20 +25863,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25826,20 +25890,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25847,7 +25911,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BookingItemUpdateInput = {
@@ -26349,6 +26413,7 @@ export namespace Prisma {
     cancelAtPeriodEnd: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    type?: $Enums.SubscriptionType
     organization: OrganizationCreateNestedOneWithoutSubscriptionInput
   }
 
@@ -26364,6 +26429,7 @@ export namespace Prisma {
     organizationId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    type?: $Enums.SubscriptionType
   }
 
   export type SubscriptionUpdateInput = {
@@ -26377,6 +26443,7 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: EnumSubscriptionTypeFieldUpdateOperationsInput | $Enums.SubscriptionType
     organization?: OrganizationUpdateOneRequiredWithoutSubscriptionNestedInput
   }
 
@@ -26392,6 +26459,7 @@ export namespace Prisma {
     organizationId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: EnumSubscriptionTypeFieldUpdateOperationsInput | $Enums.SubscriptionType
   }
 
   export type SubscriptionCreateManyInput = {
@@ -26406,6 +26474,7 @@ export namespace Prisma {
     organizationId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    type?: $Enums.SubscriptionType
   }
 
   export type SubscriptionUpdateManyMutationInput = {
@@ -26419,6 +26488,7 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: EnumSubscriptionTypeFieldUpdateOperationsInput | $Enums.SubscriptionType
   }
 
   export type SubscriptionUncheckedUpdateManyInput = {
@@ -26433,6 +26503,7 @@ export namespace Prisma {
     organizationId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: EnumSubscriptionTypeFieldUpdateOperationsInput | $Enums.SubscriptionType
   }
 
   export type InvoiceCreateInput = {
@@ -27654,9 +27725,9 @@ export namespace Prisma {
     isNot?: CouponWhereInput | null
   }
 
-  export type CustomerScalarRelationFilter = {
-    is?: CustomerWhereInput
-    isNot?: CustomerWhereInput
+  export type CustomerNullableScalarRelationFilter = {
+    is?: CustomerWhereInput | null
+    isNot?: CustomerWhereInput | null
   }
 
   export type InvoiceNullableScalarRelationFilter = {
@@ -28140,6 +28211,11 @@ export namespace Prisma {
     not?: NestedEnumWaiverStatusFilter<$PrismaModel> | $Enums.WaiverStatus
   }
 
+  export type CustomerScalarRelationFilter = {
+    is?: CustomerWhereInput
+    isNot?: CustomerWhereInput
+  }
+
   export type WaiverCustomerIdBusinessIdBookingIdCompoundUniqueInput = {
     customerId: string
     businessId: string
@@ -28195,6 +28271,13 @@ export namespace Prisma {
     _max?: NestedEnumWaiverStatusFilter<$PrismaModel>
   }
 
+  export type EnumSubscriptionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionType | EnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionTypeFilter<$PrismaModel> | $Enums.SubscriptionType
+  }
+
   export type SubscriptionCountOrderByAggregateInput = {
     id?: SortOrder
     stripeCustomerId?: SortOrder
@@ -28207,6 +28290,7 @@ export namespace Prisma {
     organizationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    type?: SortOrder
   }
 
   export type SubscriptionMaxOrderByAggregateInput = {
@@ -28221,6 +28305,7 @@ export namespace Prisma {
     organizationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    type?: SortOrder
   }
 
   export type SubscriptionMinOrderByAggregateInput = {
@@ -28235,6 +28320,17 @@ export namespace Prisma {
     organizationId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    type?: SortOrder
+  }
+
+  export type EnumSubscriptionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionType | EnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionTypeWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionTypeFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionTypeFilter<$PrismaModel>
   }
 
   export type EnumInvoiceStatusFilter<$PrismaModel = never> = {
@@ -29506,10 +29602,12 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutBookingsInput, BusinessUpdateWithoutBookingsInput>, BusinessUncheckedUpdateWithoutBookingsInput>
   }
 
-  export type CustomerUpdateOneRequiredWithoutBookingsNestedInput = {
+  export type CustomerUpdateOneWithoutBookingsNestedInput = {
     create?: XOR<CustomerCreateWithoutBookingsInput, CustomerUncheckedCreateWithoutBookingsInput>
     connectOrCreate?: CustomerCreateOrConnectWithoutBookingsInput
     upsert?: CustomerUpsertWithoutBookingsInput
+    disconnect?: CustomerWhereInput | boolean
+    delete?: CustomerWhereInput | boolean
     connect?: CustomerWhereUniqueInput
     update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutBookingsInput, CustomerUpdateWithoutBookingsInput>, CustomerUncheckedUpdateWithoutBookingsInput>
   }
@@ -29814,6 +29912,10 @@ export namespace Prisma {
     create?: XOR<OrganizationCreateWithoutSubscriptionInput, OrganizationUncheckedCreateWithoutSubscriptionInput>
     connectOrCreate?: OrganizationCreateOrConnectWithoutSubscriptionInput
     connect?: OrganizationWhereUniqueInput
+  }
+
+  export type EnumSubscriptionTypeFieldUpdateOperationsInput = {
+    set?: $Enums.SubscriptionType
   }
 
   export type OrganizationUpdateOneRequiredWithoutSubscriptionNestedInput = {
@@ -30386,6 +30488,23 @@ export namespace Prisma {
     _max?: NestedEnumWaiverStatusFilter<$PrismaModel>
   }
 
+  export type NestedEnumSubscriptionTypeFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionType | EnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionTypeFilter<$PrismaModel> | $Enums.SubscriptionType
+  }
+
+  export type NestedEnumSubscriptionTypeWithAggregatesFilter<$PrismaModel = never> = {
+    equals?: $Enums.SubscriptionType | EnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    in?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    notIn?: $Enums.SubscriptionType[] | ListEnumSubscriptionTypeFieldRefInput<$PrismaModel>
+    not?: NestedEnumSubscriptionTypeWithAggregatesFilter<$PrismaModel> | $Enums.SubscriptionType
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedEnumSubscriptionTypeFilter<$PrismaModel>
+    _max?: NestedEnumSubscriptionTypeFilter<$PrismaModel>
+  }
+
   export type NestedEnumInvoiceStatusFilter<$PrismaModel = never> = {
     equals?: $Enums.InvoiceStatus | EnumInvoiceStatusFieldRefInput<$PrismaModel>
     in?: $Enums.InvoiceStatus[] | ListEnumInvoiceStatusFieldRefInput<$PrismaModel>
@@ -30598,27 +30717,27 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     coupon?: CouponCreateNestedOneWithoutBookingInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
@@ -30632,27 +30751,27 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     couponId?: string | null
-    customerId: string
+    customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
@@ -31090,20 +31209,20 @@ export namespace Prisma {
     startTime?: DateTimeFilter<"Booking"> | Date | string
     endTime?: DateTimeFilter<"Booking"> | Date | string
     status?: EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
-    totalAmount?: FloatFilter<"Booking"> | number
+    totalAmount?: FloatNullableFilter<"Booking"> | number | null
     depositAmount?: FloatNullableFilter<"Booking"> | number | null
     depositPaid?: BoolFilter<"Booking"> | boolean
     eventType?: StringNullableFilter<"Booking"> | string | null
-    eventAddress?: StringFilter<"Booking"> | string
-    eventCity?: StringFilter<"Booking"> | string
-    eventState?: StringFilter<"Booking"> | string
-    eventZipCode?: StringFilter<"Booking"> | string
+    eventAddress?: StringNullableFilter<"Booking"> | string | null
+    eventCity?: StringNullableFilter<"Booking"> | string | null
+    eventState?: StringNullableFilter<"Booking"> | string | null
+    eventZipCode?: StringNullableFilter<"Booking"> | string | null
     eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
-    participantCount?: IntFilter<"Booking"> | number
-    subtotalAmount?: FloatFilter<"Booking"> | number
-    taxAmount?: FloatFilter<"Booking"> | number
-    taxRate?: FloatFilter<"Booking"> | number
+    participantCount?: IntNullableFilter<"Booking"> | number | null
+    subtotalAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxRate?: FloatNullableFilter<"Booking"> | number | null
     isCompleted?: BoolFilter<"Booking"> | boolean
     isCancelled?: BoolFilter<"Booking"> | boolean
     specialInstructions?: StringNullableFilter<"Booking"> | string | null
@@ -31111,7 +31230,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Booking"> | Date | string
     couponId?: StringNullableFilter<"Booking"> | string | null
     businessId?: StringFilter<"Booking"> | string
-    customerId?: StringFilter<"Booking"> | string
+    customerId?: StringNullableFilter<"Booking"> | string | null
   }
 
   export type PaymentUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -31510,6 +31629,7 @@ export namespace Prisma {
     cancelAtPeriodEnd: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    type?: $Enums.SubscriptionType
   }
 
   export type SubscriptionUncheckedCreateWithoutOrganizationInput = {
@@ -31523,6 +31643,7 @@ export namespace Prisma {
     cancelAtPeriodEnd: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
+    type?: $Enums.SubscriptionType
   }
 
   export type SubscriptionCreateOrConnectWithoutOrganizationInput = {
@@ -31666,6 +31787,7 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: EnumSubscriptionTypeFieldUpdateOperationsInput | $Enums.SubscriptionType
   }
 
   export type SubscriptionUncheckedUpdateWithoutOrganizationInput = {
@@ -31679,6 +31801,7 @@ export namespace Prisma {
     cancelAtPeriodEnd?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    type?: EnumSubscriptionTypeFieldUpdateOperationsInput | $Enums.SubscriptionType
   }
 
   export type UserCreateWithoutMembershipInput = {
@@ -32068,20 +32191,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -32102,20 +32225,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -33151,20 +33274,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -33172,7 +33295,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
     invoice?: InvoiceCreateNestedOneWithoutBookingInput
@@ -33185,20 +33308,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -33206,7 +33329,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     couponId?: string | null
     businessId: string
-    customerId: string
+    customerId?: string | null
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
     invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
@@ -33235,20 +33358,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33256,7 +33379,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
     invoice?: InvoiceUpdateOneWithoutBookingNestedInput
@@ -33269,20 +33392,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33290,7 +33413,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
     invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
@@ -33419,20 +33542,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -33440,7 +33563,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
     invoice?: InvoiceCreateNestedOneWithoutBookingInput
@@ -33453,20 +33576,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -33474,7 +33597,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     couponId?: string | null
     businessId: string
-    customerId: string
+    customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
     invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
@@ -33582,20 +33705,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33603,7 +33726,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
     invoice?: InvoiceUpdateOneWithoutBookingNestedInput
@@ -33616,20 +33739,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33637,7 +33760,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
     invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
@@ -33814,27 +33937,27 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutBookingsInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
@@ -33848,27 +33971,27 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
-    customerId: string
+    customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
@@ -34291,20 +34414,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -34312,7 +34435,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     invoice?: InvoiceCreateNestedOneWithoutBookingInput
@@ -34325,20 +34448,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -34346,7 +34469,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     couponId?: string | null
     businessId: string
-    customerId: string
+    customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
@@ -34521,20 +34644,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34542,7 +34665,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     invoice?: InvoiceUpdateOneWithoutBookingNestedInput
@@ -34555,20 +34678,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34576,7 +34699,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
@@ -34779,20 +34902,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -34800,7 +34923,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
@@ -34813,20 +34936,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -34834,7 +34957,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     couponId?: string | null
     businessId: string
-    customerId: string
+    customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
@@ -35009,20 +35132,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35030,7 +35153,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
@@ -35043,20 +35166,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35064,7 +35187,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
@@ -35211,20 +35334,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -35232,7 +35355,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
-    customer: CustomerCreateNestedOneWithoutBookingsInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
@@ -35245,20 +35368,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -35266,7 +35389,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     couponId?: string | null
     businessId: string
-    customerId: string
+    customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
@@ -35441,20 +35564,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35462,7 +35585,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
@@ -35475,20 +35598,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35496,7 +35619,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
@@ -35833,27 +35956,27 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     couponId?: string | null
-    customerId: string
+    customerId?: string | null
   }
 
   export type PaymentCreateManyBusinessInput = {
@@ -36113,27 +36236,27 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     coupon?: CouponUpdateOneWithoutBookingNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
@@ -36147,27 +36270,27 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
@@ -36181,27 +36304,27 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type PaymentUpdateWithoutBusinessInput = {
@@ -36605,20 +36728,20 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
@@ -36694,20 +36817,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -36728,20 +36851,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -36762,20 +36885,20 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
@@ -37115,27 +37238,27 @@ export namespace Prisma {
     startTime: Date | string
     endTime: Date | string
     status?: $Enums.BookingStatus
-    totalAmount: number
+    totalAmount?: number | null
     depositAmount?: number | null
     depositPaid?: boolean
     eventType?: string | null
-    eventAddress: string
-    eventCity: string
-    eventState: string
-    eventZipCode: string
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
     eventTimeZone?: string
     participantAge?: number | null
-    participantCount: number
-    subtotalAmount?: number
-    taxAmount?: number
-    taxRate?: number
+    participantCount?: number | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
     isCompleted?: boolean
     isCancelled?: boolean
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
-    customerId: string
+    customerId?: string | null
   }
 
   export type BookingUpdateWithoutCouponInput = {
@@ -37144,27 +37267,27 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutBookingsNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
@@ -37178,27 +37301,27 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
@@ -37212,27 +37335,27 @@ export namespace Prisma {
     startTime?: DateTimeFieldUpdateOperationsInput | Date | string
     endTime?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: FloatFieldUpdateOperationsInput | number
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     depositPaid?: BoolFieldUpdateOperationsInput | boolean
     eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: StringFieldUpdateOperationsInput | string
-    eventCity?: StringFieldUpdateOperationsInput | string
-    eventState?: StringFieldUpdateOperationsInput | string
-    eventZipCode?: StringFieldUpdateOperationsInput | string
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
     eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: IntFieldUpdateOperationsInput | number
-    subtotalAmount?: FloatFieldUpdateOperationsInput | number
-    taxAmount?: FloatFieldUpdateOperationsInput | number
-    taxRate?: FloatFieldUpdateOperationsInput | number
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
     isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
 

@@ -91,9 +91,8 @@ export default async function DomainLayout({
     domain === 'favicon.ico';
   
   if (isStaticAsset(domain)) {
-    // Option 1: Let Next.js handle it (do nothing)
     return;
-    // Option 2: Or, if in middleware, call NextResponse.next()
+
   }
   
   try {
