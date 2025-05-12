@@ -9,6 +9,7 @@ import { sendToDocuSeal } from "@/lib/docuseal.server";
 import { syncStripeDataToDB } from "@/lib/stripe-sync";
 import { BookingStatus, InvoiceStatus } from "@/prisma/generated/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { createBookingSafely } from "@/lib/createBookingSafely";
 
 interface Booking {
     id: string;
@@ -234,14 +235,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   console.log("PaymentIntent object:", JSON.stringify(paymentIntent, null, 2));
   console.log("Metadata:", metadata);
 
-  if (!metadata || !metadata.bounceHouseId) {
+  if (!metadata || !metadata.prismaBookingId) {
     console.log("No booking metadata found in payment intent");
     return;
   }
 
   try {
     const email = paymentIntent.receipt_email || '';
-    const businessId = metadata.businessId || '';
+    const businessId = metadata.prismaBusinessId || '';
     const business = await prisma.business.findUnique({
       where: { id: businessId },
     });
@@ -272,7 +273,6 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             state: metadata.eventState || '',
             zipCode: metadata.eventZipCode || '',
             status: 'Active',
-
           },
         });
         console.log("Customer updated successfully:", customer.id);
@@ -341,7 +341,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           const selectedItems = JSON.parse(metadata.selectedItems);
           console.log("Parsed selectedItems:", selectedItems);
           
-          // Map the selected items to the format expected by Prisma
+          // Map the selected items to the format expected by createBookingSafely
           inventoryItems = selectedItems.map((item: { id: string; quantity?: number; price?: number }) => ({
             inventoryId: item.id,
             quantity: item.quantity || 1,
@@ -374,47 +374,57 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         }];
       }
 
-      const bookingData = {
-        id: metadata.bookingId || '',
-        eventDate: eventDate, // Use the date-only UTC Date object
-        startTime: startUTC,  // Use the converted UTC start time
-        endTime: endUTC,    // Use the converted UTC end time
-        eventTimeZone: tz,    // Persist the timezone used
-        status: 'CONFIRMED' as const,
-        totalAmount: paymentIntent.amount / 100,
-        subtotalAmount: subtotalAmount,
-        taxAmount: taxAmount,
-        taxRate: taxRate,
-        depositPaid: true,
-        eventType: metadata.eventType || 'OTHER',
-        eventAddress: metadata.eventAddress || '',
-        eventCity: metadata.eventCity || '',
-        eventState: metadata.eventState || '',
-        eventZipCode: metadata.eventZipCode || '',
-        participantCount: parseInt(metadata.participantCount) || 1,
-        participantAge: metadata.participantAge ? parseInt(metadata.participantAge) : null,
-        specialInstructions: metadata.specialInstructions || '',
-        businessId: metadata.businessId,
-        customerId: customer.id,
-        inventoryItems: {
-          create: inventoryItems,
-        },
-        business: { connect: { id: metadata.businessId } },
-        customer: { connect: { id: customer.id } },
-      };
-
-      booking = await prisma.booking.upsert({
-        where: { id: bookingData.id },
-        update: {
-          status: 'CONFIRMED',
-          depositPaid: true,
-        },
-        create: bookingData as import("@/prisma/generated/prisma").Prisma.BookingCreateInput,
-        include: {
-          inventoryItems: true,
-        },
+      // Check if booking exists
+      const existingBooking = await prisma.booking.findUnique({
+        where: { id: metadata.prismaBookingId },
       });
-      console.log("Booking created/updated successfully:", booking.id);
+
+      if (existingBooking) {
+        // Only update status and depositPaid
+        booking = await prisma.booking.update({
+          where: { id: metadata.prismaBookingId },
+          data: {
+            status: 'CONFIRMED',
+            depositPaid: true,
+          },
+        });
+        console.log("Booking updated successfully:", booking.id);
+        // Set all BookingItems to CONFIRMED
+        await prisma.$executeRaw`UPDATE "BookingItem" SET "bookingStatus" = 'CONFIRMED', "updatedAt" = NOW() WHERE "bookingId" = ${booking.id}`;
+        console.log("All BookingItems set to CONFIRMED for booking:", booking.id);
+      } else {
+        // Remove inventoryItems from bookingData
+        const bookingData = {
+          id: metadata.prismaBookingId || '',
+          eventDate: eventDate,
+          startTime: startUTC,
+          endTime: endUTC,
+          eventTimeZone: tz,
+          status: 'CONFIRMED' as const,
+          totalAmount: paymentIntent.amount / 100,
+          subtotalAmount: subtotalAmount,
+          taxAmount: taxAmount,
+          taxRate: taxRate,
+          depositPaid: true,
+          eventType: metadata.eventType || 'OTHER',
+          eventAddress: metadata.eventAddress || '',
+          eventCity: metadata.eventCity || '',
+          eventState: metadata.eventState || '',
+          eventZipCode: metadata.eventZipCode || '',
+          participantCount: parseInt(metadata.participantCount) || 1,
+          participantAge: metadata.participantAge ? parseInt(metadata.participantAge) : null,
+          specialInstructions: metadata.specialInstructions || '',
+          businessId: metadata.prismaBusinessId,
+          customerId: customer.id,
+          business: { connect: { id: metadata.prismaBusinessId } },
+          customer: { connect: { id: customer.id } },
+        };
+        booking = await createBookingSafely(bookingData, inventoryItems);
+        console.log("Booking created successfully via createBookingSafely:", booking.id);
+        // Set all BookingItems to CONFIRMED
+        await prisma.$executeRaw`UPDATE "BookingItem" SET "bookingStatus" = 'CONFIRMED', "updatedAt" = NOW() WHERE "bookingId" = ${booking.id}`;
+        console.log("All BookingItems set to CONFIRMED for booking:", booking.id);
+      }
     } catch (bookingError) {
       console.error("Error creating/updating booking:", bookingError);
       throw bookingError;
@@ -431,7 +441,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         stripeClientSecret: paymentIntent.client_secret || '',
         paidAt: new Date(),
         bookingId: booking.id,
-        businessId: metadata.businessId,
+        businessId: metadata.prismaBusinessId,
         metadata: metadata as Record<string, string | number | null>,
       };
 
@@ -453,10 +463,10 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     console.log(`[handlePaymentIntentSucceeded] Booking ${booking?.id} confirmed successfully via Payment Intent`);
 
     const invoiceMeta = paymentIntent.metadata ?? null;
-    if (invoiceMeta && invoiceMeta.couponCode && metadata.businessId) {
+    if (invoiceMeta && invoiceMeta.couponCode && metadata.prismaBusinessId) {
       await prisma.$transaction(async (tx) => {
         await tx.coupon.update({
-          where: { code_businessId: { code: invoiceMeta.couponCode, businessId: metadata.businessId } },
+          where: { code_businessId: { code: invoiceMeta.couponCode, businessId: metadata.prismaBusinessId } },
           data: { usedCount: { increment: 1 } },
         });
       });
@@ -764,14 +774,14 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent failed: ${paymentIntent.id}`);
 
   const metadata = paymentIntent.metadata;
-  if (!metadata || !metadata.bookingId) {
+  if (!metadata || !metadata.prismaBookingId) {
     return;
   }
 
   try {
     // Update booking status if it exists
     await prisma.booking.updateMany({
-      where: { id: metadata.bookingId },
+      where: { id: metadata.prismaBookingId },
       data: { status: 'PENDING' },
     });
 
@@ -784,8 +794,8 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
         type: 'FULL_PAYMENT',
         stripePaymentId: paymentIntent.id,
         stripeClientSecret: paymentIntent.client_secret || '',
-        bookingId: metadata.bookingId,
-        businessId: metadata.businessId,
+        bookingId: metadata.prismaBookingId,
+        businessId: metadata.prismaBusinessId,
         metadata: metadata as Record<string, string | number | null>,
       },
     });

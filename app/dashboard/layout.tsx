@@ -31,7 +31,6 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNotificationsContext, NotificationsProvider } from "@/context/NotificationsContext";
 import dynamic from 'next/dynamic';
-import { OrganizationSwitcher } from "@clerk/nextjs";
 
 interface Business {
   id: string;
@@ -51,6 +50,12 @@ const UserButton = dynamic(() => import('@clerk/nextjs').then(mod => mod.UserBut
   ssr: false,
   loading: () => <Skeleton className="h-8 w-8 rounded-full" />
 });
+
+// Dynamically import OrganizationSwitcher with SSR disabled
+const OrganizationSwitcher = dynamic(
+  () => import("@clerk/nextjs").then(mod => mod.OrganizationSwitcher),
+  { ssr: false }
+);
 
 // New Inner Component
 function DashboardUI({ children }: { children: React.ReactNode }) {

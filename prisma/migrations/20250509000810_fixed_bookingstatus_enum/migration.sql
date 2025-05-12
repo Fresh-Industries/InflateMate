@@ -1,0 +1,23 @@
+-- AlterEnum
+ALTER TYPE "BookingStatus" ADD VALUE 'EXPIRED';
+
+-- DropForeignKey
+ALTER TABLE "Booking" DROP CONSTRAINT "Booking_customerId_fkey";
+
+-- AlterTable
+ALTER TABLE "Booking" ALTER COLUMN "totalAmount" DROP NOT NULL,
+ALTER COLUMN "eventAddress" DROP NOT NULL,
+ALTER COLUMN "eventCity" DROP NOT NULL,
+ALTER COLUMN "eventState" DROP NOT NULL,
+ALTER COLUMN "eventZipCode" DROP NOT NULL,
+ALTER COLUMN "participantCount" DROP NOT NULL,
+ALTER COLUMN "customerId" DROP NOT NULL,
+ALTER COLUMN "subtotalAmount" DROP NOT NULL,
+ALTER COLUMN "subtotalAmount" DROP DEFAULT,
+ALTER COLUMN "taxAmount" DROP NOT NULL,
+ALTER COLUMN "taxAmount" DROP DEFAULT,
+ALTER COLUMN "taxRate" DROP NOT NULL,
+ALTER COLUMN "taxRate" DROP DEFAULT;
+
+-- AddForeignKey
+ALTER TABLE "Booking" ADD CONSTRAINT "Booking_customerId_fkey" FOREIGN KEY ("customerId") REFERENCES "Customer"("id") ON DELETE SET NULL ON UPDATE CASCADE;

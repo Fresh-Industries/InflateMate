@@ -73,6 +73,9 @@ export async function GET(req: NextRequest) {
             external_account_collection: true,
           },
         },
+        account_onboarding: {
+          enabled: true,
+        },
       },
     });
     

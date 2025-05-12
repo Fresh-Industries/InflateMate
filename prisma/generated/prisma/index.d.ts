@@ -152,7 +152,8 @@ export const BookingStatus: {
   CONFIRMED: 'CONFIRMED',
   CANCELLED: 'CANCELLED',
   COMPLETED: 'COMPLETED',
-  HOLD: 'HOLD'
+  HOLD: 'HOLD',
+  EXPIRED: 'EXPIRED'
 };
 
 export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus]
@@ -161,6 +162,7 @@ export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus]
 export const PaymentType: {
   DEPOSIT: 'DEPOSIT',
   FULL_PAYMENT: 'FULL_PAYMENT',
+  CASH: 'CASH',
   REFUND: 'REFUND'
 };
 
@@ -7641,6 +7643,7 @@ export namespace Prisma {
     teardownTime: number | null
     weightLimit: number | null
     quantity: number | null
+    version: number | null
   }
 
   export type InventorySumAggregateOutputType = {
@@ -7650,6 +7653,7 @@ export namespace Prisma {
     teardownTime: number | null
     weightLimit: number | null
     quantity: number | null
+    version: number | null
   }
 
   export type InventoryMinAggregateOutputType = {
@@ -7672,6 +7676,7 @@ export namespace Prisma {
     quantity: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    version: number | null
     businessId: string | null
   }
 
@@ -7695,6 +7700,7 @@ export namespace Prisma {
     quantity: number | null
     createdAt: Date | null
     updatedAt: Date | null
+    version: number | null
     businessId: string | null
   }
 
@@ -7720,6 +7726,7 @@ export namespace Prisma {
     quantity: number
     createdAt: number
     updatedAt: number
+    version: number
     businessId: number
     _all: number
   }
@@ -7732,6 +7739,7 @@ export namespace Prisma {
     teardownTime?: true
     weightLimit?: true
     quantity?: true
+    version?: true
   }
 
   export type InventorySumAggregateInputType = {
@@ -7741,6 +7749,7 @@ export namespace Prisma {
     teardownTime?: true
     weightLimit?: true
     quantity?: true
+    version?: true
   }
 
   export type InventoryMinAggregateInputType = {
@@ -7763,6 +7772,7 @@ export namespace Prisma {
     quantity?: true
     createdAt?: true
     updatedAt?: true
+    version?: true
     businessId?: true
   }
 
@@ -7786,6 +7796,7 @@ export namespace Prisma {
     quantity?: true
     createdAt?: true
     updatedAt?: true
+    version?: true
     businessId?: true
   }
 
@@ -7811,6 +7822,7 @@ export namespace Prisma {
     quantity?: true
     createdAt?: true
     updatedAt?: true
+    version?: true
     businessId?: true
     _all?: true
   }
@@ -7923,6 +7935,7 @@ export namespace Prisma {
     quantity: number
     createdAt: Date
     updatedAt: Date
+    version: number
     businessId: string
     _count: InventoryCountAggregateOutputType | null
     _avg: InventoryAvgAggregateOutputType | null
@@ -7967,6 +7980,7 @@ export namespace Prisma {
     quantity?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    version?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookingItems?: boolean | Inventory$bookingItemsArgs<ExtArgs>
@@ -7995,6 +8009,7 @@ export namespace Prisma {
     quantity?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    version?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventory"]>
@@ -8021,6 +8036,7 @@ export namespace Prisma {
     quantity?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    version?: boolean
     businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventory"]>
@@ -8047,10 +8063,11 @@ export namespace Prisma {
     quantity?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    version?: boolean
     businessId?: boolean
   }
 
-  export type InventoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "name" | "description" | "dimensions" | "capacity" | "price" | "setupTime" | "teardownTime" | "images" | "primaryImage" | "stripeProductId" | "stripePriceId" | "status" | "minimumSpace" | "weightLimit" | "ageRange" | "weatherRestrictions" | "quantity" | "createdAt" | "updatedAt" | "businessId", ExtArgs["result"]["inventory"]>
+  export type InventoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "name" | "description" | "dimensions" | "capacity" | "price" | "setupTime" | "teardownTime" | "images" | "primaryImage" | "stripeProductId" | "stripePriceId" | "status" | "minimumSpace" | "weightLimit" | "ageRange" | "weatherRestrictions" | "quantity" | "createdAt" | "updatedAt" | "version" | "businessId", ExtArgs["result"]["inventory"]>
   export type InventoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookingItems?: boolean | Inventory$bookingItemsArgs<ExtArgs>
@@ -8091,6 +8108,7 @@ export namespace Prisma {
       quantity: number
       createdAt: Date
       updatedAt: Date
+      version: number
       businessId: string
     }, ExtArgs["result"]["inventory"]>
     composites: {}
@@ -8538,6 +8556,7 @@ export namespace Prisma {
     readonly quantity: FieldRef<"Inventory", 'Int'>
     readonly createdAt: FieldRef<"Inventory", 'DateTime'>
     readonly updatedAt: FieldRef<"Inventory", 'DateTime'>
+    readonly version: FieldRef<"Inventory", 'Int'>
     readonly businessId: FieldRef<"Inventory", 'String'>
   }
     
@@ -22625,6 +22644,7 @@ export namespace Prisma {
     quantity: 'quantity',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    version: 'version',
     businessId: 'businessId'
   };
 
@@ -23564,6 +23584,7 @@ export namespace Prisma {
     quantity?: IntFilter<"Inventory"> | number
     createdAt?: DateTimeFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    version?: IntFilter<"Inventory"> | number
     businessId?: StringFilter<"Inventory"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookingItems?: BookingItemListRelationFilter
@@ -23591,6 +23612,7 @@ export namespace Prisma {
     quantity?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    version?: SortOrder
     businessId?: SortOrder
     business?: BusinessOrderByWithRelationInput
     bookingItems?: BookingItemOrderByRelationAggregateInput
@@ -23621,6 +23643,7 @@ export namespace Prisma {
     quantity?: IntFilter<"Inventory"> | number
     createdAt?: DateTimeFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    version?: IntFilter<"Inventory"> | number
     businessId?: StringFilter<"Inventory"> | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookingItems?: BookingItemListRelationFilter
@@ -23648,6 +23671,7 @@ export namespace Prisma {
     quantity?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    version?: SortOrder
     businessId?: SortOrder
     _count?: InventoryCountOrderByAggregateInput
     _avg?: InventoryAvgOrderByAggregateInput
@@ -23681,6 +23705,7 @@ export namespace Prisma {
     quantity?: IntWithAggregatesFilter<"Inventory"> | number
     createdAt?: DateTimeWithAggregatesFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Inventory"> | Date | string
+    version?: IntWithAggregatesFilter<"Inventory"> | number
     businessId?: StringWithAggregatesFilter<"Inventory"> | string
   }
 
@@ -25365,6 +25390,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
     business: BusinessCreateNestedOneWithoutInventoryInput
     bookingItems?: BookingItemCreateNestedManyWithoutInventoryInput
   }
@@ -25391,6 +25417,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
     businessId: string
     bookingItems?: BookingItemUncheckedCreateNestedManyWithoutInventoryInput
   }
@@ -25417,6 +25444,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
     business?: BusinessUpdateOneRequiredWithoutInventoryNestedInput
     bookingItems?: BookingItemUpdateManyWithoutInventoryNestedInput
   }
@@ -25443,6 +25471,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
     bookingItems?: BookingItemUncheckedUpdateManyWithoutInventoryNestedInput
   }
@@ -25469,6 +25498,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
     businessId: string
   }
 
@@ -25494,6 +25524,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
   }
 
   export type InventoryUncheckedUpdateManyInput = {
@@ -25518,6 +25549,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -27501,6 +27533,7 @@ export namespace Prisma {
     quantity?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    version?: SortOrder
     businessId?: SortOrder
   }
 
@@ -27511,6 +27544,7 @@ export namespace Prisma {
     teardownTime?: SortOrder
     weightLimit?: SortOrder
     quantity?: SortOrder
+    version?: SortOrder
   }
 
   export type InventoryMaxOrderByAggregateInput = {
@@ -27533,6 +27567,7 @@ export namespace Prisma {
     quantity?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    version?: SortOrder
     businessId?: SortOrder
   }
 
@@ -27556,6 +27591,7 @@ export namespace Prisma {
     quantity?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    version?: SortOrder
     businessId?: SortOrder
   }
 
@@ -27566,6 +27602,7 @@ export namespace Prisma {
     teardownTime?: SortOrder
     weightLimit?: SortOrder
     quantity?: SortOrder
+    version?: SortOrder
   }
 
   export type EnumInventoryTypeWithAggregatesFilter<$PrismaModel = never> = {
@@ -30613,6 +30650,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
     bookingItems?: BookingItemCreateNestedManyWithoutInventoryInput
   }
 
@@ -30638,6 +30676,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
     bookingItems?: BookingItemUncheckedCreateNestedManyWithoutInventoryInput
   }
 
@@ -31141,6 +31180,7 @@ export namespace Prisma {
     quantity?: IntFilter<"Inventory"> | number
     createdAt?: DateTimeFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    version?: IntFilter<"Inventory"> | number
     businessId?: StringFilter<"Inventory"> | string
   }
 
@@ -33442,6 +33482,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
     business: BusinessCreateNestedOneWithoutInventoryInput
   }
 
@@ -33467,6 +33508,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
     businessId: string
   }
 
@@ -33508,6 +33550,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
     business?: BusinessUpdateOneRequiredWithoutInventoryNestedInput
   }
 
@@ -33533,6 +33576,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
     businessId?: StringFieldUpdateOperationsInput | string
   }
 
@@ -35928,6 +35972,7 @@ export namespace Prisma {
     quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    version?: number
   }
 
   export type CustomerCreateManyBusinessInput = {
@@ -36108,6 +36153,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
     bookingItems?: BookingItemUpdateManyWithoutInventoryNestedInput
   }
 
@@ -36133,6 +36179,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
     bookingItems?: BookingItemUncheckedUpdateManyWithoutInventoryNestedInput
   }
 
@@ -36158,6 +36205,7 @@ export namespace Prisma {
     quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    version?: IntFieldUpdateOperationsInput | number
   }
 
   export type CustomerUpdateWithoutBusinessInput = {

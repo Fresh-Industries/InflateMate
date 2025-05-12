@@ -282,14 +282,19 @@ export async function POST(
 
             // Also update the status of the associated BookingItems from 'HOLD' to 'PENDING'
             // Use raw SQL again because of the Unsupported type limitation
+            
+
              if (existingBooking.inventoryItems.length > 0) {
-                 const itemIds = existingBooking.inventoryItems.map(item => item.id);
-                 await tx.$executeRaw`
+              const itemIds = existingBooking.inventoryItems.map(item => String(item.id));
+                 await tx.$executeRawUnsafe(
+                  `
                     UPDATE "BookingItem"
                     SET "bookingStatus" = 'PENDING', "updatedAt" = NOW()
-                    WHERE id IN (${Prisma.join(itemIds)})
-                    AND "bookingStatus" = 'HOLD'; -- Only update items still on HOLD
-                 `;
+                    WHERE id = ANY($1::text[])
+                    AND "bookingStatus" = 'HOLD'
+                  `,
+                  itemIds
+                );
                 console.log(`[POST /bookings] Updated ${existingBooking.inventoryItems.length} BookingItem statuses to PENDING.`);
              }
 
@@ -400,15 +405,8 @@ export async function POST(
           currency: "usd", // Or get currency from business settings
           payment_method_types: ["card"], // Specify allowed payment methods
           receipt_email: bookingData.customerEmail, // Send receipt to customer
-          metadata: metadata, // Attach the metadata
-          customer: stripeCustomerId, // Link the Stripe customer
-
-          // Optional: request 3D Secure if required
-          // payment_method_options: {
-          //   card: {
-          //     request_three_d_secure: 'any',
-          //   },
-          // },
+          metadata: metadata, 
+          customer: stripeCustomerId, 
         },
         {
           stripeAccount: stripeConnectedAccountId, // Perform action on behalf of the connected account
@@ -462,19 +460,15 @@ export async function POST(
 }
 
 
-// --- GET: Fetch All Bookings for a Business ---
-// This GET route is separate from availability and hold placement.
 export async function GET(
   req: NextRequest,
-  { params }: { params: Promise<{ businessId: string }> } // Use direct params
+  { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
-    const { businessId } = await params;
+    const businessId = (await params).businessId;
     if (!businessId) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
-
-    console.log(`[GET /bookings] Fetching all bookings for business ID: ${businessId}`);
 
     const bookings = await prisma.booking.findMany({
       where: {
@@ -484,58 +478,43 @@ export async function GET(
         inventoryItems: {
           include: {
             inventory: {
-              select: { id: true, name: true } // Only select necessary fields from Inventory
+              select: { id: true, name: true } // Only select necessary fields
             }
           }
         },
-        customer: { // Include customer details
-            select: { id: true, name: true, email: true, phone: true } // Select specific customer fields
-        },
+        customer: true, // Keep customer details
         waivers: { // Include waivers related to this booking
           select: {
             id: true,
             status: true, // Get the waiver status
             docuSealDocumentId: true // Include for potential linking/viewing
           }
-        },
-        coupon: { // Include coupon details if linked
-            select: { id: true, code: true, discountType: true, discountAmount: true }
-        },
-        invoice: { // Include invoice details if linked
-            select: { id: true, status: true, amountDue: true, invoicePdfUrl: true, hostedInvoiceUrl: true }
-        },
-        quote: { // Include quote details if linked
-             select: { id: true, status: true, amountTotal: true, hostedQuoteUrl: true, pdfUrl: true }
         }
       },
       orderBy: {
-        eventDate: 'asc', // Order by event date ascending
-        startTime: 'asc', // Then by start time
+        eventDate: 'asc',
       },
     });
-
-    console.log(`[GET /bookings] Found ${bookings.length} bookings.`);
-
-    // Transform bookings for the response format if needed
-    // Adding hasSignedWaiver flag is a good transformation
+    
+    // Transform bookings to include simplified bounceHouse and waiver status
     const formattedBookings = bookings.map(booking => {
+      // Use inventoryItems directly instead of creating a separate bounceHouse field
       const hasSignedWaiver = booking.waivers.some(waiver => waiver.status === 'SIGNED');
-
+      
       return {
         ...booking,
         hasSignedWaiver, // Add a boolean flag for signed waiver
-        // Ensure any fields marked with `undefined` or `null` in previous logic
-        // are correctly handled if they were included by default and are not needed.
-        // Based on the `select` and `include` above, Prisma will only fetch what's specified.
+        // Remove the old bounceHouse and bounceHouseId fields
+        bounceHouse: undefined,
+        bounceHouseId: undefined,
       };
     });
 
     return NextResponse.json(formattedBookings, { status: 200 });
-
   } catch (error) {
-    console.error("[GET /bookings] Error fetching bookings:", error);
+    console.error("Error fetching bookings:", error);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal server error" },
+      { error: "Internal server error" },
       { status: 500 }
     );
   }

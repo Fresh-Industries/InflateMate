@@ -198,6 +198,7 @@ exports.Prisma.InventoryScalarFieldEnum = {
   quantity: 'quantity',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  version: 'version',
   businessId: 'businessId'
 };
 
@@ -448,12 +449,14 @@ exports.BookingStatus = exports.$Enums.BookingStatus = {
   CONFIRMED: 'CONFIRMED',
   CANCELLED: 'CANCELLED',
   COMPLETED: 'COMPLETED',
-  HOLD: 'HOLD'
+  HOLD: 'HOLD',
+  EXPIRED: 'EXPIRED'
 };
 
 exports.PaymentType = exports.$Enums.PaymentType = {
   DEPOSIT: 'DEPOSIT',
   FULL_PAYMENT: 'FULL_PAYMENT',
+  CASH: 'CASH',
   REFUND: 'REFUND'
 };
 

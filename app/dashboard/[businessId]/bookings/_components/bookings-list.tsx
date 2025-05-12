@@ -39,7 +39,7 @@ interface Booking {
   eventDate: string;
   startTime: string;
   endTime: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW' | 'WEATHER_HOLD';
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'HOLD';
   totalAmount: number;
   subtotalAmount?: number;
   taxAmount?: number;
@@ -134,7 +134,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
 
   const clearAllFilters = () => {
     setSearchTerm("");
-    setStatusFilter("CONFIRMED");
+    setStatusFilter("all");
     setDateRange(undefined);
     setEventType("");
     setShowPastBookings(false);
@@ -197,10 +197,8 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         return `${baseClasses} bg-green-50 text-green-700 border border-green-200`;
       case "CANCELLED":
         return `${baseClasses} bg-red-50 text-red-700 border border-red-200`;
-      case "NO_SHOW":
+      case "HOLD":
         return `${baseClasses} bg-gray-50 text-gray-700 border border-gray-200`;
-      case "WEATHER_HOLD":
-        return `${baseClasses} bg-purple-50 text-purple-700 border border-purple-200`;
       default:
         return `${baseClasses} bg-gray-50 text-gray-700 border border-gray-200`;
     }
@@ -530,8 +528,12 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                     >
                       <td className="py-4 px-4">
                         <div className="flex flex-col">
-                          <span className="font-medium text-gray-900">{booking.customer.name}</span>
-                          <span className="text-sm text-gray-500">{booking.customer.email}</span>
+                          <span className="font-medium text-gray-900">
+                            {booking.customer?.name || `${booking.status} Booking`}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {booking.customer?.email || `ID: ${booking.id.substring(0, 8)}...`}
+                          </span>
                         </div>
                       </td>
                       <td className="py-4 px-4">
@@ -560,13 +562,11 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                       </td>
                       <td className="py-4 px-4">
                         <Badge className={getStatusBadgeVariant(booking.status)}>
-                          {booking.status === 'WEATHER_HOLD' && <Cloud className="h-3 w-3" />}
-                          {booking.status === 'NO_SHOW' && <X className="h-3 w-3" />}
+                          {booking.status === 'HOLD' && <Cloud className="h-3 w-3" />}
                           {booking.status === 'COMPLETED' && <CheckCircle className="h-3 w-3" />}
                           {booking.status === 'CONFIRMED' && <ShieldCheck className="h-3 w-3" />}
                           {booking.status === 'PENDING' && <Clock className="h-3 w-3" />}
                           {booking.status === 'CANCELLED' && <X className="h-3 w-3" />}
-                          {booking.status}
                         </Badge>
                         {!booking.hasSignedWaiver && booking.status !== 'CANCELLED' && (
                           <div className="mt-1">
@@ -606,7 +606,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                                   variant="ghost"
                                   size="sm"
                                   className="h-8 w-8 p-0 hover:bg-gray-100"
-                                  onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}`)}
+                                  onClick={() => router.push(`/dashboard/${businessId}/bookings/${booking.id}/edit`)}
                                 >
                                   <PencilIcon className="h-4 w-4 text-gray-500" />
                                 </Button>

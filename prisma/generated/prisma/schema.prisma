@@ -132,9 +132,9 @@ model Inventory {
   quantity            Int             @default(1)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @default(now())
-
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String
+  version             Int             @default(0)
+  business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId          String
 
   bookingItems BookingItem[]
 
@@ -218,6 +218,7 @@ model Booking {
   @@index([eventDate])
   @@index([couponId])
   @@index([startTime, endTime])
+  @@index([status, startTime])
 }
 
 model BookingItem {
@@ -237,6 +238,7 @@ model BookingItem {
 
   @@index([bookingId])
   @@index([inventoryId])
+  @@index([status])
 }
 
 model Payment {
@@ -374,6 +376,7 @@ model Invoice {
   @@index([bookingId])
   @@index([status])
   @@index([stripeInvoiceId])
+  @@index([expiresAt])
 }
 
 model Quote {
@@ -439,11 +442,13 @@ enum BookingStatus {
   CANCELLED
   COMPLETED
   HOLD
+  EXPIRED
 }
 
 enum PaymentType {
   DEPOSIT
   FULL_PAYMENT
+  CASH
   REFUND
 }
 

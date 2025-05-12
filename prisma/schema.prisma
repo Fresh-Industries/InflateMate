@@ -132,9 +132,9 @@ model Inventory {
   quantity            Int             @default(1)
   createdAt           DateTime        @default(now())
   updatedAt           DateTime        @default(now())
-
-  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  businessId String
+  version             Int             @default(0)
+  business            Business        @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  businessId          String
 
   bookingItems BookingItem[]
 
@@ -205,11 +205,11 @@ model Booking {
   coupon              Coupon?       @relation(fields: [couponId], references: [id])
   business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   businessId          String
-  customer            Customer?      @relation(fields: [customerId], references: [id])
+  customer            Customer?     @relation(fields: [customerId], references: [id])
   customerId          String?
   inventoryItems      BookingItem[]
-  payments            Payment[] 
-  waivers             Waiver[] 
+  payments            Payment[]
+  waivers             Waiver[]
   invoice             Invoice?
   quote               Quote?
 
@@ -218,6 +218,7 @@ model Booking {
   @@index([eventDate])
   @@index([couponId])
   @@index([startTime, endTime])
+  @@index([status, startTime])
 }
 
 model BookingItem {
@@ -233,10 +234,11 @@ model BookingItem {
   status      String                   @map("bookingStatus")
   inventory   Inventory                @relation(fields: [inventoryId], references: [id])
   inventoryId String
-  period      Unsupported("tstzrange") 
+  period      Unsupported("tstzrange")
 
   @@index([bookingId])
   @@index([inventoryId])
+  @@index([status])
 }
 
 model Payment {
@@ -323,18 +325,18 @@ model Waiver {
 }
 
 model Subscription {
-  id                   String       @id @default(cuid())
-  stripeCustomerId     String       @unique
-  stripeSubscriptionId String       @unique
+  id                   String           @id @default(cuid())
+  stripeCustomerId     String           @unique
+  stripeSubscriptionId String           @unique
   status               String
   priceId              String
   currentPeriodStart   DateTime
   currentPeriodEnd     DateTime
   cancelAtPeriodEnd    Boolean
-  organization         Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  organizationId       String       @unique
-  createdAt            DateTime     @default(now())
-  updatedAt            DateTime     @updatedAt
+  organization         Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organizationId       String           @unique
+  createdAt            DateTime         @default(now())
+  updatedAt            DateTime         @updatedAt
   type                 SubscriptionType @default(GROWTH)
 
   @@index([organizationId])
@@ -374,6 +376,7 @@ model Invoice {
   @@index([bookingId])
   @@index([status])
   @@index([stripeInvoiceId])
+  @@index([expiresAt])
 }
 
 model Quote {
@@ -439,11 +442,13 @@ enum BookingStatus {
   CANCELLED
   COMPLETED
   HOLD
+  EXPIRED
 }
 
 enum PaymentType {
   DEPOSIT
   FULL_PAYMENT
+  CASH
   REFUND
 }
 

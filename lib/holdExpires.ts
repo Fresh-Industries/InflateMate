@@ -41,7 +41,7 @@ export async function expireHolds() {
           id: { in: expiredBookingIds }
         },
         data: {
-          status: 'CANCELLED',
+          status: 'EXPIRED',
           isCancelled: true,
           updatedAt: new Date(), // Explicitly set update timestamp
         }

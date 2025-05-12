@@ -37,7 +37,7 @@ import { cn } from "@/lib/utils";
 
 interface Booking {
   id: string;
-  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'NO_SHOW' | 'WEATHER_HOLD';
+  status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'HOLD';
   totalAmount: number;
   eventDate: string;
   startTime: string;
@@ -257,8 +257,7 @@ export default function DashboardPage() {
           { name: 'Pending', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'PENDING').length },
           { name: 'Completed', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'COMPLETED').length },
           { name: 'Cancelled', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'CANCELLED').length },
-          { name: 'No Show', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'NO_SHOW').length },
-          { name: 'Weather Hold', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'WEATHER_HOLD').length }
+          { name: 'Hold', value: bookingsWithCustomers.filter((b: Booking) => b.status === 'HOLD').length }
         ].filter(item => item.value > 0);
 
         // Calculate top inventory items by booking count

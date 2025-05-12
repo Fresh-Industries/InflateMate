@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import BookingsList from "./_components/bookings-list";
-import { auth } from "@clerk/nextjs/server";
+import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import LoadingBookings from "./loading";
@@ -18,8 +18,8 @@ interface BounceHouse {
 
 
 async function getInitialData(businessId: string) {
-  const { userId } = await auth();
-  if (!userId) {
+  const user = await getCurrentUserWithOrgAndBusiness();
+  if (!user) {
     redirect('/sign-in');
   }
 

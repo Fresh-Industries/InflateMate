@@ -1,17 +1,8 @@
 -- 0. prerequisites
 create extension if not exists btree_gist;
 
-create or replace function immutable_tsrange(timestamp, timestamp)
-returns tsrange
-language sql
-immutable
-as $$ select tsrange($1,$2); $$;
-
 alter table "BookingItem"
-  add column period tsrange
-  generated always as (
-    immutable_tsrange("startUTC","endUTC")
-  ) stored;
+  add column period tsrange;
 
 alter table "BookingItem"
   add constraint booking_item_no_overlap

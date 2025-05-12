@@ -20,6 +20,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { cn } from "@/lib/utils";
 
+
 interface BookingsViewControlsProps {
   searchTerm: string;
   onSearchChange: (value: string) => void;

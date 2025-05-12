@@ -97,7 +97,6 @@ export async function POST(
         participantAge: holdData.participantAge, // Use parsed participant age (can be null)
         specialInstructions: holdData.specialInstructions, // Use parsed instructions (can be null)
         business: { connect: { id: businessId } }, // Connect to the business
-        customer: { connect: { id: '' } }, // Connect to the customer
         coupon: undefined, // Coupon applied later
         invoice: undefined, // Invoice created later
         quote: undefined, // Quote created later

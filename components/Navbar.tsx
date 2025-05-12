@@ -76,8 +76,6 @@ const RESOURCES = [
 const MAIN_LINKS = [
   { label: 'Pricing', href: '/pricing' },
   { label: 'Contact', href: '/contact' },
-  { label: 'Features', href: '/features' },
-  { label: 'Resources', href: '/resources' },
 ];
 
 export default function Navbar() {
