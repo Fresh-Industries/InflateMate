@@ -2,7 +2,6 @@ import { Resend } from 'resend';
 import type { CreateEmailResponse } from 'resend';  
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-console.log("RESEND_API_KEY", RESEND_API_KEY);
 const resend = new Resend(RESEND_API_KEY);
 
 interface EmailParams {

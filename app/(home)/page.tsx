@@ -8,6 +8,8 @@ import PricingList from "./_components/PricingList";
 import FoundersRoadmap from "./_components/FoundersRoadmap";
 import Faq from "./_components/Faq";
 import SecondaryCTA from "./_components/SecondaryCTA";
+import { Suspense } from "react";
+
 export default function Home() {
   return (
     <main className="relative overflow-hidden">
@@ -17,7 +19,9 @@ export default function Home() {
       <WorkflowStoryboard />
       <DemoPlayer />
       <DifferentiatorTable />
-      <PricingList />
+      <Suspense fallback={<div>Loading pricing...</div>}>
+        <PricingList />
+      </Suspense>
       <FoundersRoadmap />
       <Faq />
       <SecondaryCTA />
