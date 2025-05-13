@@ -309,7 +309,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
                    eventState: eventState,
                    eventZipCode: eventZipCode,
                    participantCount: participantCount,
-                   participantAge: participantAge ? parseInt(participantAge) : null,
+                   participantAge: participantAge ? parseInt(participantAge, 10) : null,
                    specialInstructions: specialInstructions,
                    customer: { connect: { id: customer.id } },
                }
