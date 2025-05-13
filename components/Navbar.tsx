@@ -335,7 +335,7 @@ export default function Navbar() {
                     Sign In
                   </Button>
                 </Link>
-                <Link href="/sign-up">
+                <Link href="/waitlist">
                   <Button variant="outline" size="sm">
                     Join Waitlist
                   </Button>
