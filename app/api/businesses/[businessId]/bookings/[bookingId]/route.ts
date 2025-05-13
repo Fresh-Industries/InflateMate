@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "@/prisma/generated/prisma";
 import { createId } from '@paralleldrive/cuid2';
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 
