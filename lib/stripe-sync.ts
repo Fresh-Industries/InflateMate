@@ -1,12 +1,13 @@
 // lib/stripe-sync.ts
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
+import { SubscriptionType } from '@/prisma/generated/prisma';
 
 /**
  * Syncs the most recent Stripe subscription for a customer into your DB.
  * If no subscription exists, upserts a row with status 'none'.
  */
-export async function syncStripeDataToDB(customerId: string): Promise<void> {
+export async function syncStripeDataToDB(customerId: string, plan: string): Promise<void> {
   console.log(`🔄 syncStripeDataToDB(${customerId})`);
 
   // 1️⃣ Fetch latest subscription from Stripe
@@ -86,6 +87,7 @@ export async function syncStripeDataToDB(customerId: string): Promise<void> {
       currentPeriodStart: new Date(startTs),
       currentPeriodEnd:   new Date(endTs),
       cancelAtPeriodEnd,
+      type: plan.toUpperCase() as SubscriptionType,
     },
     create: {
       // Create with all fields required by the schema
@@ -97,6 +99,7 @@ export async function syncStripeDataToDB(customerId: string): Promise<void> {
       currentPeriodStart: new Date(startTs),
       currentPeriodEnd:   new Date(endTs),
       cancelAtPeriodEnd,
+      type: plan.toUpperCase() as SubscriptionType,
     }
   });
 

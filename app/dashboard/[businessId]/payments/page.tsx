@@ -17,6 +17,7 @@ import {
   
 } from "@stripe/react-connect-js";
 import PaymentAnalytics from "./_components/PaymentAnalytics";
+import InvoicesAndQuotes from "./_components/InvoicesandQuotes";
 
 export default function PaymentsPage() {
   const params = useParams();
@@ -130,6 +131,7 @@ export default function PaymentsPage() {
                 <TabsTrigger value="overview">Overview</TabsTrigger>
                 <TabsTrigger value="payments">Payments</TabsTrigger>
                 <TabsTrigger value="payouts">Payouts</TabsTrigger>
+                <TabsTrigger value="invoicesandquotes">Invoices and Quotes</TabsTrigger>
               </TabsList>
               <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
                 <TabsContent value="overview" className="space-y-6">
@@ -166,7 +168,11 @@ export default function PaymentsPage() {
                 <ConnectPayouts />
               </TabsContent>
               </ConnectComponentsProvider>
+              <TabsContent value="invoicesandquotes" className="space-y-6">
+              <InvoicesAndQuotes />
+            </TabsContent>
             </Tabs>
+           
           </div>
         )}
     </div>

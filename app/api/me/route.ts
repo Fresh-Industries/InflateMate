@@ -9,13 +9,16 @@ export async function GET() {
     return NextResponse.json({ business: null, subscription: null });
   }
 
+  console.log(user)
+
   // find subscription status if business exists
-  const orgId = user.membership?.organization?.id;
+  const orgId = user.membership?.organization?.clerkOrgId;
   const business = user.membership?.organization?.business;
+  const supabaseOrgId = user.membership?.organization?.id;
 
 const subscription = orgId
   ? await prisma.subscription.findUnique({
-      where: { organizationId: orgId },
+      where: { organizationId: supabaseOrgId },
       select: { status: true },
     })
   : null;

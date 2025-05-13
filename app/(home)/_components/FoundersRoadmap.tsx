@@ -12,7 +12,7 @@ import {
   Layout, // Used for Mobile App (representing the interface/structure)
   Zap // Used for AI features (representing intelligence/power)
 } from "lucide-react";
-
+import founderImage from "@/public/images/me.png"
 // Re-defining interface for upcoming features
 interface UpcomingFeature {
     name: string;
@@ -58,7 +58,7 @@ export default function FounderRoadmap() {
 
   const founderName = "Nikolas Manuel"; // Replace with actual founder name
   const founderTitle = "Founder, InflateMate"; // Keep title
-  const founderImageSrc = "/founder-avatar.jpg"; // Path to founder image
+  
 
   // Founder's story adapted from user context, *without* specific numbers
   const founderStory = (
@@ -103,7 +103,7 @@ export default function FounderRoadmap() {
                 <div className="relative h-16 w-16 rounded-full overflow-hidden border-2 border-primary/20 flex-shrink-0"> {/* Added flex-shrink-0 */}
                    {/* Use the actual image source */}
                   <Image
-                    src={founderImageSrc}
+                    src={founderImage}
                     alt={`${founderName}, InflateMate Founder`}
                     fill
                     className="object-cover"

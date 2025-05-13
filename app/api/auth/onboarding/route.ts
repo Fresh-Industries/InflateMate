@@ -46,6 +46,7 @@ const businessSchema = z.object({
   businessState: z.string().length(2, "Please use 2-letter state code"),
   businessZip: z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code"),
   businessPhone: z.string().regex(/^\+?1?\d{9,15}$/, "Invalid phone number"),
+  businessEmail: z.string().email("Invalid email address"),
 });
 
 export async function POST(req: NextRequest) {
@@ -184,7 +185,7 @@ export async function POST(req: NextRequest) {
         state: validatedData.businessState,
         zipCode: validatedData.businessZip,
         phone: validatedData.businessPhone.replace(/\D/g, ""),
-        email: user.email,
+        email: validatedData.businessEmail,
         onboarded: true,
         stripeAccountId: account.id,
         subdomain: finalSubdomain,

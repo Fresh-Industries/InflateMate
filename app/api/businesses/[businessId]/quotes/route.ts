@@ -5,7 +5,7 @@ import { z } from "zod";
 import Stripe from "stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
-import { QuoteStatus } from "@/prisma/generated/prisma";
+import { QuoteStatus, BookingStatus } from "@/prisma/generated/prisma";
 import { UTApi } from 'uploadthing/server'
 import { FileEsque } from '@/lib/utils'
 
@@ -37,7 +37,7 @@ const quoteSchema = z.object({
   participantCount: z.number().min(1),
   participantAge: z.string().optional(),
   specialInstructions: z.string().optional(),
-  bookingId: z.string().uuid("Valid Booking ID is required"), // Use the pre-generated bookingId
+  holdId: z.string().min(1, "Hold ID is required"),
   eventTimeZone: z.string().optional(),
 });
 
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       participantCount,
       participantAge,
       specialInstructions,
-      bookingId, // This ID is generated client-side and links the potential booking
+      holdId,
       eventTimeZone
     } = validation.data;
 
@@ -183,17 +183,17 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         customer: stripeCustomerId,
         line_items: lineItems as unknown as Stripe.QuoteCreateParams.LineItem[],
         application_fee_amount: 0,
-        
-
-        
-        // collection_method: 'send_invoice',
+        collection_method: 'send_invoice',
+        invoice_settings: {
+          days_until_due: 1,
+        },
+        expires_at: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 hours from now
         metadata: {
-          prismaBookingId: bookingId,
+          prismaBookingId: holdId,
           prismaBusinessId: businessId,
           prismaCustomerId: customer.id,
+          prismaQuoteId: holdId, // Add this to help with tracking
         },
-        // Optional: Set expiration date, description, etc.
-        // expires_at: Math.floor(Date.now() / 1000) + (7 * 24 * 60 * 60), // e.g., expires in 7 days
         description: `Quote for event on ${eventDate}`,
       }, { stripeAccount: stripeConnectedAccountId });
       console.log(`Created Stripe quote draft: ${stripeQuoteDraft.id}`);
@@ -226,85 +226,79 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
        // Prepare dates
        const startDateTime = new Date(`${eventDate}T${startTime}`);
        const endDateTime = new Date(`${eventDate}T${endTime}`);
-       // Check if expires_at is not null before converting
-       const quoteExpiresAt = sentQuote.expires_at !== null ? new Date(sentQuote.expires_at * 1000) : null;
 
-       // const pdf = await stripe.quotes.pdf(sentQuote.id);
+       // --- Start: Handle PDF Stream from Stripe ---
+       const pdfStream = await stripe.quotes.pdf(sentQuote.id, { stripeAccount: stripeConnectedAccountId }); // Added stripeAccount here for consistency
 
-       // const buf = await pdf.arrayBuffer()
-      // const fileName = `Quote-${customer.name}-${bookingId}.pdf`
-      // const upRes = await utapi.uploadFiles(new FileEsque([buf], fileName))
-      // const ufsUrl = upRes.data?.ufsUrl
-      // if (!ufsUrl) throw new Error('UploadThing failed')
+       const chunks: Uint8Array[] = [];
+       let ufsUrl: string | undefined;
 
-      // --- Start: Handle PDF Stream from Stripe ---
-      const pdfStream = await stripe.quotes.pdf(sentQuote.id, { stripeAccount: stripeConnectedAccountId }); // Added stripeAccount here for consistency
+       // Create a promise to handle the stream processing
+       await new Promise<void>((resolve, reject) => {
+         pdfStream.on('data', (chunk) => {
+           chunks.push(chunk);
+         });
+         pdfStream.on('error', (err) => {
+           console.error("Error reading PDF stream from Stripe:", err);
+           reject(new Error("Failed to read PDF stream from Stripe."));
+         });
+         pdfStream.on('end', async () => {
+           try {
+             const pdfBuffer = Buffer.concat(chunks);
+             const arrayBuffer = pdfBuffer.buffer.slice(pdfBuffer.byteOffset, pdfBuffer.byteOffset + pdfBuffer.byteLength);
 
-      const chunks: Uint8Array[] = [];
-      let ufsUrl: string | undefined;
+             const fileName = `Quote-${customer.name}-${holdId}.pdf`;
+             console.log(`Uploading PDF to UploadThing: ${fileName}`);
+             const upRes = await utapi.uploadFiles(new FileEsque([arrayBuffer], fileName, { type: 'application/pdf' }));
 
-      // Create a promise to handle the stream processing
-      await new Promise<void>((resolve, reject) => {
-        pdfStream.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-        pdfStream.on('error', (err) => {
-          console.error("Error reading PDF stream from Stripe:", err);
-          reject(new Error("Failed to read PDF stream from Stripe."));
-        });
-        pdfStream.on('end', async () => {
-          try {
-            const pdfBuffer = Buffer.concat(chunks);
-            const arrayBuffer = pdfBuffer.buffer.slice(pdfBuffer.byteOffset, pdfBuffer.byteOffset + pdfBuffer.byteLength);
+             if (upRes.error) {
+                 console.error("UploadThing API Error:", upRes.error);
+                 throw new Error(`UploadThing upload failed: ${upRes.error.message}`);
+             }
+             if (!upRes.data || !upRes.data.url) { // Assuming 'url' is the correct field from UploadThing response
+                 console.error("UploadThing response missing URL:", upRes.data);
+                 throw new Error('UploadThing failed to return a URL.');
+             }
+             ufsUrl = upRes.data.url; // Store the URL
+             console.log(`PDF uploaded successfully to UploadThing: ${ufsUrl}`);
+             resolve();
+           } catch (uploadError) {
+             console.error("Error during PDF upload or processing:", uploadError);
+             reject(uploadError);
+           }
+         });
+       });
 
-            const fileName = `Quote-${customer.name}-${bookingId}.pdf`;
-            console.log(`Uploading PDF to UploadThing: ${fileName}`);
-            const upRes = await utapi.uploadFiles(new FileEsque([arrayBuffer], fileName, { type: 'application/pdf' }));
-
-            if (upRes.error) {
-                console.error("UploadThing API Error:", upRes.error);
-                throw new Error(`UploadThing upload failed: ${upRes.error.message}`);
-            }
-            if (!upRes.data || !upRes.data.url) { // Assuming 'url' is the correct field from UploadThing response
-                console.error("UploadThing response missing URL:", upRes.data);
-                throw new Error('UploadThing failed to return a URL.');
-            }
-            ufsUrl = upRes.data.url; // Store the URL
-            console.log(`PDF uploaded successfully to UploadThing: ${ufsUrl}`);
-            resolve();
-          } catch (uploadError) {
-            console.error("Error during PDF upload or processing:", uploadError);
-            reject(uploadError);
-          }
-        });
-      });
-
-      if (!ufsUrl) {
-        // This case should ideally be caught by the promise rejection, but as a safeguard:
-        console.error("UploadThing URL was not set after stream processing.");
-        throw new Error('UploadThing URL was not obtained.');
-      }
-      // --- End: Handle PDF Stream from Stripe ---
+       if (!ufsUrl) {
+         // This case should ideally be caught by the promise rejection, but as a safeguard:
+         console.error("UploadThing URL was not set after stream processing.");
+         throw new Error('UploadThing URL was not obtained.');
+       }
+       // --- End: Handle PDF Stream from Stripe ---
 
 
-      // 6. Create Booking, BookingItems, and Quote in DB Transaction
-      console.log("Starting database transaction for Booking and Quote...");
-      const [potentialBooking, createdQuote] = await prisma.$transaction(async (tx) => {
+       // 6. Update existing Booking and Create Quote in DB Transaction
+       console.log("Starting database transaction for updating Booking and creating Quote...");
+       const [updatedBooking, createdQuote] = await prisma.$transaction(async (tx) => {
+           // Find and update the existing booking
+           const existingBooking = await tx.booking.findUnique({
+               where: { id: holdId },
+               include: { inventoryItems: true }
+           });
 
-          // Use upsert for Booking in case a quote is created for an ID that already exists
-          // (e.g., user generates UUID client-side, refreshes, and tries again).
-          // Or if a previous attempt failed partially.
-          // The status remains PENDING as it's just a quote for a potential booking.
-          const createdBooking = await tx.booking.upsert({
-              where: { id: bookingId }, // Use the client-generated ID
-              update: {
-                  // If booking exists, ensure key details match the latest quote attempt
+           if (!existingBooking) {
+               throw new Error("Hold booking not found");
+           }
+
+           // Update the booking with new information
+           const updatedBooking = await tx.booking.update({
+               where: { id: holdId },
+               data: {
                    eventDate: new Date(eventDate),
                    startTime: startDateTime,
                    endTime: endDateTime,
-                   // Status might remain PENDING or change to QUOTED
-                   // Consider adding a 'QUOTED' status or using PENDING with the quote link
-                   // For simplicity, let's use PENDING and the presence of a linked Quote indicates it's quoted.
+                   eventTimeZone: eventTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+                   status: "PENDING" as BookingStatus,
                    totalAmount: totalAmount,
                    subtotalAmount: subtotalAmount,
                    taxAmount: taxAmount,
@@ -314,150 +308,115 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
                    eventCity: eventCity,
                    eventState: eventState,
                    eventZipCode: eventZipCode,
-                   eventTimeZone: eventTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
                    participantCount: participantCount,
                    participantAge: participantAge ? parseInt(participantAge, 10) : null,
                    specialInstructions: specialInstructions,
-                   customerId: customer.id,
-                   // We don't update inventoryItems here on update to keep it simple;
-                   // upserting nested create might be complex on update.
-                   // If updating a booking via quote is common, reconsider this.
-              },
-              create: { // Create if it doesn't exist
-                  id: bookingId, // Use the client-generated ID
-                  eventDate: new Date(eventDate),
-                  startTime: startDateTime,
-                  endTime: endDateTime,
-                  status: 'PENDING', // Initial status is PENDING until accepted/invoiced
-                  totalAmount: totalAmount,
-                  subtotalAmount: subtotalAmount,
-                  taxAmount: taxAmount,
-                  taxRate: taxRate,
-                  eventType: eventType,
-                  eventAddress: eventAddress,
-                  eventCity: eventCity,
-                  eventState: eventState,
-                  eventZipCode: eventZipCode,
-                  eventTimeZone: eventTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
-                  participantCount: participantCount,
-                  participantAge: participantAge ? parseInt(participantAge, 10) : null,
-                  specialInstructions: specialInstructions,
-                  businessId: businessId,
-                  customerId: customer.id,
-                   // Create nested BookingItems only on initial booking creation
-                   inventoryItems: {
-                       create: selectedItems.map(item => ({
-                           inventoryId: item.id,
-                           quantity: item.quantity,
-                           price: item.price,
-                       })),
-                   },
-              },
-          });
-          console.log(` - Booking upserted: ${createdBooking.id}`);
-
-
-          // Create the Quote record linked to the Booking
-          // Note: Since bookingId in Quote is @unique, this will fail if a quote already exists for this bookingId.
-          // You might want to handle that - e.g., update the existing quote or return an error.
-          // For this example, we assume creating a *new* quote replaces a previous draft/sent one,
-          // or that the client prevents sending multiple quotes for the same potential booking.
-          // A simple approach is to delete any existing quote for this bookingId before creating a new one.
-
-           // Optional: Delete existing quote for this booking if necessary
-           await tx.quote.deleteMany({
-               where: { bookingId: bookingId }
+                   customer: { connect: { id: customer.id } },
+               }
            });
-           console.log(` - Deleted existing quotes for booking ${bookingId}`);
+           console.log(` - Booking updated from HOLD to PENDING: ${updatedBooking.id}`);
 
-          const createdQuote = await tx.quote.create({
-              data: {
-                  stripeQuoteId: sentQuote.id,
-                  // Map Stripe status (lowercase string) to your Prisma enum (uppercase)
-                  // Stripe statuses: 'draft', 'open', 'sent', 'accepted', 'canceled', 'expired'
-                  // Prisma statuses: 'DRAFT', 'OPEN', 'SENT', 'ACCEPTED', 'CANCELED', 'EXPIRED'
-                  // Assuming a direct uppercase mapping
-                  status: sentQuote.status.toUpperCase() as QuoteStatus, // Cast to the specific enum value
-                  amountTotal: totalAmount,
-                  amountSubtotal: subtotalAmount,
-                  amountTax: taxAmount,
-                  // Use non-null assertion ! since we checked sentQuote.currency is not null below
-                  currency: sentQuote.currency!.toUpperCase(),
-                  // These properties exist on Stripe.Quote after sending
-                  hostedQuoteUrl: sentQuote.invoice?.toString(), // This might be invoice.hosted_invoice_url if it's an invoice
-                  pdfUrl: ufsUrl, // Use the URL from UploadThing
-                  expiresAt: quoteExpiresAt,
-                  metadata: {
-                      prismaBookingId: bookingId,
-                      prismaBusinessId: businessId,
-                      prismaCustomerId: customer.id,
-                  },
-                  businessId: businessId,
-                  customerId: customer.id,
-                  bookingId: createdBooking.id, // Link to the upserted booking
-              }
-          });
+           // Create the Quote record linked to the existing Booking
+           const createdQuote = await tx.quote.create({
+               data: {
+                   stripeQuoteId: sentQuote.id,
+                   status: QuoteStatus.DRAFT,
+                   amountTotal: totalAmount,
+                   amountSubtotal: subtotalAmount,
+                   amountTax: taxAmount,
+                   currency: sentQuote.currency!.toUpperCase(),
+                   hostedQuoteUrl: sentQuote.invoice?.toString(),
+                   pdfUrl: ufsUrl,
+                   expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+                   metadata: {
+                       prismaBookingId: holdId,
+                       prismaBusinessId: businessId,
+                       prismaCustomerId: customer.id,
+                   },
+                   businessId: businessId,
+                   customerId: customer.id,
+                   bookingId: holdId,
+               }
+           });
            console.log(` - Quote created: ${createdQuote.id}, Stripe ID: ${createdQuote.stripeQuoteId}`);
 
-          return [createdBooking, createdQuote];
-      });
-      console.log("Database transaction completed.");
+           return [updatedBooking, createdQuote];
+       });
+       console.log("Database transaction completed.");
 
-      // --- End: Database and Stripe Operations ---
+       // --- End: Database and Stripe Operations ---
 
-      return NextResponse.json(
-        {
-          message: "Quote sent successfully via Stripe",
-          bookingId: potentialBooking.id, // Return the booking ID
-          quoteId: createdQuote.id,
-          stripeQuoteId: createdQuote.stripeQuoteId,
-          hostedQuoteUrl: createdQuote.hostedQuoteUrl,
-          pdfUrl: createdQuote.pdfUrl, // Also return the new PDF URL
-        },
-        { status: 200 } // 200 OK
-      );
+       return NextResponse.json(
+         {
+           message: "Quote sent successfully via Stripe",
+           bookingId: updatedBooking.id, // Return the booking ID
+           quoteId: createdQuote.id,
+           stripeQuoteId: createdQuote.stripeQuoteId,
+           hostedQuoteUrl: createdQuote.hostedQuoteUrl,
+           pdfUrl: createdQuote.pdfUrl, // Also return the new PDF URL
+         },
+         { status: 200 } // 200 OK
+       );
 
-    } catch (error) {
-      // Enhanced Error Handling (similar to Invoice API)
-      console.error("[QUOTE_CREATION_ERROR]", error); // Log the raw error
+     } catch (error) {
+       // Enhanced Error Handling (similar to Invoice API)
+       console.error("[QUOTE_CREATION_ERROR]", error); // Log the raw error
 
-      if (error instanceof z.ZodError) {
-         console.error("Validation Error Details:", error.errors);
-         return NextResponse.json({ error: "Invalid input data provided.", details: error.flatten().fieldErrors }, { status: 400 });
-      }
-       if (error instanceof Stripe.errors.StripeError) {
-          console.error("Stripe API Error:", { code: error.code, message: error.message, type: error.type });
-          let userMessage = "An error occurred while creating the quote with our payment provider.";
-          if (error.code === 'account_invalid') {
-            userMessage = "Stripe account configuration error. Please contact support.";
-          } else if (error.code === 'parameter_invalid') {
-            userMessage = `Invalid data sent to payment provider: ${error.param}.`;
-          }
-          return NextResponse.json({ error: userMessage, stripeErrorCode: error.code }, { status: 500 });
-      }
-       if (error instanceof PrismaClientKnownRequestError) {
-           console.error("Prisma Database Error:", { code: error.code, meta: error.meta });
-            // Handle unique constraint violation if trying to create a quote for a booking_id that already has one
-           if (error.code === 'P2002' && Array.isArray(error.meta?.target) && error.meta.target.includes('bookingId')) {
-                return NextResponse.json({ error: `A quote already exists for this booking ID (${bookingId}).`, field: 'bookingId' }, { status: 409 }); // Conflict
+       if (error instanceof z.ZodError) {
+          console.error("Validation Error Details:", error.errors);
+          return NextResponse.json({ error: "Invalid input data provided.", details: error.flatten().fieldErrors }, { status: 400 });
+       }
+        if (error instanceof Stripe.errors.StripeError) {
+           console.error("Stripe API Error:", { code: error.code, message: error.message, type: error.type });
+           let userMessage = "An error occurred while creating the quote with our payment provider.";
+           if (error.code === 'account_invalid') {
+             userMessage = "Stripe account configuration error. Please contact support.";
+           } else if (error.code === 'parameter_invalid') {
+             userMessage = `Invalid data sent to payment provider: ${error.param}.`;
            }
-           return NextResponse.json({ error: "A database error occurred.", code: error.code }, { status: 500 });
+           return NextResponse.json({ error: userMessage, stripeErrorCode: error.code }, { status: 500 });
        }
-       if (error instanceof Error) {
-            console.error("Generic Error:", error.message);
-            return NextResponse.json({ error: error.message || "An unexpected internal server error occurred." }, { status: 500 });
-       }
+        if (error instanceof PrismaClientKnownRequestError) {
+            console.error("Prisma Database Error:", { code: error.code, meta: error.meta });
+             // Handle unique constraint violation if trying to create a quote for a booking_id that already has one
+            if (error.code === 'P2002' && Array.isArray(error.meta?.target) && error.meta.target.includes('bookingId')) {
+                 return NextResponse.json({ error: `A quote already exists for this booking ID (${holdId}).`, field: 'bookingId' }, { status: 409 }); // Conflict
+            }
+            return NextResponse.json({ error: "A database error occurred.", code: error.code }, { status: 500 });
+        }
+        if (error instanceof Error) {
+             console.error("Generic Error:", error.message);
+             return NextResponse.json({ error: error.message || "An unexpected internal server error occurred." }, { status: 500 });
+        }
 
-      console.error("Unknown Error Type:", error);
-      return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
-    }
+       console.error("Unknown Error Type:", error);
+       return NextResponse.json({ error: "An unexpected error occurred." }, { status: 500 });
+     }
 
+   } catch (error) {
+     console.error("Error processing quote request:", error);
+     // Fallback for errors happening *before* the main try block's inner try
+     if (error instanceof z.ZodError) {
+        return NextResponse.json({ error: "Invalid input data", details: error.errors }, { status: 400 });
+     }
+     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+   }
+}
+
+export async function GET(req: NextRequest, { params }: { params: Promise<{ businessId: string }> }) {
+  const { businessId } = await params;
+  if (!businessId) {
+    return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
+  }
+
+  try {
+    const quotes = await prisma.quote.findMany({
+      where: { businessId: businessId },
+    });
+
+    return NextResponse.json(quotes, { status: 200 });
   } catch (error) {
-    console.error("Error processing quote request:", error);
-    // Fallback for errors happening *before* the main try block's inner try
-    if (error instanceof z.ZodError) {
-       return NextResponse.json({ error: "Invalid input data", details: error.errors }, { status: 400 });
-    }
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    console.error("Error fetching quotes:", error);
+    return NextResponse.json({ error: "An error occurred while fetching quotes." }, { status: 500 });
   }
 }

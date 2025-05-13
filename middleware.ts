@@ -17,6 +17,18 @@ const internalRoute = createRouteMatcher([
   '/api(.*)',                 // your API
 ]);
 
+const isStaticAsset = (domain: string) =>
+  domain.endsWith('.svg') ||
+  domain.endsWith('.png') ||
+  domain.endsWith('.jpg') ||
+  domain.endsWith('.ico') ||
+  domain.endsWith('.webmanifest') ||
+  domain.endsWith('.css') ||
+  domain.endsWith('.js') ||
+  domain.startsWith('_next/') ||
+  domain === 'favicon.ico';
+
+
 export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
   const host = (req.headers.get('host') ?? '').toLowerCase().replace(/^www\./, '');
@@ -33,6 +45,10 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (url.pathname.startsWith('/api')) {
+    return NextResponse.next();
+  }
+
+  if (isStaticAsset(host)) {
     return NextResponse.next();
   }
 

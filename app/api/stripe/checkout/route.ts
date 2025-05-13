@@ -1,52 +1,55 @@
+// app/api/stripe/checkout/route.ts
 import { NextResponse } from 'next/server';
-import { auth } from '@clerk/nextjs/server';
-import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
+import { prisma } from '@/lib/prisma';
+import { getCurrentUserWithOrgAndBusiness } from '@/lib/auth/clerk-utils';
 
 export async function POST(req: Request) {
-  const { userId } = await auth();
-  if (!userId) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // 1️⃣ Load user + org + business + subscription
+  const userWithOrg = await getCurrentUserWithOrgAndBusiness();
+  if (!userWithOrg || !userWithOrg.membership) {
+    return NextResponse.json({ error: 'Unauthorized or no organization found' }, { status: 401 });
+  }
+  console.log(userWithOrg)
+
+  const { organization } = userWithOrg.membership;
+  const { business, subscription } = organization;
+
+  if (!organization) {
+    return NextResponse.json({ error: 'Organization not found' }, { status: 404 });
   }
 
-  const body = await req.json();
-  const { organizationId } = body; // Expect the internal organizationId
-
-  if (!organizationId) {
-    return NextResponse.json({ error: 'Organization ID is required' }, { status: 400 });
+  // 2️⃣ Parse and validate request body
+  const { organizationId, plan } = await req.json();
+  console.log(organizationId, plan)
+  if (!organizationId || !plan) {
+    return NextResponse.json(
+      { error: 'Organization ID and plan are required' },
+      { status: 400 }
+    );
   }
 
-  // 1️⃣ Load org, include business, memberships, and subscription
-  const organization = await prisma.organization.findUnique({
-    where: { clerkOrgId: organizationId },
-    include: {
-      business: true,
-      memberships: { include: { user: true } },
-      subscription: true,
-    },
-  });
-
-  // Verify the organization exists and the user is a member
-  const isMember = organization?.memberships.some(m => m.user.clerkUserId === userId);
-  if (!organization || !isMember) {
-    return NextResponse.json({ error: 'Organization not found or user not a member' }, { status: 404 });
+  // Sanity check: ensure the clerkOrgId matches
+  console.log(organization.clerkOrgId, organizationId)
+  if (organization.clerkOrgId !== organizationId) {
+    return NextResponse.json(
+      { error: 'Organization mismatch' },
+      { status: 403 }
+    );
   }
 
-  // If a subscription already exists and is active/trialing, redirect
-  if (organization.subscription && ['active', 'trialing'].includes(organization.subscription.status)) {
-    return NextResponse.json({ url: `/dashboard/${organization.business?.id}` });
+  // 3️⃣ If already active or trialing, just send them to the dashboard
+  if (subscription && ['active', 'trialing'].includes(subscription.status)) {
+    return NextResponse.json({ url: `/dashboard/${business?.id}` });
   }
 
-  // 2️⃣ Find or create the Stripe Customer for this Organization
-  let customerId = organization.subscription?.stripeCustomerId;
-
+  // 4️⃣ Find or create Stripe Customer
+  let customerId = subscription?.stripeCustomerId;
   if (!customerId) {
-    // Use the first member as the "owner" for Stripe customer info
-    const owner = organization.memberships[0]?.user;
-
+    // Use the user’s email/name from prisma record
     const customer = await stripe.customers.create({
-      email: owner?.email ?? undefined,
-      name: owner?.name ?? undefined,
+      email: userWithOrg.email ?? undefined,
+      name: userWithOrg.name ?? undefined,
       metadata: {
         internalOrganizationId: organization.id,
         clerkOrgId: organization.clerkOrgId,
@@ -54,7 +57,7 @@ export async function POST(req: Request) {
     });
     customerId = customer.id;
 
-    // Create/Upsert a placeholder Subscription record linked to the Organization
+    // Upsert a placeholder subscription record
     await prisma.subscription.upsert({
       where: { organizationId: organization.id },
       create: {
@@ -71,8 +74,21 @@ export async function POST(req: Request) {
     });
   }
 
-  // 3️⃣ Create Checkout Session
-  const priceId = process.env.STRIPE_PRICE_ID!;
+  // 5️⃣ Map plan keys to your env‑stored Stripe Price IDs
+  const priceIdMap: Record<string,string> = {
+    solo: process.env.STRIPE_SOLO_PRICE_ID!,
+    growth: process.env.STRIPE_GROWTH_PRICE_ID!,
+  };
+  const priceId = priceIdMap[plan];
+  console.log(priceId)
+  if (!priceId) {
+    return NextResponse.json(
+      { error: `Unknown plan: ${plan}` },
+      { status: 400 }
+    );
+  }
+
+  // 6️⃣ Create the Checkout Session
   const session = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
@@ -80,17 +96,17 @@ export async function POST(req: Request) {
     subscription_data: {
       metadata: {
         internalOrganizationId: organization.id,
-        clerkOrgId: organizationId,
-        clerkUserId: userId,
+        clerkOrgId: organization.clerkOrgId,
+        clerkUserId: userWithOrg.clerkUserId,
       },
     },
-    success_url: `${process.env.NEXT_PUBLIC_API_HOST}/callback`,
-    cancel_url: `${process.env.NEXT_PUBLIC_API_HOST}/pricing`,
+    success_url:  `${process.env.NEXT_PUBLIC_API_HOST}/callback`,
+    cancel_url:   `${process.env.NEXT_PUBLIC_API_HOST}/pricing`,
     payment_method_types: ['card'],
     metadata: {
       internalOrganizationId: organization.id,
-      clerkOrgId: organizationId,
-      clerkUserId: userId,
+      clerkOrgId: organization.clerkOrgId,
+      clerkUserId: userWithOrg.clerkUserId,
     },
   });
 

@@ -29,6 +29,7 @@ export async function generateMetadata(
   
   try {
     // Get the business data
+    
     const business = await getBusinessByDomain(domain);
     
     
@@ -78,6 +79,21 @@ export default async function DomainLayout({
 }) {
   const domain = decodeURIComponent((await params).domain);
   console.log('Domain layout rendered with domain:', domain);
+  const isStaticAsset = (domain: string) =>
+    domain.endsWith('.svg') ||
+    domain.endsWith('.png') ||
+    domain.endsWith('.jpg') ||
+    domain.endsWith('.ico') ||
+    domain.endsWith('.webmanifest') ||
+    domain.endsWith('.css') ||
+    domain.endsWith('.js') ||
+    domain.startsWith('_next/') ||
+    domain === 'favicon.ico';
+  
+  if (isStaticAsset(domain)) {
+    return;
+
+  }
   
   try {
     const business = await getBusinessByDomain(domain);

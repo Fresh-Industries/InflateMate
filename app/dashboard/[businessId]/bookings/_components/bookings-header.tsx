@@ -9,9 +9,11 @@ import {
   SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import { NewBookingForm } from "./new-booking-form";
+import { NewBookingForm } from "@/components/BookingForm/NewBookingForm";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { prisma } from "@/lib/prisma";
+
+
 
 interface BookingsHeaderProps {
   businessId: string;

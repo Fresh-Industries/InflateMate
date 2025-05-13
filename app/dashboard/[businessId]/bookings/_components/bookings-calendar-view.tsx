@@ -34,7 +34,7 @@ interface Booking {
   eventDate: string;
   startTime: string;
   endTime: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'NO_SHOW' | 'WEATHER_HOLD';
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'HOLD';
   totalAmount: number;
   subtotalAmount?: number;
   taxAmount?: number;
@@ -99,10 +99,8 @@ const CustomEvent = ({ event }: EventProps<CalendarEvent>) => {
         return "bg-green-100 border-green-300 text-green-800";
       case "CANCELLED":
         return "bg-red-100 border-red-300 text-red-800";
-      case "NO_SHOW":
+      case "HOLD":
         return "bg-gray-100 border-gray-300 text-gray-600";
-      case "WEATHER_HOLD":
-        return "bg-purple-100 border-purple-300 text-purple-800";
       default:
         return "bg-gray-100 border-gray-300 text-gray-600";
     }
@@ -217,8 +215,7 @@ export function BookingsCalendarView({
             event.status === "CONFIRMED" && "border-blue-500",
             event.status === "COMPLETED" && "border-green-500",
             event.status === "CANCELLED" && "border-red-500",
-            event.status === "NO_SHOW" && "border-gray-400",
-            event.status === "WEATHER_HOLD" && "border-purple-500"
+            event.status === "HOLD" && "border-gray-400",
           )
         })}
         className="rbc-calendar-modern"

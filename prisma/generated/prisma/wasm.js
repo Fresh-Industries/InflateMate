@@ -198,6 +198,7 @@ exports.Prisma.InventoryScalarFieldEnum = {
   quantity: 'quantity',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  version: 'version',
   businessId: 'businessId'
 };
 
@@ -247,6 +248,7 @@ exports.Prisma.BookingScalarFieldEnum = {
   specialInstructions: 'specialInstructions',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  couponId: 'couponId',
   businessId: 'businessId',
   customerId: 'customerId'
 };
@@ -257,7 +259,10 @@ exports.Prisma.BookingItemScalarFieldEnum = {
   price: 'price',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  startUTC: 'startUTC',
+  endUTC: 'endUTC',
   bookingId: 'bookingId',
+  status: 'status',
   inventoryId: 'inventoryId'
 };
 
@@ -272,6 +277,7 @@ exports.Prisma.PaymentScalarFieldEnum = {
   stripePaymentId: 'stripePaymentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  paidAt: 'paidAt',
   bookingId: 'bookingId',
   businessId: 'businessId'
 };
@@ -289,6 +295,8 @@ exports.Prisma.CouponScalarFieldEnum = {
   isActive: 'isActive',
   minimumAmount: 'minimumAmount',
   businessId: 'businessId',
+  stripeCouponId: 'stripeCouponId',
+  stripePromotionId: 'stripePromotionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 };
@@ -332,7 +340,8 @@ exports.Prisma.SubscriptionScalarFieldEnum = {
   cancelAtPeriodEnd: 'cancelAtPeriodEnd',
   organizationId: 'organizationId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  type: 'type'
 };
 
 exports.Prisma.InvoiceScalarFieldEnum = {
@@ -440,13 +449,14 @@ exports.BookingStatus = exports.$Enums.BookingStatus = {
   CONFIRMED: 'CONFIRMED',
   CANCELLED: 'CANCELLED',
   COMPLETED: 'COMPLETED',
-  NO_SHOW: 'NO_SHOW',
-  WEATHER_HOLD: 'WEATHER_HOLD'
+  HOLD: 'HOLD',
+  EXPIRED: 'EXPIRED'
 };
 
 exports.PaymentType = exports.$Enums.PaymentType = {
   DEPOSIT: 'DEPOSIT',
   FULL_PAYMENT: 'FULL_PAYMENT',
+  CASH: 'CASH',
   REFUND: 'REFUND'
 };
 
@@ -454,7 +464,8 @@ exports.PaymentStatus = exports.$Enums.PaymentStatus = {
   PENDING: 'PENDING',
   COMPLETED: 'COMPLETED',
   FAILED: 'FAILED',
-  REFUNDED: 'REFUNDED'
+  REFUNDED: 'REFUNDED',
+  EXPIRED: 'EXPIRED'
 };
 
 exports.DiscountType = exports.$Enums.DiscountType = {
@@ -467,6 +478,11 @@ exports.WaiverStatus = exports.$Enums.WaiverStatus = {
   SIGNED: 'SIGNED',
   REJECTED: 'REJECTED',
   EXPIRED: 'EXPIRED'
+};
+
+exports.SubscriptionType = exports.$Enums.SubscriptionType = {
+  SOLO: 'SOLO',
+  GROWTH: 'GROWTH'
 };
 
 exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {

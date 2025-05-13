@@ -6,8 +6,15 @@ import { loadConnectAndInitialize } from "@stripe/connect-js";
 import {
   ConnectComponentsProvider,
   ConnectAccountManagement,
+  ConnectAccountOnboarding,
 } from "@stripe/react-connect-js";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function PaymentsPage() {
   const params = useParams();
@@ -18,9 +25,8 @@ export default function PaymentsPage() {
   const [stripeConnectInstance, setStripeConnectInstance] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
-
-  // Fetch the business and account session data from your server, then initialize Connect.js.
   useEffect(() => {
     async function fetchBusinessAndInitStripe() {
       try {
@@ -37,6 +43,13 @@ export default function PaymentsPage() {
         }
         setStripeAccountId(business.stripeAccountId);
 
+        // Check onboarding status
+        const onboardingStatusRes = await fetch(`/api/stripe/connect/onboarding-status?accountId=${business.stripeAccountId}`);
+        const onboardingStatus = await onboardingStatusRes.json();
+        if (!onboardingStatus.isOnboarded) {
+          setShowOnboarding(true);
+        }
+
         // Call your API endpoint to create an account session (returns clientSecret)
         const clientSecretResponse = await fetch(
           `/api/stripe/embedded-components?businessId=${businessId}`
@@ -51,7 +64,6 @@ export default function PaymentsPage() {
         setClientSecret(clientSecretData.clientSecret);
 
         // Initialize Connect.js with the client secret and publishable key.
-        // This returns a StripeConnectInstance used to power the embedded components.
         const stripeConnect = loadConnectAndInitialize({
           publishableKey: process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY!,
           fetchClientSecret: async () => clientSecretData.clientSecret,
@@ -68,63 +80,59 @@ export default function PaymentsPage() {
     fetchBusinessAndInitStripe();
   }, [businessId]);
 
-  
-
   return (
     <div className="p-6 space-y-6">
-    <Card>
-      <CardHeader>
-        <CardTitle>Stripe Settings</CardTitle>
-        <CardDescription>Manage your Stripe account settings</CardDescription>
-      </CardHeader>
-      
-   <CardContent>
+      <Card>
+        <CardHeader>
+          <CardTitle>Stripe Settings</CardTitle>
+          <CardDescription>
+            Manage your Stripe account settings
+          </CardDescription>
+        </CardHeader>
 
-      {isLoading && (
-        <div className="flex items-center justify-center py-10">
-          <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
-        </div>
-      )}
+        <CardContent>
+          {isLoading && (
+            <div className="flex items-center justify-center py-10">
+              <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-primary"></div>
+            </div>
+          )}
 
-      {error && (
-        <div className="bg-red-50 p-4 rounded-md border border-red-200">
-          <h3 className="text-red-800 font-medium">Error</h3>
-          <p className="text-red-700">{error}</p>
-        </div>
-      )}
+          {error && (
+            <div className="bg-red-50 p-4 rounded-md border border-red-200">
+              <h3 className="text-red-800 font-medium">Error</h3>
+              <p className="text-red-700">{error}</p>
+            </div>
+          )}
 
-      {!isLoading && !error && !stripeAccountId && (
-        <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
-          <h3 className="text-amber-800 font-medium">No Stripe Account</h3>
-          <p className="text-amber-700">
-            You need to set up a Stripe account for this business first.
-          </p>
-        </div>
-      )}
+          {!isLoading && !error && !stripeAccountId && (
+            <div className="bg-amber-50 p-4 rounded-md border border-amber-200">
+              <h3 className="text-amber-800 font-medium">No Stripe Account</h3>
+              <p className="text-amber-700">
+                You need to set up a Stripe account for this business first.
+              </p>
+            </div>
+          )}
 
-      {/* Only render the Connect embedded components when everything is ready */}
-      {!isLoading &&
-        !error &&
-        stripeAccountId &&
-        clientSecret &&
-        stripeConnectInstance && (
-          <div className="space-y-6">
-    
-              <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
-
-             
-              
-                <ConnectAccountManagement />
-              
-              
-          
-              </ConnectComponentsProvider>
-           
-          </div>
-        )}
-
+          {/* Only render the Connect embedded components when everything is ready */}
+          {!isLoading &&
+            !error &&
+            stripeAccountId &&
+            clientSecret &&
+            stripeConnectInstance && (
+              <div className="space-y-6">
+                <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
+                  {!showOnboarding ? (
+                    <ConnectAccountManagement />
+                  ) : (
+                    <ConnectAccountOnboarding
+                      onExit={() => setShowOnboarding(false)}
+                    />
+                  )}
+                </ConnectComponentsProvider>
+              </div>
+            )}
         </CardContent>
-    </Card>
+      </Card>
     </div>
   );
 }

@@ -9,6 +9,7 @@ import { sendToDocuSeal } from "@/lib/docuseal.server";
 import { syncStripeDataToDB } from "@/lib/stripe-sync";
 import { BookingStatus, InvoiceStatus } from "@/prisma/generated/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { createBookingSafely } from "@/lib/createBookingSafely";
 
 interface Booking {
     id: string;
@@ -104,13 +105,6 @@ export async function POST(req: NextRequest) {
         break;
       }
 
-      case 'invoice.paid': { // Often overlaps with payment_succeeded
-        const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Processing invoice.paid: ${invoice.id}`);
-        await handleInvoicePaid(invoice);
-        break;
-      }
-
       case 'invoice.payment_failed': {
         const invoice = event.data.object as Stripe.Invoice;
         // Log finalization error if available, otherwise log generic message
@@ -199,10 +193,28 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleSubscription(subscription: Stripe.Subscription) {
-  console.log(`Subscription: ${subscription.id}`);
+  console.log(`Subscription event: ${subscription.id}`);
 
+  // 1️⃣ Get the customer
   const customerId = subscription.customer as string;
-  await syncStripeDataToDB(customerId);
+
+  // 2️⃣ Extract the priceId from the first line item
+  const priceId = subscription.items.data[0]?.price.id;
+  console.log(` → priceId: ${priceId}`);
+
+  // 3️⃣ Map that back to your plan key
+  let plan: string;
+  if (priceId === process.env.STRIPE_SOLO_PRICE_ID) {
+    plan = 'solo';
+  } else if (priceId === process.env.STRIPE_GROWTH_PRICE_ID) {
+    plan = 'growth';
+  } else {
+    console.warn(`Unrecognized priceId for subscription ${subscription.id}:`, priceId);
+    plan = 'unknown';
+  }
+
+  // 4️⃣ Now sync, passing the plan
+  await syncStripeDataToDB(customerId, plan);
 }
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent succeeded: ${paymentIntent.id}`);
@@ -216,14 +228,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
   console.log("PaymentIntent object:", JSON.stringify(paymentIntent, null, 2));
   console.log("Metadata:", metadata);
 
-  if (!metadata || !metadata.bounceHouseId) {
+  if (!metadata || !metadata.prismaBookingId) {
     console.log("No booking metadata found in payment intent");
     return;
   }
 
   try {
     const email = paymentIntent.receipt_email || '';
-    const businessId = metadata.businessId || '';
+    const businessId = metadata.prismaBusinessId || '';
     const business = await prisma.business.findUnique({
       where: { id: businessId },
     });
@@ -254,7 +266,6 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             state: metadata.eventState || '',
             zipCode: metadata.eventZipCode || '',
             status: 'Active',
-
           },
         });
         console.log("Customer updated successfully:", customer.id);
@@ -323,11 +334,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           const selectedItems = JSON.parse(metadata.selectedItems);
           console.log("Parsed selectedItems:", selectedItems);
           
-          // Map the selected items to the format expected by Prisma
+          // Map the selected items to the format expected by createBookingSafely
           inventoryItems = selectedItems.map((item: { id: string; quantity?: number; price?: number }) => ({
             inventoryId: item.id,
             quantity: item.quantity || 1,
             price: item.price || 0,
+            status: 'CONFIRMED',
+            startUTC: startUTC,
+            endUTC: endUTC,
           }));
         } else {
           // Fallback to legacy bounceHouseId for backwards compatibility
@@ -335,6 +349,9 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             inventoryId: metadata.bounceHouseId,
             quantity: 1,
             price: subtotalAmount,
+            status: 'CONFIRMED',
+            startUTC: startUTC,
+            endUTC: endUTC,
           }];
         }
       } catch (parseError) {
@@ -344,48 +361,63 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           inventoryId: metadata.bounceHouseId,
           quantity: 1,
           price: subtotalAmount,
+          status: 'CONFIRMED',
+          startUTC: startUTC,
+          endUTC: endUTC,
         }];
       }
 
-      const bookingData = {
-        id: metadata.bookingId || '',
-        eventDate: eventDate, // Use the date-only UTC Date object
-        startTime: startUTC,  // Use the converted UTC start time
-        endTime: endUTC,    // Use the converted UTC end time
-        eventTimeZone: tz,    // Persist the timezone used
-        status: 'CONFIRMED' as const,
-        totalAmount: paymentIntent.amount / 100,
-        subtotalAmount: subtotalAmount,
-        taxAmount: taxAmount,
-        taxRate: taxRate,
-        depositPaid: true,
-        eventType: metadata.eventType || 'OTHER',
-        eventAddress: metadata.eventAddress || '',
-        eventCity: metadata.eventCity || '',
-        eventState: metadata.eventState || '',
-        eventZipCode: metadata.eventZipCode || '',
-        participantCount: parseInt(metadata.participantCount) || 1,
-        participantAge: metadata.participantAge ? parseInt(metadata.participantAge) : null,
-        specialInstructions: metadata.specialInstructions || '',
-        businessId: metadata.businessId,
-        customerId: customer.id,
-        inventoryItems: {
-          create: inventoryItems,
-        },
-      };
-
-      booking = await prisma.booking.upsert({
-        where: { id: bookingData.id },
-        update: {
-          status: 'CONFIRMED',
-          depositPaid: true,
-        },
-        create: bookingData,
-        include: {
-          inventoryItems: true,
-        },
+      // Check if booking exists
+      const existingBooking = await prisma.booking.findUnique({
+        where: { id: metadata.prismaBookingId },
       });
-      console.log("Booking created/updated successfully:", booking.id);
+
+      if (existingBooking) {
+        // Only update status and depositPaid
+        booking = await prisma.booking.update({
+          where: { id: metadata.prismaBookingId },
+          data: {
+            status: 'CONFIRMED',
+            depositPaid: true,
+          },
+        });
+        console.log("Booking updated successfully:", booking.id);
+        // Set all BookingItems to CONFIRMED
+        await prisma.$executeRaw`UPDATE "BookingItem" SET "bookingStatus" = 'CONFIRMED', "updatedAt" = NOW() WHERE "bookingId" = ${booking.id}`;
+        console.log("All BookingItems set to CONFIRMED for booking:", booking.id);
+      } else {
+        // Remove inventoryItems from bookingData
+        const bookingData = {
+          id: metadata.prismaBookingId || '',
+          eventDate: eventDate,
+          startTime: startUTC,
+          endTime: endUTC,
+          eventTimeZone: tz,
+          status: 'CONFIRMED' as const,
+          totalAmount: paymentIntent.amount / 100,
+          subtotalAmount: subtotalAmount,
+          taxAmount: taxAmount,
+          taxRate: taxRate,
+          depositPaid: true,
+          eventType: metadata.eventType || 'OTHER',
+          eventAddress: metadata.eventAddress || '',
+          eventCity: metadata.eventCity || '',
+          eventState: metadata.eventState || '',
+          eventZipCode: metadata.eventZipCode || '',
+          participantCount: parseInt(metadata.participantCount) || 1,
+          participantAge: metadata.participantAge ? parseInt(metadata.participantAge) : null,
+          specialInstructions: metadata.specialInstructions || '',
+          businessId: metadata.prismaBusinessId,
+          customerId: customer.id,
+          business: { connect: { id: metadata.prismaBusinessId } },
+          customer: { connect: { id: customer.id } },
+        };
+        booking = await createBookingSafely(bookingData, inventoryItems);
+        console.log("Booking created successfully via createBookingSafely:", booking.id);
+        // Set all BookingItems to CONFIRMED
+        await prisma.$executeRaw`UPDATE "BookingItem" SET "bookingStatus" = 'CONFIRMED', "updatedAt" = NOW() WHERE "bookingId" = ${booking.id}`;
+        console.log("All BookingItems set to CONFIRMED for booking:", booking.id);
+      }
     } catch (bookingError) {
       console.error("Error creating/updating booking:", bookingError);
       throw bookingError;
@@ -402,7 +434,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
         stripeClientSecret: paymentIntent.client_secret || '',
         paidAt: new Date(),
         bookingId: booking.id,
-        businessId: metadata.businessId,
+        businessId: metadata.prismaBusinessId,
         metadata: metadata as Record<string, string | number | null>,
       };
 
@@ -423,6 +455,16 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
     console.log(`[handlePaymentIntentSucceeded] Booking ${booking?.id} confirmed successfully via Payment Intent`);
 
+    const invoiceMeta = paymentIntent.metadata ?? null;
+    if (invoiceMeta && invoiceMeta.couponCode && metadata.prismaBusinessId) {
+      await prisma.$transaction(async (tx) => {
+        await tx.coupon.update({
+          where: { code_businessId: { code: invoiceMeta.couponCode, businessId: metadata.prismaBusinessId } },
+          data: { usedCount: { increment: 1 } },
+        });
+      });
+    }
+
   } catch (error) {
     // --- MODIFIED CATCH BLOCK --- 
     console.error(`[HANDLER_ERROR handlePaymentIntentSucceeded] Error processing PI ${paymentIntent.id}:`, error);
@@ -439,216 +481,107 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 }
 
 
-// async function handleQuoteCreated(stripeQuote: Stripe.Quote) {
-//   console.log(`[HANDLER] Processing Quote Created: ${stripeQuote.id}`);
-//   // If your API endpoint only creates the DB record upon *sending* the quote,
-//   // this handler might just be for logging. If you pre-create drafts in DB,
-//   // you'd handle saving the initial draft state here.
-//   const bookingId = stripeQuote.metadata?.prismaBookingId as string | undefined;
-//    if (!bookingId) {
-//       console.warn(`[HANDLER] Quote ${stripeQuote.id} created without prismaBookingId metadata.`);
-//       return; // Cannot link to internal booking
-//   }
-//   console.log(`[HANDLER] Quote ${stripeQuote.id} created for potential Booking ID: ${bookingId}`);
-
-//   try {
-//       // Check if a quote record already exists for this booking ID (e.g., from a previous attempt)
-//       const existingQuote = await prisma.quote.findUnique({
-//           where: { bookingId: bookingId },
-//       });
-
-//       if (existingQuote) {
-//           console.warn(`[HANDLER] Existing Quote record ${existingQuote.id} found for Booking ${bookingId}. Not creating a new one.`);
-//            // Optional: Update the existing draft record if necessary
-//            if (existingQuote.stripeQuoteId !== stripeQuote.id) {
-//                console.warn(`[HANDLER] Existing Quote ${existingQuote.id} has different Stripe ID (${existingQuote.stripeQuoteId}) than new quote ${stripeQuote.id}. This may indicate an issue.`);
-//                // Decide how to handle this conflict: update existing, log, or error
-//            }
-//           return;
-//       }
-
-//       const pdf = await stripe.quotes.pdf(stripeQuote.id);
-
-//       // Create a new Quote record in the database for the draft quote
-//       await prisma.quote.create({
-//           data: {
-//               stripeQuoteId: stripeQuote.id,
-//               status: 'DRAFT', // Initial status is DRAFT
-//                // Use optional chaining and handle nulls for properties not available on draft
-//               amountTotal: (stripeQuote.amount_total ?? 0) / 100,
-//               amountSubtotal: (stripeQuote.amount_subtotal ?? 0) / 100,
-//               amountTax: (stripeQuote.total_tax_amounts?.[0]?.amount ?? 0) / 100, // Adjust if tax is applied differently
-//               currency: stripeQuote.currency?.toUpperCase() ?? 'USD', // Default if currency is null
-//               hostedQuoteUrl: stripeQuote.invoice?.toString(), // Should be null on draft
-//               pdfUrl: stripeQuote.quote_pdf, // Should be null on draft
-//               expiresAt: stripeQuote.expires_at ? new Date(stripeQuote.expires_at * 1000) : null,
-//               metadata: stripeQuote.metadata,
-//               businessId: stripeQuote.metadata?.prismaBusinessId as string, // Link from metadata
-//               customerId: stripeQuote.metadata?.prismaCustomerId as string, // Link from metadata
-//               bookingId: bookingId, // Link to the potential booking
-//           },
-//       });
-//       console.log(`[HANDLER] Quote ${stripeQuote.id} (DRAFT) record created in DB.`);
-
-//   } catch (error) {
-//       console.error(`[HANDLER_ERROR handleQuoteCreated] Error processing Quote ${stripeQuote.id}:`, error);
-//       if (error instanceof PrismaClientKnownRequestError) {
-//           console.error(` - Prisma Error Code: ${error.code}`);
-//           console.error(` - Prisma Meta: ${JSON.stringify(error.meta)}`);
-//       } else if (error instanceof Error) {
-//            console.error(` - Error Message: ${error.message}`);
-//       }
-//        // Do NOT re-throw
-//   }
-// }
-
-
-// async function handleQuoteFinalized(stripeQuote: Stripe.Quote) {
-//   console.log(`[HANDLER] Processing Quote Finalized: ${stripeQuote.id}`);
-
-//   const stripeQuoteId = stripeQuote.id;
-//   const bookingId = stripeQuote.metadata?.prismaBookingId as string | undefined;
-
-//   if (!bookingId) {
-//        console.warn(`[HANDLER] Quote ${stripeQuoteId} finalized without prismaBookingId metadata. Cannot link to internal booking.`);
-//        // We can still try to update the Quote record if it exists by stripeQuoteId,
-//        // but linking it to a booking won't be possible.
-//        // For this example, we assume prismaBookingId is always present from our API.
-//        return;
-//   }
-
-//   try {
-//       // Find the internal quote record using the booking ID or Stripe ID
-//       const internalQuote = await prisma.quote.findUnique({
-//           where: { bookingId: bookingId },
-//            include: { booking: true } // Include booking to update its status if needed
-//       });
-
-//       if (!internalQuote) {
-//           console.warn(`[HANDLER] Finalized: Quote record for booking ${bookingId} (Stripe ID ${stripeQuoteId}) not found in DB.`);
-//           // This might happen if the quote was finalized directly in Stripe after creation
-//           // without going through our API that creates the initial DB record.
-//           // Decide how to handle this: create a new record? Log and ignore?
-//           // For now, log and return.
-//           return;
-//       }
-
-//        if (internalQuote.status !== 'DRAFT') {
-//            console.warn(`[HANDLER] Finalized: Quote ${internalQuote.id} (Stripe ${stripeQuoteId}) is not in DRAFT state (Status: ${internalQuote.status}). Skipping update.`);
-//            return; // Avoid reprocessing if already sent/accepted/canceled/etc.
-//        }
-
-//       console.log(`[HANDLER] Finalized: Updating internal Quote record ${internalQuote.id} for Booking ${bookingId}`);
-
-//       const pdf = await stripe.quotes.pdf(stripeQuote.id);
-
-
-//       // Update the internal Quote status to SENT and store the URLs
-//       await prisma.quote.update({
-//           where: { id: internalQuote.id },
-//           data: {
-//               status: 'SENT', // Map Stripe 'finalized' or 'open'/'sent' to your SENT enum
-//               // These URLs should now be available on the Stripe.Quote object after finalization
-//               hostedQuoteUrl: stripeQuote.invoice?.toString(),
-//               pdfUrl: pdf.toString(),
-//                // Update amounts just in case, though our API should set them
-//                amountTotal: (stripeQuote.amount_total ?? 0) / 100,
-//                amountSubtotal: (stripeQuote.amount_subtotal ?? 0) / 100,
-//                amountTax: (stripeQuote.total_tax_amounts?.[0]?.amount ?? 0) / 100, // Adjust based on your tax setup
-//               currency: stripeQuote.currency?.toUpperCase() ?? internalQuote.currency, // Update currency, keep old if null
-//               expiresAt: stripeQuote.expires_at ? new Date(stripeQuote.expires_at * 1000) : internalQuote.expiresAt, // Update expiry
-//               updatedAt: new Date(), // Explicitly set update time
-//           },
-//       });
-//       console.log(`[HANDLER] Internal Quote record ${internalQuote.id} updated to SENT.`);
-
-//       // Optional: Update the Booking status to indicate it's quoted, if you have a 'QUOTED' status
-//       // Example:
-//       // if (internalQuote.booking) {
-//       //      await prisma.booking.update({
-//       //          where: { id: internalQuote.bookingId },
-//       //          data: { status: 'QUOTED' }, // Assuming you have a 'QUOTED' status enum
-//       //      });
-//       //      console.log(`[HANDLER] Booking ${internalQuote.bookingId} status updated to QUOTED.`);
-//       // }
-
-
-//   } catch (error) {
-//       console.error(`[HANDLER_ERROR handleQuoteFinalized] Error processing Quote ${stripeQuoteId}:`, error);
-//        if (error instanceof PrismaClientKnownRequestError) {
-//           console.error(` - Prisma Error Code: ${error.code}`);
-//           console.error(` - Prisma Meta: ${JSON.stringify(error.meta)}`);
-//       } else if (error instanceof Error) {
-//            console.error(` - Error Message: ${error.message}`);
-//       }
-//        // Do NOT re-throw
-//   }
-// }
-
-
 async function handleQuoteAccepted(stripeQuote: Stripe.Quote) {
   console.log(`[HANDLER] Processing Quote Accepted: ${stripeQuote.id}`);
   const stripeQuoteId = stripeQuote.id;
   const bookingId = stripeQuote.metadata?.prismaBookingId as string | undefined;
 
   if (!bookingId) {
-       console.warn(`[HANDLER] Quote ${stripeQuoteId} accepted without prismaBookingId metadata. Cannot link to internal booking.`);
-       return; // Cannot link
+    console.warn(`[HANDLER] Quote ${stripeQuoteId} accepted without prismaBookingId metadata. Cannot link to internal booking.`);
+    return;
   }
 
+  console.log(`[HANDLER] Booking ID: ${bookingId}`);
+
   try {
-       // Find the internal quote record
-      const internalQuote = await prisma.quote.findUnique({
-          where: { bookingId: bookingId },
-          include: { booking: true }
+    // Find the internal quote record
+    const internalQuote = await prisma.quote.findFirst({
+      where: { 
+        OR: [
+          { bookingId: bookingId },
+          { stripeQuoteId: stripeQuoteId }
+        ]
+      },
+      include: { booking: true, customer: true }
+    });
+
+    if (!internalQuote) {
+      console.warn(`[HANDLER] Accepted: Quote record for booking ${bookingId} (Stripe ID ${stripeQuoteId}) not found in DB.`);
+      return;
+    }
+
+    if (internalQuote.status === 'ACCEPTED') {
+      console.warn(`[HANDLER] Accepted: Quote ${internalQuote.id} (Stripe ${stripeQuoteId}) is already ACCEPTED. Skipping update.`);
+      return;
+    }
+
+    // Create invoice record and update quote status in a transaction
+    await prisma.$transaction(async (tx) => {
+      // Update quote status
+      await tx.quote.update({
+        where: { id: internalQuote.id },
+        data: {
+          status: 'ACCEPTED',
+          updatedAt: new Date(),
+        },
       });
 
-      if (!internalQuote) {
-           console.warn(`[HANDLER] Accepted: Quote record for booking ${bookingId} (Stripe ID ${stripeQuoteId}) not found in DB.`);
-           return; // Nothing to update
-      }
-
-      if (internalQuote.status === 'ACCEPTED') {
-           console.warn(`[HANDLER] Accepted: Quote ${internalQuote.id} (Stripe ${stripeQuoteId}) is already ACCEPTED. Skipping update.`);
-           return; // Avoid reprocessing
-      }
-
-      console.log(`[HANDLER] Accepted: Updating internal Quote record ${internalQuote.id} for Booking ${bookingId}`);
-
-      // Update the internal Quote status to ACCEPTED
-      await prisma.quote.update({
-          where: { id: internalQuote.id },
-          data: {
-              status: 'ACCEPTED', // Map Stripe 'accepted' to your ACCEPTED enum
-              updatedAt: new Date(), // Explicitly set update time
+      // Create invoice record
+      await tx.invoice.create({
+        data: {
+          status: 'OPEN',
+          amountDue: internalQuote.amountTotal,
+          amountPaid: 0,
+          amountRemaining: internalQuote.amountTotal,
+          currency: internalQuote.currency,
+          stripeInvoiceId: stripeQuote.invoice?.toString(), // Stripe creates this automatically
+          businessId: internalQuote.businessId,
+          customerId: internalQuote.customerId,
+          bookingId: internalQuote.bookingId,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24-hour hold
+          metadata: {
+            prismaBookingId: bookingId,
+            prismaBusinessId: internalQuote.businessId,
+            prismaCustomerId: internalQuote.customerId,
+            prismaQuoteId: internalQuote.id,
           },
+        },
       });
-      console.log(`[HANDLER] Internal Quote record ${internalQuote.id} updated to ACCEPTED.`);
 
-      // IMPORTANT: If Stripe is configured to automatically create an invoice upon quote acceptance,
-      // you DO NOT need to manually create an invoice or update the booking status here.
-      // The subsequent `invoice.created` and `invoice.paid` (or `invoice.payment_succeeded`)
-      // webhooks will handle the invoice creation and then the booking confirmation via `handleInvoicePaymentSucceeded`.
+      // Create payment record with PENDING status
+      await tx.payment.create({
+        data: {
+          amount: internalQuote.amountTotal,
+          type: 'FULL_PAYMENT',
+          status: 'PENDING',
+          currency: internalQuote.currency,
+          bookingId: internalQuote.bookingId,
+          businessId: internalQuote.businessId,
+          metadata: {
+            prismaQuoteId: internalQuote.id,
+            stripeQuoteId: stripeQuoteId,
+          },
+        },
+      });
 
-      // If you are NOT using Stripe's auto-invoicing feature on quote acceptance,
-      // you would need to implement the logic here to:
-      // 1. Create a Stripe Invoice from the accepted quote using stripe.invoices.create() with the `from_quote` parameter.
-      // 2. Finalize and send that invoice.
-      // 3. Update your internal Booking status (e.g., to 'INVOICED' or similar, not CONFIRMED yet).
-      // 4. The booking status would then be updated to CONFIRMED when the *invoice* is paid via the invoice webhooks.
+      // Update booking status to PENDING
+      await tx.booking.update({
+        where: { id: bookingId },
+        data: {
+          status: 'PENDING' as BookingStatus,
+          updatedAt: new Date(),
+        },
+      });
+    });
 
-       console.log(`[HANDLER] Quote Accepted: Relying on invoice.paid/payment_intent.succeeded webhooks for booking confirmation.`);
-
+    console.log(`[HANDLER] Quote ${internalQuote.id} accepted and invoice record created.`);
 
   } catch (error) {
-      console.error(`[HANDLER_ERROR handleQuoteAccepted] Error processing Quote ${stripeQuoteId}:`, error);
-       if (error instanceof PrismaClientKnownRequestError) {
-          console.error(` - Prisma Error Code: ${error.code}`);
-          console.error(` - Prisma Meta: ${JSON.stringify(error.meta)}`);
-      } else if (error instanceof Error) {
-           console.error(` - Error Message: ${error.message}`);
-      }
-       // Do NOT re-throw
+    console.error(`[HANDLER_ERROR handleQuoteAccepted] Error processing Quote ${stripeQuoteId}:`, error);
+    if (error instanceof PrismaClientKnownRequestError) {
+      console.error(` - Prisma Error Code: ${error.code}`);
+      console.error(` - Prisma Meta: ${JSON.stringify(error.meta)}`);
+    }
   }
 }
 
@@ -725,14 +658,14 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
   console.log(`PaymentIntent failed: ${paymentIntent.id}`);
 
   const metadata = paymentIntent.metadata;
-  if (!metadata || !metadata.bookingId) {
+  if (!metadata || !metadata.prismaBookingId) {
     return;
   }
 
   try {
     // Update booking status if it exists
     await prisma.booking.updateMany({
-      where: { id: metadata.bookingId },
+      where: { id: metadata.prismaBookingId },
       data: { status: 'PENDING' },
     });
 
@@ -745,8 +678,8 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
         type: 'FULL_PAYMENT',
         stripePaymentId: paymentIntent.id,
         stripeClientSecret: paymentIntent.client_secret || '',
-        bookingId: metadata.bookingId,
-        businessId: metadata.businessId,
+        bookingId: metadata.prismaBookingId,
+        businessId: metadata.prismaBusinessId,
         metadata: metadata as Record<string, string | number | null>,
       },
     });
@@ -800,11 +733,11 @@ async function handleBookingConfirmation(bookingId: string) {
     const docuSealBooking: Booking = {
       id: booking.id,
       eventDate: formattedEventDate, // Use formatted string date
-      eventAddress: booking.eventAddress,
-      eventCity: booking.eventCity,
-      eventState: booking.eventState,
-      eventZipCode: booking.eventZipCode,
-      participantCount: booking.participantCount,
+      eventAddress: booking.eventAddress || '',
+      eventCity: booking.eventCity || '',
+      eventState: booking.eventState || '',
+      eventZipCode: booking.eventZipCode || '',
+      participantCount: booking.participantCount || 1,
       participantAge: booking.participantAge ?? undefined,
     };
 
@@ -860,7 +793,7 @@ async function handleBookingConfirmation(bookingId: string) {
       <p>The ${business.name} Team</p>
     `; // Improved email content
     await sendSignatureEmail({
-      from: `${business.name} <onboarding@resend.dev>`, // Use dynamic business name
+      from: `${business.name} <noreply@updates.inflatmate.co>`, // Use dynamic business name
       to: customer.email,
       subject: `Action Required: Sign Your Waiver for Booking with ${business.name}`, // More specific subject
       html: emailHtml,
@@ -947,13 +880,24 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
       });
       console.log(` - Invoice ${internalInvoice.id} status updated to PAID.`);
 
+      // Update Payment status to COMPLETED
+      await tx.payment.updateMany({
+        where: { 
+          bookingId: internalInvoice.bookingId,
+          status: 'PENDING'
+        },
+        data: {
+          status: 'COMPLETED',
+          paidAt: new Date(),
+        },
+      });
+      console.log(` - Payment status updated to COMPLETED for booking ${internalInvoice.bookingId}`);
+
       // Update Booking
       await tx.booking.update({
         where: { id: internalInvoice.bookingId },
         data: {
           status: 'CONFIRMED',
-          depositPaid: true, // Assuming invoice payment confirms everything
-          isCompleted: true, // Mark as completed upon final payment
         },
       });
        console.log(` - Booking ${internalInvoice.bookingId} status updated to CONFIRMED/COMPLETED.`);
@@ -980,6 +924,16 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
     console.log(`[HANDLER] Calling handleBookingConfirmation for Booking ID: ${bookingIdToConfirm}`);
     await handleBookingConfirmation(bookingIdToConfirm);
 
+    const invoiceMeta = invoice.metadata ?? null;
+    if (invoiceMeta && invoiceMeta.couponCode && internalInvoice.booking?.businessId) {
+      await prisma.$transaction(async (tx) => {
+        await tx.coupon.update({
+          where: { code_businessId: { code: invoiceMeta.couponCode, businessId: internalInvoice.booking.businessId } },
+          data: { usedCount: { increment: 1 } },
+        });
+      });
+    }
+
   } catch (error) {
     // --- MODIFIED CATCH BLOCK --- 
     console.error(`[HANDLER_ERROR handleInvoicePaymentSucceeded] Error processing Invoice ${invoice.id}:`, error);
@@ -994,13 +948,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
   }
 }
 
-async function handleInvoicePaid(invoice: Stripe.Invoice) {
-  console.log(`[HANDLER] Invoice Paid event received: ${invoice.id}. Delegating to handleInvoicePaymentSucceeded.`);
-  // For this application's logic, the actions taken when an invoice is fully paid 
-  // are covered by handleInvoicePaymentSucceeded. We call it to ensure 
-  // idempotency and consistent state updates, even if both events fire.
-  await handleInvoicePaymentSucceeded(invoice);
-}
+
 
 async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
   const stripeInvoiceId = invoice.id;
@@ -1091,11 +1039,24 @@ async function handleInvoiceVoided(invoice: Stripe.Invoice) {
         },
       });
 
+      // Update payment status to EXPIRED
+      await tx.payment.updateMany({
+        where: { 
+          bookingId: internalInvoice.bookingId,
+          status: 'PENDING'
+        },
+        data: {
+          status: 'EXPIRED',
+        },
+      });
+      console.log(` - Payment status updated to EXPIRED for booking ${internalInvoice.bookingId}`);
+
       if (internalInvoice.booking) {
         await tx.booking.update({
           where: { id: internalInvoice.bookingId },
-          data: { status: 'CANCELLED' }, // Voiding cancels the booking
+          data: { status: 'EXPIRED' }, // Voiding cancels the booking
         });
+
       } else {
          console.warn(`[HANDLER] Voided: Booking ${internalInvoice.bookingId} linked to Invoice ${internalInvoice.id} not found.`);
       }

@@ -99,7 +99,7 @@ export async function DELETE(
           gte: new Date(),
         },
         status: {
-          notIn: ["CANCELLED", "COMPLETED", "NO_SHOW"],
+          notIn: ["CANCELLED", "COMPLETED", "PENDING", "HOLD", "EXPIRED"],
         },
       },
     });
