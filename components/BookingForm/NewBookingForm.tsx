@@ -195,6 +195,14 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   const handleSendAsQuote = async () => {
     if (isProcessingQuote) return;
     if (!validateEventDetails() || !validateCustomerInfo()) return;
+    if (!holdId) {
+      toast({
+        title: "Error",
+        description: "No hold in place. Please start your booking again.",
+        variant: "destructive",
+      });
+      return;
+    }
     setIsProcessingQuote(true);
     try {
       const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
@@ -212,22 +220,39 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         });
         return;
       }
+
+      // Create quote data with all necessary info
       const quoteDetails = {
-        ...newBooking,
+        holdId, // Send the holdId instead of creating new booking
+        customerName: newBooking.customerName,
+        customerEmail: newBooking.customerEmail,
+        customerPhone: newBooking.customerPhone,
         selectedItems: selectedItemsArray,
+        eventDate: newBooking.eventDate,
+        startTime: newBooking.startTime,
+        endTime: newBooking.endTime,
+        eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        eventType: newBooking.eventType || 'OTHER',
+        eventAddress: newBooking.eventAddress,
+        eventCity: newBooking.eventCity,
+        eventState: newBooking.eventState,
+        eventZipCode: newBooking.eventZipCode,
+        participantCount: newBooking.participantCount || 1,
+        participantAge: newBooking.participantAge || "",
+        specialInstructions: newBooking.specialInstructions || '',
         subtotalAmount: rawSubtotal,
         taxAmount: taxAmount,
         taxRate: taxRate || 0,
         totalAmount: total,
         businessId: businessId,
-        bookingId: crypto.randomUUID(), // always new for quote
-        eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
       };
+
       const response = await fetch(`/api/businesses/${businessId}/quotes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(quoteDetails),
       });
+
       const data = await response.json();
       if (!response.ok) {
         toast({
@@ -237,6 +262,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         });
         throw new Error(data.error || "Failed to create quote");
       }
+
       toast({
         title: "Quote Sent",
         description: `A quote has been sent to ${newBooking.customerEmail}.`,
@@ -266,6 +292,22 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
             <span>Reservation expires in:</span>
             <span className="ml-2 font-mono font-bold">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}</span>
           </div>
+        </div>
+      )}
+
+      {/* Back Button */}
+      {currentStep > 1 && (
+        <div className="flex justify-start mb-4">
+          <Button 
+            onClick={handleBack} 
+            variant="ghost" 
+            className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+            </svg>
+            Back
+          </Button>
         </div>
       )}
       
@@ -348,15 +390,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
               onProceedToPayment={handleProceedToPayment}
             />
           )}
-          {/* Navigation Buttons */}
-          <div className="flex justify-between mt-8">
-            {currentStep > 2 && (
-              <Button onClick={handleBack} variant="outline">Back</Button>
-            )}
-          </div>
-          {currentStep > 2 && (
-            <Button onClick={() => setCurrentStep((s) => s + 1)} variant="primary-gradient">Continue</Button>
-          )}
+       
         </>
       )}
     </div>

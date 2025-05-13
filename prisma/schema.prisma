@@ -457,6 +457,7 @@ enum PaymentStatus {
   COMPLETED
   FAILED
   REFUNDED
+  EXPIRED
 }
 
 enum DiscountType {

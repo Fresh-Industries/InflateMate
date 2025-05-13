@@ -10,7 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Loader2, CreditCard, X } from "lucide-react"; // Import icons needed here
+import { Loader2, CreditCard } from "lucide-react"; // Import icons needed here
 import React from "react";
 import { SelectedItem, NewBookingState } from '@/types/booking';
 
@@ -61,7 +61,6 @@ export function ReviewPayStep({
   setCouponCode,
   onApplyCoupon,
   onRemoveCoupon,
-  onRemoveItem,
   onSendAsQuote,
   onProceedToPayment,
 }: ReviewPayStepProps) {
@@ -123,15 +122,7 @@ export function ReviewPayStep({
 
                   </div>
                   {/* Remove Item Button - calls the prop function */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="flex-shrink-0"
-                    onClick={() => onRemoveItem(item.id)} // Call the prop function
-                    aria-label={`Remove ${item.name}`} // Added accessibility label
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
+               
                 </div>
                 {/* Optional: Display item description if present */}
                 {item.description && (
@@ -283,13 +274,13 @@ export function ReviewPayStep({
       </Card>
 
       {/* Action Buttons (Quote and Payment) - Moved into the step component */}
-      <div className="flex flex-col sm:flex-row gap-4 justify-end mt-8"> {/* Use justify-end instead of ml-auto */}
+      <div className="flex w-full flex-col sm:flex-row gap-4 justify-center mt-8"> {/* Use justify-end instead of ml-auto */}
          {/* Send as Quote Button */}
          <Button
                  onClick={onSendAsQuote} // Call prop function
                  disabled={isSubmittingPayment || isProcessingQuote || selectedItems.size === 0} // Disable while processing or no items
                  variant="outline"
-                 className="w-full sm:w-auto"
+                 className="w-full"
              >
                  {isProcessingQuote ? ( // Use prop
                     <>
@@ -306,7 +297,7 @@ export function ReviewPayStep({
                 onClick={onProceedToPayment} // Call prop function
                 disabled={isSubmittingPayment || isProcessingQuote || selectedItems.size === 0 || discountedTotal <= 0} // Disable while processing or no items/total <= 0
                 variant="primary-gradient"
-                className="w-full sm:w-auto"
+                className="w-full"
             >
                 {isSubmittingPayment ? ( // Use prop
                   <>

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { isPast, startOfDay } from "date-fns";
+import { startOfDay } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { BookingsViewControls } from "./bookings-view-controls";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
@@ -144,8 +144,9 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   const filteredAndSortedBookings = bookings
     .filter((booking) => {
       const bookingEventDate = startOfDay(new Date(booking.eventDate));
+      const today = startOfDay(new Date());
 
-      if (!showPastBookings && (isPast(bookingEventDate) || booking.status === 'COMPLETED')) {
+      if (!showPastBookings && (bookingEventDate < today || booking.status === 'COMPLETED')) {
         if (statusFilter !== 'COMPLETED') {
           return false;
         }
