@@ -1,4 +1,3 @@
-// app/api/cron/expire-holds/route.ts
 import { NextResponse } from 'next/server';
 import { expireHolds } from '@/lib/holdExpires';
 
