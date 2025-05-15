@@ -1,4 +1,4 @@
-// themeConfig.ts
+// Modern Theme
 
 import { ThemeDefinition, ThemeColors } from '../types';
 import { makeButtonStyles, makeLinkStyles } from '../themeFactories';
@@ -7,47 +7,56 @@ import { getContrastColor } from '../utils';
 
 export const modernOverrides: Partial<ThemeDefinition> = {
   // Header
-  headerBg:       (colors: ThemeColors) => colors.primary,
-  boxShadow:      (_c, scrolled) => scrolled ? shadows.light : shadows.medium,
-  extraBorderStyle:(colors) => ({
-    borderBottom: `1px solid ${colors.primary}33`
+  headerBg: (c: ThemeColors) => c.primary[100],
+  boxShadow: (_c, scrolled) => scrolled ? shadows.light : 'none',
+  extraBorderStyle: (c: ThemeColors) => ({
+    borderBottom: `1px solid ${c.primary[100]}33`
   }),
 
   // Buttons
-  buttonStyles:          makeButtonStyles({}, { role: 'primary', size: 'lg' }),
-  secondaryButtonStyles: makeButtonStyles({}, { role: 'secondary', size: 'md' }),
+  buttonStyles: makeButtonStyles({
+    background: (c: ThemeColors) => c.primary[500],
+    textColor: () => '#ffffff',
+    hoverBackground: (c: ThemeColors) => c.accent[500]
+  }, { role: 'primary', size: 'lg' }),
+  secondaryButtonStyles: makeButtonStyles({
+    background: () => 'transparent',
+    textColor: (c: ThemeColors) => c.secondary[900],
+    border: (c: ThemeColors) => `${borderWidths.thin} solid ${c.secondary[500]}`,
+    hoverBackground: (c: ThemeColors) => c.secondary[100]
+  }, { role: 'secondary', size: 'md' }),
 
   // Links
-  linkStyles: makeLinkStyles({}, { role: 'accent' }),
+  linkStyles: makeLinkStyles({}, { role: 'secondary' }),
 
   // Cards
   cardStyles: {
-    background:   (c) => c.primary,
-    border:       (c) => `${borderWidths.thin} solid ${c.primary}33`,
-    boxShadow:    () => shadows.light,
-    textColor:    (c) => c.text,
+    background: (c) => c.background[100],
+    border: (c) => `${borderWidths.thin} solid ${c.primary[100]}33`,
+    boxShadow: () => shadows.light,
+    textColor: (c) => c.text[900],
     borderRadius: radii.large,
   },
 
   // Hero
-  heroBackground: (c) => c.primary,
-  heroTitleColor: (c) => c.text,
-  heroTextColor:  (c) => c.text,
+  heroBackground: (c) => c.primary[100],
+  heroTitleColor: (c) => c.primary[900],
+  heroTextColor: (c) => c.text[900],
 
   // Feature Section
   featureSectionStyles: {
-    titleColor:      (c) => c.text,
-    cardBackground:  (c) => c.primary,
-    iconBackground:  (c, i) => {
+    titleColor: (c) => c.text[900],
+    cardBackground: (c) => c.background[100],
+    iconBackground: (c, i) => {
       const a = c.accent;
       const s = c.secondary;
-      return [ `${s}50`, `${a}50`, `${s}50` ][i % 3];
+      return [ s[100], a[100], s[100] ][i % 3];
     },
-    cardTitleColor:  (c) => c.text,
-    cardTextColor:   (c) => c.text,
-    iconBorder:      (c) => `1px solid ${c.primary}33`,
-    iconBoxShadow:   () => shadows.light,
-    iconBorderRadius:() => radii.medium,
+    cardTitleColor: (c) => c.text[900],
+    cardTextColor: (c) => c.text[500],
+    iconBorder: (c) => `1px solid ${c.primary[100]}33`,
+    iconBoxShadow: () => shadows.light,
+    iconBorderRadius: () => radii.medium,
   },
 
   // Popular Rentals
@@ -56,46 +65,45 @@ export const modernOverrides: Partial<ThemeDefinition> = {
       backgroundImage: `
         linear-gradient(
           135deg,
-          ${c.primary},
-          ${c.secondary}
+          ${c.primary[100]},
+          ${c.secondary[100]}
         )
       `
     }),
-    titleColor:            (c) => c.text,
-    cardBackgroundGradient:(c) => {
-      const a = c.accent;
-      return `linear-gradient(135deg, ${a}100, ${a}500)`;
-    },
-    priceColor:            (c) => c.accent,
+    titleColor: (c) => c.text[900],
+    cardBackgroundGradient: (c) =>
+      `linear-gradient(135deg, ${c.accent[100]}, ${c.accent[500]})`,
+    priceColor: (c) => c.accent[500],
   },
 
   // CTA
   ctaStyles: {
-    background: (c) => c.accent,
-    titleColor: (c) => getContrastColor(c.accent),
-    textColor:  (c) => getContrastColor(c.accent),
+    background: (c) => c.accent[500],
+    titleColor: (c) => getContrastColor(c.accent[500]),
+    textColor: (c) => getContrastColor(c.accent[500]),
   },
 
   // Contact
   contactStyles: {
-    background:               (c) => c.background,
-    titleColor:               (c) => c.primary,
-    cardBackground:           (c) => c.primary,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    iconBackground:           (c) => c.primary,
-    textColor:                (c) => c.text,
-    serviceAreaTagBackground: (c) => c.primary,
-    serviceAreaTagColor:      (c) => c.primary,
-    cardBorder:               (c) => `${borderWidths.thin} solid ${c.primary}`,
-    cardBoxShadow:            () => shadows.light,
+    background: (c) => c.background[100],
+    titleColor: (c) => c.primary[500],
+    cardBackground: (c) => c.background[100],
+    iconBackground: (c: ThemeColors, type: "primary" | "secondary" | "accent") => {
+      return c[type][100];
+    },
+    textColor: (c) => c.text[900],
+    serviceAreaTagBackground: (c) => c.primary[100],
+    serviceAreaTagColor: (c) => c.primary[500],
+    cardBorder: (c) => `${borderWidths.thin} solid ${c.primary[100]}33`,
+    cardBoxShadow: () => shadows.light,
   },
 
   // Footer
   footerStyles: {
-    background: (c) => c.primary,
-    textColor:  (c) => getContrastColor(c.secondary),
-    border:     (c) => `${borderWidths.medium} solid ${c.secondary}`,
-    boxShadow:  () => shadows.heavy,
+    background: (c) => c.primary[100],
+    textColor: () => '#ffffff',
+    border: (c) => `${borderWidths.medium} solid ${c.secondary[500]}`,
+    boxShadow: () => shadows.heavy,
   },
 
   // Inherit bookingStyles from base or factories
@@ -103,9 +111,9 @@ export const modernOverrides: Partial<ThemeDefinition> = {
 
   // ImageTextSection
   imageTextStyles: {
-    containerBackground: (c) => c.primary,
-    titleColor:          (c) => c.primary,
-    textColor:           (c) => c.text,
+    containerBackground: (c) => c.background[100],
+    titleColor: (c) => c.primary[500],
+    textColor: (c) => c.text[900],
     imageContainerStyle: () => ({ borderRadius: radii.small, boxShadow: shadows.light }),
   },
 

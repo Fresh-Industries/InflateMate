@@ -11,6 +11,7 @@ import PopularRentalsGrid from './_components/LandingPage/PopularRentalsGrid';
 import { prisma } from '@/lib/prisma';
 import CTA from './_components/LandingPage/CTA';
 import Contact from './_components/LandingPage/Contact';
+import { makeScale } from './_themes/utils';
 export const dynamic = 'force-dynamic'; 
 
 interface PageProps {
@@ -65,26 +66,33 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
     const themeName = Object.keys(themeConfig).includes(rawThemeName) ? rawThemeName : 'modern';
     const theme: ThemeDefinition = themeConfig[themeName];
     
-    // Define Colors (with fallbacks)
+    // Get base colors from site config with fallbacks
+    const primaryColor = siteConfig.colors?.primary || '#4f46e5';
+    const accentColor = siteConfig.colors?.accent || '#f97316';
+    const secondaryColor = siteConfig.colors?.secondary || '#06b6d4';
+    const backgroundColor = siteConfig.colors?.background || '#ffffff';
+    const textColor = siteConfig.colors?.text || '#333333';
+    
+    // Define Colors with scales for each color using makeScale
     const colors: ThemeColors = {
-      primary: siteConfig.colors?.primary || '#4f46e5',
-      accent: siteConfig.colors?.accent || '#f97316',
-      secondary: siteConfig.colors?.secondary || '#06b6d4',
-      background: siteConfig.colors?.background || '#ffffff',
-      text: siteConfig.colors?.text || '#333333'
+      primary: makeScale(primaryColor),
+      accent: makeScale(accentColor),
+      secondary: makeScale(secondaryColor),
+      background: makeScale(backgroundColor),
+      text: makeScale(textColor)
     };
 
     const inventoryItems = await prisma.inventory.findMany({
       where: { businessId: business.id, status: 'AVAILABLE' },
       select: { id: true, name: true, description: true, price: true, primaryImage: true, type: true },
-      take: 3,           // or however many “popular” you want
+      take: 3,           // or however many "popular" you want
     });
 
 
     // --- Render Page --- 
     return (
       // Base background color from theme or default white
-      <div className="min-h-screen" style={{ background: colors.background || '#ffffff' }}>
+      <div className="min-h-screen" style={{ background: colors.background[100] }}>
         <Hero
             colors={colors}
             themeName={themeName}

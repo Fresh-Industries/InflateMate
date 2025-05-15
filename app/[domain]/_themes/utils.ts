@@ -7,14 +7,22 @@ export type ColorScale = {
 };
 
 // Helper to calculate contrast: returns "#000000" for light backgrounds, or "#ffffff" for dark backgrounds.
-export const getContrastColor = (hex: string): string => {
+export const getContrastColor = (hex: string | ColorScale): string => {
+    // Handle ColorScale input
+    let colorValue: string;
+    if (typeof hex === 'object' && hex !== null && '500' in hex) {
+      colorValue = hex[500];
+    } else {
+      colorValue = hex as string;
+    }
+    
     // Simplified hex validation and expansion
-    let color = (hex || '#ffffff').replace('#', '');
+    let color = (colorValue || '#ffffff').replace('#', '');
     if (color.length === 3) {
       color = color[0] + color[0] + color[1] + color[1] + color[2] + color[2];
     }
     if (color.length !== 6) {
-      console.warn('Invalid hex color format for contrast calculation:', hex);
+      console.warn('Invalid hex color format for contrast calculation:', colorValue);
       return '#000000'; // Default to black on error
     }
     const r = parseInt(color.substring(0, 2), 16);
@@ -29,6 +37,8 @@ export function makeScale(baseHex: string): ColorScale {
       const [l] = c.lab();
       return c.set('lab.l', Math.min(100, Math.max(0, l + delta)));
     };
+
+    
   
     const light = clampL(chroma(baseHex), +20);
     const dark  = clampL(chroma(baseHex), -20);
@@ -41,3 +51,5 @@ export function makeScale(baseHex: string): ColorScale {
       900: scale(0.8).hex(),  // not full black
     };
   }
+
+console.log(makeScale('#8b5cf6'));

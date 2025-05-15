@@ -2,7 +2,7 @@ import { notFound } from 'next/navigation';
 import { getBusinessByDomain } from '@/lib/business/domain-utils';
 import { NewBookingForm } from "./_components/customer-booking-form";
 import { Metadata } from 'next';
-import { ThemeColors } from '../_themes/themeConfig';
+import { ThemeColors } from '../_themes/types';
 
 export const dynamic = 'force-dynamic';
 

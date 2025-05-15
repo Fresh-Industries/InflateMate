@@ -105,11 +105,11 @@ export default function Hero({
   /* section colours from theme */
   const sectionBg =
     themeConfig[themeName].heroBackground?.(colors) ||
-    `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`;
+    `linear-gradient(135deg, ${colors.primary[500]}, ${colors.secondary[500]})`;
   const titleColor =
-    themeConfig[themeName].heroTitleColor?.(colors) || getContrastColor(colors.primary);
+    themeConfig[themeName].heroTitleColor?.(colors) || getContrastColor(colors.primary[500]);
   const textColor =
-    themeConfig[themeName].heroTextColor?.(colors) || getContrastColor(colors.secondary);
+    themeConfig[themeName].heroTextColor?.(colors) || getContrastColor(colors.secondary[500]);
 
   return (
     <section
@@ -118,9 +118,9 @@ export default function Hero({
     >
       {/* subtle decorative blobs */}
       <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-20 pointer-events-none"
-           style={{ background: `${colors.accent}30` }}/>
+           style={{ background: `${colors.primary[500]}` }}/>
       <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-20 pointer-events-none"
-           style={{ background: `${colors.secondary}30` }}/>
+           style={{ background: `${colors.secondary[500]}` }}/>
 
       <div className="container mx-auto px-4 py-24 lg:py-32 relative z-10 grid md:grid-cols-2 gap-12 items-center">
         {/* copy block */}
@@ -140,7 +140,7 @@ export default function Hero({
             <Button
               asChild
               size="lg"
-              className="font-bold"
+              className="font-bold text-xl"
               style={primaryButton}
               onMouseEnter={(e) =>
                 Object.assign(e.currentTarget.style, primaryHover)
@@ -157,7 +157,7 @@ export default function Hero({
             <Button
               asChild
               size="lg"
-              className="font-bold"
+              className="font-bold text-xl"
               style={secondaryButton}
               onMouseEnter={(e) =>
                 Object.assign(e.currentTarget.style, secondaryHover)

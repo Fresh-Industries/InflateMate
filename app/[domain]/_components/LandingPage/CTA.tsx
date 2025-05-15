@@ -47,14 +47,43 @@ export default function CTA({
   };
 
   /* ---- button ---- */
-  const btnTheme = theme.secondaryButtonStyles ?? theme.buttonStyles;
-  const buttonStyle: React.CSSProperties = {
-    background: btnTheme.background(colors),
-    color: btnTheme.textColor(colors),
-    border: btnTheme.border?.(colors) ?? 'none',
-    boxShadow: btnTheme.boxShadow?.(colors) ?? 'none',
-    borderRadius: btnTheme.borderRadius ?? '12px',
-    transition: btnTheme.transition ?? 'all 0.3s ease'
+  const secondaryButton = {
+    background:
+      themeConfig[themeName].secondaryButtonStyles?.background(colors) ??
+      themeConfig[themeName].buttonStyles.background(colors),
+    color:
+      themeConfig[themeName].secondaryButtonStyles?.textColor(colors) ??
+      themeConfig[themeName].buttonStyles.textColor(colors),
+    border:
+      themeConfig[themeName].secondaryButtonStyles?.border?.(colors) ??
+      themeConfig[themeName].buttonStyles.border?.(colors) ??
+      'none',
+    boxShadow:
+      themeConfig[themeName].secondaryButtonStyles?.boxShadow?.(colors) ??
+      themeConfig[themeName].buttonStyles.boxShadow?.(colors),
+    borderRadius:
+      themeConfig[themeName].secondaryButtonStyles?.borderRadius ??
+      themeConfig[themeName].buttonStyles.borderRadius,
+    transition:
+      themeConfig[themeName].secondaryButtonStyles?.transition ??
+      themeConfig[themeName].buttonStyles.transition ??
+      'all .25s ease',
+  };
+
+  const secondaryHover = {
+    background:
+      themeConfig[themeName].secondaryButtonStyles?.hoverBackground?.(colors) ??
+      secondaryButton.background,
+    color:
+      themeConfig[themeName].secondaryButtonStyles?.hoverTextColor?.(colors) ??
+      secondaryButton.color,
+    border:
+      themeConfig[themeName].secondaryButtonStyles?.hoverBorder?.(colors) ??
+      secondaryButton.border,
+    boxShadow:
+      themeConfig[themeName].secondaryButtonStyles?.hoverBoxShadow?.(colors) ??
+      secondaryButton.boxShadow,
+    transform: 'scale(1.06)',
   };
 
   return (
@@ -78,7 +107,13 @@ export default function CTA({
           asChild
           size="lg"
           className="text-xl font-bold shadow-xl hover:shadow-2xl transition-all duration-300 hover:scale-105 px-10 py-7"
-          style={buttonStyle}
+          style={secondaryButton}
+          onMouseEnter={(e) =>
+            Object.assign(e.currentTarget.style, secondaryHover)
+          }
+          onMouseLeave={(e) =>
+            Object.assign(e.currentTarget.style, secondaryButton)
+          }
         >
           <Link href={ctaHref} className="flex items-center gap-3">
             {ctaLabel} <ArrowRight className="h-6 w-6" />

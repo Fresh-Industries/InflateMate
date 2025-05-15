@@ -39,7 +39,7 @@ export default function Footer({ themeName, colors, business }: Props) {
         padding:       '0.25rem 0.5rem',
         margin:        '-0.25rem -0.5rem'
       }
-    : { color: colors.primary, transition: 'color 0.3s ease' };
+    : { color: colors.primary[500], transition: 'color 0.3s ease' };
 
   const hoverLink: React.CSSProperties = link
     ? {
@@ -48,7 +48,7 @@ export default function Footer({ themeName, colors, business }: Props) {
         border:       link.hoverBorder(colors),
         boxShadow:    link.hoverBoxShadow(colors)
       }
-    : { color: colors.secondary };
+    : { color: colors.secondary[500] };
 
   const containerStyle: React.CSSProperties = {
     background:  footer.background(colors),
@@ -83,18 +83,18 @@ export default function Footer({ themeName, colors, business }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
           {/* company blurb */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">
+            <h3 className="text-xl font-bold mb-3">
               {business.name}
             </h3>
-            <p className="text-sm">
+            <p className="text-md">
               {business.description ?? 'Providing the best rental experience.'}
             </p>
           </div>
 
           {/* quick links */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">Quick&nbsp;Links</h3>
-            <ul className="space-y-2 text-sm">
+            <h3 className="text-xl font-bold mb-3">Quick&nbsp;Links</h3>
+            <ul className="space-y-2 text-md font-semibold">
               <li><Hoverable href={`/${domainPrefix}/inventory`}>Rentals</Hoverable></li>
               <li><Hoverable href={`/${domainPrefix}/about`}>About&nbsp;Us</Hoverable></li>
               <li><Hoverable href={`/${domainPrefix}/contact`}>Contact</Hoverable></li>
@@ -104,7 +104,7 @@ export default function Footer({ themeName, colors, business }: Props) {
 
           {/* social icons */}
           <div>
-            <h3 className="text-lg font-semibold mb-3">Follow&nbsp;Us</h3>
+            <h3 className="text-xl font-bold mb-3">Follow&nbsp;Us</h3>
             <div className="flex gap-4 text-2xl">
               {social.facebook  && <Hoverable href={social.facebook}>  <FaFacebook  /> </Hoverable>}
               {social.instagram && <Hoverable href={social.instagram}> <FaInstagram /> </Hoverable>}

@@ -124,20 +124,20 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme }: SalesFun
   // --- Generate Theme Styles ---
   const imageStyles = theme.imageStyles(colors);
   const headerStyles = theme.headerBg(colors, false);
-  const headerTextColor = getContrastColor(colors.primary); // Use contrast based on primary color for header text/icons
+  const headerTextColor = getContrastColor(colors.primary[500]); // Use contrast based on primary color for header text/icons
 
   // Button Styles
   const primaryButtonStyle = getButtonStyle(theme, colors, 'primary');
-  const primaryButtonTextColor = getContrastColor(colors.primary); // Use contrast based on primary color for button text
+  const primaryButtonTextColor = getContrastColor(colors.primary[500]); // Use contrast based on primary color for button text
 
   // Text Colors
-  const primaryTextColor = colors.primary;
-  const secondaryTextColor = colors.secondary;
-  const mainTextColor = colors.text;
+  const primaryTextColor = colors.primary[500];
+  const secondaryTextColor = colors.secondary[500];
+  const mainTextColor = colors.text[500];
 
   // Background Colors
-  const lightPrimaryBg = `${colors.primary}1A`; // 10% opacity primary
-  const lightSecondaryBg = `${colors.secondary}1A`; // 10% opacity secondary
+  const lightPrimaryBg = `${colors.primary[100]}`; // Use the 100 shade
+  const lightSecondaryBg = `${colors.secondary[100]}`; // Use the 100 shade
   const cardBackgroundColor = theme.cardStyles.background(colors); // Use card background from theme
 
   // Card Styles (for main popup body)

@@ -44,10 +44,12 @@ export default function Header({ business, colors, theme }: HeaderProps) {
       ? theme.linkStyles?.active(colors)
       : theme.linkStyles?.background(colors),
     color: active
-      ? theme.linkStyles?.hoverTextColor(colors) ?? getContrastColor(colors.primary)
+      ? theme.linkStyles?.hoverTextColor(colors) ?? getContrastColor(theme.linkStyles?.hoverBackground(colors) ?? colors.primary[500])
       : theme.linkStyles?.textColor(colors),
     border: theme.linkStyles?.border(colors),
-    boxShadow: theme.linkStyles?.boxShadow(colors),
+    boxShadow: active 
+      ? theme.linkStyles?.activeBoxShadow?.(colors) ?? theme.linkStyles?.boxShadow(colors)
+      : theme.linkStyles?.boxShadow(colors),
     borderRadius: theme.linkStyles?.borderRadius ?? '9999px',
     padding: '0.65rem 1rem',
     fontWeight: 600,
@@ -120,8 +122,8 @@ export default function Header({ business, colors, theme }: HeaderProps) {
                 height: logoSize,
                 width : logoSize,
                 borderRadius: '9999px',
-                background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-                color: getContrastColor(colors.primary),
+                background: `linear-gradient(135deg, ${colors.primary[500]}, ${colors.secondary[500]})`,
+                color: getContrastColor(colors.primary[500]),
               }}
               className="flex items-center justify-center font-extrabold text-xl shadow-md transition-transform group-hover:scale-105"
             >

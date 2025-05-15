@@ -6,21 +6,30 @@ import Footer from '@/app/[domain]/_components/Footer';
 import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
 import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
 import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/types';
+import { makeScale } from '@/app/[domain]/_themes/utils';
 
+// Temporary type until everything is migrated
+type OldColors = {
+  primary: string;
+  secondary: string;
+  accent: string;
+  background: string;
+  text: string;
+};
 
 interface DomainLayoutClientProps {
   children: ReactNode;
   business: BusinessWithSiteConfig;
   domain: string;
   themeName: string;
-  colors: ThemeColors;
+  colors: ThemeColors | OldColors;
   activeFunnel?: Omit<SalesFunnelType, 'theme'>;
 }
 
 export function DomainLayoutClient({ 
   children, 
   business, 
-  colors,
+  colors: rawColors,
   activeFunnel,
   themeName 
 }: DomainLayoutClientProps) {
@@ -33,6 +42,24 @@ export function DomainLayoutClient({
   useEffect(() => {
     setIsMounted(true);
   }, []);
+  
+  // Convert colors to ThemeColors if not already
+  const colors = useMemo(() => {
+    // Check if colors is already in the ColorScale format
+    if ('primary' in rawColors && typeof rawColors.primary === 'object' && '500' in rawColors.primary) {
+      return rawColors as ThemeColors;
+    }
+    
+    // Convert from flat colors to ColorScale
+    const oldColors = rawColors as OldColors;
+    return {
+      primary: makeScale(oldColors.primary),
+      secondary: makeScale(oldColors.secondary),
+      accent: makeScale(oldColors.accent),
+      background: makeScale(oldColors.background),
+      text: makeScale(oldColors.text)
+    };
+  }, [rawColors]);
   
   return (
     <div className="flex flex-col min-h-screen">

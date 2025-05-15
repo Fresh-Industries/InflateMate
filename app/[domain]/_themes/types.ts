@@ -1,12 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // src/app/_themes/types.ts  (new helper file)
 
+import { CSSProperties } from 'react';
+
+export type ColorScale = {
+  100: string;
+  500: string;
+  900: string;
+};
+
 export interface ThemeColors {
-    primary: string;
-    secondary: string;
-    accent: string;
-    background: string;
-    text: string;
+    primary: ColorScale;
+    secondary: ColorScale;
+    accent: ColorScale;
+    background: ColorScale;
+    text: ColorScale;
 }
 
 export interface ThemeDefinition {
@@ -15,6 +23,15 @@ export interface ThemeDefinition {
     headerTextColor: (colors: ThemeColors) => string;
     boxShadow: (colors: ThemeColors, scrolled: boolean) => string;
     extraBorderStyle: (colors: ThemeColors) => React.CSSProperties;
+    // Enhanced header styles
+    headerGlassEffect?: boolean; // Enable glass morphism effect 
+    headerAccentElements?: (colors: ThemeColors) => React.CSSProperties; // Special accents for the header
+    headerAnimation?: string; // Animation for header elements
+    navItemStyles?: {
+      normal: (colors: ThemeColors) => React.CSSProperties;
+      hover: (colors: ThemeColors) => React.CSSProperties;
+      active: (colors: ThemeColors) => React.CSSProperties;
+    };
   
     // Button styles
     buttonStyles: {
@@ -28,6 +45,7 @@ export interface ThemeDefinition {
       hoverBoxShadow?: (colors: ThemeColors) => string;
       transition?: string;
       borderRadius?: string;
+      animation?: string;
     };
     secondaryButtonStyles?: {
       background: (colors: ThemeColors) => string;
@@ -40,6 +58,7 @@ export interface ThemeDefinition {
       hoverTextColor?: (colors: ThemeColors) => string;
       hoverBorder?: (colors: ThemeColors) => string;
       hoverBoxShadow?: (colors: ThemeColors) => string;
+      animation?: string;
     };
   
     // Card styles
@@ -105,6 +124,17 @@ export interface ThemeDefinition {
       textColor: (colors: ThemeColors) => string;
       border: (colors: ThemeColors) => string;
       boxShadow: (colors: ThemeColors) => string;
+      // Enhanced footer styles
+      pattern?: (colors: ThemeColors) => string; // Background pattern
+      accentElements?: (colors: ThemeColors) => React.CSSProperties; // Special accents for the footer
+      linkStyles?: {
+        normal: (colors: ThemeColors) => React.CSSProperties;
+        hover: (colors: ThemeColors) => React.CSSProperties;
+      };
+      sectionTitleStyles?: (colors: ThemeColors) => React.CSSProperties; // Styles for footer section titles
+      footerAnimation?: string; // Animation for footer elements
+      socialIconStyles?: (colors: ThemeColors) => React.CSSProperties; // Styles for social media icons
+      borderTop?: (colors: ThemeColors) => string;
     };
   
     // Link styles
@@ -120,6 +150,8 @@ export interface ThemeDefinition {
       transition: string;
       active: (colors: ThemeColors) => string;
       borderRadius: string;
+      activeBoxShadow?: (colors: ThemeColors) => string;
+      customStyles?: (colors: ThemeColors) => React.CSSProperties;
     };
   
     // Image styles: Applied to key images like logo, hero, inventory cards
@@ -181,6 +213,58 @@ export interface ThemeDefinition {
         border: (colors: ThemeColors, isAvailable: boolean) => string;
         textColor: (colors: ThemeColors, isAvailable: boolean) => string;
       };
+    };
+    
+    // Global animation settings
+    animations?: {
+      pageTransition?: string;
+      sectionTransition?: string;
+      elementEntrance?: string;
+      pulseGlow?: string;
+    };
+    
+    // Global decorative elements
+    decorativeElements?: {
+      shapesColor?: (colors: ThemeColors) => string;
+      patternOpacity?: number;
+      enableParticles?: boolean;
+    };
+
+    // Global background patterns
+    globalBackground?: (colors: ThemeColors) => {
+      main: string;
+      accent: string;
+      overlay: string;
+    };
+
+    // Additional decorative patterns
+    additionalPatterns?: {
+      cornerDecorations: (colors: ThemeColors) => {
+        topLeft: CSSProperties;
+        topRight: CSSProperties;
+        bottomLeft: CSSProperties;
+        bottomRight: CSSProperties;
+      };
+      borderPatterns: (colors: ThemeColors) => {
+        top: string;
+        bottom: string;
+        left: string;
+        right: string;
+      };
+      backgroundPatterns: (colors: ThemeColors) => string[];
+    };
+
+    heroAccentElements?: (colors: ThemeColors) => {
+      topLeft: CSSProperties;
+      topRight: CSSProperties;
+      bottomLeft: CSSProperties;
+      bottomRight: CSSProperties;
+    };
+
+    sectionTransitions?: {
+      enter: string;
+      exit: string;
+      duration: string;
     };
 }
 
@@ -253,6 +337,7 @@ export interface ButtonStylesConfig {
     textAlign?: string;
     textTransform?: string;
     textDecoration?: string;
+    animation?: string;
   }
   
   export interface CardStylesConfig {
@@ -289,4 +374,8 @@ export interface ButtonStylesConfig {
     textAlign?: string;
     textTransform?: string;
     textDecoration?: string;
+  }
+
+  export interface GlobalStylesConfig {
+    globalStyles: () => string;
   }
