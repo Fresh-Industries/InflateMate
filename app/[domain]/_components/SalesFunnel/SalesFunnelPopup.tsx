@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { LeadCaptureForm } from "./LeadCaptureForm";
 import { ThankYouMessage } from "./ThankYouMessage";
 import { motion, AnimatePresence } from "framer-motion";
-import { ThemeColors, ThemeDefinition, getContrastColor } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeColors, ThemeDefinition } from '@/app/[domain]/_themes/types';
+import { getContrastColor } from '@/app/[domain]/_themes/utils';
 
 
 export interface SalesFunnel {

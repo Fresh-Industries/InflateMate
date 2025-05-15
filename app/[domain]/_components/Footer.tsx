@@ -2,166 +2,124 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
-import { ThemeDefinition, ThemeColors } from '../_themes/themeConfig';
 import { FaFacebook, FaInstagram, FaTwitter, FaTiktok } from 'react-icons/fa';
+import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
+import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeColors } from '../_themes/types';
 
-interface FooterProps {
-  business: BusinessWithSiteConfig;
-  theme: ThemeDefinition;
-  colors: ThemeColors;
+interface Props {
+  themeName: keyof typeof themeConfig;
+  colors:   ThemeColors;
+  business: Pick<
+    BusinessWithSiteConfig,
+    | 'id'
+    | 'customDomain'
+    | 'name'
+    | 'description'
+    | 'socialMedia'
+  >;
 }
 
-export default function Footer({ business, theme, colors }: FooterProps) {
-  const currentYear = new Date().getFullYear();
+export default function Footer({ themeName, colors, business }: Props) {
+  const theme = themeConfig[themeName];
+  const link = theme.linkStyles;
+  const footer = theme.footerStyles!;
   const domainPrefix = business.customDomain || business.id;
-  const socialLinks = business.socialMedia || {};
-  console.log(socialLinks);
+  const social = business.socialMedia ?? {};
 
-  const linkStyles = theme.linkStyles;
-  
-  // Base styles for links using theme linkStyles or fallback colors
-  const baseLinkStyle: React.CSSProperties = linkStyles ? {
-    color: linkStyles.textColor(colors),
-    background: linkStyles.background(colors),
-    border: linkStyles.border(colors),
-    boxShadow: linkStyles.boxShadow(colors),
-    borderRadius: linkStyles.borderRadius,
-    padding: '0.25rem 0.5rem', // Add some padding if using background/border
-    margin: '-0.25rem -0.5rem', // Adjust margin to compensate for padding
-    transition: linkStyles.transition,
-  } : {
-    color: colors.primary, // Fallback to primary color
-    transition: 'color 0.3s ease'
+  /* ---------- computed styles ---------- */
+  const baseLink: React.CSSProperties = link
+    ? {
+        color:         link.textColor(colors),
+        background:    link.background(colors),
+        border:        link.border(colors),
+        boxShadow:     link.boxShadow(colors),
+        borderRadius:  link.borderRadius,
+        transition:    link.transition,
+        padding:       '0.25rem 0.5rem',
+        margin:        '-0.25rem -0.5rem'
+      }
+    : { color: colors.primary, transition: 'color 0.3s ease' };
+
+  const hoverLink: React.CSSProperties = link
+    ? {
+        color:        link.hoverTextColor(colors),
+        background:   link.hoverBackground(colors),
+        border:       link.hoverBorder(colors),
+        boxShadow:    link.hoverBoxShadow(colors)
+      }
+    : { color: colors.secondary };
+
+  const containerStyle: React.CSSProperties = {
+    background:  footer.background(colors),
+    color:       footer.textColor(colors),
+    borderColor: footer.border(colors)
   };
 
-  const hoverLinkStyle: React.CSSProperties = linkStyles ? {
-    color: linkStyles.hoverTextColor(colors),
-    background: linkStyles.hoverBackground(colors),
-    border: linkStyles.hoverBorder(colors),
-    boxShadow: linkStyles.hoverBoxShadow(colors),
-  } : {
-    color: colors.secondary, // Fallback to secondary color
-  };
-
-  // Styles for the footer container using base colors
-  const footerContainerStyle: React.CSSProperties = {
-    backgroundColor: theme.footerStyles?.background(colors),
-    color: theme.footerStyles?.textColor(colors),
-    borderColor: theme.footerStyles?.border(colors),
-  };
-
-  // Style for headings in the footer using primary color
-  const headingStyle: React.CSSProperties = {
-    color: theme.footerStyles?.textColor(colors), 
-  };
-
-  // Style for regular text in the footer (using container's default)
-  const textStyle: React.CSSProperties = {
-      color: theme.footerStyles?.textColor(colors),
-  };
-
-  // Style for the copyright section (same as container)
-  const copyrightStyle: React.CSSProperties = {
-    borderColor: theme.footerStyles?.border(colors), // Match container border
-    color: theme.footerStyles?.textColor(colors), // Match container text color
-  };
-
-  
-
-  return (
-    <footer
-      className="mt-auto border-t"
-      style={footerContainerStyle}
+  /* ---------- helpers ---------- */
+  const Hoverable = ({
+    href,
+    children
+  }: {
+    href: string;
+    children: React.ReactNode;
+  }) => (
+    <Link
+      href={href}
+      className="inline-block transition-all duration-300"
+      style={baseLink}
+      onMouseEnter={e => Object.assign(e.currentTarget.style, hoverLink)}
+      onMouseLeave={e => Object.assign(e.currentTarget.style, baseLink)}
     >
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
-          {/* Business Info */}
+      {children}
+    </Link>
+  );
+
+  /* ---------- render ---------- */
+  return (
+    <footer className="mt-auto border-t" style={containerStyle}>
+      <div className="container mx-auto px-4 py-10">
+        {/* --- top grid --- */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10 mb-10">
+          {/* company blurb */}
           <div>
-            <h3 className="text-lg font-semibold mb-3" style={headingStyle}>{business.name}</h3>
-            <p className="text-sm" style={textStyle}>
-              {business.description || 'Providing the best rental experience.'}
+            <h3 className="text-lg font-semibold mb-3">
+              {business.name}
+            </h3>
+            <p className="text-sm">
+              {business.description ?? 'Providing the best rental experience.'}
             </p>
           </div>
-          
-          {/* Quick Links */}
+
+          {/* quick links */}
           <div>
-            <h3 className="text-lg font-semibold mb-3" style={headingStyle}>Quick Links</h3>
-            <ul className="space-y-2">
-              <li>
-                <Link 
-                  href={`/${domainPrefix}/inventory`}
-                  className="text-sm footer-link transition-colors duration-300 inline-block" // Use inline-block for padding/margin
-                  style={baseLinkStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverLinkStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, baseLinkStyle)}
-                >
-                  Rentals
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href={`/${domainPrefix}/about`}
-                  className="text-sm footer-link transition-colors duration-300 inline-block"
-                  style={baseLinkStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverLinkStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, baseLinkStyle)}
-                >
-                  About Us
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href={`/${domainPrefix}/contact`}
-                  className="text-sm footer-link transition-colors duration-300 inline-block"
-                  style={baseLinkStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverLinkStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, baseLinkStyle)}
-                >
-                  Contact
-                </Link>
-              </li>
-              <li>
-                <Link 
-                  href={`/${domainPrefix}/booking`}
-                  className="text-sm footer-link transition-colors duration-300 inline-block"
-                  style={baseLinkStyle}
-                  onMouseEnter={(e) => Object.assign(e.currentTarget.style, hoverLinkStyle)}
-                  onMouseLeave={(e) => Object.assign(e.currentTarget.style, baseLinkStyle)}
-                >
-                  Book Now
-                </Link>
-              </li>
+            <h3 className="text-lg font-semibold mb-3">Quick&nbsp;Links</h3>
+            <ul className="space-y-2 text-sm">
+              <li><Hoverable href={`/${domainPrefix}/inventory`}>Rentals</Hoverable></li>
+              <li><Hoverable href={`/${domainPrefix}/about`}>About&nbsp;Us</Hoverable></li>
+              <li><Hoverable href={`/${domainPrefix}/contact`}>Contact</Hoverable></li>
+              <li><Hoverable href={`/${domainPrefix}/booking`}>Book&nbsp;Now</Hoverable></li>
             </ul>
           </div>
-          
-          {/* Placeholder for extra content (e.g., Social Icons) */}
+
+          {/* social icons */}
           <div>
-            <h3 className="text-lg font-semibold mb-3" style={headingStyle}>Follow Us</h3>
-            <div className="flex gap-5">
-              {Object.entries(socialLinks).map(([key, value]) => (
-                <Link
-                  key={key}
-                  href={value}
-                  className="text-2xl footer-link transition-colors hover:scale-105 duration-300 inline-block"
-                  style={baseLinkStyle}
-                >
-                  {key === 'facebook' && <FaFacebook />}
-                  {key === 'instagram' && <FaInstagram />}
-                  {key === 'twitter' && <FaTwitter />}
-                  {key === 'tiktok' && <FaTiktok />}
-                  
-                </Link>
-              ))}
+            <h3 className="text-lg font-semibold mb-3">Follow&nbsp;Us</h3>
+            <div className="flex gap-4 text-2xl">
+              {social.facebook  && <Hoverable href={social.facebook}>  <FaFacebook  /> </Hoverable>}
+              {social.instagram && <Hoverable href={social.instagram}> <FaInstagram /> </Hoverable>}
+              {social.twitter   && <Hoverable href={social.twitter}>   <FaTwitter   /> </Hoverable>}
+              {social.tiktok    && <Hoverable href={social.tiktok}>    <FaTiktok    /> </Hoverable>}
             </div>
           </div>
         </div>
-        
+
+        {/* --- copyright bar --- */}
         <div
           className="border-t pt-6 text-center text-sm"
-          style={copyrightStyle}
+          style={{ borderColor: footer.border(colors) }}
         >
-          &copy; {currentYear} {business.name}. All rights reserved.
+          © {new Date().getFullYear()} {business.name}. All rights reserved.
         </div>
       </div>
     </footer>

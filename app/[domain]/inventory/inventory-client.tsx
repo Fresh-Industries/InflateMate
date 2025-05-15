@@ -15,7 +15,9 @@ import {
 } from "lucide-react";
 import Link from 'next/link';
 import { InventoryItem } from './page';
-import { ThemeColors, themeConfig, getContrastColor } from '@/app/[domain]/_themes/themeConfig';
+import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeColors } from '@/app/[domain]/_themes/types';
+import { getContrastColor } from '@/app/[domain]/_themes/utils';
 
 // Function to format inventory type for display
 const formatInventoryType = (type: string) => {

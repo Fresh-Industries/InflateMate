@@ -12,7 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Gift, Mail, User, Phone, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ThemeColors, ThemeDefinition, getContrastColor } from "@/app/[domain]/_themes/themeConfig";
+import { ThemeColors, ThemeDefinition } from "@/app/[domain]/_themes/types";
+import { getContrastColor } from "@/app/[domain]/_themes/utils";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),

@@ -4,7 +4,9 @@ import { SalesFunnel as SalesFunnelType, SalesFunnelPopup } from '@/app/[domain]
 import Header from '@/app/[domain]/_components/Header';
 import Footer from '@/app/[domain]/_components/Footer';
 import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
-import { ThemeDefinition, ThemeColors, themeConfig } from '@/app/[domain]/_themes/themeConfig';
+import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/types';
+
 
 interface DomainLayoutClientProps {
   children: ReactNode;
@@ -44,7 +46,11 @@ export function DomainLayoutClient({
         {children}
       </main>
       
-      <Footer business={business} theme={selectedTheme} colors={colors} />
+      <Footer 
+        business={business} 
+        themeName={themeName} 
+        colors={colors} 
+      />
       
       {isMounted && activeFunnel && (
         <SalesFunnelPopup 
