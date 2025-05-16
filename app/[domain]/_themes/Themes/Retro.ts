@@ -11,16 +11,20 @@ const retroText = {
     fontFamily: '"Press Start 2P", "Courier New", monospace',
     letterSpacing: '1px',
     lineHeight: '1.5',
+    textTransform: 'uppercase',
+    fontWeight: 'bold',
   }),
   
   pixelFont: () => ({
     fontFamily: '"VT323", "Space Mono", monospace',
     letterSpacing: '0.5px',
+    textRendering: 'pixelated',
   }),
   
   neonText: (color: string, glowColor: string) => ({
     color: color,
-    textShadow: `0 0 5px ${glowColor}, 0 0 10px ${glowColor}80, 0 0 15px ${glowColor}40`
+    textShadow: `0 0 5px ${glowColor}, 0 0 10px ${glowColor}80, 0 0 15px ${glowColor}40, 0 0 20px ${glowColor}20`,
+    animation: 'neonPulse 1.5s ease-in-out infinite alternate',
   }),
   
   glitchText: () => ({
@@ -38,12 +42,47 @@ const retroText = {
       left: '2px',
       textShadow: '-1px 0 #ff0000',
       animation: 'glitch-anim-1 2s infinite linear alternate-reverse',
+      clipPath: 'polygon(0 0, 100% 0, 100% 45%, 0 45%)',
     },
     '&::after': {
       left: '-2px',
       textShadow: '1px 0 #00ffff',
       animation: 'glitch-anim-2 3s infinite linear alternate-reverse',
+      clipPath: 'polygon(0 55%, 100% 55%, 100% 100%, 0 100%)',
     }
+  }),
+  
+  retroLabel: () => ({
+    fontFamily: '"Space Mono", monospace',
+    textTransform: 'uppercase',
+    letterSpacing: '1.5px',
+    display: 'inline-block',
+    padding: '3px 8px',
+    transform: 'rotate(-2deg)',
+    position: 'relative',
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      border: '2px solid currentColor',
+      transform: 'rotate(1deg)',
+      zIndex: -1,
+    }
+  }),
+  
+  vintageTitle: (color: string) => ({
+    fontFamily: '"Rubik", "Roboto Slab", serif',
+    fontWeight: 'bold',
+    letterSpacing: '1px',
+    color,
+    textTransform: 'uppercase',
+    textDecoration: 'underline',
+    textDecorationColor: color + '80',
+    textDecorationThickness: '2px',
+    textUnderlineOffset: '5px',
   })
 };
 
@@ -52,7 +91,9 @@ const retroAnimations = {
   blinkingCursor: `
     @keyframes blinkingCursor {
       0% { opacity: 1; }
+      49% { opacity: 1; }
       50% { opacity: 0; }
+      99% { opacity: 0; }
       100% { opacity: 1; }
     }
   `,
@@ -79,6 +120,37 @@ const retroAnimations = {
       60% { clip-path: inset(50% 0 70% 0); }
       80% { clip-path: inset(10% 0 40% 0); }
     }
+  `,
+  
+  neonPulse: `
+    @keyframes neonPulse {
+      0% { text-shadow: 0 0 5px currentColor, 0 0 10px currentColor, 0 0 15px currentColor; }
+      100% { text-shadow: 0 0 10px currentColor, 0 0 20px currentColor, 0 0 30px currentColor; }
+    }
+  `,
+  
+  pressDown: `
+    @keyframes pressDown {
+      0% { transform: scale(1); }
+      40% { transform: scale(0.95); }
+      100% { transform: scale(1); }
+    }
+  `,
+  
+  tickerTape: `
+    @keyframes tickerTape {
+      0% { transform: translateX(100%); opacity: 0; }
+      10% { opacity: 1; }
+      100% { transform: translateX(0); opacity: 1; }
+    }
+  `,
+  
+  pixelButton: `
+    @keyframes pixelButtonHover {
+      0% { filter: brightness(1); }
+      50% { filter: brightness(1.2); }
+      100% { filter: brightness(1); }
+    }
   `
 };
 
@@ -99,6 +171,16 @@ export const retroOverrides: Partial<ThemeDefinition> = {
       right: 0,
       height: '4px',
       background: retroPatterns.stripes(c.accent[500], c.secondary[500], 4),
+    },
+    '&:before': {
+      content: '""',
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      right: 0,
+      height: '3px',
+      background: retroPatterns.zigzag(c.primary[500], c.primary[900]),
+      opacity: 0.5,
     }
   }),
   headerGlassEffect: false,
@@ -150,31 +232,58 @@ export const retroOverrides: Partial<ThemeDefinition> = {
     }),
   },
 
-  // Buttons - chunky arcade style
+  // Buttons - simple retro style matching the image
   buttonStyles: {
     background: (c) => c.accent[500],
-    textColor: (c) => c.text[100],
-    border: (c) => `4px solid ${c.accent[900]}`,
-    boxShadow: (c) => `6px 6px 0 ${c.primary[900]}`,
-    hoverBackground: (c) => c.accent[900],
-    hoverTextColor: (c) => c.text[100],
-    hoverBorder: (c) => `4px solid ${c.accent[900]}`,
-    hoverBoxShadow: (c) => `3px 3px 0 ${c.primary[900]}`,
-    transition: 'all 0.1s steps(3)',
-    borderRadius: '0px',
+    textColor: (c) => c.text[900],
+    border: (c) => 'none',
+    boxShadow: (c) => '3px 3px 0 rgba(0,0,0,0.8)',
+    hoverBackground: (c) => c.accent[500],
+    hoverTextColor: (c) => c.text[900],
+    hoverBorder: (c) => 'none',
+    hoverBoxShadow: (c) => '2px 2px 0 rgba(0,0,0,0.8)',
+    transition: 'all 0.1s ease',
+    borderRadius: '6px',
     animation: 'none',
+    // The styling matches the image
+    customStyles: (c: ThemeColors) => ({
+      position: 'relative',
+      fontFamily: '"Space Mono", monospace',
+      padding: '0.75rem 1.5rem',
+      fontSize: '1rem',
+      fontWeight: 'bold',
+      background: `${retroPatterns.pixelGrid(c.accent[900], 0.05, 2)}, ${c.accent[500]}`,
+      '&:active': {
+        transform: 'translate(1px, 1px)',
+        boxShadow: '2px 2px 0 rgba(0,0,0,0.8)',
+      }
+    })
   },
   secondaryButtonStyles: {
     background: (c) => c.primary[100],
-    textColor: (c) => c.primary[900],
-    border: (c) => `4px solid ${c.primary[900]}`,
-    boxShadow: (c) => `6px 6px 0 ${c.secondary[500]}`,
-    hoverBackground: (c) => c.primary[500],
-    hoverTextColor: (c) => c.text[100],
-    hoverBorder: (c) => `4px solid ${c.primary[900]}`,
-    hoverBoxShadow: (c) => `3px 3px 0 ${c.secondary[900]}`,
-    transition: 'all 0.1s steps(3)',
-    borderRadius: '0px',
+    textColor: (c) => c.text[900],
+    border: (c) => 'none',
+    boxShadow: (c) => '3px 3px 0 rgba(0,0,0,0.8)',
+    hoverBackground: (c) => c.primary[100],
+    hoverTextColor: (c) => c.text[900],
+    hoverBorder: (c) => 'none',
+    hoverBoxShadow: (c) => '2px 2px 0 rgba(0,0,0,0.8)',
+    transition: 'all 0.1s ease',
+    borderRadius: '6px',
+    animation: 'none',
+    // The styling matches the image but with different colors
+    customStyles: (c: ThemeColors) => ({
+      position: 'relative',
+      fontFamily: '"Space Mono", monospace',
+      padding: '0.75rem 1.5rem',
+      fontSize: '1rem',
+      fontWeight: 'bold',
+      background: `${retroPatterns.pixelGrid(c.primary[500], 0.05, 2)}, ${c.primary[100]}`,
+      '&:active': {
+        transform: 'translate(1px, 1px)',
+        boxShadow: '2px 2px 0 rgba(0,0,0,0.8)',
+      }
+    })
   },
 
   // Cards - chunky arcade/console style frames
@@ -187,26 +296,30 @@ export const retroOverrides: Partial<ThemeDefinition> = {
   },
 
   // Hero section - bold arcade style with better CRT effect
-  heroBackground: (c: ThemeColors) => c.primary[900],
+  heroBackground: (c: ThemeColors) => c.accent[900],
   heroTitleColor: (c: ThemeColors) => c.text[100],
   heroTextColor: (c: ThemeColors) => c.secondary[900],
   heroAccentElements: (c: ThemeColors) => ({
     topLeft: {
       background: retroPatterns.stars(c.accent[500], c.primary[900]),
       transform: 'rotate(-45deg)',
+      animation: 'fadeIn 0.5s steps(5)'
     },
     topRight: {
       background: retroPatterns.memphis(c.primary[500] + '20', c.accent[500] + '20', 'transparent'),
       transform: 'rotate(45deg)',
+      animation: 'fadeIn 0.7s steps(5)'
     },
     bottomLeft: {
       background: retroPatterns.pixelGrid(c.secondary[500], 0.1, 4),
       transform: 'rotate(45deg)',
+      animation: 'fadeIn 0.9s steps(5)'
     },
     bottomRight: {
       background: retroPatterns.cassetteTape(c.accent[900] + '20', c.primary[900] + '20'),
       transform: 'rotate(-45deg)',
-    },
+      animation: 'fadeIn 1.1s steps(5)'
+    }
   }),
 
   // Feature section - 80s color block style
@@ -502,11 +615,11 @@ export const retroOverrides: Partial<ThemeDefinition> = {
     enableParticles: true,
   },
   
-  // Global background patterns
+  // Global background patterns with improved CRT effect
   globalBackground: (c) => ({
-    main: retroPatterns.grid(c.primary[900] + '10', c.background[100], 30),
-    accent: retroPatterns.memphis(c.accent[500] + '10', c.primary[500] + '20', 'transparent'),
-    overlay: retroPatterns.scanlines('rgba(0,0,0,0.05)', 2),
+    main: `${retroPatterns.checkerboard(c.primary[900] + '08', c.background[100], 20)}`,
+    accent: `${retroPatterns.diagonalStripes(c.accent[500] + '15', c.primary[500] + '10', 12)}`,
+    overlay: `${retroPatterns.scanlines('rgba(0,0,0,0.05)', 2)}, ${retroPatterns.grain('rgba(0,0,0,0.02)')}`,
   }),
 
   // Section transitions with retro effects
@@ -591,5 +704,6 @@ export const retroOverrides: Partial<ThemeDefinition> = {
     sectionTransition: "fadeInUp 0.3s steps(6)",
     elementEntrance: "fadeIn 0.2s steps(4)",
     pulseGlow: "blinkingCursor 1s steps(2) infinite",
+    pixelButton: "pixelButtonHover 2s infinite"
   },
 };

@@ -12,6 +12,11 @@ interface RetroPatterns {
   pixelGrid: (color: string, opacity: number, size: number) => string;
   cassetteTape: (color1: string, color2: string) => string;
   scanlines: (color: string, size: number) => string;
+  grain: (color: string) => string;
+  diagonalStripes: (color1: string, color2: string, size: number) => string;
+  squareGrid: (color1: string, color2: string, size: number) => string;
+  checkerboard: (color1: string, color2: string, size: number) => string;
+  neonGlow: (baseColor: string, glowColor: string, size: number) => string;
 }
 
 export const retroPatterns: RetroPatterns = {
@@ -162,4 +167,39 @@ export const retroPatterns: RetroPatterns = {
 
   scanlines: (color = 'rgba(0, 0, 0, 0.1)', size = 2) => 
     `linear-gradient(to bottom, transparent, transparent ${size-1}px, ${color} ${size-1}px, ${color} ${size}px)`,
+    
+  grain: (color: string) => `
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%' height='100%' filter='url(%23noiseFilter)' opacity='0.25' fill='${color.replace('#', '%23')}' /%3E%3C/svg%3E");
+  `,
+  
+  diagonalStripes: (color1: string, color2: string, size: number) => `
+    repeating-linear-gradient(
+      -45deg,
+      ${color1},
+      ${color1} ${size/2}px,
+      ${color2} ${size/2}px,
+      ${color2} ${size}px
+    )
+  `,
+  
+  squareGrid: (color1: string, color2: string, size: number) => `
+    linear-gradient(to right, ${color1} 1px, transparent 1px) 0 0 / ${size}px ${size}px,
+    linear-gradient(to bottom, ${color1} 1px, transparent 1px) 0 0 / ${size}px ${size}px,
+    ${color2}
+  `,
+  
+  checkerboard: (color1: string, color2: string, size: number) => `
+    linear-gradient(45deg, ${color1} 25%, transparent 25%, transparent 75%, ${color1} 75%),
+    linear-gradient(45deg, ${color1} 25%, transparent 25%, transparent 75%, ${color1} 75%);
+    background-color: ${color2};
+    background-size: ${size}px ${size}px;
+    background-position: 0 0, ${size/2}px ${size/2}px;
+  `,
+
+  neonGlow: (baseColor: string, glowColor: string, size: number) => `
+    linear-gradient(to right, ${baseColor}, ${baseColor}),
+    0 0 ${size}px ${glowColor},
+    0 0 ${size*2}px ${glowColor},
+    0 0 ${size*3}px ${glowColor}
+  `
 }; 

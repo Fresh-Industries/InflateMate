@@ -46,6 +46,7 @@ export interface ThemeDefinition {
       transition?: string;
       borderRadius?: string;
       animation?: string;
+      customStyles?: (colors: ThemeColors) => React.CSSProperties;
     };
     secondaryButtonStyles?: {
       background: (colors: ThemeColors) => string;
@@ -59,6 +60,7 @@ export interface ThemeDefinition {
       hoverBorder?: (colors: ThemeColors) => string;
       hoverBoxShadow?: (colors: ThemeColors) => string;
       animation?: string;
+      customStyles?: (colors: ThemeColors) => React.CSSProperties;
     };
   
     // Card styles
@@ -221,6 +223,7 @@ export interface ThemeDefinition {
       sectionTransition?: string;
       elementEntrance?: string;
       pulseGlow?: string;
+      pixelButton?: string;
     };
     
     // Global decorative elements
@@ -338,9 +341,10 @@ export interface ButtonStylesConfig {
     textTransform?: string;
     textDecoration?: string;
     animation?: string;
-  }
+    customStyles?: (colors: ThemeColors) => React.CSSProperties;
+}
   
-  export interface CardStylesConfig {
+export interface CardStylesConfig {
     background: (colors: ThemeColors) => string;
     border: (colors: ThemeColors) => string;
     boxShadow: (colors: ThemeColors) => string;
@@ -353,9 +357,9 @@ export interface ButtonStylesConfig {
     textAlign?: string;
     textTransform?: string;
     textDecoration?: string;
-  }
+}
   
-  export interface LinkStylesConfig {
+export interface LinkStylesConfig {
     background: (colors: ThemeColors) => string;
     textColor: (colors: ThemeColors) => string;
     border: (colors: ThemeColors) => string;
@@ -374,8 +378,8 @@ export interface ButtonStylesConfig {
     textAlign?: string;
     textTransform?: string;
     textDecoration?: string;
-  }
+}
 
-  export interface GlobalStylesConfig {
+export interface GlobalStylesConfig {
     globalStyles: () => string;
-  }
+}
