@@ -4,7 +4,7 @@ import { DynamicSection, getBusinessByDomain } from '@/lib/business/domain-utils
 import { Metadata } from 'next';
 import SectionRenderer from './_components/SectionRenderer';
 import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
-import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/types';
+import { ThemeColors } from '@/app/[domain]/_themes/types';
 import Hero from './_components/LandingPage/Hero';
 import FeatureGrid from './_components/LandingPage/FeatureGrid';
 import PopularRentalsGrid from './_components/LandingPage/PopularRentalsGrid';
@@ -64,7 +64,6 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
     // Determine Theme
     const rawThemeName = (siteConfig.themeName?.name as string) || 'modern';
     const themeName = Object.keys(themeConfig).includes(rawThemeName) ? rawThemeName : 'modern';
-    const theme: ThemeDefinition = themeConfig[themeName];
     
     // Get base colors from site config with fallbacks
     const primaryColor = siteConfig.colors?.primary || '#4f46e5';
@@ -116,7 +115,7 @@ export default async function DomainPage({ params }: { params: Promise<{ domain:
         {siteConfig.landing?.sections?.map((section: DynamicSection) => (
           <section key={section.id} className="dynamic-section" style={{ background: section.backgroundColor }}>
             {/* Removed theme and colors props */}
-            <SectionRenderer section={section} theme={theme} colors={colors} /> 
+            <SectionRenderer section={section} themeName={themeName} colors={colors} /> 
           </section>
         ))}
 

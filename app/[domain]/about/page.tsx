@@ -210,7 +210,7 @@ export default async function AboutPage({ params }: { params: Promise<{ domain: 
 
       {aboutSections.map((section) => (
         <section key={section.id} className="dynamic-section">
-          <SectionRenderer section={section} theme={theme} colors={colors} />
+          <SectionRenderer section={section} themeName={themeName} colors={colors} />
         </section>
       ))}
       

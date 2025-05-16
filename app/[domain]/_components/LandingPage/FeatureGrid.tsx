@@ -4,8 +4,8 @@
 // to the active theme + brand colours.
 
 import React from 'react';
-import { themeConfig, ThemeColors } from '../../_themes/themeConfig';
-
+import { ThemeColors } from '../../_themes/types';
+import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
 export interface FeatureItem {
   icon: string;   // Emoji or URL to an SVG – we just render whatever we get.
   title: string;
@@ -24,7 +24,7 @@ export default function FeatureGrid({ items, themeName, colors }: FeatureGridPro
   const cardBase = theme.cardStyles;
 
   const featureTitleStyle: React.CSSProperties = {
-    color: featureStyles ? featureStyles.titleColor(colors) : colors.primary,
+    color: featureStyles ? featureStyles.titleColor(colors) : colors.primary[500],
   };
 
   const getCardStyle = (idx: number): React.CSSProperties => ({
@@ -51,7 +51,7 @@ export default function FeatureGrid({ items, themeName, colors }: FeatureGridPro
   });
 
   const getTitleStyle = (idx: number): React.CSSProperties => ({
-    color: featureStyles ? featureStyles.cardTitleColor(colors, idx) : colors.primary,
+    color: featureStyles ? featureStyles.cardTitleColor(colors, idx) : colors.primary[500],
   });
 
   const textStyle: React.CSSProperties = {
@@ -59,7 +59,7 @@ export default function FeatureGrid({ items, themeName, colors }: FeatureGridPro
   };
 
   return (
-    <section className="py-20" style={{ background: colors.background }}>
+    <section className="py-20" style={{ background: colors.background[500] }}>
       <div className="container mx-auto px-4">
         <h2
           className="text-3xl md:text-5xl font-bold text-center mb-16"

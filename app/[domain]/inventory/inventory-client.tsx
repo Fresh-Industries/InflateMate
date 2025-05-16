@@ -161,7 +161,7 @@ export default function InventoryClient({
   }
   
   return (
-    <div className="min-h-screen w-full" style={{ background: colors.background }}>
+    <div className="min-h-screen w-full" style={{ background: colors.background[500] }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         {/* Page Header with Theme Background */}
         <div className="mb-10 relative overflow-hidden p-8" style={headerStyle}>
@@ -170,13 +170,13 @@ export default function InventoryClient({
           </div>
           <h1 
             className="text-4xl font-bold mb-3"
-            style={{ color: theme.heroTitleColor ? theme.heroTitleColor(colors) : getContrastColor(colors.primary) }}
+            style={{ color: theme.heroTitleColor ? theme.heroTitleColor(colors) : getContrastColor(colors.primary[500]) }}
           >
             Our Awesome Inventory
           </h1>
           <p 
             className="text-lg opacity-90 max-w-3xl"
-            style={{ color: theme.heroTextColor ? theme.heroTextColor(colors) : getContrastColor(colors.primary) }}
+            style={{ color: theme.heroTextColor ? theme.heroTextColor(colors) : getContrastColor(colors.primary[500]) }}
           >
             Browse our selection of premium inflatable rentals for your next event!
             Click on any item to view more details and book.
@@ -189,7 +189,7 @@ export default function InventoryClient({
             {/* Search */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5" style={{ color: colors.primary }} />
+                <Search className="h-5 w-5" style={{ color: colors.primary[500] }} />
               </div>
               <input
                 type="text"
@@ -204,7 +204,7 @@ export default function InventoryClient({
             {/* Type Filter */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Tag className="h-5 w-5" style={{ color: colors.primary }} />
+                <Tag className="h-5 w-5" style={{ color: colors.primary[500] }} />
               </div>
               <select 
                 className="block w-full pl-10 pr-3 py-3 focus:ring-2 focus:outline-none appearance-none"
@@ -220,14 +220,14 @@ export default function InventoryClient({
                 ))}
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronRight className="h-5 w-5" style={{ color: colors.primary }} />
+                <ChevronRight className="h-5 w-5" style={{ color: colors.primary[500] }} />
               </div>
             </div>
             
             {/* Sort Options */}
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <ArrowUpDown className="h-5 w-5" style={{ color: colors.primary }} />
+                <ArrowUpDown className="h-5 w-5" style={{ color: colors.primary[500] }} />
               </div>
               <select 
                 className="block w-full pl-10 pr-3 py-3 focus:ring-2 focus:outline-none appearance-none"
@@ -241,7 +241,7 @@ export default function InventoryClient({
                 <option value="price-desc">Price: High to Low</option>
               </select>
               <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronRight className="h-5 w-5" style={{ color: colors.primary }} />
+                <ChevronRight className="h-5 w-5" style={{ color: colors.primary[500]  }} />
               </div>
             </div>
           </div>
@@ -250,9 +250,9 @@ export default function InventoryClient({
         {/* Inventory Grid */}
         {Object.entries(itemsByType).map(([type, items]) => (
           <div key={type} className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2" style={{ color: colors.primary }}>
+            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2" style={{ color: colors.primary[500] }}>
               {getTypeEmoji(type)} {formatInventoryType(type)}
-              <span className="text-sm font-normal ml-2" style={{ color: colors.secondary }}>
+              <span className="text-sm font-normal ml-2" style={{ color: colors.secondary[500] }}>
                 ({items.length} items)
               </span>
             </h2>
@@ -288,26 +288,26 @@ export default function InventoryClient({
                   
                   {/* Item Details */}
                   <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2" style={{ color: colors.primary }}>{item.name}</h3>
+                    <h3 className="text-xl font-bold mb-2" style={{ color: colors.primary[500] }}>{item.name}</h3>
                     <p className="mb-4 line-clamp-2" style={{ color: cardStyle.color }}>
                       {item.description || 'Perfect for any event or party!'}
                     </p>
                     
                     {/* Item Specs */}
                     <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary }}>
+                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
                         <Users className="h-4 w-4" />
                         <span className="text-sm">Up to {item.capacity}</span>
                       </div>
-                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary }}>
+                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
                         <Ruler className="h-4 w-4" />
                         <span className="text-sm">{item.dimensions}</span>
                       </div>
-                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary }}>
+                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
                         <Clock className="h-4 w-4" />
                         <span className="text-sm">Setup: {item.setupTime}min</span>
                       </div>
-                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary }}>
+                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
                         <Package className="h-4 w-4" />
                         <span className="text-sm">{formatInventoryType(item.type)}</span>
                       </div>
@@ -315,7 +315,7 @@ export default function InventoryClient({
                     
                     {/* Price and Action */}
                     <div className="flex items-center justify-between mt-6">
-                      <div className="text-2xl font-bold" style={{ color: colors.accent }}>
+                      <div className="text-2xl font-bold" style={{ color: colors.accent[500] }}>
                         ${item.price}/day
                       </div>
                       <div className="flex items-center gap-2">
@@ -341,8 +341,8 @@ export default function InventoryClient({
         {/* Empty State */}
         {filteredItems.length === 0 && (
           <div className="text-center py-12" style={cardStyle}>
-            <Package className="h-12 w-12 mx-auto mb-4" style={{ color: colors.primary }} />
-            <h3 className="text-xl font-bold mb-2" style={{ color: colors.primary }}>No items found</h3>
+            <Package className="h-12 w-12 mx-auto mb-4" style={{ color: colors.primary[500] }} />
+            <h3 className="text-xl font-bold mb-2" style={{ color: colors.primary[500] }}>No items found</h3>
             <p className="mb-6" style={{ color: cardStyle.color }}>
               Try adjusting your search or filters to find what you&apos;re looking for.
             </p>

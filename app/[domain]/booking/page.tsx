@@ -3,6 +3,8 @@ import { getBusinessByDomain } from '@/lib/business/domain-utils';
 import { NewBookingForm } from "./_components/customer-booking-form";
 import { Metadata } from 'next';
 import { ThemeColors } from '../_themes/types';
+import { makeScale } from '../_themes/utils';
+import { themeConfig } from '../_themes/themeConfig';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,16 +61,24 @@ export default async function BookingPage({ params }: { params: Promise<{ domain
     // Get the site configuration
     const siteConfig = business.siteConfig || {};
     
-    // Get theme name
-    const themeName = (siteConfig.themeName?.name as string) || 'modern'; // Default to modern
+    // Determine Theme
+    const rawThemeName = (siteConfig.themeName?.name as string) || 'modern';
+    const themeName = Object.keys(themeConfig).includes(rawThemeName) ? rawThemeName : 'modern';
     
-    // Define Colors (with fallbacks)
+    // Get base colors from site config with fallbacks
+    const primaryColor = siteConfig.colors?.primary || '#4f46e5';
+    const accentColor = siteConfig.colors?.accent || '#f97316';
+    const secondaryColor = siteConfig.colors?.secondary || '#06b6d4';
+    const backgroundColor = siteConfig.colors?.background || '#ffffff';
+    const textColor = siteConfig.colors?.text || '#333333';
+    
+    // Define Colors with scales for each color using makeScale
     const colors: ThemeColors = {
-      primary: siteConfig.colors?.primary || '#4f46e5', // Example fallback primary
-      accent: siteConfig.colors?.accent || '#f97316', // Example fallback accent
-      secondary: siteConfig.colors?.secondary || '#06b6d4', // Example fallback secondary
-      background: siteConfig.colors?.background || '#ffffff', // Example fallback background
-      text: siteConfig.colors?.text || '#1f2937' // Example fallback text
+      primary: makeScale(primaryColor),
+      accent: makeScale(accentColor),
+      secondary: makeScale(secondaryColor),
+      background: makeScale(backgroundColor),
+      text: makeScale(textColor)
     };
     
     return (

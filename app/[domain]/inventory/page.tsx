@@ -3,6 +3,9 @@ import { getBusinessByDomain } from '@/lib/business/domain-utils';
 import { prisma } from '@/lib/prisma';
 import { Metadata } from 'next';
 import InventoryClient from './inventory-client';
+import { makeScale } from '../_themes/utils';
+import { themeConfig } from '../_themes/themeConfig';
+import { ColorScale } from '../_themes/types';
 
 export const dynamic = 'force-dynamic';
 
@@ -27,11 +30,11 @@ export interface InventoryItem {
 }
 
 export interface ThemeColors {
-  primary: string;
-  accent: string;
-  secondary: string;
-  background: string;
-  text: string;
+  primary: ColorScale;
+  accent: ColorScale;
+  secondary: ColorScale;
+  background: ColorScale;
+  text: ColorScale;
 }
 
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
@@ -83,18 +86,27 @@ export default async function InventoryPage(props: { params: Promise<{ domain: s
     // Get the site configuration
     const siteConfig = business.siteConfig || {};
     
-    // Get theme name
-    const themeName = (siteConfig.themeName?.name as string) || 'modern';
+
     
-    // Define Colors (with fallbacks)
-    const colors: ThemeColors = {
-      primary: siteConfig.colors?.primary || '#4f46e5',
-      accent: siteConfig.colors?.accent || '#f97316',
-      secondary: siteConfig.colors?.secondary || '#06b6d4',
-      background: siteConfig.colors?.background || '#ffffff',
-      text: siteConfig.colors?.text || '#1f2937'
-    };
-    
+      // Determine Theme
+  const rawThemeName = (siteConfig.themeName?.name as string) || 'modern';
+  const themeName = Object.keys(themeConfig).includes(rawThemeName) ? rawThemeName : 'modern';
+
+// Get base colors from site config with fallbacks
+const primaryColor = siteConfig.colors?.primary || '#4f46e5';
+const accentColor = siteConfig.colors?.accent || '#f97316';
+const secondaryColor = siteConfig.colors?.secondary || '#06b6d4';
+const backgroundColor = siteConfig.colors?.background || '#ffffff';
+const textColor = siteConfig.colors?.text || '#333333';
+
+// Define Colors with scales for each color using makeScale
+const colors: ThemeColors = {
+  primary: makeScale(primaryColor),
+  accent: makeScale(accentColor),
+  secondary: makeScale(secondaryColor),
+  background: makeScale(backgroundColor),
+  text: makeScale(textColor)
+};
     // Fetch available inventory items for this business with all details
     const inventoryItems = await prisma.inventory.findMany({
       where: {

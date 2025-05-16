@@ -69,7 +69,7 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
       <div className="container mx-auto px-4 relative z-10">
         <h2
           className="text-3xl md:text-5xl font-bold text-center mb-16"
-          style={{ color: theme.popularRentalsStyles?.titleColor(colors) ?? colors.primary }}
+          style={{ color: theme.popularRentalsStyles?.titleColor(colors) ?? colors.primary[500] }}
         >
           Our Most Popular Rentals
         </h2>
@@ -119,7 +119,7 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
                     {item.description ?? 'Perfect for any event or party!'}
                   </p>
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold" style={{ color: priceColour }}>
+                    <span className="text-2xl font-bold" style={{ color: priceColour as string }}>
                       ${item.price}/day
                     </span>
 

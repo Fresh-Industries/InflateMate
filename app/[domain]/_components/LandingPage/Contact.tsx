@@ -66,7 +66,7 @@ export default function ContactSection({ themeName, colors, business }: Props) {
 
           {/* ------------ CONTACT CARD ------------ */}
           <div className="p-8 shadow-lg" style={cardStyle}>
-            <h2 className="text-3xl font-bold mb-8" style={{ color: titleColor }}>
+            <h2 className="text-3xl font-bold mb-8" style={{ color: titleColor as string }}>
               Contact&nbsp;Us
             </h2>
 
@@ -99,7 +99,7 @@ export default function ContactSection({ themeName, colors, business }: Props) {
 
           {/* ------------ SERVICE-AREA CARD ------------ */}
           <div className="p-8 shadow-lg" style={cardStyle}>
-            <h2 className="text-3xl font-bold mb-8" style={{ color: titleColor }}>
+            <h2 className="text-3xl font-bold mb-8" style={{ color: titleColor as string }}>
               Service&nbsp;Areas
             </h2>
 
@@ -116,8 +116,8 @@ export default function ContactSection({ themeName, colors, business }: Props) {
                       key={area}
                       className="px-4 py-3 text-center font-medium shadow-sm hover:shadow-md transition-transform duration-300 hover:-translate-y-1"
                       style={{
-                        background: tagBG(i),
-                        color: tagColor(i),
+                        background: tagBG(i) as string,
+                        color: tagColor(i) as string,
                         borderRadius: pillRadius
                       }}
                     >

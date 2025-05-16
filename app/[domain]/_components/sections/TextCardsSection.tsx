@@ -1,11 +1,11 @@
 
-
 import React, { ComponentType, Suspense } from 'react';
 import { TextCard, TextCardsSectionContent } from '@/lib/business/domain-utils';
-import { ThemeDefinition, ThemeColors } from '../../_themes/themeConfig';
+import { ThemeColors } from '@/app/[domain]/_themes/types';
 import { Card, CardContent, CardTitle } from "@/components/ui/card"; 
 import * as LucideIcons from 'lucide-react'; 
 import { Loader2 } from 'lucide-react'; 
+import { themeConfig } from '../../_themes/themeConfig';
 
 // Helper component to render Lucide icons dynamically by name
 // (Should match the one used in IconPicker or be moved to shared utils)
@@ -20,14 +20,15 @@ const DynamicLucideIcon = ({ name, ...props }: { name: string } & LucideIcons.Lu
 
 interface TextCardsSectionProps {
   content: TextCardsSectionContent;
-  theme: ThemeDefinition;
+  themeName: keyof typeof themeConfig;
   colors: ThemeColors;
 }
 
 // Component to render text cards section
-export default function TextCardsSection({ content, theme, colors }: TextCardsSectionProps) {
+export default function TextCardsSection({ content, themeName, colors }: TextCardsSectionProps) {
   const cards = content.cards || [];
   const sectionStyle = { backgroundColor: content.backgroundColor || 'transparent' };
+  const theme = themeConfig[themeName];
 
   // Adjusted getCardStyle definition
   const getCardStyle = (cardData: TextCard): React.CSSProperties => {
@@ -54,7 +55,7 @@ export default function TextCardsSection({ content, theme, colors }: TextCardsSe
         {content?.title && (
           <h2 
             className="text-3xl md:text-4xl font-bold text-center mb-10 md:mb-12"
-            style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary }}
+            style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary[500] }}
           >
             {content.title}
           </h2>
@@ -81,7 +82,7 @@ export default function TextCardsSection({ content, theme, colors }: TextCardsSe
               {card.title && (
                 <CardTitle 
                   className="text-xl font-semibold mb-3"
-                  style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, cards.indexOf(card)) || colors.primary }}
+                  style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, cards.indexOf(card)) || colors.primary[500] }}
                 >
                   {card.title}
                 </CardTitle>
@@ -90,7 +91,7 @@ export default function TextCardsSection({ content, theme, colors }: TextCardsSe
               {card.description && (
                 <CardContent className="text-base p-0">
                   <p 
-                    style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text }}
+                    style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text[500] }}
                     className="opacity-90"
                   >
                     {card.description}
