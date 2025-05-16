@@ -62,31 +62,52 @@ export function DomainLayoutClient({
   }, [rawColors]);
   
   return (
-    <div className="flex flex-col min-h-screen">
+    <>
       <Header 
         business={business} 
         colors={colors} 
         theme={selectedTheme}
       />
       
-      <main className="flex-1">
-        {children}
-      </main>
-      
-      <Footer 
-        business={business} 
-        themeName={themeName} 
-        colors={colors} 
-      />
-      
-      {isMounted && activeFunnel && (
-        <SalesFunnelPopup 
-          businessId={business.id}
-          funnel={{...activeFunnel, theme: selectedTheme}}
-          colors={colors}
-          theme={selectedTheme}
+      <div className={`flex flex-col min-h-screen ${themeName}-theme`}>
+        <main className="flex-1">
+          {children}
+        </main>
+        
+        <Footer 
+          business={business} 
+          themeName={themeName} 
+          colors={colors} 
         />
-      )}
-    </div>
+        
+        {isMounted && activeFunnel && (
+          <SalesFunnelPopup 
+            businessId={business.id}
+            funnel={{...activeFunnel, theme: selectedTheme}}
+            colors={colors}
+            theme={selectedTheme}
+          />
+        )}
+      </div>
+      
+      {/* Apply theme-specific global background styles */}
+      <style jsx global>{`
+        ${selectedTheme.globalBackground ? selectedTheme.globalBackground(colors).overlay : ''}
+        
+        body {
+          padding-top: 0;
+          min-height: 100vh;
+          display: flex;
+          flex-direction: column;
+        }
+        
+        header {
+          position: sticky;
+          top: 0;
+          z-index: 100;
+          width: 100%;
+        }
+      `}</style>
+    </>
   );
 } 

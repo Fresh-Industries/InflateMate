@@ -202,4 +202,7 @@ export const retroPatterns: RetroPatterns = {
     0 0 ${size*2}px ${glowColor},
     0 0 ${size*3}px ${glowColor}
   `
+
+  
 }; 
+

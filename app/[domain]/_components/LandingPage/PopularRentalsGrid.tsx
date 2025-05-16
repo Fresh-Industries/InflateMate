@@ -35,6 +35,8 @@ const typeEmoji: Record<string, string> = {
 
 export default function PopularRentalsGrid({ items, colors, themeName, fallbackEmoji = '🎈' }: Props) {
   const theme = themeConfig[themeName];
+  const sectionAnimation = theme.animations?.sectionTransition || "fadeIn 0.3s ease";
+  const itemAnimation = theme.animations?.elementEntrance || "popIn 0.3s ease-out";
 
   /** Primary button style (pre‑computed so no functions travel to the client) */
   const buttonStyles: React.CSSProperties = {
@@ -63,12 +65,15 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
 
   return (
     <section
-      className="py-20 relative overflow-hidden"
-      style={theme.popularRentalsStyles?.background(colors)}
-    >
+      className={`py-20 relative overflow-hidden ${themeName}-theme popular-rentals`}
+      style={{ 
+        background: theme.popularRentalsStyles?.background(colors) ?? 'transparent',
+        animation: sectionAnimation
+      }}
+      >
       <div className="container mx-auto px-4 relative z-10">
         <h2
-          className="text-3xl md:text-5xl font-bold text-center mb-16"
+          className={`text-3xl md:text-5xl font-bold text-center mb-16 ${themeName}-theme section-title`}
           style={{ color: theme.popularRentalsStyles?.titleColor(colors) ?? colors.primary[500] }}
         >
           Our Most Popular Rentals
@@ -89,7 +94,10 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
               <div
                 key={item.id}
                 className="overflow-hidden hover:shadow-2xl transition-transform duration-300 hover:-translate-y-2 group"
-                style={baseCard}
+                style={{
+                  ...baseCard,
+                  animation: itemAnimation
+                }}
               >
                 <div
                   className="h-56 flex items-center justify-center overflow-hidden"

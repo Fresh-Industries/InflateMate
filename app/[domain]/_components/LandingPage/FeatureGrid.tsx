@@ -22,6 +22,7 @@ export default function FeatureGrid({ items, themeName, colors }: FeatureGridPro
   const theme = themeConfig[themeName];
   const featureStyles = theme.featureSectionStyles;
   const cardBase = theme.cardStyles;
+  const sectionAnimation = theme.animations?.sectionTransition || "fadeIn 0.3s ease";
 
   const featureTitleStyle: React.CSSProperties = {
     color: featureStyles ? featureStyles.titleColor(colors) : colors.primary[500],
@@ -59,7 +60,13 @@ export default function FeatureGrid({ items, themeName, colors }: FeatureGridPro
   };
 
   return (
-    <section className="py-20" style={{ background: colors.background[500] }}>
+    <section 
+      className={`py-20 ${themeName}-theme feature-section`} 
+      style={{ 
+        background: colors.background[100],
+        animation: sectionAnimation
+      }}
+    >
       <div className="container mx-auto px-4">
         <h2
           className="text-3xl md:text-5xl font-bold text-center mb-16"
@@ -73,7 +80,7 @@ export default function FeatureGrid({ items, themeName, colors }: FeatureGridPro
             <div
               key={idx}
               style={getCardStyle(idx)}
-              className="text-center hover:-translate-y-2 hover:shadow-xl"
+              className={`text-center hover:-translate-y-2 hover:shadow-xl ${themeName}-theme`}
             >
               {/* Icon */}
               <div style={getIconContainerStyle(idx)}>

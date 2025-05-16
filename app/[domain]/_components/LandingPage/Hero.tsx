@@ -7,6 +7,7 @@ import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
 import { Button } from '@/components/ui/button';
 import { getContrastColor } from '@/app/[domain]/_themes/utils';
 import { ThemeColors } from '@/app/[domain]/_themes/types';
+import { CSSProperties } from 'react';
 
 /** Props expected from DomainPage */
 export interface HeroProps {
@@ -50,6 +51,7 @@ export default function Hero({
     boxShadow: themeConfig[themeName].buttonStyles.boxShadow?.(colors),
     borderRadius: themeConfig[themeName].buttonStyles.borderRadius ?? '9999px',
     transition: themeConfig[themeName].buttonStyles.transition ?? 'all .25s ease',
+    ...(themeConfig[themeName].buttonStyles.customStyles?.(colors) ?? {}),
   };
 
   const primaryHover = {
@@ -61,6 +63,7 @@ export default function Hero({
     boxShadow:
       themeConfig[themeName].buttonStyles.hoverBoxShadow?.(colors) ?? primaryButton.boxShadow,
     transform: 'scale(1.08)',
+    ...(themeConfig[themeName].buttonStyles.customStyles?.(colors) ?? {}),
   };
 
   const secondaryButton = {
@@ -84,6 +87,7 @@ export default function Hero({
       themeConfig[themeName].secondaryButtonStyles?.transition ??
       themeConfig[themeName].buttonStyles.transition ??
       'all .25s ease',
+    ...(themeConfig[themeName].secondaryButtonStyles?.customStyles?.(colors) ?? {}),
   };
 
   const secondaryHover = {
@@ -100,6 +104,7 @@ export default function Hero({
       themeConfig[themeName].secondaryButtonStyles?.hoverBoxShadow?.(colors) ??
       secondaryButton.boxShadow,
     transform: 'scale(1.06)',
+    ...(themeConfig[themeName].secondaryButtonStyles?.customStyles?.(colors) ?? {}),
   };
 
   /* section colours from theme */
@@ -110,21 +115,66 @@ export default function Hero({
     themeConfig[themeName].heroTitleColor?.(colors) || getContrastColor(colors.primary[500]);
   const textColor =
     themeConfig[themeName].heroTextColor?.(colors) || getContrastColor(colors.secondary[500]);
+  const hero = themeConfig[themeName].heroAccentElements?.(colors) || {};
+  const heroAnimation = themeConfig[themeName].animations?.elementEntrance || "fadeIn 0.3s ease-out";
+
+  console.log(hero);
+  console.log(heroAnimation);
+  const heroStyles = {
+    background: sectionBg,
+    color: textColor,
+    animation: heroAnimation,
+  };
+
+  // Check if hero is an object with accent elements
+  const hasAccentElements = 
+    hero && 
+    typeof hero === 'object' && 
+    ('topLeft' in hero || 'topRight' in hero || 'bottomLeft' in hero || 'bottomRight' in hero);
+
+  // Function to safely cast to CSSProperties
+  const safeCssProps = (prop: unknown): CSSProperties => {
+    return prop as CSSProperties;
+  };
 
   return (
     <section
-      className="relative overflow-hidden"
-      style={{ background: sectionBg, color: textColor }}
+      className={`relative overflow-hidden ${themeName}-theme hero-section`}
+      style={heroStyles}
     >
-      {/* subtle decorative blobs */}
-      <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full opacity-20 pointer-events-none"
-           style={{ background: `${colors.primary[500]}` }}/>
-      <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full opacity-20 pointer-events-none"
-           style={{ background: `${colors.secondary[500]}` }}/>
+      {/* Theme-specific accent elements */}
+      {hasAccentElements && 'topLeft' in hero && (
+        <div
+          className="absolute top-10 left-10 w-32 h-32 md:w-48 md:h-48 z-0"
+          style={safeCssProps(hero.topLeft)}
+        />
+      )}
+      
+      {hasAccentElements && 'topRight' in hero && (
+        <div
+          className="absolute top-10 right-10 w-32 h-32 md:w-48 md:h-48 z-0"
+          style={safeCssProps(hero.topRight)}
+        />
+      )}
+      
+      {hasAccentElements && 'bottomLeft' in hero && (
+        <div
+          className="absolute bottom-10 left-10 w-32 h-32 md:w-48 md:h-48 z-0"
+          style={safeCssProps(hero.bottomLeft)}
+        />
+      )}
+      
+      {hasAccentElements && 'bottomRight' in hero && (
+        <div
+          className="absolute bottom-10 right-10 w-32 h-32 md:w-48 md:h-48 z-0"
+          style={safeCssProps(hero.bottomRight)}
+        />
+      )}
 
-      <div className="container mx-auto px-4 py-24 lg:py-32 relative z-10 grid md:grid-cols-2 gap-12 items-center">
+
+      <div className="container mx-auto px-4 py-24 lg:py-32 relative z-10 grid md:grid-cols-2 gap-12 items-center hero-content-wrapper">
         {/* copy block */}
-        <div className="space-y-8 text-center md:text-left">
+        <div className="space-y-8 text-center md:text-left hero-content">
           <h1
             className="text-4xl sm:text-5xl lg:text-7xl font-extrabold leading-tight"
             style={{ color: titleColor }}

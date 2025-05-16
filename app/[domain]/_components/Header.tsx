@@ -23,8 +23,9 @@ export default function Header({ business, colors, theme }: HeaderProps) {
 
   /* scroll shadow */
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    window.addEventListener('scroll', onScroll);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll(); // Check initial scroll position
+    window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
@@ -96,14 +97,28 @@ export default function Header({ business, colors, theme }: HeaderProps) {
   /* logo sizing */
   const logoSize = scrolled ? layoutTokens.logoSizeScrolled : layoutTokens.logoSize;
 
+  /* ---- Helper: styles for nav links (retro or default) ---- */
+  const useRetroNav = !!theme.navItemStyles;
+  const navLinkBase = (active: boolean): React.CSSProperties =>
+    useRetroNav
+      ? theme.navItemStyles![active ? 'active' : 'normal'](colors)
+      : linkBase(active);
+  const navLinkHover = (): React.CSSProperties =>
+    useRetroNav
+      ? theme.navItemStyles!.hover(colors)
+      : linkHover();
+
+  
+
   /* responsive container */
   return (
     <header
-      className="sticky top-0 z-50 w-full"
+      className={`w-full ${scrolled ? 'scrolled' : ''} sticky top-0 z-50`}
       style={{
         background: theme.headerBg(colors, scrolled),
         boxShadow : theme.boxShadow(colors, scrolled),
         padding   : '0.65rem 0',
+        ...(theme.extraBorderStyle ? theme.extraBorderStyle(colors) : {}),
       }}
     >
       <div className="container mx-auto px-4 flex items-center justify-between">
@@ -147,7 +162,7 @@ export default function Header({ business, colors, theme }: HeaderProps) {
               <Link
                 key={path}
                 href={path}
-                style={{ ...(linkBase(active)), ...(hover ? linkHover() : {}) }}
+                style={{ ...(navLinkBase(active)), ...(hover ? navLinkHover() : {}) }}
                 onMouseEnter={() => setHovered(path)}
                 onMouseLeave={() => setHovered(null)}
               >
@@ -180,7 +195,7 @@ export default function Header({ business, colors, theme }: HeaderProps) {
       {/* ---- Mobile panel ---- */}
       {mobileOpen && (
         <div
-          className="md:hidden fixed inset-0 z-40 flex flex-col bg-white/90 backdrop-blur pt-24 px-8 space-y-6 animate-in fade-in slide-in-from-top-10"
+          className="md:hidden fixed inset-0 z-50 flex flex-col bg-white/90 backdrop-blur pt-24 px-8 space-y-6 animate-in fade-in slide-in-from-top-10"
           style={{ background: theme.headerBg(colors, true) }}
         >
           {nav.map(({ path, label }) => {
@@ -190,7 +205,7 @@ export default function Header({ business, colors, theme }: HeaderProps) {
                 key={path}
                 href={path}
                 onClick={() => setMobileOpen(false)}
-                style={linkBase(active)}
+                style={navLinkBase(active)}
                 className="text-lg hover:scale-105 transition-transform"
               >
                 {label}

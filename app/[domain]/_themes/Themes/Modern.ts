@@ -42,11 +42,47 @@ export const modernOverrides: Partial<ThemeDefinition> = {
   heroBackground: (c) => c.primary[100],
   heroTitleColor: (c) => c.primary[900],
   heroTextColor: (c) => c.text[900],
+  heroAccentElements(colors) {
+    return {
+      topLeft: {
+        background: colors.primary[500],
+        width: '100px',
+        height: '100px',
+        borderRadius: '50%',
+        opacity: 0.2,
+        pointerEvents: 'none',
+      },
+      topRight: {
+        background: colors.secondary[500],
+        width: '100px',
+        height: '100px',
+        borderRadius: '50%',
+        opacity: 0.2,
+        pointerEvents: 'none',
+      },
+      bottomLeft: {
+        background: colors.accent[900],
+        width: '100px',
+        height: '100px',
+        borderRadius: '50%',
+        opacity: 0.2,
+        pointerEvents: 'none',
+      },
+      bottomRight: {
+        background: colors.primary[900],
+        width: '100px',
+        height: '100px',
+        borderRadius: '50%',
+        opacity: 0.2,
+        pointerEvents: 'none',
+      }
+    }
+  },
 
   // Feature Section
   featureSectionStyles: {
     titleColor: (c) => c.text[900],
-    cardBackground: (c) => c.background[100],
+    cardBackground: (c) => c.secondary[100],
     iconBackground: (c, i) => {
       const a = c.accent;
       const s = c.secondary;
@@ -61,15 +97,7 @@ export const modernOverrides: Partial<ThemeDefinition> = {
 
   // Popular Rentals
   popularRentalsStyles: {
-    background: (c) => ({
-      backgroundImage: `
-        linear-gradient(
-          135deg,
-          ${c.primary[100]},
-          ${c.secondary[100]}
-        )
-      `
-    }),
+    background: (c) => c.primary[100],
     titleColor: (c) => c.text[900],
     cardBackgroundGradient: (c) =>
       `linear-gradient(135deg, ${c.accent[100]}, ${c.accent[500]})`,
@@ -101,9 +129,15 @@ export const modernOverrides: Partial<ThemeDefinition> = {
   // Footer
   footerStyles: {
     background: (c) => c.primary[100],
-    textColor: () => '#ffffff',
+    textColor: (c) => c.text[900],
     border: (c) => `${borderWidths.medium} solid ${c.secondary[500]}`,
     boxShadow: () => shadows.heavy,
+    socialIconStyles: (c) => ({
+      background: c.primary[100],
+      color: c.text[900],
+      border: `1px solid ${c.primary[100]}33`,
+      boxShadow: shadows.light,
+    }),
   },
 
   // Inherit bookingStyles from base or factories

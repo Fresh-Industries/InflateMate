@@ -90,7 +90,7 @@ export interface ThemeDefinition {
       
     };
     popularRentalsStyles?: {
-      background: (colors: ThemeColors) => React.CSSProperties;
+      background: (colors: ThemeColors) => string;
       titleColor: (colors: ThemeColors) => string;
       cardBackgroundGradient: (colors: ThemeColors) => string;
       priceColor: (colors: ThemeColors) => string;
@@ -137,6 +137,9 @@ export interface ThemeDefinition {
       footerAnimation?: string; // Animation for footer elements
       socialIconStyles?: (colors: ThemeColors) => React.CSSProperties; // Styles for social media icons
       borderTop?: (colors: ThemeColors) => string;
+      footerLogo?: (colors: ThemeColors) => React.CSSProperties;
+      copyrightStyle?: (colors: ThemeColors) => React.CSSProperties;
+      socialIcons?: (colors: ThemeColors) => React.CSSProperties;
     };
   
     // Link styles

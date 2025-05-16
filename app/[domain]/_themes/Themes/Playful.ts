@@ -34,33 +34,15 @@ const funPatterns = {
 export const playfulOverrides: Partial<ThemeDefinition> = {
   // Header - vibrant, eye-catching but professional
   headerBg: (c) => c.primary[500],
-  headerTextColor: (c) => c.text[100],
+  headerTextColor: (c) => c.text[500],
   boxShadow: (c, scrolled) =>
     scrolled ? `0 6px 12px ${c.primary[900]}30` : "none",
   extraBorderStyle: (c) => ({
     borderBottom: `4px solid ${c.accent[500]}`,
-    position: "relative",
-    "&:after": {
-      content: '""',
-      position: "absolute",
-      bottom: "-8px",
-      left: 0,
-      right: 0,
-      height: "4px",
-      background: `repeating-linear-gradient(90deg, 
-        ${c.accent[500]}, ${c.accent[500]} 10px, 
-        transparent 10px, transparent 20px)`,
-    }
   }),
-  headerGlassEffect: false,
-  headerAccentElements: (c) => ({
-    background: funPatterns.balloons(c.accent[100], 'transparent', 0.2),
-    backgroundSize: "52px 52px",
-  }),
-  headerAnimation: "fadeIn 0.3s ease-out",
   navItemStyles: {
     normal: (c) => ({
-      color: c.text[100],
+      color: c.text[500],
       position: "relative",
       padding: "0.5rem 1rem",
       margin: "0 0.2rem",
@@ -69,11 +51,18 @@ export const playfulOverrides: Partial<ThemeDefinition> = {
       transition: "all 0.2s ease",
     }),
     hover: (c) => ({
-      color: c.accent[100],
+      color: c.text[500],
       transform: "translateY(-3px)",
+      transition: "all 0.3s ease",
+      background: c.accent[900],
+      padding: "0.5rem 1rem",
+      borderRadius: radii.pill,
     }),
     active: (c) => ({
       color: c.accent[100],
+      background: c.accent[900],
+      padding: "0.5rem 1rem",
+      borderRadius: radii.pill,
       fontWeight: "bold",
       "&:after": {
         content: '""',
@@ -162,35 +151,22 @@ export const playfulOverrides: Partial<ThemeDefinition> = {
 
   // Popular Rentals - showcase products with fun backgrounds
   popularRentalsStyles: {
-    background: (c) => ({
-      background: c.secondary[100],
-      backgroundImage: funPatterns.polkaDots(c.secondary[500], 'transparent', 0.1),
-      position: "relative",
-      "&:before": {
-        content: '""',
-        position: "absolute",
-        top: 0,
-        left: 0,
-        right: 0,
-        height: "8px",
-        background: c.secondary[500],
-      }
-    }),
-    titleColor: (c) => c.primary[900],
-    cardBackgroundGradient: (c) => c.background[100],
+    background: (c) => funPatterns.polkaDots(c.secondary[500], c.primary[100], 0.05),
+    titleColor: (c) => c.text[100],
+    cardBackgroundGradient: (c) => funPatterns.polkaDots(c.secondary[500], c.background[100], 0.05),
     priceColor: (c) => c.accent[900],
   },
 
   // CTA - attention-grabbing but professional
   ctaStyles: {
-    background: (c) => funPatterns.stars(c.accent[100], c.accent[500], 0.15),
+    background: (c) => funPatterns.bouncyBalls(c.accent[100], c.accent[500], 0.15),
     titleColor: (c) => c.text[100],
     textColor: (c) => c.text[100],
   },
 
   // Contact section - clean, professional but with playful elements
   contactStyles: {
-    background: (c) => funPatterns.balloons(c.primary[500], c.background[100], 0.05),
+    background: (c) => funPatterns.stars(c.primary[500], c.background[100], 0.05),
     titleColor: (c) => c.primary[900],
     cardBackground: (c) => c.background[100],
     iconBackground: (c, type) => {

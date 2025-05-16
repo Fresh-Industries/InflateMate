@@ -23,15 +23,18 @@ interface Props {
 
 export default function ContactSection({ themeName, colors, business }: Props) {
   const theme = themeConfig[themeName];
+  const sectionAnimation = theme.animations?.sectionTransition || "fadeIn 0.3s ease";
+  const elementAnimation = theme.animations?.elementEntrance || "popIn 0.3s ease-out";
 
   /* ------- helpers ------- */
   const cardBase = theme.cardStyles;
   const cardStyle: React.CSSProperties = {
-    background: cardBase.background(colors),
-    border: cardBase.border(colors),
-    boxShadow: cardBase.boxShadow(colors),
+    background: theme.contactStyles?.cardBackground?.(colors) || cardBase.background(colors),
+    border: theme.contactStyles?.cardBorder?.(colors) || cardBase.border(colors),
+    boxShadow: theme.contactStyles?.cardBoxShadow?.(colors) || cardBase.boxShadow(colors),
     borderRadius: cardBase.borderRadius ?? '16px',
-    color: cardBase.textColor(colors)
+    color: cardBase.textColor(colors),
+    animation: elementAnimation,
   };
 
   /* section background + subtle dots */
@@ -60,7 +63,10 @@ export default function ContactSection({ themeName, colors, business }: Props) {
 
   /* ------- render ------- */
   return (
-    <section className="py-20 relative overflow-hidden" style={sectionBG}>
+    <section className={`py-20 relative overflow-hidden ${themeName}-theme contact-section`} style={{
+      ...sectionBG,
+      animation: sectionAnimation
+    }}>
       <div className="container mx-auto px-4 relative z-10">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
 

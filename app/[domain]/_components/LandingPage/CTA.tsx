@@ -30,12 +30,15 @@ export default function CTA({
   ctaLabel = 'Book Your Bounce House'
 }: Props) {
   const theme = themeConfig[themeName];
+  const sectionAnimation = theme.animations?.sectionTransition || "fadeIn 0.3s ease";
+  const elementAnimation = theme.animations?.elementEntrance || "popIn 0.3s ease-out";
 
   /* ---- section-level styles ---- */
   const sectionStyle: React.CSSProperties = {
     background: theme.ctaStyles?.background(colors) ??
       `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
-    color: theme.ctaStyles?.textColor(colors) ?? getContrastColor(colors.primary)
+    color: theme.ctaStyles?.textColor(colors) ?? getContrastColor(colors.primary),
+    animation: sectionAnimation
   };
 
   /* ---- headline / copy ---- */
@@ -87,11 +90,14 @@ export default function CTA({
   };
 
   return (
-    <section className="py-20 relative overflow-hidden" style={sectionStyle}>
+    <section className={`py-20 relative overflow-hidden ${themeName}-theme cta-section`} style={sectionStyle}>
       <div className="container mx-auto px-4 text-center relative z-10">
         <h2
           className="text-4xl md:text-6xl font-bold mb-8 drop-shadow-md"
-          style={titleStyle}
+          style={{
+            ...titleStyle,
+            animation: elementAnimation
+          }}
         >
           {title}
         </h2>
