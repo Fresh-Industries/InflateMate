@@ -113,7 +113,7 @@ export const playfulOverrides: Partial<ThemeDefinition> = {
   },
 
   // Hero - eye-catching with fun patterns
-  heroBackground: (c) => funPatterns.polkaDots(c.primary[900], c.accent[100], 0.07),
+  heroBackground: (c) => funPatterns.polkaDots(c.secondary[100], c.accent[100], 0.05),
   heroTitleColor: (c) => c.primary[900],
   heroTextColor: (c) => c.text[900],
 

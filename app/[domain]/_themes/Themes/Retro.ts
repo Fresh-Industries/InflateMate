@@ -223,7 +223,7 @@ export const retroOverrides: Partial<ThemeDefinition> = {
   },
 
   // Hero section - bold, playful style with retro patterns
-  heroBackground: (c: ThemeColors) => retroPatterns.checkerboard(c.primary[900], c.accent[100], 500),
+  heroBackground: (c: ThemeColors) => retroPatterns.cassetteTape(c.primary[100], c.accent[100]),
   heroTitleColor: (c: ThemeColors) => c.primary[900],
   heroTextColor: (c: ThemeColors) => c.text[900],
   
