@@ -177,7 +177,7 @@ export function BookingsCalendarView({
 
       return {
         id: booking.id,
-        title: `${booking.customer.name} (${booking.inventoryItems.map(i => i.inventoryId).join(', ') || 'No Items'})`,
+        title: `${booking.customer?.name || 'No Customer'} (${booking.inventoryItems?.map(i => i.inventoryId).join(', ') || 'No Items'})`,
         start: startDate,
         end: endDate,
         resource: booking,

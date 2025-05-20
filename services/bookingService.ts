@@ -1,6 +1,6 @@
 // src/services/bookingService.ts
 
-import { InventoryItem, BookingMetadata, AvailabilitySearchFilters } from '@/types/booking';
+import { InventoryItem, BookingMetadata, AvailabilitySearchFilters, BookingFullDetails } from '@/types/booking';
 
 // --- Data Fetching Services ---
 
@@ -129,10 +129,13 @@ export async function createBookingPaymentIntent(businessId: string, bookingDeta
 }
 
 
-export async function fetchBookingDetails(bookingId: string, businessId: string): Promise<BookingMetadata> {
+export async function fetchBookingDetails(bookingId: string, businessId: string): Promise<BookingFullDetails> {
   const response = await fetch(`/api/businesses/${businessId}/bookings/${bookingId}`);
   if (!response.ok) {
-    throw new Error("Failed to fetch booking details.");
+    // Consider more specific error handling based on response status or body
+    const errorData = await response.json().catch(() => ({ error: "Failed to fetch booking details and could not parse error response." }));
+    throw new Error(errorData.error || "Failed to fetch booking details.");
   }
-  return response.json();
+  // The API is now expected to return data matching BookingFullDetails
+  return response.json() as Promise<BookingFullDetails>; // Added 'as Promise<BookingFullDetails>' for clarity, though response.json() is already Promise<any>
 }

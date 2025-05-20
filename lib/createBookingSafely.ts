@@ -1,6 +1,6 @@
 // lib/createBookingSafely.ts
 import { prisma } from "@/lib/prisma";
-import { Prisma } from "@/prisma/generated/prisma";
+import { Prisma, BookingStatus } from "@/prisma/generated/prisma";
 import { createId } from '@paralleldrive/cuid2'; // Correct import for createId
 // Note: crypto is not needed if you use createId() for CUIDs
 // import crypto from 'crypto';
@@ -38,11 +38,16 @@ export async function createBookingSafely(
       const transactionResult = await prisma.$transaction(async tx => {
         console.log("[createBookingSafely] Starting transaction...");
 
-        // Create booking first
-        // Ensure bookingData contains the necessary connections/data for creation
-        const booking = await tx.booking.create({ data: bookingData });
-        console.log(`[createBookingSafely] Booking created with ID: ${booking.id}`);
+        // Create enhanced booking data with expiresAt and default status
+        const dataForCreation = {
+          ...bookingData,
+          status: bookingData.status || BookingStatus.HOLD,
+          expiresAt: bookingData.expiresAt || new Date(Date.now() + 30 * 60 * 1000), // 30 minutes for HOLD
+        };
 
+        // Create booking with enhanced data
+        const booking = await tx.booking.create({ data: dataForCreation });
+        console.log(`[createBookingSafely] Booking created with ID: ${booking.id}`);
 
         // Insert BookingItems using raw SQL for each item (required for Unsupported type with generated column)
         // Make sure to NOT include the 'period' column in the INSERT list or VALUES.

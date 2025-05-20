@@ -316,7 +316,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold">Booking for {booking.customer.name}</h3>
+            <h3 className="text-lg font-semibold">Booking for {booking.customer?.name || "N/A"}</h3>
              <Badge className={`mt-1 ${getStatusBadgeVariant(booking.status)}`}>
               {booking.status}
             </Badge>
@@ -364,9 +364,9 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
               <Info className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
               <div>
                 <div className="font-medium">Customer</div>
-                <div className="text-sm text-muted-foreground">{booking.customer.name}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3"/> {booking.customer.email}</div>
-                <div className="text-sm text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3"/> {booking.customer.phone}</div>
+                <div className="text-sm text-muted-foreground">{booking.customer?.name}</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-1"><Mail className="h-3 w-3"/> {booking.customer?.email}</div>
+                <div className="text-sm text-muted-foreground flex items-center gap-1"><Phone className="h-3 w-3"/> {booking.customer?.phone}</div>
               </div>
             </div>
              <div className="flex items-start gap-3">

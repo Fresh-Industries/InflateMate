@@ -3,81 +3,74 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import React from "react";
-import { NewBookingState } from '@/types/booking';
-import { Button } from "@/components/ui/button";
 
-interface CustomerDetailsStepProps {
-  newBooking: {
-    customerName: string;
-    customerEmail: string;
-    customerPhone: string;
+interface CustomerInfoProps {
+  customerData: {
+    name: string;
+    email: string;
+    phone: string;
+    specialInstructions: string | null;
+    // Event location fields
     eventAddress: string;
     eventCity: string;
     eventState: string;
     eventZipCode: string;
+    // Participant fields
     participantCount: number;
     participantAge: string;
-    specialInstructions: string;
   };
-  setNewBooking: React.Dispatch<React.SetStateAction<NewBookingState>>;
-  onContinue: () => void;
+  setCustomerData: React.Dispatch<React.SetStateAction<{
+    name: string;
+    email: string;
+    phone: string;
+    specialInstructions: string | null;
+    // Event location fields
+    eventAddress: string;
+    eventCity: string;
+    eventState: string;
+    eventZipCode: string;
+    // Participant fields
+    participantCount: number;
+    participantAge: string;
+  }>>;
 }
 
-export function CustomerDetailsStep({
-  newBooking,
-  setNewBooking,
-  onContinue,
-}: CustomerDetailsStepProps) {
+export function CustomerInfo({ customerData, setCustomerData }: CustomerInfoProps) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 gap-4">
         {/* Customer Name */}
         <div className="space-y-2">
-          <Label htmlFor="customerName">Full Name</Label>
-          <Input
-            id="customerName"
-            value={newBooking.customerName} // Use prop
-            onChange={(e) =>
-              setNewBooking((prevBooking) => ({
-                ...prevBooking,
-                customerName: e.target.value,
-              })) // Use functional update
-            }
+          <Label htmlFor="name">Full Name</Label>
+          <Input 
+            id="name" 
+            value={customerData.name || ""}
+            onChange={(e) => setCustomerData({ ...customerData, name: e.target.value })}
             placeholder="Customer name"
             required
           />
         </div>
+        
         {/* Customer Email */}
         <div className="space-y-2">
-          <Label htmlFor="customerEmail">Email</Label>
-          <Input
-            id="customerEmail"
-            type="email"
-            value={newBooking.customerEmail} // Use prop
-            onChange={(e) =>
-              setNewBooking((prevBooking) => ({
-                ...prevBooking,
-                customerEmail: e.target.value,
-              })) // Use functional update
-            }
+          <Label htmlFor="email">Email Address</Label>
+          <Input 
+            id="email" 
+            type="email" 
+            value={customerData.email || ""}
+            onChange={(e) => setCustomerData({ ...customerData, email: e.target.value })}
             placeholder="customer@example.com"
             required
           />
         </div>
+        
         {/* Customer Phone */}
         <div className="space-y-2">
-          <Label htmlFor="customerPhone">Phone</Label>
-          <Input
-            id="customerPhone"
-            type="tel"
-            value={newBooking.customerPhone} // Use prop
-            onChange={(e) =>
-              setNewBooking((prevBooking) => ({
-                ...prevBooking,
-                customerPhone: e.target.value,
-              })) // Use functional update
-            }
+          <Label htmlFor="phone">Phone Number</Label>
+          <Input 
+            id="phone" 
+            value={customerData.phone || ""}
+            onChange={(e) => setCustomerData({ ...customerData, phone: e.target.value })}
             placeholder="(123) 456-7890"
             required
           />
@@ -90,15 +83,9 @@ export function CustomerDetailsStep({
           <Label htmlFor="eventAddress">Event Address</Label>
           <Input
             id="eventAddress"
-            value={newBooking.eventAddress} // Use prop
-            onChange={(e) =>
-              setNewBooking((prevBooking) => ({
-                ...prevBooking,
-                eventAddress: e.target.value,
-              })) // Use functional update
-            }
+            value={customerData.eventAddress || ""}
+            onChange={(e) => setCustomerData({ ...customerData, eventAddress: e.target.value })}
             placeholder="123 Main St"
-            required
           />
         </div>
         <div className="grid grid-cols-3 gap-4">
@@ -107,15 +94,9 @@ export function CustomerDetailsStep({
             <Label htmlFor="eventCity">City</Label>
             <Input
               id="eventCity"
-              value={newBooking.eventCity} // Use prop
-              onChange={(e) =>
-                setNewBooking((prevBooking) => ({
-                  ...prevBooking,
-                  eventCity: e.target.value,
-                })) // Use functional update
-              }
+              value={customerData.eventCity || ""}
+              onChange={(e) => setCustomerData({ ...customerData, eventCity: e.target.value })}
               placeholder="City"
-              required
             />
           </div>
           {/* State */}
@@ -123,15 +104,9 @@ export function CustomerDetailsStep({
             <Label htmlFor="eventState">State</Label>
             <Input
               id="eventState"
-              value={newBooking.eventState} // Use prop
-              onChange={(e) =>
-                setNewBooking((prevBooking) => ({
-                  ...prevBooking,
-                  eventState: e.target.value,
-                })) // Use functional update
-              }
+              value={customerData.eventState || ""}
+              onChange={(e) => setCustomerData({ ...customerData, eventState: e.target.value })}
               placeholder="State"
-              required
             />
           </div>
           {/* Zip Code */}
@@ -139,15 +114,9 @@ export function CustomerDetailsStep({
             <Label htmlFor="eventZipCode">Zip Code</Label>
             <Input
               id="eventZipCode"
-              value={newBooking.eventZipCode} // Use prop
-              onChange={(e) =>
-                setNewBooking((prevBooking) => ({
-                  ...prevBooking,
-                  eventZipCode: e.target.value,
-                })) // Use functional update
-              }
+              value={customerData.eventZipCode || ""}
+              onChange={(e) => setCustomerData({ ...customerData, eventZipCode: e.target.value })}
               placeholder="12345"
-              required
             />
           </div>
         </div>
@@ -161,57 +130,34 @@ export function CustomerDetailsStep({
             id="participantCount"
             type="number"
             min={1}
-            value={newBooking.participantCount} // Use prop
-            onChange={(e) =>
-              setNewBooking((prevBooking) => ({
-                ...prevBooking,
-                participantCount: parseInt(e.target.value) || 1, // Ensure it's a number
-              })) // Use functional update
-            }
-            required
+            value={customerData.participantCount || 1}
+            onChange={(e) => setCustomerData({ 
+              ...customerData, 
+              participantCount: parseInt(e.target.value) || 1 
+            })}
           />
         </div>
         <div className="space-y-2">
           <Label htmlFor="participantAge">Age Range</Label>
           <Input
             id="participantAge"
-            value={newBooking.participantAge} // Use prop
-            onChange={(e) =>
-              setNewBooking((prevBooking) => ({
-                ...prevBooking,
-                participantAge: e.target.value,
-              })) // Use functional update
-            }
+            value={customerData.participantAge || ""}
+            onChange={(e) => setCustomerData({ ...customerData, participantAge: e.target.value })}
             placeholder="e.g., 5-12 years"
           />
         </div>
       </div>
-
+      
       {/* Special Instructions */}
       <div className="space-y-2">
-        <Label htmlFor="specialInstructions">Special Instructions</Label>
-        <Textarea
-          id="specialInstructions"
-          value={newBooking.specialInstructions} // Use prop
-          onChange={(e) =>
-            setNewBooking((prevBooking) => ({
-              ...prevBooking,
-              specialInstructions: e.target.value,
-            })) // Use functional update
-          }
+        <Label htmlFor="special-instructions">Special Instructions</Label>
+        <Textarea 
+          id="special-instructions" 
+          className="min-h-32"
+          value={customerData.specialInstructions || ""}
+          onChange={(e) => setCustomerData({ ...customerData, specialInstructions: e.target.value })}
           placeholder="Any special requests or setup instructions"
-          rows={3}
         />
-      </div>
-      <div className="flex justify-center mt-8">
-        <Button
-          type="button"
-          className="w-full max-w-md"
-          onClick={onContinue}
-          variant="primary-gradient"
-        >
-          Continue
-        </Button>
       </div>
     </div>
   );

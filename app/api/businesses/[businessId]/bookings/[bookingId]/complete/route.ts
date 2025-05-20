@@ -5,7 +5,7 @@ import { revalidateTag } from "next/cache";
 
 export async function POST(
   req: NextRequest,
-  { params }: { params: Promise<{ businessId: string; bookingId: string }> }
+  { params }: { params: { businessId: string; bookingId: string } }
 ) {
   try {
     const user = await getCurrentUserWithOrgAndBusiness();
@@ -13,7 +13,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { businessId, bookingId } = await params;
+    const { businessId, bookingId } = params;
 
     // Check that the user has access to this business
     const userBusinessId = user.membership?.organization?.business?.id;

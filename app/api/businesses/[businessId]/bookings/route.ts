@@ -88,23 +88,30 @@ export async function POST(
     }
 
     // Check if the hold is still active
-    const holdExpirationTime = new Date(existingBooking.createdAt.getTime() + 30 * 60 * 1000);
     const now = new Date();
-    if (existingBooking.status !== 'HOLD' || now > holdExpirationTime) {
-        console.warn(`[POST /bookings] HOLD booking ID ${existingBooking.id} is expired or not in HOLD status (Current Status: ${existingBooking.status}).`);
-        // Update the booking status to CANCELLED if it was an expired HOLD
-        if (existingBooking.status === 'HOLD') {
-             await prisma.booking.update({
-                 where: { id: existingBooking.id },
-                 data: { status: 'CANCELLED', isCancelled: true }
-             });
-         }
-        return NextResponse.json({
-            error: "The hold on your selected items has expired. Please check availability again.",
-            isExpired: true, // Indicate to client the specific reason
-        }, { status: 409 }); // 409 Conflict
+    let isHoldExpired = false;
+    if (existingBooking.expiresAt) {
+        isHoldExpired = now > new Date(existingBooking.expiresAt);
+    } else {
+        // Fallback for older bookings without expiresAt: consider them expired
+        console.warn(`[POST /bookings] HOLD booking ID ${existingBooking.id} is missing 'expiresAt'.`);
+        isHoldExpired = true;
     }
-     console.log(`[POST /bookings] Valid HOLD booking found and is active.`);
+
+    if (existingBooking.status !== 'HOLD' || isHoldExpired) {
+        console.warn(`[POST /bookings] HOLD booking ID ${existingBooking.id} is expired or not in HOLD status (Current Status: ${existingBooking.status}, Expires At: ${existingBooking.expiresAt ? new Date(existingBooking.expiresAt).toISOString() : 'N/A'}).`);
+        if (existingBooking.status === 'HOLD' && isHoldExpired) {
+            await prisma.booking.update({
+                where: { id: existingBooking.id },
+                data: { status: 'EXPIRED', isCancelled: true, updatedAt: new Date() }
+            });
+        }
+        return NextResponse.json({
+            error: "The hold on your selected items has expired or is invalid. Please check availability again.",
+            isExpired: true,
+        }, { status: 409 });
+    }
+    console.log(`[POST /bookings] Valid HOLD booking found and is active.`);
 
     // Get Stripe Account ID from the included business relation
     const stripeConnectedAccountId = existingBooking.business?.stripeAccountId;
@@ -275,6 +282,7 @@ export async function POST(
                     specialInstructions: bookingData.specialInstructions,
                     couponId: appliedCouponId, // Link the coupon ID
                     updatedAt: new Date(), // Explicitly set update timestamp
+                    expiresAt: new Date(Date.now() + 15 * 60 * 1000), // Set new 15-minute expiration for PENDING payment
                 },
                 include: { inventoryItems: true } // Include items to update their status below
             });

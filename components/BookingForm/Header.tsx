@@ -6,6 +6,7 @@ import { CreditCard } from "lucide-react";
 
 interface HeaderProps {
   currentStep: number;
+  bookingId: string | null;
 }
 
   // Steps for progress indicator
@@ -15,7 +16,7 @@ interface HeaderProps {
     { number: 3, title: "Review & Pay", icon: CreditCard },
   ];
 
-const Header = ({ currentStep }: HeaderProps) => {
+const Header = ({ currentStep, bookingId }: HeaderProps) => {
   return (
     <div className="relative mb-12">
       <div className="flex justify-between items-center z-10 relative">
