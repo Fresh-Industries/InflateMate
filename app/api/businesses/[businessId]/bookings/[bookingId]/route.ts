@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { updateBookingSafely, UpdateBookingDataInput, BookingConflictError } from '@/lib/updateBookingSafely';
-import { z } from 'zod'; // Placeholder for Zod schema
+import { z } from 'zod'; // Import Zod for schema validation
 
 export async function GET(
   req: NextRequest,
@@ -86,8 +86,61 @@ export async function GET(
   }
 }
 
-// Placeholder Zod schema for UpdateBookingDataInput - define this properly based on your needs
-// const UpdateBookingDataSchema = z.object({...
+// Define a schema for the booking update request body
+const UpdateBookingSchema = z.object({
+  // Customer information
+  customerName: z.string().optional(),
+  customerEmail: z.string().email().optional(),
+  customerPhone: z.string().optional(),
+  
+  // Special instructions
+  specialInstructions: z.string().nullable().optional(),
+  
+  // Event location fields
+  eventAddress: z.string().optional(),
+  eventCity: z.string().optional(),
+  eventState: z.string().optional(),
+  eventZipCode: z.string().optional(),
+  
+  // Participant fields
+  participantCount: z.number().int().min(1).optional(),
+  participantAge: z.number().int().positive().nullable().optional(),
+  
+  // Original date/time fields - typically shouldn't change in edit flow but kept for validation
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  eventTimeZone: z.string().optional(),
+  
+  // Inventory items - make optional to allow confirmed booking updates without items
+  items: z.array(
+    z.object({
+      inventoryId: z.string(),
+      quantity: z.number().int().min(1),
+      price: z.number().min(0),
+      // These will be converted to Date objects in updateBookingSafely
+      startUTC: z.date().or(z.string()),
+      endUTC: z.date().or(z.string()),
+      status: z.string().optional(),
+    })
+  ).optional(),
+  
+  // Amounts for validation
+  subtotalAmount: z.number().min(0).optional(),
+  taxAmount: z.number().min(0).optional(),
+  totalAmount: z.number().min(0).optional(),
+  
+  // Coupon
+  couponCode: z.string().optional().nullable(),
+  
+  // Intent for prepare_for_quote or prepare_for_payment
+  intent: z.enum([
+    "prepare_for_quote", 
+    "prepare_for_payment", 
+    "prepare_for_payment_difference",
+    "update_customer_info_only"
+  ]).optional(),
+});
 
 export async function PATCH(
   request: NextRequest,
@@ -106,29 +159,113 @@ export async function PATCH(
       return NextResponse.json({ error: "Forbidden: Access denied to this business." }, { status: 403 });
     }
 
-    // At this point, user is authenticated and authorized for the businessId
-
+    // Parse and validate the request body
     let body: UpdateBookingDataInput;
     try {
       const rawBody = await request.json();
-      // body = UpdateBookingDataSchema.parse(rawBody); // Recommended 
-      body = rawBody as UpdateBookingDataInput; // Bypassing for now
-      if (!body || typeof body !== 'object' || !Array.isArray(body.items) || body.items.length === 0) {
-        return NextResponse.json({ error: "Invalid request body. 'items' array is required and cannot be empty." }, { status: 400 });
+      console.log('[API PATCH Booking] Request body:', JSON.stringify(rawBody));
+      
+      // Validate the request body with Zod schema
+      const validatedData = UpdateBookingSchema.parse(rawBody);
+      body = validatedData as UpdateBookingDataInput;
+      
+      // Log if we're processing an intent
+      if (body.intent) {
+        console.log(`[API PATCH Booking] Processing with intent: ${body.intent}`);
       }
     } catch (error) {
       console.error('[API PATCH Booking] Error parsing request body:', error);
       if (error instanceof z.ZodError) {
-        return NextResponse.json({ error: "Invalid request body format.", details: error.errors }, { status: 400 });
+        return NextResponse.json({ 
+          error: "Invalid request body format.", 
+          details: error.errors 
+        }, { status: 400 });
       }
       return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
     }
 
     console.log(`[API PATCH Booking] User ${user.id} attempting to update booking ${bookingId} for business ${businessId}`);
     
+    // Check if this is a CONFIRMED booking
+    const booking = await prisma.booking.findUnique({ 
+      where: { id: bookingId },
+      select: { status: true }
+    });
+
+    // Special handling for CONFIRMED bookings without items array (just updating customer info)
+    if (booking?.status === "CONFIRMED" && (!body.items || body.intent === "update_customer_info_only")) {
+      console.log(`[API PATCH Booking] Processing simple update for CONFIRMED booking without modifying items`);
+      
+      // Directly update the booking without affecting booking items
+      const updatedBooking = await prisma.booking.update({
+        where: { id: bookingId },
+        data: {
+          eventAddress: body.eventAddress,
+          eventCity: body.eventCity,
+          eventState: body.eventState,
+          eventZipCode: body.eventZipCode,
+          participantCount: body.participantCount,
+          participantAge: body.participantAge,
+          specialInstructions: body.specialInstructions,
+          eventDate: body.eventDate ? new Date(body.eventDate) : undefined,
+          startTime: body.startTime && body.eventDate 
+            ? new Date(`${body.eventDate}T${body.startTime}:00.000Z`) 
+            : undefined,
+          endTime: body.endTime && body.eventDate 
+            ? new Date(`${body.eventDate}T${body.endTime}:00.000Z`) 
+            : undefined,
+          eventTimeZone: body.eventTimeZone,
+          updatedAt: new Date(),
+          // If we have customer info, also update the customer
+          ...(body.customerName && body.customerEmail && body.customerPhone ? {
+            customer: {
+              update: {
+                name: body.customerName,
+                email: body.customerEmail,
+                phone: body.customerPhone,
+                updatedAt: new Date(),
+              }
+            }
+          } : {})
+        },
+        include: {
+          customer: true,
+          inventoryItems: {
+            include: { inventory: true }
+          }
+        }
+      });
+      
+      console.log(`[API PATCH Booking] Successfully updated CONFIRMED booking ${bookingId} (simple update)`);
+      return NextResponse.json(updatedBooking, { status: 200 });
+    }
+    
+    // Special handling for CONFIRMED bookings with prepare_for_payment_difference intent
+    if (booking?.status === "CONFIRMED" && body.intent === "prepare_for_payment_difference" && body.items) {
+      console.log(`[API PATCH Booking] Processing payment for additional items for CONFIRMED booking`);
+      
+      // Process payment for additional items
+      try {
+        // Use updateBookingSafely with our special intent
+        const updatedBookingWithItems = await updateBookingSafely(bookingId, businessId, body);
+        
+        // Further processing will be handled by the Stripe webhook
+        return NextResponse.json(updatedBookingWithItems, { status: 200 });
+      } catch (error) {
+        console.error("[API PATCH Booking] Error processing payment difference:", error);
+        return NextResponse.json({ 
+          error: error instanceof Error ? error.message : "Failed to process payment for additional items",
+          code: "PAYMENT_DIFFERENCE_ERROR"
+        }, { status: 400 });
+      }
+    }
+    
+    // For non-confirmed bookings or confirmed bookings with items array, use the regular update process
     const updatedBooking = await updateBookingSafely(bookingId, businessId, body);
 
-    console.log(`[API PATCH Booking] Successfully updated booking ${updatedBooking.id}`);
+    console.log(`[API PATCH Booking] Successfully updated booking ${updatedBooking.id} to status ${updatedBooking.status}`);
+    
+    // Return the fully updated booking
     return NextResponse.json(updatedBooking, { status: 200 });
 
   } catch (error: any) {
@@ -139,17 +276,34 @@ export async function PATCH(
       console.error(`[API PATCH Booking] Error updating booking:`, error);
     }
 
+    // Handle specific error types
     if (error instanceof BookingConflictError) {
-      return NextResponse.json({ error: error.message || "Booking conflict detected." }, { status: 409 });
+      return NextResponse.json({ 
+        error: error.message || "Booking conflict detected - Items may no longer be available.", 
+        code: "CONFLICT"
+      }, { status: 409 });
     }
-    if (error.message.includes("cannot be edited") || error.message.includes("not found")) {
-      return NextResponse.json({ error: error.message }, { status: 404 });
+    
+    if (error.message.includes("cannot be edited")) {
+      return NextResponse.json({ 
+        error: error.message, 
+        code: "CANNOT_EDIT"
+      }, { status: 400 });
+    }
+    
+    if (error.message.includes("not found")) {
+      return NextResponse.json({ 
+        error: error.message, 
+        code: "NOT_FOUND"
+      }, { status: 404 });
     }
 
-    return NextResponse.json({ error: "Internal Server Error." }, { status: 500 });
+    return NextResponse.json({ 
+      error: "Internal Server Error.", 
+      message: error.message || "An unexpected error occurred." 
+    }, { status: 500 });
   }
 }
-
 
 // Delete Booking only if pending or hold if no payment has been made then it can be safely deleted 
 export async function DELETE(

@@ -17,6 +17,12 @@ interface EditSummaryCardProps {
     email: string;
     phone: string;
     specialInstructions: string | null;
+    eventAddress: string;
+    eventCity: string;
+    eventState: string;
+    eventZipCode: string;
+    participantCount: number;
+    participantAge: string;
   };
   subtotal: number;
   taxAmount: number;
@@ -57,8 +63,14 @@ export function EditSummaryCard({
             <div>
               <h3 className="text-sm font-medium text-gray-500">Date</h3>
               <p className="font-medium">
-                {bookingDetails.booking?.eventDate && bookingDetails.booking?.eventTimeZone
-                  ? utcToLocal(new Date(bookingDetails.booking.eventDate), bookingDetails.booking.eventTimeZone, 'MMM d, yyyy')
+                {bookingDetails.booking?.startTime && bookingDetails.booking?.eventTimeZone
+                  ? utcToLocal(
+                      typeof bookingDetails.booking.startTime === 'string' 
+                        ? new Date(bookingDetails.booking.startTime) 
+                        : bookingDetails.booking.startTime,
+                      bookingDetails.booking.eventTimeZone, 
+                      'MMM d, yyyy'
+                    )
                   : "Not set"}
               </p>
             </div>
@@ -66,16 +78,40 @@ export function EditSummaryCard({
               <h3 className="text-sm font-medium text-gray-500">Time</h3>
               <p className="font-medium">
                 {bookingDetails.booking?.startTime && bookingDetails.booking?.endTime && bookingDetails.booking?.eventTimeZone
-                  ? `${utcToLocal(new Date(bookingDetails.booking.startTime), bookingDetails.booking.eventTimeZone, 'h:mm a')} - 
-                     ${utcToLocal(new Date(bookingDetails.booking.endTime), bookingDetails.booking.eventTimeZone, 'h:mm a')}`
+                  ? `${utcToLocal(
+                      typeof bookingDetails.booking.startTime === 'string' 
+                        ? new Date(bookingDetails.booking.startTime) 
+                        : bookingDetails.booking.startTime,
+                      bookingDetails.booking.eventTimeZone, 
+                      'h:mm a'
+                    )} - 
+                     ${utcToLocal(
+                      typeof bookingDetails.booking.endTime === 'string' 
+                        ? new Date(bookingDetails.booking.endTime) 
+                        : bookingDetails.booking.endTime,
+                      bookingDetails.booking.eventTimeZone, 
+                      'h:mm a'
+                    )}`
                   : "Not set"}
               </p>
             </div>
             <div>
               <h3 className="text-sm font-medium text-gray-500">Location</h3>
               <p className="font-medium">
-                {bookingDetails.booking?.eventAddress || "No address provided"}
+                {customerData.eventAddress || bookingDetails.booking?.eventAddress || "No address provided"}
               </p>
+            </div>
+          </div>
+          
+          {/* Participant Info */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Participants</h3>
+              <p className="font-medium">{customerData.participantCount || bookingDetails.booking?.participantCount || 0}</p>
+            </div>
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Age Range</h3>
+              <p className="font-medium">{customerData.participantAge || bookingDetails.booking?.participantAge || "N/A"}</p>
             </div>
           </div>
         </CardContent>
@@ -148,7 +184,7 @@ export function EditSummaryCard({
               
               {appliedCoupon && (
                 <div className="flex justify-between text-green-600">
-                  <span>Discount:</span>
+                  <span>Discount ({appliedCoupon.code}):</span>
                   <span>-${(subtotal - (total - taxAmount)).toFixed(2)}</span>
                 </div>
               )}
@@ -181,10 +217,18 @@ export function EditSummaryCard({
               <h3 className="text-sm font-medium text-gray-500">Phone</h3>
               <p className="font-medium">{customerData.phone}</p>
             </div>
-            {customerData.specialInstructions && (
-              <div className="col-span-2">
+            <div>
+              <h3 className="text-sm font-medium text-gray-500">Event Address</h3>
+              <p className="font-medium">
+                {customerData.eventAddress && customerData.eventCity && customerData.eventState && customerData.eventZipCode
+                  ? `${customerData.eventAddress}, ${customerData.eventCity}, ${customerData.eventState} ${customerData.eventZipCode}`
+                  : "No address provided"}
+              </p>
+            </div>
+            {(customerData.specialInstructions || bookingDetails.booking?.specialInstructions) && (
+              <div className="md:col-span-2">
                 <h3 className="text-sm font-medium text-gray-500">Special Instructions</h3>
-                <p>{customerData.specialInstructions}</p>
+                <p className="whitespace-pre-wrap">{customerData.specialInstructions || bookingDetails.booking?.specialInstructions}</p>
               </div>
             )}
           </div>
