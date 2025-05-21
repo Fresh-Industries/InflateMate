@@ -248,6 +248,7 @@ exports.Prisma.BookingScalarFieldEnum = {
   specialInstructions: 'specialInstructions',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  expiresAt: 'expiresAt',
   couponId: 'couponId',
   businessId: 'businessId',
   customerId: 'customerId'

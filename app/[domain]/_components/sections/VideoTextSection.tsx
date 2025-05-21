@@ -2,12 +2,13 @@
 
 import React from 'react';
 import { VideoTextSectionContent } from '@/lib/business/domain-utils';
-import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/types';
 import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { themeConfig } from '../../_themes/themeConfig';
 
 interface VideoTextSectionProps {
   content: VideoTextSectionContent;
-  theme: ThemeDefinition;
+  themeName: keyof typeof themeConfig;
   colors: ThemeColors;
 }
 
@@ -23,9 +24,10 @@ const getCardStyle = (theme: ThemeDefinition, colors: ThemeColors): React.CSSPro
   };
 };
 
-export default function VideoTextSection({ content, theme, colors }: VideoTextSectionProps) {
+export default function VideoTextSection({ content, themeName, colors }: VideoTextSectionProps) {
+  const theme = themeConfig[themeName];
   const { title, text, videoUrl, videoPosition = 'left', backgroundColor } = content || {};
-  const textColor = colors.text;
+  const textColor = colors.text[500];
   const cardStyles = getCardStyle(theme, colors);
 
 

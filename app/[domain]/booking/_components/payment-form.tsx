@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { ThemeColors, themeConfig } from "../../_themes/themeConfig";
+import { ThemeColors } from "../../_themes/types";
+import { themeConfig } from "@/app/[domain]/_themes/themeConfig";
 import { BookingMetadata } from "./customer-booking-form";
 
 interface PaymentFormProps {

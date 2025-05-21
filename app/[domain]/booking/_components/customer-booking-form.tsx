@@ -38,7 +38,9 @@ import { Separator } from "@/components/ui/separator";
 import React from "react";
 import { Checkbox } from "@/components/ui/checkbox";
 import Link from "next/link";
-import { ThemeColors, themeConfig, getContrastColor } from "../../_themes/themeConfig";
+import { ThemeColors } from "../../_themes/types";
+import { getContrastColor } from "@/app/[domain]/_themes/utils";
+import { themeConfig } from "@/app/[domain]/_themes/themeConfig";
 
 // Inventory item type
 type InventoryItem = {
@@ -930,7 +932,7 @@ export function NewBookingForm({ businessId, themeName, colors }: NewBookingForm
               className="border-gray-400 data-[state=checked]:bg-blue-500"
             />
             <Label htmlFor="terms" style={labelStyle} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-              I accept the <Link href="/terms" target="_blank" className="underline" style={{color: colors.primary}}>terms and conditions</Link>.
+              I accept the <Link href="/terms" target="_blank" className="underline" style={{color: colors.primary[500]}}>terms and conditions</Link>.
             </Label>
           </div>
           <div className="flex justify-between mt-6">

@@ -1,265 +1,103 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { EventDetailsStep } from '@/components/BookingForm/edit/EditProducts';
-import {
-  NewBookingState,
-  SelectedItem,
-  BookingMetadata,
-} from '@/types/booking'; // Import necessary types
-import {
-  fetchBookingDetails,
-} from '@/services/bookingService'; // Import service to fetch booking data
-import { useParams } from 'next/navigation'; // To get businessId and bookingId
-
-const TimerDisplay = ({ expirationTime }: { expirationTime: Date | null }) => {
-  const [timeLeft, setTimeLeft] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!expirationTime) {
-      setTimeLeft(null);
-      return;
-    }
-
-    const calculateTimeLeft = () => {
-      const now = new Date();
-      const difference = expirationTime.getTime() - now.getTime();
-
-      if (difference <= 0) {
-        setTimeLeft('Expired');
-      } else {
-        const totalSeconds = Math.floor(difference / 1000);
-        const days = Math.floor(totalSeconds / (60 * 60 * 24));
-        const hours = Math.floor((totalSeconds % (60 * 60 * 24)) / (60 * 60));
-        const minutes = Math.floor((totalSeconds % (60 * 60)) / 60);
-        const seconds = totalSeconds % 60;
-
-
-        let timeLeftString = '';
-        if (days > 0) timeLeftString += `${days}d `;
-        if (hours > 0 || days > 0) timeLeftString += `${hours}h `; // Show hours if days > 0 or hours > 0
-        if (minutes > 0 || hours > 0 || days > 0) timeLeftString += `${minutes}m `; // Show minutes if any larger unit > 0 or minutes > 0
-        timeLeftString += `${seconds}s`; // Always show seconds
-
-
-        setTimeLeft(timeLeftString.trim()); // Use trim to remove trailing space if no days/hours/minutes
-
-      }
-    };
-
-    // Calculate initial time left
-    calculateTimeLeft();
-
-    // Update every second for precise countdown visually
-    const timer = setInterval(calculateTimeLeft, 1000);
-
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(timer);
-
-  }, [expirationTime]);
-
-   if (!expirationTime || timeLeft === null || timeLeft === 'Expired') {
-        // Only return a message if it has expired, otherwise null
-       return timeLeft === 'Expired' ? (
-            <div className="p-2 text-center font-bold bg-red-200 text-red-800 rounded mb-4">
-                This booking has expired.
-            </div>
-        ) : null;
-   }
-
-
-  return (
-    <div className={`p-2 text-center font-bold bg-yellow-200 text-yellow-800 rounded mb-4`}>
-      Time Left to Edit: {timeLeft}
-    </div>
-  );
-};
-
+import { fetchBookingDetails } from '@/services/bookingService';
+import { useParams, useRouter } from 'next/navigation';
+import { Button } from '@/components/ui/button';
+import { BookingFullDetails } from '@/types/booking';
+import { EditBookingForm } from '@/components/BookingForm/edit/EditBookingForm';
 
 export default function EditBookingPage() {
   const params = useParams();
+  const router = useRouter();
   const businessId = params.businessId as string;
   const bookingId = params.bookingId as string;
-  console.log("EditBookingPage", businessId, bookingId);
 
-  // State for the booking data being edited
-  const [bookingDetails, setBookingDetails] = useState<BookingMetadata | null>(
-    null,
-  );
-  // State for the selected items (Map for easy lookup)
-  const [selectedItems, setSelectedItems] = useState<Map<string, SelectedItem>>(
-    new Map(),
-  );
+  const [bookingDetails, setBookingDetails] = useState<BookingFullDetails | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-
-  // Fetch booking data on page load
   useEffect(() => {
     const loadBooking = async () => {
       try {
         setLoading(true);
-        // TODO: Implement fetchBookingDetails service in bookingService.ts
-        // This service should fetch the existing booking data including selected items
-        // and the hold expiration time if applicable.
-        const data: BookingMetadata = await fetchBookingDetails(bookingId, businessId); // Assuming this service exists
+        const data = await fetchBookingDetails(bookingId, businessId);
         setBookingDetails(data);
-        console.log("bookingDetails", data);
-
-        // Initialize selectedItems state from fetched data
-        const initialSelectedItems = new Map<string, SelectedItem>();
-        if (data.selectedItems) {
-          data.selectedItems.forEach((itemDetail) => {
-            // Need to construct the full InventoryItem object.
-            // For now, using a partial object. You might need to fetch full details
-            // or ensure the booking data includes full item info.
-            initialSelectedItems.set(itemDetail.id, {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              item: itemDetail as any, // This cast might need refinement
-              quantity: itemDetail.quantity,
-            });
-          });
+      } catch (err: unknown) {
+        if (err instanceof Error) {
+          setError(err.message || 'Failed to load booking details.');
+        } else {
+          setError('An unknown error occurred while loading booking details.');
         }
-        setSelectedItems(initialSelectedItems);
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } catch (err: any) {
-        setError(err.message || 'Failed to load booking details.');
         console.error('Error loading booking details:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (bookingId) {
+    if (bookingId && businessId) {
       loadBooking();
     }
+    
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [bookingId]); // Rerun effect if bookingId changes
-
-
-  // Function to update selected items
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const selectInventoryItem = (item: any, quantity?: number) => {
-    setSelectedItems(prevSelectedItems => {
-      const newSelectedItems = new Map(prevSelectedItems);
-      const currentItem = newSelectedItems.get(item.id);
-
-      if (quantity === 0) {
-        // Remove item if quantity is 0
-        newSelectedItems.delete(item.id);
-      } else if (currentItem) {
-        // Update quantity if item exists
-        newSelectedItems.set(item.id, { ...currentItem, quantity: quantity ?? currentItem.quantity + 1 });
-      } else if (quantity && quantity > 0) {
-        // Add new item with specified quantity
-        newSelectedItems.set(item.id, { item, quantity });
-      } else {
-        // Add new item with quantity 1 if quantity not specified
-        newSelectedItems.set(item.id, { item, quantity: 1 });
-      }
-      return newSelectedItems;
-    });
-  };
-
-  // Function to update quantity of an existing selected item
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const updateQuantity = (item: any, delta: number) => {
-      setSelectedItems(prevSelectedItems => {
-          const newSelectedItems = new Map(prevSelectedItems);
-          const currentItem = newSelectedItems.get(item.id);
-
-          if (currentItem) {
-              const newQuantity = currentItem.quantity + delta;
-              if (newQuantity <= 0) {
-                  newSelectedItems.delete(item.id); // Remove if quantity is zero or less
-              } else {
-                  newSelectedItems.set(item.id, { ...currentItem, quantity: newQuantity });
-              }
-          }
-          return newSelectedItems;
-      });
-  };
-
-
-  // Dummy NewBookingState for EventDetailsStep. You'll likely need to map
-  // bookingDetails to this structure or adjust EventDetailsStep props.
-  const dummyNewBooking: NewBookingState = {
-      bounceHouseId: bookingDetails?.bounceHouseId || '', // Adjust if needed
-      customerName: bookingDetails?.customerName || '',
-      customerEmail: bookingDetails?.customerEmail || '',
-      customerPhone: bookingDetails?.customerPhone || '',
-      eventDate: bookingDetails?.eventDate || '',
-      startTime: bookingDetails?.startTime || '',
-      endTime: bookingDetails?.endTime || '',
-      eventType: bookingDetails?.eventType || '',
-      eventAddress: bookingDetails?.eventAddress || '',
-      eventCity: bookingDetails?.eventCity || '',
-      eventState: bookingDetails?.eventState || '',
-      eventZipCode: bookingDetails?.eventZipCode || '',
-      participantCount: bookingDetails?.participantCount || 0,
-      participantAge: bookingDetails?.participantAge || '',
-      specialInstructions: bookingDetails?.specialInstructions || '',
-  };
-
-  // Function to update the bookingDetails state from EventDetailsStep.
-  // This assumes EventDetailsStep provides the necessary setters or updates via a prop.
-  // We'll create a simple setter here that mirrors the required structure.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const setBookingDetailsField = (field: keyof NewBookingState, value: any) => {
-    setBookingDetails(prevDetails => {
-        if (!prevDetails) return null;
-        return {
-            ...prevDetails,
-            [field]: value
-        };
-    });
-  };
-
+  }, [bookingId, businessId]);
 
   if (loading) return <div className="container mx-auto p-4">Loading booking details...</div>;
   if (error) return <div className="container mx-auto p-4 text-red-600">Error: {error}</div>;
-  if (!bookingDetails) return <div className="container mx-auto p-4">No booking found.</div>;
+  if (!bookingDetails) return <div className="container mx-auto p-4">No booking found or data is not in the expected format.</div>;
 
+  const expirationTime = bookingDetails.booking?.expiresAt 
+    ? new Date(bookingDetails.booking.expiresAt)
+    : null;
 
-  // Determine expiration time based on bookingDetails
-  const expirationTime = bookingDetails?.expirationTime
-    ? new Date(bookingDetails.expirationTime)
-    : null; // Assuming bookingDetails includes an optional expirationTime field
+  // Check if booking has expired
+  const hasExpired = expirationTime 
+    ? new Date() > expirationTime 
+    : false;
 
-
-  return (
-    <div className="container mx-auto p-4">
-        <div className="flex flex-col gap-4">
-          <h1 className="text-2xl font-bold">Edit Booking</h1>
-          {/* Pass the actual expiration time to TimerDisplay */}
-          <TimerDisplay expirationTime={expirationTime} />
+  // If booking has expired, show message
+  if (hasExpired) {
+    return (
+      <div className="container mx-auto p-6 space-y-4">
+        <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+          <div className="flex">
+            <div className="flex-shrink-0">
+              <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+            </div>
+            <div className="ml-3">
+              <p className="text-sm text-yellow-700">
+                This booking has expired and can no longer be edited.
+              </p>
+              <div className="mt-4 flex">
+                <Button 
+                  variant="outline" 
+                  onClick={() => router.push(`/dashboard/${businessId}/bookings`)}
+                >
+                  Return to bookings
+                </Button>
+                <Button 
+                  className="ml-3" 
+                  onClick={() => router.push(`/dashboard/${businessId}/bookings/create`)}
+                >
+                  Create new booking
+                </Button>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex flex-col gap-4">
-          <h2 className="text-xl font-bold">Customer Information</h2>
-          {/* Pass necessary props to EventDetailsStep */}
-          <EventDetailsStep
-            businessId={businessId}
-            newBooking={dummyNewBooking} // Use mapped booking details or adjust component props
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            setNewBooking={setBookingDetailsField as any} // Use setter that updates bookingDetails state
-            selectedItems={selectedItems}
-            eventDate={bookingDetails.eventDate}
-            startTime={bookingDetails.startTime}
-            endTime={bookingDetails.endTime}
-            selectInventoryItem={selectInventoryItem}
-            updateQuantity={updateQuantity}
-            bookingId={bookingId} // Pass bookingId for availability check exclusion
-            onContinue={() => {
-              // TODO: Handle continue button action, e.g., save changes, go to next step
-              console.log("Continue button clicked. Selected items:", Array.from(selectedItems.values()));
-            }}
-          />
-        </div>
-         {/* TODO: Add other steps like Customer Info, Summary, Payment */}
       </div>
+    );
+  }
 
-  )
+  // Render just the EditBookingForm component without additional headers or timers
+  return (
+    <div className="container mx-auto p-6">
+      <EditBookingForm
+        businessId={businessId}
+        bookingDetails={bookingDetails}
+      />
+    </div>
+  );
 }
-
-// TODO: Add fetchBookingDetails function to services/bookingService.ts

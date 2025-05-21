@@ -6,6 +6,7 @@ import { CreditCard } from "lucide-react";
 
 interface HeaderProps {
   currentStep: number;
+  bookingId: string | null;
 }
 
   // Steps for progress indicator

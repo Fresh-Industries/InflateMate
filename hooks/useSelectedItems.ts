@@ -61,6 +61,26 @@ export function useSelectedItems() {
     setSelectedItems(new Map());
   }, []);
 
+  // New function to batch select multiple items
+  const batchSelectItems = useCallback((items: Array<{ item: InventoryItem; quantity: number }>) => {
+    setSelectedItems(prev => {
+      const newMap = new Map(prev);
+      items.forEach(({ item, quantity }) => {
+        if (quantity <= 0) {
+          newMap.delete(item.id);
+        } else {
+          const effectiveQuantity = Math.min(quantity, item.quantity);
+          if (effectiveQuantity > 0) {
+            newMap.set(item.id, { item, quantity: effectiveQuantity });
+          } else {
+            newMap.delete(item.id);
+          }
+        }
+      });
+      return newMap;
+    });
+  }, []);
+
   const getTotalQuantity = useCallback(() => {
     let total = 0;
     selectedItems.forEach(item => {
@@ -83,6 +103,7 @@ export function useSelectedItems() {
     updateQuantity,
     removeItem,
     clearSelection,
+    batchSelectItems,
     getTotalQuantity,
     getTotalPrice,
   };

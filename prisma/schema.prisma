@@ -201,6 +201,7 @@ model Booking {
   specialInstructions String?
   createdAt           DateTime      @default(now())
   updatedAt           DateTime      @default(now())
+  expiresAt           DateTime?
   couponId            String?
   coupon              Coupon?       @relation(fields: [couponId], references: [id])
   business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
@@ -219,6 +220,7 @@ model Booking {
   @@index([couponId])
   @@index([startTime, endTime])
   @@index([status, startTime])
+  @@index([status, expiresAt])
 }
 
 model BookingItem {

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* components/Navbar.tsx */
 'use client';
 
@@ -24,54 +25,54 @@ import { useAuth } from "@clerk/nextjs";
 import { AnimatePresence, motion } from 'framer-motion';
 
 
-const FEATURES = [
-  {
-    name: 'Smart Booking',
-    href: '/features/booking',
-    icon: <Rocket className="size-4" />,
-  },
-  {
-    name: 'Waivers & Receipts',
-    href: '/features/waivers',
-    icon: <LifeBuoy className="size-4" />,
-  },
-  { name: 'CRM', href: '/features/crm', icon: <Info className="size-4" /> },
-  {
-    name: 'Website Builder',
-    href: '/features/website-builder',
-    icon: <Zap className="size-4" />,
-  },
-  {
-    name: 'Invoicing',
-    href: '/features/invoicing',
-    icon: <Rocket className="size-4" />,
-  },
-  {
-    name: 'SMS Communication',
-    href: '/features/sms',
-    icon: <Mail className="size-4" />,
-  },
-];
+// const FEATURES = [
+//   {
+//     name: 'Smart Booking',
+//     href: '/features/booking',
+//     icon: <Rocket className="size-4" />,
+//   },
+//   {
+//     name: 'Waivers & Receipts',
+//     href: '/features/waivers',
+//     icon: <LifeBuoy className="size-4" />,
+//   },
+//   { name: 'CRM', href: '/features/crm', icon: <Info className="size-4" /> },
+//   {
+//     name: 'Website Builder',
+//     href: '/features/website-builder',
+//     icon: <Zap className="size-4" />,
+//   },
+//   {
+//     name: 'Invoicing',
+//     href: '/features/invoicing',
+//     icon: <Rocket className="size-4" />,
+//   },
+//   {
+//     name: 'SMS Communication',
+//     href: '/features/sms',
+//     icon: <Mail className="size-4" />,
+//   },
+// ];
 
 
 
-const RESOURCES = [
-  {
-    name: 'Blog',
-    href: '/resources/blog',
-    icon: <Book className="size-4" />,
-  },
-  {
-    name: 'Tutorials',
-    href: '/resources/tutorials',
-    icon: <Video className="size-4" />,
-  },
-  {
-    name: 'Feature Requests',
-    href: '/resources/feature-requests',
-    icon: <Lightbulb className="size-4" />,
-  }
-];
+// const RESOURCES = [
+//   {
+//     name: 'Blog',
+//     href: '/resources/blog',
+//     icon: <Book className="size-4" />,
+//   },
+//   {
+//     name: 'Tutorials',
+//     href: '/resources/tutorials',
+//     icon: <Video className="size-4" />,
+//   },
+//   {
+//     name: 'Feature Requests',
+//     href: '/resources/feature-requests',
+//     icon: <Lightbulb className="size-4" />,
+//   }
+// ];
 
 const MAIN_LINKS = [
   { label: 'Pricing', href: '/pricing' },
@@ -209,7 +210,7 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <nav className="hidden lg:flex items-center gap-6">
             {/* Features dropdown */}
-            <div
+            {/* <div
               className="relative"
               onMouseEnter={() => setDropdownOpen(true)}
               onMouseLeave={() => setDropdownOpen(false)}
@@ -228,9 +229,9 @@ export default function Navbar() {
                     dropdownOpen && "transform rotate-180"
                   )}
                 />
-              </button> 
+              </button>  */}
 
-              <AnimatePresence>
+              {/* <AnimatePresence>
                 {dropdownOpen && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
@@ -253,10 +254,10 @@ export default function Navbar() {
                     ))}
                   </motion.div>
                 )}
-              </AnimatePresence>
-            </div> 
+              </AnimatePresence> */}
+            {/* </div>  */}
 
-            <div
+            {/* <div
               className="relative"
               onMouseEnter={() => setResourcesDropdownOpen(true)}
               onMouseLeave={() => setResourcesDropdownOpen(false)}
@@ -275,9 +276,9 @@ export default function Navbar() {
                     resourcesDropdownOpen && "transform rotate-180"
                   )}
                 />
-              </button>
+              </button> */}
 
-              <AnimatePresence>
+              {/* <AnimatePresence>
                 {resourcesDropdownOpen && (
                   <motion.div
                     initial={{ opacity: 0, y: 8 }}
@@ -300,8 +301,8 @@ export default function Navbar() {
                     ))}
                   </motion.div>
                 )}
-              </AnimatePresence>
-            </div>
+              </AnimatePresence> */}
+            {/* </div> */}
 
             {/* Static links */}
             {MAIN_LINKS.map((link) => (
@@ -392,7 +393,7 @@ export default function Navbar() {
             {/* Content */}
             <div className="flex-1 overflow-y-auto overscroll-contain p-4">
               {/* Features group */}
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
                   Features
                 </h3>
@@ -408,10 +409,10 @@ export default function Navbar() {
                     </Link>
                   ))}
                 </nav>
-              </div>
+              </div> */}
 
               {/* Resources group */}
-              <div className="mb-6">
+              {/* <div className="mb-6">
                 <h3 className="mb-2 px-2 text-xs font-semibold uppercase text-gray-500 dark:text-gray-400">
                   Resources
                 </h3>
@@ -427,7 +428,7 @@ export default function Navbar() {
                     </Link>
                   ))}
                 </nav>
-              </div>
+              </div> */}
 
               {/* Pages group */}
               <div>

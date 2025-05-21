@@ -10,11 +10,22 @@ interface ThankYouMessageProps {
   message: string;
   couponCode: string | null;
   onClose: () => void;
-  primaryColor: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  primaryColor: any; // Allow both string and ColorScale
 }
 
 export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: ThankYouMessageProps) {
   const [copied, setCopied] = useState(false);
+  
+  // Handle both string and ColorScale objects
+  const getPrimaryColor = (): string => {
+    if (typeof primaryColor === 'object' && primaryColor !== null && '500' in primaryColor) {
+      return primaryColor[500];
+    }
+    return primaryColor as string;
+  };
+  
+  const primaryColorValue = getPrimaryColor();
   
   const handleCopyCode = () => {
     if (couponCode) {
@@ -30,7 +41,7 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
   // Create confetti animation elements
   const confettiElements = Array.from({ length: 20 }).map((_, i) => {
     const size = Math.random() * 8 + 4;
-    const color = i % 3 === 0 ? primaryColor : 
+    const color = i % 3 === 0 ? primaryColorValue : 
                  i % 3 === 1 ? '#FFD700' : '#FF6B6B';
     
     return (
@@ -92,8 +103,8 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
         <div 
           className="w-20 h-20 rounded-full flex items-center justify-center"
           style={{ 
-            background: `linear-gradient(135deg, ${primaryColor}30, ${primaryColor}60)`,
-            boxShadow: `0 10px 25px -5px ${primaryColor}40`
+            background: `linear-gradient(135deg, ${primaryColorValue}30, ${primaryColorValue}60)`,
+            boxShadow: `0 10px 25px -5px ${primaryColorValue}40`
           }}
         >
           <PartyPopper 
@@ -107,7 +118,7 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, delay: 0.2 }}
         className="text-2xl font-bold mb-4"
-        style={{ color: primaryColor }}
+        style={{ color: primaryColorValue }}
       >
         Woohoo! Thank You!
       </motion.h3>
@@ -133,9 +144,9 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
             <motion.div 
               className="bg-gray-50 px-6 py-3 rounded-xl font-mono text-xl relative overflow-hidden"
               style={{ 
-                borderColor: primaryColor, 
+                borderColor: primaryColorValue, 
                 borderWidth: "2px",
-                boxShadow: `0 4px 12px ${primaryColor}30`
+                boxShadow: `0 4px 12px ${primaryColorValue}30`
               }}
               whileHover={{ scale: 1.05 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
@@ -143,7 +154,7 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
               <div className="relative z-10 font-bold tracking-wider">{couponCode}</div>
               <div 
                 className="absolute inset-0 opacity-10" 
-                style={{ backgroundColor: primaryColor }}
+                style={{ backgroundColor: primaryColorValue }}
               ></div>
             </motion.div>
             <motion.div
@@ -156,11 +167,11 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
                 onClick={handleCopyCode}
                 className={cn(
                   "h-12 w-12 transition-all duration-200 rounded-xl",
-                  copied ? "border-green-500 text-green-500" : `border-2 border-${primaryColor}`
+                  copied ? "border-green-500 text-green-500" : `border-2 border-${primaryColorValue}`
                 )}
                 style={{ 
-                  borderColor: copied ? "rgb(34, 197, 94)" : primaryColor,
-                  color: copied ? "rgb(34, 197, 94)" : primaryColor
+                  borderColor: copied ? "rgb(34, 197, 94)" : primaryColorValue,
+                  color: copied ? "rgb(34, 197, 94)" : primaryColorValue
                 }}
               >
                 {copied ? (
@@ -188,8 +199,8 @@ export function ThankYouMessage({ message, couponCode, onClose, primaryColor }: 
           onClick={onClose}
           className="w-full py-6 text-lg font-bold rounded-xl text-white shadow-lg"
           style={{ 
-            background: `linear-gradient(135deg, ${primaryColor}dd, ${primaryColor}aa)`,
-            boxShadow: `0 10px 15px -3px ${primaryColor}40`
+            background: `linear-gradient(135deg, ${primaryColorValue}dd, ${primaryColorValue}aa)`,
+            boxShadow: `0 10px 15px -3px ${primaryColorValue}40`
           }}
         >
           Awesome, Got It!

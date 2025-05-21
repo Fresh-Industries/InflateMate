@@ -379,6 +379,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           data: {
             status: 'CONFIRMED',
             depositPaid: true,
+            expiresAt: null, // Clear expiresAt for confirmed bookings
           },
         });
         console.log("Booking updated successfully:", booking.id);
@@ -569,6 +570,7 @@ async function handleQuoteAccepted(stripeQuote: Stripe.Quote) {
         where: { id: bookingId },
         data: {
           status: 'PENDING' as BookingStatus,
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set 24-hour expiration for PENDING
           updatedAt: new Date(),
         },
       });
@@ -631,7 +633,10 @@ async function handleQuoteCanceled(stripeQuote: Stripe.Quote) {
                 await tx.booking.update({
                     where: { id: internalQuote.bookingId },
                      // Ensure you have a 'CANCELLED' status in your BookingStatus enum
-                    data: { status: 'CANCELLED' as BookingStatus },
+                    data: { 
+                      status: 'CANCELLED' as BookingStatus,
+                      expiresAt: null, // Clear expiresAt for cancelled bookings
+                    },
                 });
                console.log(` - Booking ${internalQuote.bookingId} status updated to CANCELLED.`);
            } else {
@@ -666,7 +671,10 @@ async function handlePaymentIntentFailed(paymentIntent: Stripe.PaymentIntent) {
     // Update booking status if it exists
     await prisma.booking.updateMany({
       where: { id: metadata.prismaBookingId },
-      data: { status: 'PENDING' },
+      data: { 
+        status: 'PENDING',
+        expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set 24-hour expiration for PENDING
+      },
     });
 
     // Record the failed payment
@@ -898,6 +906,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
         where: { id: internalInvoice.bookingId },
         data: {
           status: 'CONFIRMED',
+          expiresAt: null, // Clear expiresAt for confirmed bookings
         },
       });
        console.log(` - Booking ${internalInvoice.bookingId} status updated to CONFIRMED/COMPLETED.`);
@@ -977,18 +986,20 @@ async function handleInvoicePaymentFailed(invoice: Stripe.Invoice) {
       // Update Invoice status
       await tx.invoice.update({
         where: { id: internalInvoice.id },
-        data: { status: 'FAILED' as InvoiceStatus }, // Assumes FAILED enum value exists
+        data: { status: 'FAILED' as InvoiceStatus },
       });
 
-      // Update Booking status (e.g., back to PENDING or a specific FAILED status)
+      // Update Booking status
       if (internalInvoice.booking) {
         await tx.booking.update({
           where: { id: internalInvoice.bookingId },
-          // Decide appropriate booking status: PENDING allows retry/manual intervention
-          data: { status: 'PENDING' }, 
+          data: { 
+            status: 'PENDING',
+            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // Set 24-hour expiration for PENDING
+          },
         });
       } else {
-        console.warn(`[HANDLER] Failed Payment: Booking ${internalInvoice.bookingId} linked to Invoice ${internalInvoice.id} not found.`);
+         console.warn(`[HANDLER] Failed Payment: Booking ${internalInvoice.bookingId} linked to Invoice ${internalInvoice.id} not found.`);
       }
     });
     console.log(`[HANDLER] Failed Payment: Updated records for Invoice ${internalInvoice.id}`);
@@ -1035,7 +1046,7 @@ async function handleInvoiceVoided(invoice: Stripe.Invoice) {
         where: { id: internalInvoice.id },
         data: {
           status: 'VOID',
-          voidedAt: new Date(), // Record void time
+          voidedAt: new Date(),
         },
       });
 
@@ -1049,14 +1060,15 @@ async function handleInvoiceVoided(invoice: Stripe.Invoice) {
           status: 'EXPIRED',
         },
       });
-      console.log(` - Payment status updated to EXPIRED for booking ${internalInvoice.bookingId}`);
 
       if (internalInvoice.booking) {
         await tx.booking.update({
           where: { id: internalInvoice.bookingId },
-          data: { status: 'EXPIRED' }, // Voiding cancels the booking
+          data: { 
+            status: 'EXPIRED',
+            expiresAt: null, // Clear expiresAt for expired bookings
+          },
         });
-
       } else {
          console.warn(`[HANDLER] Voided: Booking ${internalInvoice.bookingId} linked to Invoice ${internalInvoice.id} not found.`);
       }
@@ -1114,7 +1126,10 @@ async function handleInvoiceDeleted(invoice: Stripe.Invoice) {
       if (internalInvoice.booking) {
         await tx.booking.update({
           where: { id: internalInvoice.bookingId },
-          data: { status: 'CANCELLED' }, // Deleting usually implies cancellation
+          data: { 
+            status: 'CANCELLED',
+            expiresAt: null, // Clear expiresAt for cancelled bookings
+          },
         });
       } else {
          console.warn(`[HANDLER] Deleted: Booking ${internalInvoice.bookingId} linked to Invoice ${internalInvoice.id} not found.`);

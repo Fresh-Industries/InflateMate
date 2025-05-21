@@ -36,11 +36,25 @@ export function formatDateToYYYYMMDD(dateValue: string): string {
     if (/^\d{4}-\d{2}-\d{2}$/.test(dateValue)) {
       return dateValue;
     }
+    
+    // If dateValue is empty or invalid, return today's date
+    if (!dateValue || dateValue === 'Invalid Date') {
+      return format(new Date(), "yyyy-MM-dd");
+    }
+
+    // Try to parse the date
     const dateObj = parseISO(dateValue);
+    
+    // Check if the parsed date is valid
+    if (isNaN(dateObj.getTime())) {
+      return format(new Date(), "yyyy-MM-dd");
+    }
+
     return format(dateObj, "yyyy-MM-dd");
   } catch (error) {
     console.error("Error formatting date:", error);
-    return "";
+    // Return today's date as fallback
+    return format(new Date(), "yyyy-MM-dd");
   }
 }
 

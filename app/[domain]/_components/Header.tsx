@@ -1,14 +1,13 @@
-// Header.tsx
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { Menu, X, ChevronRight } from 'lucide-react';
 import { BusinessWithSiteConfig } from '@/lib/business/domain-utils';
-import { Menu, X, Home, Package, Info, Phone, ChevronRight } from 'lucide-react';
-import { ThemeColors, ThemeDefinition } from '@/app/[domain]/_themes/themeConfig';
-import { getContrastColor } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeColors, ThemeDefinition } from '@/app/[domain]/_themes/types';
+import { getContrastColor } from '@/app/[domain]/_themes/utils';
+import { layoutTokens } from '@/app/[domain]/_themes/layoutTokens';
 
 interface HeaderProps {
   business: BusinessWithSiteConfig;
@@ -17,208 +16,213 @@ interface HeaderProps {
 }
 
 export default function Header({ business, colors, theme }: HeaderProps) {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const [scrolled, setScrolled] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [hovered, setHovered] = useState<string | null>(null);   // track hovered path
 
+  /* scroll shadow */
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 10);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    const onScroll = () => setScrolled(window.scrollY > 10);
+    onScroll(); // Check initial scroll position
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
-  const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
+  const nav: { path: string; label: string }[] = [
+    { path: '/',          label: 'Home'      },
+    { path: '/inventory', label: 'Inventory' },
+    { path: '/about',     label: 'About'     },
+    { path: '/contact',   label: 'Contact'   },
+  ];
 
-  const isActive = (path: string): boolean => {
-    if (path === '/' && pathname === '/') return true;
-    if (path !== '/' && pathname.startsWith(path)) return true;
-    return false;
+  const isActive = (p: string) =>
+    (p === '/' ? pathname === '/' : pathname.startsWith(p));
+
+  /* ---- Helper: styles for normal links ---- */
+  const linkBase = (active: boolean): React.CSSProperties => ({
+    background: active
+      ? theme.linkStyles?.active(colors)
+      : theme.linkStyles?.background(colors),
+    color: active
+      ? theme.linkStyles?.hoverTextColor(colors) ?? getContrastColor(theme.linkStyles?.hoverBackground(colors) ?? colors.primary[500])
+      : theme.linkStyles?.textColor(colors),
+    border: theme.linkStyles?.border(colors),
+    boxShadow: active 
+      ? theme.linkStyles?.activeBoxShadow?.(colors) ?? theme.linkStyles?.boxShadow(colors)
+      : theme.linkStyles?.boxShadow(colors),
+    borderRadius: theme.linkStyles?.borderRadius ?? '9999px',
+    padding: '0.65rem 1rem',
+    fontWeight: 600,
+    transition: theme.linkStyles?.transition ?? 'all .25s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '0.35rem',
+  });
+
+  /* hover style from theme */
+  const linkHover = (): React.CSSProperties => ({
+    background: theme.linkStyles?.hoverBackground(colors),
+    color: theme.linkStyles?.hoverTextColor(colors),
+    border: theme.linkStyles?.hoverBorder(colors) ?? theme.linkStyles?.border(colors),
+    boxShadow: theme.linkStyles?.hoverBoxShadow(colors) ?? theme.linkStyles?.boxShadow(colors),
+    transform: 'scale(1.05)',
+  });
+
+  /* ---- CTA button ---- */
+  const ctaBase: React.CSSProperties = {
+    background: theme.buttonStyles.background(colors),
+    color: theme.buttonStyles.textColor(colors),
+    border: theme.buttonStyles.border?.(colors) ?? 'none',
+    boxShadow: theme.buttonStyles.boxShadow?.(colors),
+    padding: '0.7rem 1.4rem',
+    fontWeight: 800,
+    textTransform: 'uppercase',
+    fontSize: '.9rem',
+    borderRadius: theme.buttonStyles.borderRadius ?? '9999px',
+    transition: theme.buttonStyles.transition ?? 'all .25s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '.25rem',
   };
 
-  // Compute link style based on active state and theme.
-  const computeLinkStyle = (active: boolean): React.CSSProperties => {
-    const linkStyles = theme.linkStyles;
-    if (!linkStyles) return {}; // Return empty if linkStyles are not defined
-
-    const activeBg = linkStyles.active(colors);
-    const activeTextColor = getContrastColor(activeBg);
-    const defaultBg = linkStyles.background(colors);
-    const defaultTextColor = linkStyles.textColor(colors);
-    const defaultBorder = linkStyles.border(colors);
-    const defaultShadow = linkStyles.boxShadow(colors);
-    const hoverBorder = linkStyles.hoverBorder(colors);
-    const hoverBoxShadowValue = linkStyles.hoverBoxShadow(colors);
-
-    if (active) {
-      return {
-        background: activeBg,
-        color: activeTextColor,
-        border: hoverBorder, // Use hover state for border/shadow when active for consistency?
-        boxShadow: hoverBoxShadowValue,
-        transition: linkStyles.transition,
-        borderRadius: linkStyles.borderRadius
-      };
-    } else {
-      return {
-        background: defaultBg,
-        color: defaultTextColor,
-        border: defaultBorder,
-        boxShadow: defaultShadow,
-        transition: linkStyles.transition,
-        borderRadius: linkStyles.borderRadius
-      };
-    }
+  const ctaHover: React.CSSProperties = {
+    background: theme.buttonStyles.hoverBackground(colors),
+    color: theme.buttonStyles.hoverTextColor?.(colors) ?? getContrastColor(theme.buttonStyles.hoverBackground(colors)),
+    border: theme.buttonStyles.hoverBorder?.(colors) ?? ctaBase.border,
+    boxShadow: theme.buttonStyles.hoverBoxShadow?.(colors) ?? ctaBase.boxShadow,
+    transform: 'scale(1.08)',
   };
 
-  // Styles for the primary action button (Book Now)
-  const secondaryButtonStyle: React.CSSProperties = {
-    background: theme.secondaryButtonStyles?.background(colors) || theme.buttonStyles.background(colors),
-    color: theme.secondaryButtonStyles?.textColor(colors) || theme.buttonStyles.textColor(colors),
-    border: theme.secondaryButtonStyles?.border?.(colors) || theme.buttonStyles.border?.(colors) || 'none',
-    boxShadow: theme.secondaryButtonStyles?.boxShadow?.(colors) || theme.buttonStyles.boxShadow?.(colors) || 'none',
-    transition: theme.secondaryButtonStyles?.transition || theme.buttonStyles.transition || 'transform 0.3s ease',
-    borderRadius: theme.secondaryButtonStyles?.borderRadius || theme.buttonStyles.borderRadius || '12px'
-  };
+  /* logo sizing */
+  const logoSize = scrolled ? layoutTokens.logoSizeScrolled : layoutTokens.logoSize;
 
-  const headerStyle: React.CSSProperties = {
-    background: theme.headerBg(colors, scrolled),
-    boxShadow: theme.boxShadow(colors, scrolled),
-    paddingTop: scrolled ? '0.5rem' : '0.75rem',
-    paddingBottom: scrolled ? '0.5rem' : '0.75rem',
-    ...theme.extraBorderStyle(colors) // Includes borderBottom, etc.
-  };
+  /* ---- Helper: styles for nav links (retro or default) ---- */
+  const useRetroNav = !!theme.navItemStyles;
+  const navLinkBase = (active: boolean): React.CSSProperties =>
+    useRetroNav
+      ? theme.navItemStyles![active ? 'active' : 'normal'](colors)
+      : linkBase(active);
+  const navLinkHover = (): React.CSSProperties =>
+    useRetroNav
+      ? theme.navItemStyles!.hover(colors)
+      : linkHover();
 
-  const logoInitialStyle: React.CSSProperties = {
-     background: `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-     borderRadius: theme.imageStyles ? theme.imageStyles(colors).borderRadius : '9999px', // Match image style rounding
-     color: getContrastColor(colors.primary) // Ensure text contrast
-  }
+  
+
+  /* responsive container */
   return (
     <header
-      className="sticky top-0 z-[100] shadow-md"
-      style={headerStyle}
+      className={`w-full ${scrolled ? 'scrolled' : ''} sticky top-0 z-50`}
+      style={{
+        background: theme.headerBg(colors, scrolled),
+        boxShadow : theme.boxShadow(colors, scrolled),
+        padding   : '0.65rem 0',
+        ...(theme.extraBorderStyle ? theme.extraBorderStyle(colors) : {}),
+      }}
     >
-      <div className="container mx-auto px-4 relative">
-        <div className="flex items-center justify-between h-14">
-          <Link href="/" className="flex items-center group">
-            {business.logo ? (
-              <div
-                className="relative overflow-hidden mr-2 transition-transform duration-300 group-hover:scale-105"
-              >
-                <img
-                  src={business.logo}
-                  alt={`${business.name} Logo`}
-                  className="h-20 w-auto object-contain" // Ensure img is block for proper styling application
-                  
-                />
-              </div>
-            ) : (
-              <div
-                className="h-12 w-12 flex items-center justify-center font-bold shadow-sm transition-transform duration-300 group-hover:scale-105 mr-2"
-                style={logoInitialStyle} // Use computed style for initial
-              >
-                {business.name.charAt(0)}
-              </div>
-            )}
-            <span className="font-semibold text-xl hidden sm:inline" style={{ color: theme.headerTextColor(colors) }}>
-              {business.name}
-            </span>
-          </Link>
-
-          <nav className="hidden md:flex items-center space-x-3">
-            {[ // Always show these links
-              { path: '/', label: 'Home', icon: <Home /> },
-              { path: '/inventory', label: 'Inventory', icon: <Package /> },
-              { path: '/about', label: 'About', icon: <Info /> }, 
-              { path: '/contact', label: 'Contact', icon: <Phone /> }
-            ].map((item) => {
-              const active = isActive(item.path);
-              const style = computeLinkStyle(active);
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className="nav-link flex items-center px-3 py-1.5 text-sm font-medium transition-all duration-300 hover:scale-105"
-                  style={style}
-                  
-                
-                >
-                  {React.cloneElement(item.icon, { className: "h-4 w-4 mr-1.5" })}
-                  {item.label}
-                </Link>
-              );
-            })}
-            {/* Book Now button using secondary styles */}
-            <Link
-              href="/booking"
-              className="nav-link flex items-center px-5 py-2.5 text-sm font-bold uppercase transition-transform duration-300 hover:scale-105"
-              style={secondaryButtonStyle}
-            >
-              Book Now
-              <ChevronRight className="h-4 w-4 ml-1 -mr-1" />
-            </Link>
-          </nav>
-
-          {/* Mobile Menu Toggle - Styling should adapt to theme */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={toggleMobileMenu}
-              className="p-2 rounded-full transition-colors"
-              style={{ 
-                color: theme.headerTextColor(colors),
-                background: 'transparent', // Ensure button itself is transparent
+      <div className="container mx-auto px-4 flex items-center justify-between">
+        {/* ---- Logo ---- */}
+        <Link href="/" className="flex items-center gap-3 group">
+          {business.logo ? (
+            <img
+              src={business.logo}
+              alt={`${business.name} logo`}
+              style={{ height: logoSize, objectFit: 'contain' }}
+              className="transition-transform duration-300 group-hover:scale-105"
+            />
+          ) : (
+            <div
+              style={{
+                height: logoSize,
+                width : logoSize,
+                borderRadius: '9999px',
+                background: `linear-gradient(135deg, ${colors.primary[500]}, ${colors.secondary[500]})`,
+                color: getContrastColor(colors.primary[500]),
               }}
-              // Add hover effect based on theme?
-              onMouseEnter={(e) => e.currentTarget.style.background = `${colors.primary}15`}
-              onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
-              aria-label="Toggle mobile menu"
+              className="flex items-center justify-center font-extrabold text-xl shadow-md transition-transform group-hover:scale-105"
             >
-              {mobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />} 
-            </button>
-          </div>
-        </div>
-
-        {/* Mobile Menu Panel - Styling should adapt to theme */}
-        {mobileMenuOpen && (
-          <div 
-            className="md:hidden pb-4 pt-2 animate-in slide-in-from-top-5 duration-300"
-            style={{ backgroundColor: theme.headerBg(colors, true) }} // Use scrolled bg for contrast
+              {business.name[0]}
+            </div>
+          )}
+          <span
+            className="hidden sm:block font-bold text-lg"
+            style={{ color: theme.headerTextColor(colors) }}
           >
-            {[ // Always show these links in mobile too
-              { path: '/', label: 'Home', icon: <Home /> },
-              { path: '/inventory', label: 'Inventory', icon: <Package /> },
-              { path: '/about', label: 'About', icon: <Info /> }, 
-              { path: '/contact', label: 'Contact', icon: <Phone /> }
-            ].map((item) => {
-              const active = isActive(item.path);
-              const style = computeLinkStyle(active);
-              return (
-                <Link
-                  key={item.path}
-                  href={item.path}
-                  className="nav-link flex items-center w-full px-4 py-3 mt-1 text-base font-medium transition-all duration-300"
-                  style={style}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {React.cloneElement(item.icon, { className: "h-5 w-5 mr-3" })}
-                  {item.label}
-                </Link>
-              );
-            })}
-            {/* Mobile Book Now button */}
-            <Link
-              href="/booking"
-              className="nav-link block w-full mt-4 text-center text-sm font-bold uppercase px-4 py-3 transition-transform hover:scale-105"
-              style={secondaryButtonStyle}
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Book Now
-              <ChevronRight className="h-4 w-4 inline ml-1" />
-            </Link>
-          </div>
-        )}
+            {business.name}
+          </span>
+        </Link>
+
+        {/* ---- Desktop Nav ---- */}
+        <nav className="hidden md:flex items-center gap-4">
+          {nav.map(({ path, label }) => {
+            const active = isActive(path);
+            const hover = hovered === path;
+            return (
+              <Link
+                key={path}
+                href={path}
+                style={{ ...(navLinkBase(active)), ...(hover ? navLinkHover() : {}) }}
+                onMouseEnter={() => setHovered(path)}
+                onMouseLeave={() => setHovered(null)}
+              >
+                {label}
+              </Link>
+            );
+          })}
+
+          <Link
+            href="/booking"
+            style={{ ...ctaBase, ...(hovered === 'cta' ? ctaHover : {}) }}
+            onMouseEnter={() => setHovered('cta')}
+            onMouseLeave={() => setHovered(null)}
+          >
+            Book Now <ChevronRight className="h-4 w-4" />
+          </Link>
+        </nav>
+
+        {/* ---- Mobile burger ---- */}
+        <button
+          onClick={() => setMobileOpen((o) => !o)}
+          className="md:hidden p-2 rounded-full transition-transform hover:scale-110"
+          style={{ color: theme.headerTextColor(colors) }}
+          aria-label="Toggle menu"
+        >
+          {mobileOpen ? <X /> : <Menu />}
+        </button>
       </div>
+
+      {/* ---- Mobile panel ---- */}
+      {mobileOpen && (
+        <div
+          className="md:hidden fixed inset-0 z-50 flex flex-col bg-white/90 backdrop-blur pt-24 px-8 space-y-6 animate-in fade-in slide-in-from-top-10"
+          style={{ background: theme.headerBg(colors, true) }}
+        >
+          {nav.map(({ path, label }) => {
+            const active = isActive(path);
+            return (
+              <Link
+                key={path}
+                href={path}
+                onClick={() => setMobileOpen(false)}
+                style={navLinkBase(active)}
+                className="text-lg hover:scale-105 transition-transform"
+              >
+                {label}
+              </Link>
+            );
+          })}
+
+          <Link
+            href="/booking"
+            onClick={() => setMobileOpen(false)}
+            style={ctaBase}
+            className="text-lg hover:scale-105 transition-transform"
+          >
+            Book Now <ChevronRight className="h-4 w-4" />
+          </Link>
+        </div>
+      )}
     </header>
   );
 }
-

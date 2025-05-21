@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { EventDetailsStep } from "./Availbility";
 import { CustomerDetailsStep } from "./CustomerInfo";
 import { ReviewPayStep } from "./Summary";
@@ -8,7 +9,7 @@ import { useSelectedItems } from '@/hooks/useSelectedItems';
 import { useCoupon } from '@/hooks/useCoupon';
 import { useBusinessDetails } from '@/hooks/useBusinessDetails';
 import { useBookingCalculations } from '@/hooks/useBookingCalculations';
-import { NewBookingState } from '@/types/booking';
+import { NewBookingState, InventoryItem } from '@/types/booking';
 import Header from "./Header";
 import { Elements } from "@stripe/react-stripe-js";
 import { getStripeInstance } from "@/lib/stripe-client";
@@ -16,6 +17,9 @@ import { PaymentForm } from "./PaymentForm";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "../ui/button";
 import { useRouter } from "next/navigation";
+import { type Booking as PrismaBooking, type Customer as PrismaCustomer, type BookingItem as PrismaBookingItem, type Inventory as PrismaInventory, BookingStatus } from '@/prisma/generated/prisma';
+import { formatDateToYYYYMMDD, formatTimeToHHMM, localToUTC } from '@/lib/utils';
+import { addDays } from "date-fns";
 
 const initialBooking: NewBookingState = {
   bounceHouseId: "",
@@ -33,22 +37,46 @@ const initialBooking: NewBookingState = {
   participantCount: 1,
   participantAge: "",
   specialInstructions: "",
+  eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Chicago",
 };
 
-export function NewBookingForm({ businessId }: { businessId: string }) {
+interface NewBookingFormProps {
+  businessId: string;
+}
+
+export function NewBookingForm({ businessId }: NewBookingFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
-  const [newBooking, setNewBooking] = useState<NewBookingState>(initialBooking);
+  const [newBooking, setNewBooking] = useState<NewBookingState>(() => ({
+    eventDate: formatDateToYYYYMMDD(addDays(new Date(), 2).toString()),
+    startTime: "09:00",
+    endTime: "17:00",
+    eventType: "",
+    eventAddress: "",
+    eventCity: "",
+    eventState: "",
+    eventZipCode: "",
+    eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Chicago",
+    customerName: "",
+    customerEmail: "",
+    customerPhone: "",
+    specialInstructions: "",
+    bounceHouseId: "",
+    participantCount: 1,
+    participantAge: "",
+  }));
+
   const [holdId, setHoldId] = useState<string | null>(null);
   const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
-  const [timer, setTimer] = useState<number>(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isProcessingQuote, setIsProcessingQuote] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
+  const [timer, setTimer] = useState<number>(0);
 
-  // Move useSelectedItems to the parent
-  const { selectedItems, selectInventoryItem, updateQuantity } = useSelectedItems();
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { selectedItems, selectInventoryItem, updateQuantity, clearSelection } = useSelectedItems();
+
+  const itemsForCalculation = React.useMemo(() => Array.from(selectedItems.values()), [selectedItems]);
+
   const { businessData, taxRate, applyTax } = useBusinessDetails(businessId);
   const [couponCode, setCouponCode] = useState("");
   const {
@@ -57,30 +85,22 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     isApplyingCoupon,
     handleApplyCoupon,
     handleRemoveCoupon,
-  } = useCoupon({ businessId, amountBeforeTax: 0 }); // amountBeforeTax will be set below
+  } = useCoupon({ 
+    businessId, 
+    amountBeforeTax: itemsForCalculation.reduce((sum, { item, quantity }) => sum + (item.price * quantity), 0)
+  });
 
-  // Calculations
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { rawSubtotal, discountedSubtotal, taxAmount, total } = useBookingCalculations({
-    selectedItems,
+    selectedItems: new Map(itemsForCalculation.map(({ item, quantity }) => [item.id, { item, quantity }])),
     taxRate: taxRate || 0,
     applyTax: !!applyTax,
     appliedCoupon,
   });
 
   const router = useRouter();
-
-  const handleBack = () => setCurrentStep((s) => Math.max(s - 1, 1));
-
-  // Remove item handler for summary
-  const handleRemoveItem = (itemId: string) => {
-    selectInventoryItem({ ...selectedItems.get(itemId)!.item, quantity: 0 }, 0);
-  };
-
   const { toast } = useToast();
 
-  // Timer countdown effect for hold
-  React.useEffect(() => {
+  useEffect(() => {
     if (!holdExpiresAt) return;
     const interval = setInterval(() => {
       const end = new Date(holdExpiresAt).getTime();
@@ -100,7 +120,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     return () => clearInterval(interval);
   }, [holdExpiresAt, toast]);
 
-  // Function to handle hold updates
   const handleSetHold = (id: string | null, expiresAt: string | null) => {
     setHoldId(id);
     setHoldExpiresAt(expiresAt);
@@ -110,7 +129,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     }
   };
 
-  // Validation helpers
   const validateEventDetails = () => {
     if (!newBooking.eventDate || !newBooking.startTime || !newBooking.endTime || selectedItems.size === 0) {
       toast({
@@ -131,7 +149,30 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     return true;
   };
 
-  // Payment handler: always send holdId, do not send bookingId
+  const prepareItemsPayload = () => {
+    const tz = newBooking.eventTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
+    return Array.from(selectedItems.values()).map(({ item, quantity }) => {
+      const startUTC = localToUTC(
+        newBooking.eventDate,
+        newBooking.startTime,
+        tz
+      );
+      const endUTC = localToUTC(
+        newBooking.eventDate,
+        newBooking.endTime,
+        tz
+      );
+      return {
+        inventoryId: item.id,
+        quantity,
+        price: item.price,
+        startUTC: startUTC.toISOString(),
+        endUTC: endUTC.toISOString(),
+        status: BookingStatus.HOLD
+      };
+    });
+  };
+
   const handleProceedToPayment = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -142,7 +183,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
       const amountCents = Math.round(total * 100);
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const payload = {
-        holdId, // required for payment
+        holdId,
         customerName: newBooking.customerName,
         customerEmail: newBooking.customerEmail,
         customerPhone: newBooking.customerPhone,
@@ -191,47 +232,20 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
     }
   };
 
-  // Quote handler: always generate a new bookingId, do not use holdId
   const handleSendAsQuote = async () => {
     if (isProcessingQuote) return;
     if (!validateEventDetails() || !validateCustomerInfo()) return;
-    if (!holdId) {
-      toast({
-        title: "Error",
-        description: "No hold in place. Please start your booking again.",
-        variant: "destructive",
-      });
-      return;
-    }
     setIsProcessingQuote(true);
     try {
-      const selectedItemsArray = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
-        id: item.id,
-        name: item.name,
-        price: item.price,
-        quantity: quantity,
-        stripeProductId: item.stripeProductId,
-      }));
-      if (selectedItemsArray.length === 0) {
-        toast({
-          title: "Selection Needed",
-          description: "Please select at least one item for the quote.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Create quote data with all necessary info
       const quoteDetails = {
-        holdId, // Send the holdId instead of creating new booking
         customerName: newBooking.customerName,
         customerEmail: newBooking.customerEmail,
         customerPhone: newBooking.customerPhone,
-        selectedItems: selectedItemsArray,
+        selectedItems: prepareItemsPayload(),
         eventDate: newBooking.eventDate,
         startTime: newBooking.startTime,
         endTime: newBooking.endTime,
-        eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone,
+        eventTimeZone: newBooking.eventTimeZone,
         eventType: newBooking.eventType || 'OTHER',
         eventAddress: newBooking.eventAddress,
         eventCity: newBooking.eventCity,
@@ -246,23 +260,15 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
         totalAmount: total,
         businessId: businessId,
       };
-
       const response = await fetch(`/api/businesses/${businessId}/quotes`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(quoteDetails),
       });
-
       const data = await response.json();
       if (!response.ok) {
-        toast({
-          title: "Error Sending Quote",
-          description: data.error || "Failed to create and send quote.",
-          variant: "destructive",
-        });
-        throw new Error(data.error || "Failed to create quote");
+        throw new Error(data.error || "Failed to create and send quote.");
       }
-
       toast({
         title: "Quote Sent",
         description: `A quote has been sent to ${newBooking.customerEmail}.`,
@@ -282,8 +288,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
   // Step rendering
   return (
     <div className="space-y-8">
-      <Header currentStep={currentStep} />
-      
+      <Header currentStep={currentStep} bookingId={null} />
       {/* Global Reservation Timer */}
       {holdId && holdExpiresAt && (
         <div className="flex justify-center mb-4">
@@ -294,12 +299,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
           </div>
         </div>
       )}
-
       {/* Back Button */}
       {currentStep > 1 && (
         <div className="flex justify-start mb-4">
           <Button 
-            onClick={handleBack} 
+            onClick={() => setCurrentStep((s) => Math.max(s - 1, 1))}
             variant="ghost" 
             className="text-gray-600 hover:text-gray-900 hover:bg-gray-100"
           >
@@ -310,7 +314,6 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
           </Button>
         </div>
       )}
-      
       {showPaymentForm && clientSecret ? (
         <Elements
           stripe={getStripeInstance(businessData?.stripeAccountId || businessData?.stripeConnectedAccountId)}
@@ -370,7 +373,7 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
           {currentStep === 3 && (
             <ReviewPayStep
               newBooking={newBooking}
-              selectedItems={selectedItems}
+              selectedItems={new Map(itemsForCalculation.map(({ item, quantity }) => [item.id, { item, quantity }]))}
               taxRate={taxRate || 0}
               applyTax={!!applyTax}
               couponCode={couponCode}
@@ -385,12 +388,11 @@ export function NewBookingForm({ businessId }: { businessId: string }) {
               setCouponCode={setCouponCode}
               onApplyCoupon={handleApplyCoupon}
               onRemoveCoupon={handleRemoveCoupon}
-              onRemoveItem={handleRemoveItem}
+              onRemoveItem={(itemId) => selectInventoryItem({ ...selectedItems.get(itemId)!.item, quantity: 0 }, 0)}
               onSendAsQuote={handleSendAsQuote}
               onProceedToPayment={handleProceedToPayment}
             />
           )}
-       
         </>
       )}
     </div>
