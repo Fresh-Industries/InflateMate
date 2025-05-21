@@ -1,9 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
-import { Prisma } from "@/prisma/generated/prisma";
-import { createId } from '@paralleldrive/cuid2';
-import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
+import { updateBookingSafely, UpdateBookingDataInput, BookingConflictError } from '@/lib/updateBookingSafely';
+import { z } from 'zod'; // Import Zod for schema validation
 
 export async function GET(
   req: NextRequest,
@@ -35,18 +35,48 @@ export async function GET(
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const responseData: any = { ...booking };
-    if (booking.inventoryItems && booking.inventoryItems.length > 0) {
-      responseData.bounceHouseId = booking.inventoryItems[0].inventoryId;
-      responseData.bounceHouse = {
-        id: booking.inventoryItems[0].inventoryId,
-        name: booking.inventoryItems[0].inventory.name
-      };
-    }
+    // Transform the data to match BookingFullDetails format
+    const bookingFullDetails = {
+      booking: {
+        id: booking.id,
+        eventDate: booking.eventDate,
+        startTime: booking.startTime,
+        endTime: booking.endTime,
+        status: booking.status,
+        totalAmount: booking.totalAmount,
+        eventType: booking.eventType,
+        eventAddress: booking.eventAddress,
+        eventCity: booking.eventCity,
+        eventState: booking.eventState,
+        eventZipCode: booking.eventZipCode,
+        eventTimeZone: booking.eventTimeZone || "America/Chicago",
+        participantCount: booking.participantCount,
+        participantAge: booking.participantAge,
+        specialInstructions: booking.specialInstructions,
+        expiresAt: booking.expiresAt,
+      },
+      customer: booking.customer ? {
+        id: booking.customer.id,
+        name: booking.customer.name,
+        email: booking.customer.email,
+        phone: booking.customer.phone,
+      } : null,
+      bookingItems: booking.inventoryItems.map(item => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        startUTC: item.startUTC,
+        endUTC: item.endUTC,
+        inventory: {
+          id: item.inventory.id,
+          name: item.inventory.name,
+          description: item.inventory.description,
+          primaryImage: item.inventory.primaryImage,
+        }
+      }))
+    };
 
-    return NextResponse.json(responseData);
+    return NextResponse.json(bookingFullDetails);
   } catch (error) {
     console.error("Error in GET booking route:", error);
     return NextResponse.json(
@@ -56,23 +86,236 @@ export async function GET(
   }
 }
 
+// Define a schema for the booking update request body
+const UpdateBookingSchema = z.object({
+  // Customer information
+  customerName: z.string().optional(),
+  customerEmail: z.string().email().optional(),
+  customerPhone: z.string().optional(),
+  
+  // Special instructions
+  specialInstructions: z.string().nullable().optional(),
+  
+  // Event location fields
+  eventAddress: z.string().optional(),
+  eventCity: z.string().optional(),
+  eventState: z.string().optional(),
+  eventZipCode: z.string().optional(),
+  
+  // Participant fields
+  participantCount: z.number().int().min(1).optional(),
+  participantAge: z.number().int().positive().nullable().optional(),
+  
+  // Original date/time fields - typically shouldn't change in edit flow but kept for validation
+  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
+  startTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
+  eventTimeZone: z.string().optional(),
+  
+  // Inventory items - make optional to allow confirmed booking updates without items
+  items: z.array(
+    z.object({
+      inventoryId: z.string(),
+      quantity: z.number().int().min(1),
+      price: z.number().min(0),
+      // These will be converted to Date objects in updateBookingSafely
+      startUTC: z.date().or(z.string()),
+      endUTC: z.date().or(z.string()),
+      status: z.string().optional(),
+    })
+  ).optional(),
+  
+  // Amounts for validation
+  subtotalAmount: z.number().min(0).optional(),
+  taxAmount: z.number().min(0).optional(),
+  totalAmount: z.number().min(0).optional(),
+  
+  // Coupon
+  couponCode: z.string().optional().nullable(),
+  
+  // Intent for prepare_for_quote or prepare_for_payment
+  intent: z.enum([
+    "prepare_for_quote", 
+    "prepare_for_payment", 
+    "prepare_for_payment_difference",
+    "update_customer_info_only"
+  ]).optional(),
+});
+
 export async function PATCH(
-  req: NextRequest,
+  request: NextRequest,
   { params }: { params: Promise<{ businessId: string; bookingId: string }> }
 ) {
-  // Declare bookingId outside the try block to ensure scope in catch
-  let bookingId: string | undefined;
-
   try {
+    const { businessId, bookingId } = await params;
+    const user = await getCurrentUserWithOrgAndBusiness();
+
+    if (!user || !user.membership || !user.membership.organization) {
+      return NextResponse.json({ error: "Unauthorized: User or organization details missing." }, { status: 401 });
+    }
+
+    const userBusiness = user.membership.organization.business;
+    if (!userBusiness || userBusiness.id !== businessId) {
+      return NextResponse.json({ error: "Forbidden: Access denied to this business." }, { status: 403 });
+    }
+
+    // Parse and validate the request body
+    let body: UpdateBookingDataInput;
+    try {
+      const rawBody = await request.json();
+      console.log('[API PATCH Booking] Request body:', JSON.stringify(rawBody));
+      
+      // Validate the request body with Zod schema
+      const validatedData = UpdateBookingSchema.parse(rawBody);
+      body = validatedData as UpdateBookingDataInput;
+      
+      // Log if we're processing an intent
+      if (body.intent) {
+        console.log(`[API PATCH Booking] Processing with intent: ${body.intent}`);
+      }
+    } catch (error) {
+      console.error('[API PATCH Booking] Error parsing request body:', error);
+      if (error instanceof z.ZodError) {
+        return NextResponse.json({ 
+          error: "Invalid request body format.", 
+          details: error.errors 
+        }, { status: 400 });
+      }
+      return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
+    }
+
+    console.log(`[API PATCH Booking] User ${user.id} attempting to update booking ${bookingId} for business ${businessId}`);
+    
+    // Check if this is a CONFIRMED booking
+    const booking = await prisma.booking.findUnique({ 
+      where: { id: bookingId },
+      select: { status: true }
+    });
+
+    // Special handling for CONFIRMED bookings without items array (just updating customer info)
+    if (booking?.status === "CONFIRMED" && (!body.items || body.intent === "update_customer_info_only")) {
+      console.log(`[API PATCH Booking] Processing simple update for CONFIRMED booking without modifying items`);
+      
+      // Directly update the booking without affecting booking items
+      const updatedBooking = await prisma.booking.update({
+        where: { id: bookingId },
+        data: {
+          eventAddress: body.eventAddress,
+          eventCity: body.eventCity,
+          eventState: body.eventState,
+          eventZipCode: body.eventZipCode,
+          participantCount: body.participantCount,
+          participantAge: body.participantAge,
+          specialInstructions: body.specialInstructions,
+          eventDate: body.eventDate ? new Date(body.eventDate) : undefined,
+          startTime: body.startTime && body.eventDate 
+            ? new Date(`${body.eventDate}T${body.startTime}:00.000Z`) 
+            : undefined,
+          endTime: body.endTime && body.eventDate 
+            ? new Date(`${body.eventDate}T${body.endTime}:00.000Z`) 
+            : undefined,
+          eventTimeZone: body.eventTimeZone,
+          updatedAt: new Date(),
+          // If we have customer info, also update the customer
+          ...(body.customerName && body.customerEmail && body.customerPhone ? {
+            customer: {
+              update: {
+                name: body.customerName,
+                email: body.customerEmail,
+                phone: body.customerPhone,
+                updatedAt: new Date(),
+              }
+            }
+          } : {})
+        },
+        include: {
+          customer: true,
+          inventoryItems: {
+            include: { inventory: true }
+          }
+        }
+      });
+      
+      console.log(`[API PATCH Booking] Successfully updated CONFIRMED booking ${bookingId} (simple update)`);
+      return NextResponse.json(updatedBooking, { status: 200 });
+    }
+    
+    // Special handling for CONFIRMED bookings with prepare_for_payment_difference intent
+    if (booking?.status === "CONFIRMED" && body.intent === "prepare_for_payment_difference" && body.items) {
+      console.log(`[API PATCH Booking] Processing payment for additional items for CONFIRMED booking`);
+      
+      // Process payment for additional items
+      try {
+        // Use updateBookingSafely with our special intent
+        const updatedBookingWithItems = await updateBookingSafely(bookingId, businessId, body);
+        
+        // Further processing will be handled by the Stripe webhook
+        return NextResponse.json(updatedBookingWithItems, { status: 200 });
+      } catch (error) {
+        console.error("[API PATCH Booking] Error processing payment difference:", error);
+        return NextResponse.json({ 
+          error: error instanceof Error ? error.message : "Failed to process payment for additional items",
+          code: "PAYMENT_DIFFERENCE_ERROR"
+        }, { status: 400 });
+      }
+    }
+    
+    // For non-confirmed bookings or confirmed bookings with items array, use the regular update process
+    const updatedBooking = await updateBookingSafely(bookingId, businessId, body);
+
+    console.log(`[API PATCH Booking] Successfully updated booking ${updatedBooking.id} to status ${updatedBooking.status}`);
+    
+    // Return the fully updated booking
+    return NextResponse.json(updatedBooking, { status: 200 });
+
+  } catch (error: any) {
+    try {
+      const { bookingId } = await params;
+      console.error(`[API PATCH Booking] Error updating booking ${bookingId}:`, error);
+    } catch {
+      console.error(`[API PATCH Booking] Error updating booking:`, error);
+    }
+
+    // Handle specific error types
+    if (error instanceof BookingConflictError) {
+      return NextResponse.json({ 
+        error: error.message || "Booking conflict detected - Items may no longer be available.", 
+        code: "CONFLICT"
+      }, { status: 409 });
+    }
+    
+    if (error.message.includes("cannot be edited")) {
+      return NextResponse.json({ 
+        error: error.message, 
+        code: "CANNOT_EDIT"
+      }, { status: 400 });
+    }
+    
+    if (error.message.includes("not found")) {
+      return NextResponse.json({ 
+        error: error.message, 
+        code: "NOT_FOUND"
+      }, { status: 404 });
+    }
+
+    return NextResponse.json({ 
+      error: "Internal Server Error.", 
+      message: error.message || "An unexpected error occurred." 
+    }, { status: 500 });
+  }
+}
+
+// Delete Booking only if pending or hold if no payment has been made then it can be safely deleted 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ businessId: string; bookingId: string }> }
+) {
+  try {
+    const { businessId, bookingId } = await params;
     const user = await getCurrentUserWithOrgAndBusiness();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-
-    const paramsResult = await params;
-    bookingId = paramsResult.bookingId; // Assign to the outer variable
-    const businessId = paramsResult.businessId;
-    const body = await req.json();
 
     // Check that the user has access to this business
     const userBusinessId = user.membership?.organization?.business?.id;
@@ -80,306 +323,83 @@ export async function PATCH(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Fetch the booking and check status BEFORE transaction
-    const booking = await prisma.booking.findUnique({
+    // Get the booking with all related records
+    const booking = await prisma.booking.findFirst({
       where: { id: bookingId, businessId },
+      include: {
+        payments: true,
+        waivers: true,
+        invoice: true,
+        quote: true,
+        inventoryItems: true,
+      },
     });
+
     if (!booking) {
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
-    // We still need to check status inside the transaction potentially,
-    // but this initial check gives a quick response for obvious cases.
-    // If status is 'HOLD' or 'PENDING', we proceed to the transaction.
-     if (!["PENDING", "HOLD"].includes(booking.status)) {
-      return NextResponse.json({ error: "Booking can only be edited if status is PENDING or HOLD" }, { status: 400 });
+
+    // Only allow deletion of PENDING or HOLD bookings
+    if (booking.status !== "PENDING" && booking.status !== "HOLD") {
+      return NextResponse.json(
+        { error: "Only PENDING or HOLD bookings can be deleted" },
+        { status: 400 }
+      );
     }
 
+    // Check if there are any completed payments
+    const hasCompletedPayments = booking.payments.some(
+      (payment) => payment.status === "COMPLETED"
+    );
+    if (hasCompletedPayments) {
+      return NextResponse.json(
+        { error: "Cannot delete booking with completed payments" },
+        { status: 400 }
+      );
+    }
 
-    // --- Perform updates within a transaction ---
-    try {
-      const transactionResult = await prisma.$transaction(async (tx) => {
-        // Re-fetch inside transaction to ensure we have the latest state
-        const latestBooking = await tx.booking.findUnique({
-             where: { id: bookingId!, businessId }, // Use non-null assertion as it's checked above
-             select: { status: true } // Only need status for the check
+    // Delete the booking and all related records in a transaction
+    await prisma.$transaction(async (tx) => {
+      // Delete related records first
+      if (booking.invoice) {
+        await tx.invoice.delete({
+          where: { id: booking.invoice.id },
         });
+      }
 
-         if (!latestBooking) {
-            // Should not happen if initial check passed, but good defensive coding
-             throw new Error("Booking not found during transaction."); // Will be caught below
-         }
-
-        // Re-check status inside the transaction for atomicity
-        if (!["PENDING", "HOLD"].includes(latestBooking.status)) {
-           // This will abort the transaction
-             throw new Error("Booking status changed: can no longer be edited.");
-        }
-
-
-        // Only allow updating safe fields on the main booking record
-        const allowedFields = [
-          "eventDate", "startTime", "endTime", "eventType", "eventAddress",
-          "eventCity", "eventState", "eventZipCode", "participantCount",
-          "participantAge", "specialInstructions", "status" // Allow status change
-        ];
-        const updateData: Record<string, unknown> = {};
-        for (const key of allowedFields) {
-          // Check if the field is present in the body AND is one of the allowed fields
-          if (body[key] !== undefined && allowedFields.includes(key)) {
-              updateData[key] = body[key];
-          }
-        }
-
-        // Update booking if needed
-        if (Object.keys(updateData).length > 0) {
-          await tx.booking.update({
-            where: { id: bookingId!, businessId }, // Use non-null assertion
-            data: {
-                ...updateData,
-                updatedAt: new Date(), // Ensure updated timestamp is set
-             },
-          });
-           console.log("Booking record updated within transaction:", updateData);
-        } else {
-             console.log("No top-level booking fields to update.");
-        }
-
-        // --- BookingItem edits ---
-        // Remove BookingItems (soft delete by setting status to CANCELLED)
-        if (Array.isArray(body.removeBookingItemIds) && body.removeBookingItemIds.length > 0) {
-          // Ensure item IDs belong to this booking before updating
-          await tx.$executeRaw`
-            UPDATE "BookingItem"
-            SET "bookingStatus" = 'CANCELLED', "updatedAt" = NOW()
-            WHERE "id" = ANY(${body.removeBookingItemIds}::text[])
-            AND "bookingId" = ${bookingId}
-            AND "bookingStatus" <> 'CANCELLED' -- Only cancel if not already cancelled
-          `;
-          console.log("BookingItems cancelled within transaction:", body.removeBookingItemIds);
-        } else {
-            console.log("No BookingItems to remove.");
-        }
-
-        // Add new BookingItems
-        if (Array.isArray(body.addBookingItems) && body.addBookingItems.length > 0) {
-          for (const item of body.addBookingItems) {
-            // Required: inventoryId, quantity, price, startUTC, endUTC, status
-            // Validate necessary fields are present for each item
-            if (!item.inventoryId || item.quantity === undefined || item.price === undefined || !item.startUTC || !item.endUTC) {
-                 console.warn("Skipping addition of BookingItem due to missing required fields:", item);
-                 continue; // Skip this item but continue with others
-            }
-
-            // Convert startUTC and endUTC to Date objects if they are strings (assuming ISO 8601)
-            const startUTC = typeof item.startUTC === 'string' ? new Date(item.startUTC) : item.startUTC;
-            const endUTC = typeof item.endUTC === 'string' ? new Date(item.endUTC) : item.endUTC;
-
-            if (isNaN(startUTC.getTime()) || isNaN(endUTC.getTime())) {
-                 console.warn("Skipping addition of BookingItem due to invalid date format:", item);
-                 continue;
-            }
-
-
-            // Use gen_random_uuid() directly in SQL or createId() beforehand
-            // Using createId() for consistency with createBookingSafely
-            const bookingItemId = createId();
-
-            // INSERT using raw SQL (required for 'period' column)
-            await tx.$executeRaw`
-              INSERT INTO "BookingItem" (
-                id,
-                quantity,
-                price,
-                "bookingId",
-                "bookingStatus",
-                "inventoryId",
-                "startUTC", -- Provide start and end times
-                "endUTC",   -- Provide start and end times
-                "createdAt",
-                "updatedAt",
-                "period" -- Calculate and provide the value
-              ) VALUES (
-                ${bookingItemId}::text,
-                ${item.quantity}::integer,
-                ${item.price}::double precision,
-                ${bookingId}::text,
-                ${item.status || 'PENDING'}::text,
-                ${item.inventoryId}::text,
-                ${startUTC}::timestamptz,
-                ${endUTC}::timestamptz,
-                NOW(),
-                NOW(),
-                 tstzrange( -- Calculate and provide the value
-                  ${startUTC}::timestamptz,
-                  ${endUTC}::timestamptz,
-                  '[]'
-                )
-              )
-            `;
-
-             console.log("BookingItem added within transaction:", item);
-          }
-        } else {
-            console.log("No BookingItems to add.");
-        }
-
-        // Update existing BookingItems
-        if (Array.isArray(body.updateBookingItems) && body.updateBookingItems.length > 0) {
-          for (const item of body.updateBookingItems) {
-             // Ensure item ID is provided and is a string
-            if (!item.id || typeof item.id !== 'string') {
-                 console.warn("Skipping update of BookingItem due to missing or invalid ID:", item);
-                 continue; // Skip this item
-            }
-
-             // Only allow updating specific fields: quantity, price, time, status
-            const fields: string[] = [];
-            const params: (string | number | Date)[] = [];
-            let paramIndex = 1; // Start index for parameters in SQL
-
-            if (item.quantity !== undefined) {
-                 fields.push(`quantity = $${paramIndex++}`);
-                 params.push(item.quantity);
-            }
-            if (item.price !== undefined) {
-                 fields.push(`price = $${paramIndex++}`);
-                 params.push(item.price);
-            }
-            // Handle time update separately as it affects the 'period' column
-            if (item.startUTC && item.endUTC) {
-                 const startUTC = typeof item.startUTC === 'string' ? new Date(item.startUTC) : item.startUTC;
-                 const endUTC = typeof item.endUTC === 'string' ? new Date(item.endUTC) : item.endUTC;
-
-                 if (isNaN(startUTC.getTime()) || isNaN(endUTC.getTime())) {
-                     console.warn("Skipping time update for BookingItem due to invalid date format:", item);
-                 } else {
-                    fields.push(`"startUTC" = $${paramIndex++}`);
-                    params.push(startUTC);
-                    fields.push(`"endUTC" = $${paramIndex++}`);
-                    params.push(endUTC);
-                     // Recalculate period using the new times
-                    fields.push(`period = tstzrange($${paramIndex - 2}::timestamptz, $${paramIndex - 1}::timestamptz, '[]')`);
-                 }
-            } else if (item.startUTC !== undefined || item.endUTC !== undefined) {
-                 // Log warning if only one time is provided
-                 console.warn("Cannot update only one time field (startUTC or endUTC). Both must be provided.", item);
-            }
-
-            if (item.status !== undefined) {
-                 fields.push(`"bookingStatus" = $${paramIndex++}`);
-                 params.push(item.status);
-            }
-
-            if (fields.length > 0) {
-              // Add updated timestamp to the set clause
-               fields.push(`"updatedAt" = NOW()`);
-               const finalSetClause = fields.join(', ');
-
-               // Add item.id and bookingId to parameters for the WHERE clause
-               params.push(item.id); // $paramIndex
-               params.push(bookingId || ''); // $paramIndex + 1
-
-              // Use a parameterized query for safety and correct type handling
-              await tx.$executeRawUnsafe(
-                `UPDATE "BookingItem" SET ${finalSetClause} WHERE id = $${paramIndex} AND "bookingId" = $${paramIndex + 1}`,
-                 ...params
-              );
-              console.log("BookingItem updated within transaction:", item);
-            } else {
-                 console.log(`No allowed fields to update for BookingItem ID: ${item.id}`);
-            }
-          }
-        } else {
-             console.log("No BookingItems to update.");
-        }
-
-        // Return the updated booking with necessary relations for the response
-        const updatedBooking = await tx.booking.findFirst({
-            where: { id: bookingId!, businessId }, // Use non-null assertion
-            include: {
-                inventoryItems: { include: { inventory: true } },
-                customer: true,
-            },
+      if (booking.quote) {
+        await tx.quote.delete({
+          where: { id: booking.quote.id },
         });
+      }
 
-         if (!updatedBooking) {
-             // Should not happen
-             throw new Error("Failed to retrieve updated booking.");
-         }
-
-        return updatedBooking;
-
-      }, {
-         // Use Serializable isolation level to help prevent race conditions
-         isolationLevel: Prisma.TransactionIsolationLevel.Serializable,
+      // Delete payments
+      await tx.payment.deleteMany({
+        where: { bookingId },
       });
 
+      // Delete waivers
+      await tx.waiver.deleteMany({
+        where: { bookingId },
+      });
 
-        // Transform the result for the response, similar to the GET endpoint
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const responseData: any = { ...transactionResult };
-        // Remove old bounceHouse fields if they exist
-        delete responseData.bounceHouse;
-        delete responseData.bounceHouseId;
+      // Delete booking items
+      await tx.bookingItem.deleteMany({
+        where: { bookingId },
+      });
 
-        // If you still need a single bounceHouse field for backward compatibility,
-        // you might derive it from the first inventoryItem if necessary.
-        // For now, I'll rely on inventoryItems array being the source of truth.
-        // If you need the old format, let me know.
+      // Finally delete the booking
+      await tx.booking.delete({
+        where: { id: bookingId },
+      });
+    });
 
-        return NextResponse.json(responseData);
-
-
-    //eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (transactionError: any) {
-        console.error(`[PATCH /bookings/${bookingId}] Transaction error caught:`, transactionError); // Debug log
-
-        // Handle specific Prisma errors
-        if (transactionError instanceof PrismaClientKnownRequestError) {
-             console.error(` - Prisma Error Code: ${transactionError.code}`);
-             console.error(` - Prisma Meta: ${JSON.stringify(transactionError.meta)}`);
-
-             // Handle exclusion constraint violation (e.g., time overlap)
-             if (transactionError.code === '23P01') {
-                 console.warn("[PATCH /bookings] Booking conflict detected during update.");
-                 return NextResponse.json({
-                     error: "A conflict occurred while updating the booking. The time slot may no longer be available.",
-                 }, { status: 409 }); // 409 Conflict
-             }
-              // Handle serialization error (transient, but we are not retrying PATCH automatically here)
-              if (transactionError.code === '40001') {
-                  console.warn("[PATCH /bookings] Serialization error (40001) during update.");
-                   return NextResponse.json({
-                     error: "The booking could not be updated due to a transient database conflict. Please try again.",
-                 }, { status: 500 }); // Or 409 if you prefer
-              }
-
-             // Re-throw other known Prisma errors
-             throw transactionError; // Caught by the outer catch
-        }
-         // Re-throw any custom errors thrown inside the transaction (like the status check error)
-         if (transactionError.message === "Booking status changed: can no longer be edited.") {
-              return NextResponse.json({ error: transactionError.message }, { status: 400 });
-         }
-
-
-         // Re-throw any other errors from the transaction
-         throw transactionError; // Caught by the outer catch
-    }
-
-
-//eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } catch (error: any) {
-    // Catch errors from initial checks or errors re-thrown from the transaction block
-    console.error(`[PATCH /bookings/${bookingId}] Error in main try block:`, error); // Debug log
-     // Handle errors re-thrown from the transaction or initial checks
-     if (error instanceof PrismaClientKnownRequestError) {
-         // This should ideally be caught and handled within the transaction block,
-         // but as a fallback, you might handle specific codes here too.
-         console.error(` - Uncaught Prisma Error Code: ${error.code}`);
-         console.error(` - Uncaught Prisma Meta: ${JSON.stringify(error.meta)}`);
-     }
-
+    return NextResponse.json(
+      { message: "Booking and related records deleted successfully" },
+      { status: 200 }
+    );
+  } catch (error) {
+    console.error("Error in DELETE booking route:", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Internal Server Error" },
       { status: 500 }

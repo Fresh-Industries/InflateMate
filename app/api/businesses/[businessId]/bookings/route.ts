@@ -67,8 +67,8 @@ export async function POST(
     const bookingData = finalizeBookingSchema.parse(body);
     console.log("[POST /bookings] Parsed finalization data:", bookingData);
 
-    // --- Find and Validate Existing HOLD Booking ---
-    console.log(`[POST /bookings] Finding existing HOLD booking with ID: ${bookingData.holdId}`);
+    // --- Find and Validate Existing HOLD or PENDING Booking ---
+    console.log(`[POST /bookings] Finding existing booking with ID: ${bookingData.holdId}`);
     // Include inventoryItems to potentially update their status later
     // Include business for Stripe ID and timezone
     const existingBooking = await prisma.booking.findUnique({
@@ -77,34 +77,49 @@ export async function POST(
     });
 
     if (!existingBooking) {
-        console.warn(`[POST /bookings] HOLD booking not found for ID: ${bookingData.holdId}`);
-        return NextResponse.json({ error: "Booking hold not found." }, { status: 404 });
+        console.warn(`[POST /bookings] Booking not found for ID: ${bookingData.holdId}`);
+        return NextResponse.json({ error: "Booking not found." }, { status: 404 });
     }
 
     // Check if the booking belongs to the correct business
     if (existingBooking.businessId !== businessId) {
-         console.warn(`[POST /bookings] Booking ID ${existingBooking.id} belongs to business ${existingBooking.businessId}, not ${businessId}.`);
-         return NextResponse.json({ error: "Booking hold not found for this business." }, { status: 404 });
+        console.warn(`[POST /bookings] Booking ID ${existingBooking.id} belongs to business ${existingBooking.businessId}, not ${businessId}.`);
+        return NextResponse.json({ error: "Booking not found for this business." }, { status: 404 });
     }
 
-    // Check if the hold is still active
-    const holdExpirationTime = new Date(existingBooking.createdAt.getTime() + 30 * 60 * 1000);
-    const now = new Date();
-    if (existingBooking.status !== 'HOLD' || now > holdExpirationTime) {
-        console.warn(`[POST /bookings] HOLD booking ID ${existingBooking.id} is expired or not in HOLD status (Current Status: ${existingBooking.status}).`);
-        // Update the booking status to CANCELLED if it was an expired HOLD
-        if (existingBooking.status === 'HOLD') {
-             await prisma.booking.update({
-                 where: { id: existingBooking.id },
-                 data: { status: 'CANCELLED', isCancelled: true }
-             });
-         }
+    // Check if the booking is in a valid state (HOLD or PENDING)
+    const validStatuses = ['HOLD', 'PENDING'];
+    if (!validStatuses.includes(existingBooking.status)) {
+        console.warn(`[POST /bookings] Booking ID ${existingBooking.id} has an invalid status: ${existingBooking.status}`);
         return NextResponse.json({
-            error: "The hold on your selected items has expired. Please check availability again.",
-            isExpired: true, // Indicate to client the specific reason
-        }, { status: 409 }); // 409 Conflict
+            error: `Booking cannot be processed for payment because it has status '${existingBooking.status}'.`,
+        }, { status: 409 });
     }
-     console.log(`[POST /bookings] Valid HOLD booking found and is active.`);
+
+    // Check if the booking is expired
+    const now = new Date();
+    let isExpired = false;
+    if (existingBooking.expiresAt) {
+        isExpired = now > new Date(existingBooking.expiresAt);
+    } else {
+        // Fallback for older bookings without expiresAt: consider them expired
+        console.warn(`[POST /bookings] Booking ID ${existingBooking.id} is missing 'expiresAt'.`);
+        isExpired = true;
+    }
+
+    if (isExpired) {
+        console.warn(`[POST /bookings] Booking ID ${existingBooking.id} has expired (Expires At: ${existingBooking.expiresAt ? new Date(existingBooking.expiresAt).toISOString() : 'N/A'}).`);
+        await prisma.booking.update({
+            where: { id: existingBooking.id },
+            data: { status: 'EXPIRED', isCancelled: true, updatedAt: new Date() }
+        });
+        return NextResponse.json({
+            error: "The booking has expired. Please create a new booking.",
+            isExpired: true,
+        }, { status: 409 });
+    }
+    
+    console.log(`[POST /bookings] Valid ${existingBooking.status} booking found and is active.`);
 
     // Get Stripe Account ID from the included business relation
     const stripeConnectedAccountId = existingBooking.business?.stripeAccountId;
@@ -249,7 +264,12 @@ export async function POST(
         // Use a transaction for the update to ensure atomicity
         await prisma.$transaction(async (tx) => {
 
-            // Update the main Booking record with full details and change status from HOLD to PENDING
+            // Prepare status updates (don't change status if already PENDING)
+            const statusUpdate = existingBooking.status === 'HOLD' ? 
+                { status: 'PENDING' as BookingStatus } : // Only update status if currently HOLD
+                {}; // Empty object (no status change) if already PENDING
+
+            // Update the main Booking record with full details
             const bookingUpdateResult = await tx.booking.update({
                 where: { id: existingBooking.id },
                 data: {
@@ -258,8 +278,7 @@ export async function POST(
                     startTime: startUTC,
                     endTime: endUTC,
                     eventTimeZone: timezone,
-                    // Change status from 'HOLD' to 'PENDING'
-                    status: 'PENDING' as BookingStatus, // Transitioning to PENDING before payment
+                    ...statusUpdate, // Only apply status update if needed
                     totalAmount: calculatedTotalAmountDollars, // Store calculated total
                     subtotalAmount: itemsSubtotal, // Store items subtotal
                     taxAmount: calculatedTax, // Store calculated tax
@@ -275,29 +294,32 @@ export async function POST(
                     specialInstructions: bookingData.specialInstructions,
                     couponId: appliedCouponId, // Link the coupon ID
                     updatedAt: new Date(), // Explicitly set update timestamp
+                    expiresAt: new Date(Date.now() + 15 * 60 * 1000), // Refresh 15-minute expiration for payment
                 },
                 include: { inventoryItems: true } // Include items to update their status below
             });
-            console.log(`[POST /bookings] Booking ${existingBooking.id} updated to PENDING.`);
-
-            // Also update the status of the associated BookingItems from 'HOLD' to 'PENDING'
-            // Use raw SQL again because of the Unsupported type limitation
             
+            // Log appropriate message based on whether status was updated
+            if (existingBooking.status === 'HOLD') {
+                console.log(`[POST /bookings] Booking ${existingBooking.id} updated from HOLD to PENDING.`);
+            } else {
+                console.log(`[POST /bookings] Booking ${existingBooking.id} updated (already PENDING).`);
+            }
 
-             if (existingBooking.inventoryItems.length > 0) {
-              const itemIds = existingBooking.inventoryItems.map(item => String(item.id));
-                 await tx.$executeRawUnsafe(
-                  `
+            // Also update the status of the associated BookingItems if needed
+            if (existingBooking.status === 'HOLD' && existingBooking.inventoryItems.length > 0) {
+                const itemIds = existingBooking.inventoryItems.map(item => String(item.id));
+                await tx.$executeRawUnsafe(
+                    `
                     UPDATE "BookingItem"
                     SET "bookingStatus" = 'PENDING', "updatedAt" = NOW()
                     WHERE id = ANY($1::text[])
                     AND "bookingStatus" = 'HOLD'
-                  `,
-                  itemIds
+                    `,
+                    itemIds
                 );
-                console.log(`[POST /bookings] Updated ${existingBooking.inventoryItems.length} BookingItem statuses to PENDING.`);
-             }
-
+                console.log(`[POST /bookings] Updated ${existingBooking.inventoryItems.length} BookingItem statuses from HOLD to PENDING.`);
+            }
 
             return bookingUpdateResult; // Return the updated booking
         }, {
@@ -386,15 +408,15 @@ export async function POST(
            }))),
 
            // Include coupon info if applied
-          ...(appliedCouponId ? { couponId: appliedCouponId } : {}), // Link coupon ID if applied
+          ...(appliedCouponId ? { couponId: appliedCouponId } : {}),
            ...(bookingData.couponCode ? { couponCode: bookingData.couponCode } : {}),
            ...(couponDiscountAmount > 0 ? { couponAmount: couponDiscountAmount.toString() } : {}), // Discount amount in dollars
 
           // Include special instructions if any
           ...(bookingData.specialInstructions && { specialInstructions: bookingData.specialInstructions }),
 
-          // Optional: add a note about this being a hold finalization
-          bookingFlow: 'hold_to_payment',
+          // Track the booking flow source
+          bookingFlow: existingBooking.status === 'HOLD' ? 'hold_to_payment' : 'pending_to_payment',
       };
 
       // Create the PaymentIntent on behalf of the connected account

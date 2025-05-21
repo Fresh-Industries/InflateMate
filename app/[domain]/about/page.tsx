@@ -5,8 +5,9 @@ import Link from "next/link";
 import { Users, Award, ThumbsUp, Heart } from "lucide-react";
 import { Metadata } from 'next';
 import SectionRenderer from '../_components/SectionRenderer';
-import { ThemeColors, themeConfig, getContrastColor } from '../_themes/themeConfig';
-
+import { themeConfig } from '../_themes/themeConfig';
+import { ThemeColors, ThemeDefinition } from '../_themes/types';
+import { getContrastColor, makeScale } from '../_themes/utils';
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
@@ -50,24 +51,38 @@ export async function generateMetadata(props: PageProps): Promise<Metadata> {
   }
 }
 
-async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
+export default async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
   const domain = decodeURIComponent((await params).domain);
   const business = await getBusinessByDomain(domain);
   const siteConfig = business.siteConfig || {} as SiteConfig;
   const aboutSections = siteConfig.about?.dynamicSections || [];
   
-  // Colors from site config
-  const colors: ThemeColors = {
-    primary: siteConfig.colors?.primary || "#3b82f6", // Default blue
-    secondary: siteConfig.colors?.secondary || "#6b7280", // Default gray
-    accent: siteConfig.colors?.accent || "#f59e0b", // Default amber
-    background: siteConfig.colors?.background || "#f9fafb", // Default gray-50
-    text: siteConfig.colors?.text || "#111827", // Default text color
-  };
+  
+  try {
+    const business = await getBusinessByDomain(domain);
+    const siteConfig = business.siteConfig || {};
+    
+    // Determine Theme
+    const rawThemeName = (siteConfig.themeName?.name as string) || 'modern';
+    const themeName = Object.keys(themeConfig).includes(rawThemeName) ? rawThemeName : 'modern';
+    const theme: ThemeDefinition = themeConfig[themeName];
+    
+    // Get base colors from site config with fallbacks
+    const primaryColor = siteConfig.colors?.primary || '#4f46e5';
+    const accentColor = siteConfig.colors?.accent || '#f97316';
+    const secondaryColor = siteConfig.colors?.secondary || '#06b6d4';
+    const backgroundColor = siteConfig.colors?.background || '#ffffff';
+    const textColor = siteConfig.colors?.text || '#333333';
+    
+    // Define Colors with scales for each color using makeScale
+    const colors: ThemeColors = {
+      primary: makeScale(primaryColor),
+      accent: makeScale(accentColor),
+      secondary: makeScale(secondaryColor),
+      background: makeScale(backgroundColor),
+      text: makeScale(textColor)
+    };
 
-  // Get theme configuration
-  const themeName = siteConfig.themeName?.name || 'modern';
-  const theme = themeConfig[themeName] || themeConfig.modern;
 
   // Pre-compute common styles
   const cardStyle = {
@@ -121,7 +136,7 @@ async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
   };
   
   return (
-    <div className="min-h-screen" style={{ background: colors.background }}>
+    <div className="min-h-screen" style={{ background: colors.background[500] }}>
       {/* Hero Section */}
       <section 
         className="py-16 md:py-24 relative overflow-hidden"
@@ -152,7 +167,7 @@ async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
                 className="w-16 h-16 rounded-full flex items-center justify-center"
                 style={{ 
                   background: theme.featureSectionStyles?.iconBackground(colors, 0) || `${colors.primary}20`,
-                  color: colors.primary
+                  color: colors.primary[500]
                 }}
               >
                 <Users className="h-8 w-8" />
@@ -161,7 +176,7 @@ async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
             
             <h2 
               className="text-3xl font-bold text-center mb-8"
-              style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary }}
+              style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary[500] }}
             >
               Our Story
             </h2>
@@ -195,7 +210,7 @@ async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
 
       {aboutSections.map((section) => (
         <section key={section.id} className="dynamic-section">
-          <SectionRenderer section={section} theme={theme} colors={colors} />
+          <SectionRenderer section={section} themeName={themeName} colors={colors} />
         </section>
       ))}
       
@@ -204,7 +219,7 @@ async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
         <div className="container mx-auto px-4">
           <h2 
             className="text-3xl font-bold text-center mb-12"
-            style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary }}
+            style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary[500] }}
           >
             Why Choose Us
           </h2>
@@ -236,20 +251,20 @@ async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
                   className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
                   style={{ 
                     background: theme.featureSectionStyles?.iconBackground(colors, index) || `${colors.primary}20`,
-                    color: theme.featureSectionStyles?.cardTitleColor(colors, index) || colors.primary
+                    color: theme.featureSectionStyles?.cardTitleColor(colors, index) || colors.primary[500]
                   }}
                 >
                   {feature.icon}
                 </div>
                 <h3 
                   className="text-xl font-bold mb-3 text-center"
-                  style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, index) || colors.primary }}
+                  style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, index) || colors.primary[500] }}
                 >
                   {feature.title}
                 </h3>
                 <p 
                   className="text-center"
-                  style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text }}
+                  style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text[500] }}
                 >
                   {feature.description}
                 </p>
@@ -295,6 +310,8 @@ async function AboutPage({ params }: { params: Promise<{ domain: string }> }) {
       </section>
     </div>
   );
+} catch (error) {
+  console.error('Error loading about page:', error);
+  return <div>Error loading page content</div>;
 }
-
-export default AboutPage; 
+}

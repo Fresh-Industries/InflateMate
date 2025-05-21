@@ -2,11 +2,12 @@ import React from 'react';
 import Image from 'next/image'; // Use Next.js Image for optimization
 import { ImageTextSectionContent } from '@/lib/business/domain-utils';
 import { Card, CardContent, CardTitle } from '@/components/ui/card'; 
-import { ThemeDefinition, ThemeColors } from '@/app/[domain]/_themes/themeConfig';
+import { ThemeColors, ThemeDefinition } from '@/app/[domain]/_themes/types';
+import { themeConfig } from '../../_themes/themeConfig';
 
 interface ImageTextSectionProps {
   content: ImageTextSectionContent;
-  theme: ThemeDefinition;
+  themeName: keyof typeof themeConfig;
   colors: ThemeColors;
 }
 
@@ -23,12 +24,13 @@ const getCardStyle = (theme: ThemeDefinition, colors: ThemeColors): React.CSSPro
 
 // Basic component to render image and text
 // Layout (e.g., side-by-side) will be handled by theme components
-export default function ImageTextSection({ content, theme, colors }: ImageTextSectionProps) {
+export default function ImageTextSection({ content, themeName, colors }: ImageTextSectionProps) {
+  const theme = themeConfig[themeName];
   const { title, text, imageUrl, imagePosition = 'left', backgroundColor } = content;
   // Alt text should ideally be configurable, but using title or a default for now
   const altText = title || "Section Image"; 
 console.log('backgroundColor',backgroundColor)
-  const textColor = theme.imageTextStyles?.textColor(colors) ?? colors.text;
+  const textColor = theme.imageTextStyles?.textColor(colors) ?? colors.text[500];
   const imageStyles = theme.imageStyles(colors) ?? {};
   const cardStyles = getCardStyle(theme, colors);
 

@@ -12,7 +12,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2, Gift, Mail, User, Phone, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
-import { ThemeColors, ThemeDefinition, getContrastColor } from "@/app/[domain]/_themes/themeConfig";
+import { ThemeColors, ThemeDefinition } from "@/app/[domain]/_themes/types";
+import { getContrastColor } from "@/app/[domain]/_themes/utils";
 
 const formSchema = z.object({
   name: z.string().min(2, "Name is required"),
@@ -27,7 +28,8 @@ interface LeadCaptureFormProps {
   businessId: string;
   funnelId: string;
   onSuccess: (couponCode: string | null) => void;
-  primaryColor: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  primaryColor: any; // Allow both old and new formats for backward compatibility
   theme: ThemeDefinition;
   colors: ThemeColors;
 }
@@ -116,7 +118,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor,
   const inputFocusBorder = inputStyles.focusBorder(colors); // Store focus border color
 
   const primaryButtonStyle = getButtonStyle(theme, colors, 'primary');
-  const buttonTextColor = getContrastColor(colors.primary);
+  const buttonTextColor = getContrastColor(colors.primary[500]);
   
   return (
     <Form {...form}>
@@ -140,7 +142,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor,
             render={({ field }) => (
               <FormItem>
                 <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
-                  <User className="h-4 w-4" style={{ color: primaryColor }} />
+                  <User className="h-4 w-4" style={{ color: typeof primaryColor === 'object' ? primaryColor[500] : primaryColor }} />
                   Your Name
                 </FormLabel>
                 <FormControl>
@@ -172,7 +174,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor,
             render={({ field }) => (
               <FormItem>
                 <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
-                  <Mail className="h-4 w-4" style={{ color: primaryColor }} />
+                  <Mail className="h-4 w-4" style={{ color: typeof primaryColor === 'object' ? primaryColor[500] : primaryColor }} />
                   Your Email
                 </FormLabel>
                 <FormControl>
@@ -189,7 +191,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor,
                       backgroundColor: inputBg,
                       borderColor: form.formState.errors.email ? "rgb(239 68 68)" : inputBorder,
                       "--tw-ring-color": inputFocusBorder,
-                      boxShadow: `0 1px 2px ${colors.primary}10`,
+                      boxShadow: `0 1px 2px ${colors.primary[500]}10`,
                     } as React.CSSProperties}
                     disabled={isSubmitting}
                   />
@@ -212,7 +214,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor,
             render={({ field }) => (
               <FormItem>
                 <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
-                  <Phone className="h-4 w-4" style={{ color: primaryColor }} />
+                  <Phone className="h-4 w-4" style={{ color: typeof primaryColor === 'object' ? primaryColor[500] : primaryColor }} />
                   Phone (Optional)
                 </FormLabel>
                 <FormControl>
@@ -245,7 +247,7 @@ export function LeadCaptureForm({ businessId, funnelId, onSuccess, primaryColor,
             render={({ field }) => (
               <FormItem>
                 <FormLabel style={{ color: labelColor }} className="text-sm font-medium flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" style={{ color: primaryColor }} />
+                  <MessageSquare className="h-4 w-4" style={{ color: typeof primaryColor === 'object' ? primaryColor[500] : primaryColor }} />
                   Message (Optional)
                 </FormLabel>
                 <FormControl>

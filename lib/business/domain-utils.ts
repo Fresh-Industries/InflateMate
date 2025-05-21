@@ -20,6 +20,14 @@ export interface VideoTextSectionContent {
   backgroundColor?: string;
 }
 
+export interface BusinessSocial {
+  facebook?:  string;
+  instagram?: string;
+  twitter?:   string;
+  tiktok?:    string;
+  [key: string]: string | undefined;   // flexibility for other platforms
+}
+
 export interface TextCard {
   id: string;
   title: string;
@@ -95,6 +103,7 @@ export interface BusinessWithSiteConfig {
   website?: string | null;
   customDomain?: string | null;
   siteConfig: SiteConfig | null;
+  socialMedia?: BusinessSocial | null;
   [key: string]: unknown;
 }
 
@@ -130,6 +139,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
       return {
         ...business,
         siteConfig: business.siteConfig as SiteConfig || {},
+        socialMedia: business.socialMedia as BusinessSocial | null,
       };
     }
     
@@ -165,6 +175,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
         return {
           ...business,
           siteConfig: business.siteConfig as SiteConfig || {},
+          socialMedia: business.socialMedia as BusinessSocial | null,
         };
       }
     }
@@ -182,6 +193,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
     return {
       ...business,
       siteConfig: business.siteConfig as SiteConfig || {},
+      socialMedia: business.socialMedia as BusinessSocial | null,
     };
   }
   
@@ -201,6 +213,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
       return {
         ...business,
         siteConfig: business.siteConfig as SiteConfig || {},
+        socialMedia: business.socialMedia as BusinessSocial | null,
       };
     }
   } else {
@@ -216,6 +229,7 @@ export async function getBusinessByDomain(domainParam: string): Promise<Business
       return {
         ...business,
         siteConfig: business.siteConfig as SiteConfig || {},
+        socialMedia: business.socialMedia as BusinessSocial | null,
       };
     }
   }

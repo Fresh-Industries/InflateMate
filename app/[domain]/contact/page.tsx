@@ -4,7 +4,9 @@ import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import { Phone, Mail, Calendar } from "lucide-react";
 import { Metadata } from 'next';
-import { ThemeColors, themeConfig, getContrastColor } from '../_themes/themeConfig';
+import { ThemeColors } from '../_themes/types';
+import { getContrastColor, makeScale } from '../_themes/utils';
+import { themeConfig } from '../_themes/themeConfig';
 
 export const dynamic = 'force-dynamic';
 
@@ -59,17 +61,27 @@ async function ContactPage(props: PageProps) {
   // Extract service areas from business data with proper typing
   const serviceAreas: string[] = Array.isArray(business.serviceArea) ? business.serviceArea : [];
 
-  // Colors from site config
-  const colors: ThemeColors = {
-    primary: siteConfig.colors?.primary || "#3b82f6",
-    secondary: siteConfig.colors?.secondary || "#6b7280",
-    accent: siteConfig.colors?.accent || "#f59e0b",
-    background: siteConfig.colors?.background || "#f9fafb",
-    text: siteConfig.colors?.text || "#111827",
-  };
+  // Determine Theme
+  const rawThemeName = (siteConfig.themeName?.name as string) || 'modern';
+  const themeName = Object.keys(themeConfig).includes(rawThemeName) ? rawThemeName : 'modern';
 
-  // Get theme configuration
-  const themeName = siteConfig.themeName?.name || 'modern';
+// Get base colors from site config with fallbacks
+const primaryColor = siteConfig.colors?.primary || '#4f46e5';
+const accentColor = siteConfig.colors?.accent || '#f97316';
+const secondaryColor = siteConfig.colors?.secondary || '#06b6d4';
+const backgroundColor = siteConfig.colors?.background || '#ffffff';
+const textColor = siteConfig.colors?.text || '#333333';
+
+// Define Colors with scales for each color using makeScale
+const colors: ThemeColors = {
+  primary: makeScale(primaryColor),
+  accent: makeScale(accentColor),
+  secondary: makeScale(secondaryColor),
+  background: makeScale(backgroundColor),
+  text: makeScale(textColor)
+};
+
+
   const theme = themeConfig[themeName] || themeConfig.modern;
 
   // Pre-compute common styles
@@ -112,7 +124,7 @@ async function ContactPage(props: PageProps) {
   };
 
   return (
-    <div className="min-h-screen" style={{ background: colors.background }}>
+    <div className="min-h-screen" style={{ background: colors.background[500] }}>
       {/* Hero Section */}
       <section 
         className="py-16 md:py-24 relative overflow-hidden"
@@ -148,27 +160,27 @@ async function ContactPage(props: PageProps) {
                     className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
                     style={{ 
                       background: theme.featureSectionStyles?.iconBackground(colors, 0) || `${colors.primary}20`,
-                      color: theme.featureSectionStyles?.cardTitleColor(colors, 0) || colors.primary
+                      color: theme.featureSectionStyles?.cardTitleColor(colors, 0) || colors.primary[500]
                     }}
                   >
                     <Phone className="h-8 w-8" />
                   </div>
                   <h3 
                     className="text-xl font-bold mb-3 text-center"
-                    style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, 0) || colors.primary }}
+                    style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, 0) || colors.primary[500] }}
                   >
                     Call or Text Us
                   </h3>
                   <p 
                     className="mb-4 text-center"
-                    style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text }}
+                    style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text[500] }}
                   >
                     We&apos;re available to answer questions and take bookings.
                   </p>
                   <a 
                     href={`tel:${business.phone}`} 
                     className="font-bold text-lg block text-center hover:underline"
-                    style={{ color: colors.primary }}
+                    style={{ color: colors.primary[500] }}
                   >
                     {business.phone}
                   </a>
@@ -184,27 +196,27 @@ async function ContactPage(props: PageProps) {
                     className="w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4"
                     style={{ 
                       background: theme.featureSectionStyles?.iconBackground(colors, 1) || `${colors.accent}20`,
-                      color: theme.featureSectionStyles?.cardTitleColor(colors, 1) || colors.accent
+                      color: theme.featureSectionStyles?.cardTitleColor(colors, 1) || colors.accent[500]
                     }}
                   >
                     <Mail className="h-8 w-8" />
                   </div>
                   <h3 
                     className="text-xl font-bold mb-3 text-center"
-                    style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, 1) || colors.accent }}
+                    style={{ color: theme.featureSectionStyles?.cardTitleColor(colors, 1) || colors.accent[500] }}
                   >
                     Email Us
                   </h3>
                   <p 
                     className="mb-4 text-center"
-                    style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text }}
+                    style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text[500] }}
                   >
                     Send us an email and we&apos;ll get back to you as soon as possible.
                   </p>
                   <a 
                     href={`mailto:${business.email}`} 
                     className="font-bold text-lg block text-center hover:underline"
-                    style={{ color: colors.accent }}
+                    style={{ color: colors.accent[500] }}
                   >
                     {business.email}
                   </a>
@@ -218,11 +230,11 @@ async function ContactPage(props: PageProps) {
                 <div className="text-center mb-6">
                   <h2 
                     className="text-2xl font-bold mb-2"
-                    style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary }}
+                    style={{ color: theme.featureSectionStyles?.titleColor(colors) || colors.primary[500] }}
                   >
                     Service Areas
                   </h2>
-                  <p style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text }}>
+                  <p style={{ color: theme.featureSectionStyles?.cardTextColor(colors) || colors.text[500] }}>
                     We proudly serve the following areas and surrounding communities
                   </p>
                 </div>
@@ -242,9 +254,9 @@ async function ContactPage(props: PageProps) {
                                index % 3 === 1 ? `${colors.accent}15` : 
                                `${colors.secondary}15`),
                             color: theme.contactStyles?.serviceAreaTagColor(colors, index) ||
-                              (index % 3 === 0 ? colors.primary : 
-                               index % 3 === 1 ? colors.accent : 
-                               colors.secondary)
+                              (index % 3 === 0 ? colors.primary[500] : 
+                               index % 3 === 1 ? colors.accent[500] : 
+                               colors.secondary[500])
                           }}
                         >
                           {cityName}

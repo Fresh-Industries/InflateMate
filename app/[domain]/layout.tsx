@@ -98,13 +98,16 @@ export default async function DomainLayout({
   try {
     const business = await getBusinessByDomain(domain);
     const siteConfig = business.siteConfig || {};
+    
+    // Just pass the original string colors - layout-client will handle conversion
     const colors = {
-       primary: siteConfig.colors?.primary || '#3b82f6',
-       secondary: siteConfig.colors?.secondary || '#6b7280',
-       accent: siteConfig.colors?.accent || '#ef4444',
-       background: siteConfig.colors?.background || '#ffffff',
-       text: siteConfig.colors?.text || '#333333',
+      primary: siteConfig.colors?.primary || '#3b82f6',
+      secondary: siteConfig.colors?.secondary || '#6b7280',
+      accent: siteConfig.colors?.accent || '#ef4444',
+      background: siteConfig.colors?.background || '#ffffff',
+      text: siteConfig.colors?.text || '#333333',
     };
+    
     console.log('Colors:', colors.text);
     const themeName = siteConfig.themeName?.name || 'modern';
     

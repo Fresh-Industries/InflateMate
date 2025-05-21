@@ -102,6 +102,7 @@ export type InventoryItem = {
     participantCount: number;
     participantAge: string;
     specialInstructions: string;
+    eventTimeZone?: string;
   };
   
   export type Coupon = {
@@ -113,5 +114,48 @@ export type InventoryItem = {
     total: number;
     currentPage: number;
     setCurrentPage: (page: number) => void;
+  };
+  
+  export type BookingFullDetails = {
+    booking: {
+      id: string;
+      eventDate: Date;
+      startTime: Date;
+      endTime: Date;
+      status: string;
+      totalAmount: number | null;
+      eventType: string | null;
+      eventAddress: string | null;
+      eventCity: string | null;
+      eventState: string | null;
+      eventZipCode: string | null;
+      eventTimeZone: string;
+      participantCount: number | null;
+      participantAge: number | null;
+      specialInstructions: string | null;
+      expiresAt?: Date | null;
+      // ...other booking fields
+    };
+    customer: {
+      id: string;
+      name: string;
+      email: string;
+      phone: string;
+      // ...other customer fields
+    };
+    bookingItems: Array<{
+      id: string;
+      quantity: number;
+      price: number;
+      startUTC: Date;
+      endUTC: Date;
+      inventory: {
+        id: string;
+        name: string;
+        description: string | null;
+        primaryImage: string | null;
+        // ...other inventory fields
+      };
+    }>;
   };
   

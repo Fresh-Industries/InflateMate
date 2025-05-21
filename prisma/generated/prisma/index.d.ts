@@ -10461,6 +10461,7 @@ export namespace Prisma {
     specialInstructions: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    expiresAt: Date | null
     couponId: string | null
     businessId: string | null
     customerId: string | null
@@ -10491,6 +10492,7 @@ export namespace Prisma {
     specialInstructions: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    expiresAt: Date | null
     couponId: string | null
     businessId: string | null
     customerId: string | null
@@ -10521,6 +10523,7 @@ export namespace Prisma {
     specialInstructions: number
     createdAt: number
     updatedAt: number
+    expiresAt: number
     couponId: number
     businessId: number
     customerId: number
@@ -10573,6 +10576,7 @@ export namespace Prisma {
     specialInstructions?: true
     createdAt?: true
     updatedAt?: true
+    expiresAt?: true
     couponId?: true
     businessId?: true
     customerId?: true
@@ -10603,6 +10607,7 @@ export namespace Prisma {
     specialInstructions?: true
     createdAt?: true
     updatedAt?: true
+    expiresAt?: true
     couponId?: true
     businessId?: true
     customerId?: true
@@ -10633,6 +10638,7 @@ export namespace Prisma {
     specialInstructions?: true
     createdAt?: true
     updatedAt?: true
+    expiresAt?: true
     couponId?: true
     businessId?: true
     customerId?: true
@@ -10750,6 +10756,7 @@ export namespace Prisma {
     specialInstructions: string | null
     createdAt: Date
     updatedAt: Date
+    expiresAt: Date | null
     couponId: string | null
     businessId: string
     customerId: string | null
@@ -10799,6 +10806,7 @@ export namespace Prisma {
     specialInstructions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    expiresAt?: boolean
     couponId?: boolean
     businessId?: boolean
     customerId?: boolean
@@ -10838,6 +10846,7 @@ export namespace Prisma {
     specialInstructions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    expiresAt?: boolean
     couponId?: boolean
     businessId?: boolean
     customerId?: boolean
@@ -10871,6 +10880,7 @@ export namespace Prisma {
     specialInstructions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    expiresAt?: boolean
     couponId?: boolean
     businessId?: boolean
     customerId?: boolean
@@ -10904,12 +10914,13 @@ export namespace Prisma {
     specialInstructions?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    expiresAt?: boolean
     couponId?: boolean
     businessId?: boolean
     customerId?: boolean
   }
 
-  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventDate" | "startTime" | "endTime" | "status" | "totalAmount" | "depositAmount" | "depositPaid" | "eventType" | "eventAddress" | "eventCity" | "eventState" | "eventZipCode" | "eventTimeZone" | "participantAge" | "participantCount" | "subtotalAmount" | "taxAmount" | "taxRate" | "isCompleted" | "isCancelled" | "specialInstructions" | "createdAt" | "updatedAt" | "couponId" | "businessId" | "customerId", ExtArgs["result"]["booking"]>
+  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventDate" | "startTime" | "endTime" | "status" | "totalAmount" | "depositAmount" | "depositPaid" | "eventType" | "eventAddress" | "eventCity" | "eventState" | "eventZipCode" | "eventTimeZone" | "participantAge" | "participantCount" | "subtotalAmount" | "taxAmount" | "taxRate" | "isCompleted" | "isCancelled" | "specialInstructions" | "createdAt" | "updatedAt" | "expiresAt" | "couponId" | "businessId" | "customerId", ExtArgs["result"]["booking"]>
   export type BookingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -10969,6 +10980,7 @@ export namespace Prisma {
       specialInstructions: string | null
       createdAt: Date
       updatedAt: Date
+      expiresAt: Date | null
       couponId: string | null
       businessId: string
       customerId: string | null
@@ -11427,6 +11439,7 @@ export namespace Prisma {
     readonly specialInstructions: FieldRef<"Booking", 'String'>
     readonly createdAt: FieldRef<"Booking", 'DateTime'>
     readonly updatedAt: FieldRef<"Booking", 'DateTime'>
+    readonly expiresAt: FieldRef<"Booking", 'DateTime'>
     readonly couponId: FieldRef<"Booking", 'String'>
     readonly businessId: FieldRef<"Booking", 'String'>
     readonly customerId: FieldRef<"Booking", 'String'>
@@ -22701,6 +22714,7 @@ export namespace Prisma {
     specialInstructions: 'specialInstructions',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    expiresAt: 'expiresAt',
     couponId: 'couponId',
     businessId: 'businessId',
     customerId: 'customerId'
@@ -23876,6 +23890,7 @@ export namespace Prisma {
     specialInstructions?: StringNullableFilter<"Booking"> | string | null
     createdAt?: DateTimeFilter<"Booking"> | Date | string
     updatedAt?: DateTimeFilter<"Booking"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
     couponId?: StringNullableFilter<"Booking"> | string | null
     businessId?: StringFilter<"Booking"> | string
     customerId?: StringNullableFilter<"Booking"> | string | null
@@ -23914,6 +23929,7 @@ export namespace Prisma {
     specialInstructions?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     couponId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     customerId?: SortOrderInput | SortOrder
@@ -23955,6 +23971,7 @@ export namespace Prisma {
     specialInstructions?: StringNullableFilter<"Booking"> | string | null
     createdAt?: DateTimeFilter<"Booking"> | Date | string
     updatedAt?: DateTimeFilter<"Booking"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
     couponId?: StringNullableFilter<"Booking"> | string | null
     businessId?: StringFilter<"Booking"> | string
     customerId?: StringNullableFilter<"Booking"> | string | null
@@ -23993,6 +24010,7 @@ export namespace Prisma {
     specialInstructions?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    expiresAt?: SortOrderInput | SortOrder
     couponId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     customerId?: SortOrderInput | SortOrder
@@ -24031,6 +24049,7 @@ export namespace Prisma {
     specialInstructions?: StringNullableWithAggregatesFilter<"Booking"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"Booking"> | Date | string | null
     couponId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
     businessId?: StringWithAggregatesFilter<"Booking"> | string
     customerId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
@@ -25745,6 +25764,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
@@ -25780,6 +25800,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     customerId?: string | null
@@ -25815,6 +25836,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
@@ -25850,6 +25872,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -25885,6 +25908,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     customerId?: string | null
@@ -25915,6 +25939,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
   export type BookingUncheckedUpdateManyInput = {
@@ -25942,6 +25967,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -27803,6 +27829,7 @@ export namespace Prisma {
     specialInstructions?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    expiresAt?: SortOrder
     couponId?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
@@ -27843,6 +27870,7 @@ export namespace Prisma {
     specialInstructions?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    expiresAt?: SortOrder
     couponId?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
@@ -27873,6 +27901,7 @@ export namespace Prisma {
     specialInstructions?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    expiresAt?: SortOrder
     couponId?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
@@ -30776,6 +30805,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
@@ -30810,6 +30840,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
@@ -31269,6 +31300,7 @@ export namespace Prisma {
     specialInstructions?: StringNullableFilter<"Booking"> | string | null
     createdAt?: DateTimeFilter<"Booking"> | Date | string
     updatedAt?: DateTimeFilter<"Booking"> | Date | string
+    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
     couponId?: StringNullableFilter<"Booking"> | string | null
     businessId?: StringFilter<"Booking"> | string
     customerId?: StringNullableFilter<"Booking"> | string | null
@@ -32251,6 +32283,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
@@ -32285,6 +32318,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
@@ -33334,6 +33368,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
@@ -33368,6 +33403,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     customerId?: string | null
@@ -33418,6 +33454,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
@@ -33452,6 +33489,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -33606,6 +33644,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
@@ -33640,6 +33679,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     customerId?: string | null
@@ -33769,6 +33809,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
@@ -33803,6 +33844,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34001,6 +34043,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
@@ -34035,6 +34078,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     businessId: string
     customerId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
@@ -34478,6 +34522,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
@@ -34512,6 +34557,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     customerId?: string | null
@@ -34708,6 +34754,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
@@ -34742,6 +34789,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -34966,6 +35014,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
@@ -35000,6 +35049,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     customerId?: string | null
@@ -35196,6 +35246,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
@@ -35230,6 +35281,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -35398,6 +35450,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
@@ -35432,6 +35485,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
     customerId?: string | null
@@ -35628,6 +35682,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
@@ -35662,6 +35717,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
@@ -36021,6 +36077,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     customerId?: string | null
   }
@@ -36304,6 +36361,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
@@ -36338,6 +36396,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
@@ -36372,6 +36431,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
@@ -36796,6 +36856,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     couponId?: string | null
     businessId: string
   }
@@ -36885,6 +36946,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
@@ -36919,6 +36981,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
@@ -36953,6 +37016,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
   }
@@ -37306,6 +37370,7 @@ export namespace Prisma {
     specialInstructions?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    expiresAt?: Date | string | null
     businessId: string
     customerId?: string | null
   }
@@ -37335,6 +37400,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
@@ -37369,6 +37435,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
@@ -37403,6 +37470,7 @@ export namespace Prisma {
     specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
   }
