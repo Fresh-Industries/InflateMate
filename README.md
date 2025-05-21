@@ -1,98 +1,74 @@
-# InflateMate - Multi-tenant Platform with Custom Domain Support
+# 🎈 InflateMate – The All-In-One Platform for Bounce House Businesses
 
-InflateMate is a multi-tenant platform that allows businesses to create their own websites with custom domain support. This project is built with Next.js, Clerk for authentication, and Prisma for database access.
+![CodeRabbit Pull Request Reviews](https://img.shields.io/coderabbit/prs/github/Fresh-Digital-Solutions/InflateMate?utm_source=oss&utm_medium=github&utm_campaign=Fresh-Digital-Solutions%2FInflateMate&labelColor=171717&color=FF570A&link=https%3A%2F%2Fcoderabbit.ai&label=CodeRabbit+Reviews)
 
-## Features
+InflateMate is a powerful, easy-to-use software platform designed specifically for bounce house and party rental companies.
 
-- **Multi-tenancy**: Each business gets their own website
-- **Custom Domain Support**: Businesses can connect their own domains to their websites
-- **Subdomain Support**: Each business gets a subdomain based on their name (e.g., `business-name.localhost:3000`)
-- **Dashboard**: Businesses can manage their website content and settings
-- **Authentication**: Secure authentication with Clerk
+Whether you're just getting started or looking to scale your business, InflateMate helps you manage everything from online bookings to customer communication—all in one place.
 
-## Custom Domain Implementation
+---
 
-The platform supports custom domains through the following components:
+## 💼 What You Get with InflateMate
 
-### 1. Middleware
+### 🖥️ Your Own Booking Website
+- Get a professional, mobile-friendly website hosted on your own subdomain or custom domain.
+- Showcase your inflatables, services, and prices.
+- Accept bookings online 24/7 with real-time availability.
+- Customize the look and feel with your own brand and colors.
 
-The middleware (`middleware.ts`) handles routing for custom domains and subdomains:
+### 📆 Smart Booking System
+- Prevent double bookings with real-time inventory tracking.
+- Let customers book with confidence—date/time conflicts are handled automatically.
+- Hold inventory while customers complete checkout (to reduce abandoned bookings).
 
-- Detects if the request is coming from a custom domain or subdomain
-- Rewrites the request to the appropriate route
-- Handles authentication for protected routes
+### 💳 Secure Payments (Powered by Stripe)
+- Collect deposits or full payments upfront.
+- Connect your Stripe account in minutes.
+- Automatic payment confirmation, receipts, and tracking.
 
-### 2. Domain Settings
+### 📃 Waivers & Contracts
+- Send waivers automatically after a booking.
+- Collect legally binding signatures online.
+- Get notified when a waiver is signed—no more paperwork.
 
-Businesses can configure their custom domains in the dashboard:
+### 📈 Business Dashboard
+- View upcoming bookings and customer history.
+- Add and manage your inventory (photos, pricing, availability).
+- Track revenue and performance with built-in analytics.
 
-- Set up a custom domain
-- Verify domain ownership
-- Configure DNS settings
-- Preview their website
+### 🎯 Built-in Marketing Tools
+- Offer coupon codes and discounts.
+- Capture leads from your website with sales funnels.
+- Send booking confirmation emails automatically.
 
-### 3. Dynamic Routes
+### 👥 Multi-User Access
+- Invite your team and manage permissions.
+- Great for family businesses or growing operations.
 
-The application uses dynamic routes to serve content based on the domain:
+---
 
-- `/[domain]/*` - Routes for both custom domains and business subdomains
+## 🧠 Why InflateMate?
 
-## Getting Started
+Most party rental software is outdated or overly complex. InflateMate was built with:
+- 💡 Modern design and simple user experience
+- 🛠️ Tools to grow your business, not just run it
+- 📱 Mobile-first features that work on the go
 
-### Prerequisites
+Whether you're running one bounce house or twenty, InflateMate helps you stay organized, get more bookings, and provide a better experience for your customers.
 
-- Node.js 16+
-- npm or yarn
-- PostgreSQL database
+---
 
-### Installation
+## 🔐 Built with Security & Reliability
 
-1. Clone the repository
-2. Install dependencies:
-   ```
-   npm install
-   ```
-3. Set up environment variables (copy `.env.example` to `.env.local`)
-4. Run database migrations:
-   ```
-   npx prisma migrate dev
-   ```
-5. Start the development server:
-   ```
-   npm run dev
-   ```
+- Hosted on Vercel with Cloudflare DNS for fast, secure websites
+- Payments processed by Stripe
+- User accounts and teams managed with Clerk (SOC2 compliant)
+- Your data is protected and backed by enterprise-grade infrastructure
 
-## Local Development with Custom Domains
+---
 
-To test custom domains locally:
+## 🚀 Ready to Try It?
 
-1. Add entries to your hosts file:
-   ```
-   127.0.0.1 business-name.localhost
-   127.0.0.1 custom-domain.localhost
-   ```
-2. Access your business site at `http://business-name.localhost:3000`
-3. Configure a custom domain in the dashboard
-4. Access your site via the custom domain at `http://custom-domain.localhost:3000`
+Visit [www.inflatemate.co](https://www.inflatemate.co) to learn more or request early access.
 
-## Production Deployment
-
-For production deployment with real custom domains:
-
-1. Set up a wildcard DNS record for your main domain (e.g., `*.yourdomain.com`)
-2. Configure your DNS provider to allow custom domain CNAME records
-3. Implement proper domain verification (TXT records)
-4. Set up SSL certificate provisioning for custom domains
-
-## Architecture
-
-The custom domain feature is implemented with the following architecture:
-
-1. **Middleware**: Handles domain detection and routing
-2. **Database**: Stores custom domain mappings for each business
-3. **API Routes**: Provides endpoints for domain verification and management
-4. **UI Components**: Allows businesses to manage their domains
-
-## License
-
-This project is licensed under the MIT License - see the LICENSE file for details.
+Built by Fresh Digital Solutions.
