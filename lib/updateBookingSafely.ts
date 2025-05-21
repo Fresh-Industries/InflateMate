@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { prisma } from "@/lib/prisma";
 import { Prisma, BookingStatus, InvoiceStatus, QuoteStatus } from "@/prisma/generated/prisma"; // Assuming BookingStatus is part of generated prisma client
 import { createId } from '@paralleldrive/cuid2';
@@ -69,7 +70,7 @@ export async function updateBookingSafely(
         // Fetch the booking with a lock for update
         const booking = await tx.booking.findFirst({
           where: { id: bookingId, businessId },
-          include: { inventoryItems: true, customer: true },
+          include: { inventoryItems: true, customer: true, invoice: true, quote: true },
         });
 
         if (!booking) {
