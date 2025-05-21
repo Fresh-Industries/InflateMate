@@ -16,7 +16,7 @@ interface HeaderProps {
     { number: 3, title: "Review & Pay", icon: CreditCard },
   ];
 
-const Header = ({ currentStep, bookingId }: HeaderProps) => {
+const Header = ({ currentStep }: HeaderProps) => {
   return (
     <div className="relative mb-12">
       <div className="flex justify-between items-center z-10 relative">
