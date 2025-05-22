@@ -799,9 +799,13 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
       }
       
       const paymentClientSecret = paymentData.clientSecret;
+      const paymentBookingId = paymentData.bookingId;
+      console.log('Received bookingId:', paymentBookingId);
+      
       if (!paymentClientSecret) throw new Error("Missing client secret from server");
       
       setClientSecret(paymentClientSecret);
+      setPaymentBookingId(paymentBookingId);
       setShowPaymentForm(true);
       
     } catch (error) {
@@ -1037,6 +1041,9 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
     }
   };
 
+  // Add the state for bookingId at the top of the component
+  const [paymentBookingId, setPaymentBookingId] = useState<string | null>(null);
+
   // Conditional rendering based on expiration
   if (isExpired) {
     return (
@@ -1138,6 +1145,7 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
               subtotal={hasAddedItems ? addedItemsTotal : rawSubtotal}
               taxAmount={hasAddedItems ? ((taxRate || 0) * addedItemsTotal / 100) : taxAmount}
               taxRate={taxRate || 0}
+              bookingId={paymentBookingId || undefined}
               onSuccess={handlePaymentSuccess}
               onError={handlePaymentError}
             />

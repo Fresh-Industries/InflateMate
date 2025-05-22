@@ -117,14 +117,24 @@ export default function Hero({
     themeConfig[themeName].heroTextColor?.(colors) || getContrastColor(colors.secondary[500]);
   const hero = themeConfig[themeName].heroAccentElements?.(colors) || {};
   const heroAnimation = themeConfig[themeName].animations?.elementEntrance || "fadeIn 0.3s ease-out";
-
-  console.log(hero);
-  console.log(heroAnimation);
-  const heroStyles = {
-    background: sectionBg,
+  
+  // Create hero styles based on the type of sectionBg
+  let heroStyles: React.CSSProperties = {
     color: textColor,
     animation: heroAnimation,
   };
+  
+  // If sectionBg is a string, set it as background property
+  if (typeof sectionBg === 'string') {
+    heroStyles.background = sectionBg;
+  } 
+  // If it's an object, spread its properties into heroStyles
+  else if (typeof sectionBg === 'object' && sectionBg !== null) {
+    heroStyles = {
+      ...heroStyles,
+      ...(sectionBg as CSSProperties)
+    };
+  }
 
   // Check if hero is an object with accent elements
   const hasAccentElements = 

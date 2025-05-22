@@ -72,6 +72,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [timer, setTimer] = useState<number>(0);
+  const [bookingId, setBookingId] = useState<string | null>(null);
 
   const { selectedItems, selectInventoryItem, updateQuantity, clearSelection } = useSelectedItems();
 
@@ -218,8 +219,12 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
         throw new Error(paymentData.error || "Failed to create payment intent.");
       }
       const clientSecret = paymentData.clientSecret;
+      const bookingId = paymentData.bookingId;
+      console.log('Received bookingId:', bookingId);
+
       if (!clientSecret) throw new Error("Missing client secret from server.");
       setClientSecret(clientSecret);
+      setBookingId(bookingId);
       setShowPaymentForm(true);
     } catch (error) {
       toast({
@@ -329,6 +334,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
             subtotal={rawSubtotal}
             taxAmount={taxAmount}
             taxRate={taxRate || 0}
+            bookingId={bookingId || undefined}
             onSuccess={async () => {
               setShowPaymentForm(false);
               setClientSecret(null);

@@ -16,6 +16,7 @@ interface PaymentFormProps {
   subtotal?: number;
   taxAmount?: number;
   taxRate?: number;
+  bookingId?: string;
 }
 
 export function PaymentForm({
@@ -27,6 +28,7 @@ export function PaymentForm({
   subtotal,
   taxAmount,
   taxRate,
+  bookingId,
 }: PaymentFormProps) {
   const stripe = useStripe();
   const elements = useElements();
@@ -81,8 +83,21 @@ export function PaymentForm({
           description: "Your booking has been confirmed",
         });
         
-        // Redirect manually to ensure it happens
-        router.push(`/dashboard/${businessId}/bookings`);
+        // Get the booking ID from props or payment intent metadata
+        const confirmedBookingId = bookingId || 
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ((paymentIntent as any)?.metadata?.prismaBookingId as string | undefined);
+        console.log('Booking ID:', confirmedBookingId);
+
+        // Extract domain from path to construct redirect URL
+        const fullPath = window.location.pathname;
+        console.log('Current pathname:', fullPath);
+
+        // Build redirect URL to success page
+        const redirectUrl = `/success?bookingId=${confirmedBookingId}&businessId=${businessId}`;
+        
+        console.log('Redirecting to:', redirectUrl);
+        router.push(redirectUrl);
         
         await onSuccess();
       } else {

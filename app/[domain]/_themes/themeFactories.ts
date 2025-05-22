@@ -75,6 +75,8 @@ export function makeBookingStyles(overrides: Partial<BookingStylesConfig> = {}):
     stepBorder: (c, active: boolean) => `${borderWidths.medium} solid ${active ? c.primary[500] : c.primary[100]}40`,
     stepTextColor: (c: ThemeColors, active: boolean) => (active ? c.primary[500] : c.text[900]),
     stepIconColor: (c: ThemeColors, active: boolean) => (active ? getContrastColor(c.primary[500]) : c.text[900]),
+    title: (c: ThemeColors) => ({ color: c.primary[900], fontWeight: 'bold' }),
+    subtitle: (c: ThemeColors) => ({ color: c.text[500] }),
     availabilityCard: {
       background: (c: ThemeColors) => c.background[100],
       border: (c, sel: boolean) => `${borderWidths.thin} solid ${sel ? c.primary[500] : c.primary[100]}20`,

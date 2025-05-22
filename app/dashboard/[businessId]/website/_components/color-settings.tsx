@@ -33,70 +33,95 @@ interface ColorSettingsProps {
 }
 const colorPalettes = [
   {
-    name: "Pastel Playground",
-    primary:    "#A2D5F2", // sky‑blue buttons & links
-    secondary:  "#F2A2E8", // cotton‑candy panels & icons
-    accent:     "#FFE066", // sunny‑yellow badges & hovers
-    background: "#F7F9FC", // whisper‑light page BG
-    text:       "#2E3A59", // deep‑blue text for 4.5:1+ contrast
+    name: "Circus Spectacular",
+    primary: "#FF3D7F", // vibrant magenta (main buttons/CTAs)
+    secondary: "#32B4FF", // bright sky blue (sections, cards)
+    accent: "#FFD100", // sunshine yellow (highlights, badges)
+    background: "#F9F4FF", // soft lavender white (background)
+    text: "#2B2D42", // deep navy (readable text)
   },
   {
-    name: "Sunshine Pop",
-    primary:    "#FFC947", // mustard CTAs
-    secondary:  "#FF6A00", // tangerine outlines & icons
-    accent:     "#00B8A9", // teal highlights & hover states
-    background: "#FFF8E7", // warm cream background
-    text:       "#333333", // dark charcoal copy
+    name: "Tropical Bounce",
+    primary: "#00BFB2", // turquoise (primary actions)
+    secondary: "#FF9F1C", // sunset orange (feature sections)
+    accent: "#FC4F67", // coral pink (accents, notifications)
+    background: "#F0FFF6", // mint white (background)
+    text: "#1F2D3D", // charcoal blue (text)
   },
   {
-    name: "Bubblegum Bliss",
-    primary:    "#FF6EC7", // hot‑pink buttons
-    secondary:  "#6EC1E4", // pastel‑blue cards
-    accent:     "#FFD670", // pale‑gold micro‑interactions
-    background: "#F0F8FF", // airy light‑blue BG
-    text:       "#1A1A1A", // almost‑black for headlines
+    name: "Neon Playground",
+    primary: "#6C11FF", // electric purple (main CTAs)
+    secondary: "#00E0A6", // bright mint (secondary elements)
+    accent: "#FF427F", // hot pink (highlights, special offers)
+    background: "#FBFAFE", // pale lilac white (background)
+    text: "#120D31", // deep indigo (text contrast)
   },
   {
-    name: "Tropic Treat",
-    primary:    "#FF9F1C", // bright‑orange primary
-    secondary:  "#2EC4B6", // sea‑green secondaries
-    accent:     "#E71D36", // raspberry accent pops
-    background: "#FBFCFD", // near‑white base
-    text:       "#2E2E2E", // dark gray body text
+    name: "Fantasy Kingdom",
+    primary: "#5271FF", // royal blue (primary buttons)
+    secondary: "#FF9F8C", // coral peach (cards, banners)
+    accent: "#35D282", // emerald green (highlights, tags)
+    background: "#FEF8FF", // ivory white (background)
+    text: "#2D2B55", // twilight purple (text)
   },
   {
-    name: "Confetti Carnival",
-    primary:    "#FFCA3A", // marigold primaries
-    secondary:  "#8AC926", // lime‑green secondaries
-    accent:     "#1982C4", // cerulean accent details
-    background: "#FFFFFF", // neutral white canvas
-    text:       "#212121", // pure black headlines
+    name: "Bubblegum Party",
+    primary: "#FF6BB8", // bubblegum pink (main actions)
+    secondary: "#4DB5FF", // clear blue (sections, headers)
+    accent: "#FFDE59", // cheerful yellow (highlights)
+    background: "#FFF0F9", // cotton candy (background)
+    text: "#33264E", // plum purple (text)
   },
   {
-    name: "Balloon Bonanza Rev",
-    primary:    "#357ABD", // deeper, calmer sky‑blue for CTAs & headings
-    secondary:  "#2AA69A", // richer teal for outlines, icons & secondary buttons
-    accent:     "#FFBE00", // warmer gold for badges, hovers & micro‑interactions
-    background: "#F7FAFF", // very pale off‑white so primary really stands out
-    text:       "#1A1A1A", // rock‑solid dark for all copy & headings
+    name: "Adventure Safari",
+    primary: "#FF8427", // safari orange (primary CTAs)
+    secondary: "#4CAF50", // jungle green (panels, cards)
+    accent: "#FFCD38", // sun yellow (badges, icons)
+    background: "#FFFAED", // sand beige (background)
+    text: "#33302E", // dark brown (text)
   },
   {
-    name: "Neon Party",
-    primary:    "#FF4081", // electric pink primaries
-    secondary:  "#536DFE", // electric indigo secondaries
-    accent:     "#00E5FF", // cyan pop accents
-    background: "#FAFAFA", // clean light gray
-    text:       "#263238", // slate gray copy
+    name: "Space Bounce",
+    primary: "#7B4DFF", // cosmic purple (main actions)
+    secondary: "#14CAFF", // nebula blue (cards, sections)
+    accent: "#FF6584", // asteroid pink (highlights)
+    background: "#F5F6FF", // star white (background)
+    text: "#1E1656", // deep space (text)
   },
   {
-    name: "Starburst Fun",
-    primary:    "#D81159", // punchy magenta
-    secondary:  "#8F2D56", // rich berry secondary
-    accent:     "#218380", // teal accent for contrast
-    background: "#FCFCFC", // bright neutral BG
-    text:       "#0C090D", // near‑black text
+    name: "Sweet Celebration",
+    primary: "#FF5C8D", // strawberry (primary buttons)
+    secondary: "#7BD9D0", // mint ice cream (sections)
+    accent: "#FFBE0B", // honey gold (highlights, special tags)
+    background: "#FFF9FA", // vanilla cream (background)
+    text: "#3D3A50", // chocolate (text)
+  },
+  {
+    name: "Superhero Bounce",
+    primary: "#E63946", // hero red (main CTAs)
+    secondary: "#457B9D", // navy blue (panels, cards)
+    accent: "#FFD60A", // power yellow (badges, stars)
+    background: "#F4F9FF", // sky white (background)
+    text: "#1D3557", // midnight blue (text)
+  },
+  {
+    name: "Magic Wonderland",
+    primary: "#9D4EDD", // enchanted purple (primary actions)
+    secondary: "#06D6A0", // magical teal (sections, features)
+    accent: "#FF7C43", // spellbound orange (accents)
+    background: "#F8F7FF", // fairy dust white (background)
+    text: "#2B2D42", // mystic charcoal (text)
+  },
+  {
+    name: "Happy Hopper",
+    primary:    "#41C9E2", // swimming pool blue (primary/hero)
+    secondary:  "#F27C1E", // orange pop (buttons, nav highlights)
+    accent:     "#EDE23B", // daffodil yellow (badges, tags)
+    background: "#FDFDF6", // pale lemonade (background)
+    text:       "#232B30", // dark slate, readable on light BG
   },
 ];
+
 
 export default function ColorSettings({
   colors,

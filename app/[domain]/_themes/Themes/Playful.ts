@@ -251,6 +251,97 @@ export const playfulOverrides: Partial<ThemeDefinition> = {
     stepTextColor: (c, active) => (active ? c.primary[900] : c.text[500]),
     stepIconColor: (c, active) => (active ? c.accent[500] : c.secondary[500]),
     
+    // Extended booking form styles
+    title: (c) => ({
+      color: c.primary[900],
+      fontFamily: '"Outfit", "Nunito", sans-serif',
+      fontWeight: 'bold',
+      letterSpacing: '0.5px',
+    }),
+    
+    subtitle: (c) => ({
+      color: c.text[500],
+      fontFamily: '"Outfit", "Nunito", sans-serif',
+    }),
+    
+    formContainer: (c) => ({
+      background: c.primary[100] + '20',
+      border: `2px dashed ${c.primary[500]}`,
+      borderRadius: '24px',
+      padding: '20px',
+    }),
+    
+    resultsContainer: (c) => ({
+      background: c.background[100] + '80',
+      border: `2px dashed ${c.primary[500]}`,
+      borderRadius: '24px',
+      boxShadow: '0 8px 20px rgba(0,0,0,0.1)',
+      padding: '24px',
+    }),
+    
+    resultsHeading: (c) => ({
+      color: c.primary[500],
+      fontFamily: '"Outfit", "Nunito", sans-serif',
+      fontWeight: 'bold',
+      position: 'relative',
+    }),
+    
+    priceTag: (c) => ({
+      background: c.accent[500],
+      color: '#ffffff',
+      borderRadius: '9999px',
+      boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+      padding: '4px 8px',
+    }),
+    
+    productName: (c) => ({
+      fontFamily: '"Outfit", "Nunito", sans-serif',
+      fontWeight: 'bold',
+      color: c.primary[900],
+    }),
+    
+    specsContainer: (c) => ({
+      background: c.background[500] + '30',
+      borderRadius: '12px',
+      border: `1px dashed ${c.primary[100]}`,
+      padding: '8px',
+    }),
+    
+    selectedFooter: (c) => ({
+      borderTop: `1px dashed ${c.primary[100]}`,
+      paddingTop: '16px',
+      marginTop: '8px',
+    }),
+    
+    imageContainer: (c) => ({
+      borderBottom: `2px dashed ${c.primary[500]}`,
+      overflow: 'hidden',
+    }),
+    
+    continueSection: (c) => ({
+      borderTop: `2px dashed ${c.primary[100]}`,
+      paddingTop: '20px',
+      marginTop: '20px',
+    }),
+    
+    selectedCardTransform: () => 'rotate(1deg)',
+    
+    decorativeElements: {
+      topRight: {
+        background: 'linear-gradient(135deg, #fdba74, #f97316)',
+        opacity: 0.6,
+        zIndex: -1,
+        animation: 'pulse 3s infinite',
+        borderRadius: '50%',
+      },
+      bottomLeft: {
+        background: '#4f46e5',
+        opacity: 0.2,
+        zIndex: -1,
+        borderRadius: '50%',
+      }
+    },
+    
     availabilityCard: {
       background: (c) => c.background[100],
       border: (c, isSelected) =>
@@ -286,6 +377,7 @@ export const playfulOverrides: Partial<ThemeDefinition> = {
       focusBorder: (c) => `2px solid ${c.accent[500]}`,
       placeholderColor: (c) => c.text[500],
       labelColor: (c) => c.primary[900],
+      borderRadius: () => '16px',
     },
     
     timeSlot: {
