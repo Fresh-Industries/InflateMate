@@ -418,5 +418,5 @@ export interface LinkStylesConfig {
 }
 
 export interface GlobalStylesConfig {
-    globalStyles: () => string;
+    globalStyles: (colors: ThemeColors) => string;
 }

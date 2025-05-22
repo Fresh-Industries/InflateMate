@@ -127,7 +127,7 @@ export function EventDetailsStep({
   // Input styles
   const inputStyle = {
     background: theme.bookingStyles.input.background(c),
-    border: `1px solid ${theme.bookingStyles.input.border(c)}`,
+    border: theme.bookingStyles.input.border(c),
     borderRadius: "6px",
   };
   

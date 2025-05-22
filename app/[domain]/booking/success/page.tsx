@@ -55,8 +55,6 @@ export default function BookingSuccessPage() {
   
   const bookingId = searchParams.get('bookingId');
   const businessId = searchParams.get('businessId');
-  console.log('Booking ID:', bookingId);
-  console.log('Business ID:', businessId);
   
   useEffect(() => {
     async function fetchBookingDetails() {
