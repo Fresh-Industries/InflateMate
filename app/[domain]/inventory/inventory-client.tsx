@@ -79,13 +79,28 @@ export default function InventoryClient({
   };
 
   // Enhanced header style using theme's hero section styling
-  const headerStyle = {
-    background: theme.heroBackground ? theme.heroBackground(colors) : `linear-gradient(135deg, ${colors.primary}, ${colors.secondary})`,
-    color: theme.heroTextColor ? theme.heroTextColor(colors) : getContrastColor(colors.primary),
+  const defaultHeaderBackground = `linear-gradient(135deg, ${colors.primary[500]}, ${colors.secondary[500]})`;
+  const defaultHeaderColor = getContrastColor(colors.primary[500]);
+
+  const headerStyle: React.CSSProperties = {
     borderRadius: cardStyle.borderRadius,
     boxShadow: theme.cardStyles.boxShadow(colors),
     border: theme.cardStyles.border(colors),
   };
+
+  const themeProvidedBackground = theme.heroBackground
+    ? theme.heroBackground(colors)
+    : defaultHeaderBackground;
+
+  if (typeof themeProvidedBackground === 'string') {
+    headerStyle.background = themeProvidedBackground;
+  } else if (themeProvidedBackground && typeof themeProvidedBackground === 'object') {
+    Object.assign(headerStyle, themeProvidedBackground);
+  }
+
+  headerStyle.color = theme.heroTextColor
+    ? theme.heroTextColor(colors)
+    : defaultHeaderColor;
 
   // Enhanced input style using theme properties
   const inputStyle = {
