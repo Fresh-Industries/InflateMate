@@ -801,7 +801,7 @@ async function handleBookingConfirmation(bookingId: string) {
       <p>The ${business.name} Team</p>
     `; // Improved email content
     await sendSignatureEmail({
-      from: `${business.name} <noreply@updates.inflatmate.co>`, // Use dynamic business name
+      from: `${business.name} <waivers+inflatmate@freshdigitalsolutions.tech>`, // Use dynamic business name
       to: customer.email,
       subject: `Action Required: Sign Your Waiver for Booking with ${business.name}`, // More specific subject
       html: emailHtml,

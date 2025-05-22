@@ -228,6 +228,7 @@ function DashboardUI({ children }: { children: React.ReactNode }) {
         <OrganizationSwitcher 
           hidePersonal={true} 
           
+          
           appearance={{ 
             elements: { 
               avatarBox: "w-8 h-8",

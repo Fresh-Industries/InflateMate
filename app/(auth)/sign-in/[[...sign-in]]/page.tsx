@@ -9,6 +9,8 @@ export default function AuthPage() {
           fallbackRedirectUrl="/callback" 
           signUpFallbackRedirectUrl="/sign-up"
           waitlistUrl='/waitlist'
+          signUpUrl='/sign-up'
+          forceRedirectUrl={process.env.NEXT_PUBLIC_API_HOST + '/callback'}
           appearance={{
             elements: {
               formButtonPrimary: 'bg-gradient-to-r from-primary to-accent text-white rounded-full shadow-lg hover:scale-105 transform transition-transform duration-300 rounded-full',
