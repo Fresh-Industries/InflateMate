@@ -112,10 +112,24 @@ export default async function AboutPage({ params }: { params: Promise<{ domain: 
   } : buttonStyle;
 
   // Hero section style
-  const heroStyle = {
-    background: theme.heroBackground ? theme.heroBackground(colors) : `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
-    color: theme.heroTextColor ? theme.heroTextColor(colors) : getContrastColor(colors.primary),
-  };
+  const defaultHeroBackground = `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.accent[500]} 100%)`;
+  const defaultHeroColor = getContrastColor(colors.primary[500]);
+
+  const heroStyle: React.CSSProperties = {};
+
+  const themeProvidedBackground = theme.heroBackground 
+    ? theme.heroBackground(colors) 
+    : defaultHeroBackground;
+
+  if (typeof themeProvidedBackground === 'string') {
+    heroStyle.background = themeProvidedBackground;
+  } else if (themeProvidedBackground && typeof themeProvidedBackground === 'object') {
+    Object.assign(heroStyle, themeProvidedBackground);
+  }
+
+  heroStyle.color = theme.heroTextColor 
+    ? theme.heroTextColor(colors) 
+    : defaultHeroColor;
 
   // Feature card style (Why Choose Us section)
   const featureCardStyle = {
