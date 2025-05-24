@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { unstable_cache, revalidateTag } from "next/cache";
 import { Prisma } from "@prisma/client";
 
@@ -85,8 +85,8 @@ export async function GET(
     }
 
     // Authenticated request logic: check access
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json(
         { error: "Access denied" },
         { status: 403 }
@@ -133,8 +133,8 @@ export async function PATCH(
     }
 
     const businessId = params.businessId;
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json(
         { error: "Access denied" },
         { status: 403 }

@@ -1,7 +1,7 @@
 import React from 'react'
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils"
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils"
 import BusinessSettingsForm from "@/app/dashboard/[businessId]/settings/_components/BusinessSettingsForm"
 
 // Business interface for settings form
@@ -35,7 +35,8 @@ async function getBusinessData(businessId: string): Promise<BusinessSettings | n
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
+  const membership = getMembershipByBusinessId(user, businessId);
+  const userBusinessId = membership?.organization?.business?.id;
   if (!userBusinessId || userBusinessId !== businessId) {
     redirect("/dashboard");
   }

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { updateBookingSafely, UpdateBookingDataInput, BookingConflictError } from '@/lib/updateBookingSafely';
 import { z } from 'zod'; // Import Zod for schema validation
 
@@ -18,8 +18,8 @@ export async function GET(
     const { businessId, bookingId } = await params;
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -150,12 +150,13 @@ export async function PATCH(
     const { businessId, bookingId } = await params;
     const user = await getCurrentUserWithOrgAndBusiness();
 
-    if (!user || !user.membership || !user.membership.organization) {
-      return NextResponse.json({ error: "Unauthorized: User or organization details missing." }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized: User details missing." }, { status: 401 });
     }
 
-    const userBusiness = user.membership.organization.business;
-    if (!userBusiness || userBusiness.id !== businessId) {
+    // Check that the user has access to this business
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Forbidden: Access denied to this business." }, { status: 403 });
     }
 
@@ -318,8 +319,8 @@ export async function DELETE(
     }
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 

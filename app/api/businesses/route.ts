@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getPrimaryMembership } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 
@@ -28,7 +28,8 @@ export async function POST(req: NextRequest) {
     }
 
     // Get the user's organization via membership
-    const org = user.membership?.organization;
+    const membership = getPrimaryMembership(user);
+    const org = membership?.organization;
     if (!org) {
       return NextResponse.json(
         { message: "User is not a member of any organization" },
@@ -88,7 +89,8 @@ export async function GET() {
       );
     }
 
-    const org = user.membership?.organization;
+    const membership = getPrimaryMembership(user);
+    const org = membership?.organization;
     if (!org) {
       return NextResponse.json(
         { error: "User is not a member of any organization" },

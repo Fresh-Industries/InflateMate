@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import WebsiteCustomizer from "./_components/website-customizer";
@@ -15,7 +15,8 @@ async function getBusinessData(businessId: string) {
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
+  const membership = getMembershipByBusinessId(user, businessId);
+  const userBusinessId = membership?.organization?.business?.id;
   if (!userBusinessId || userBusinessId !== businessId) {
     redirect('/dashboard');
   }

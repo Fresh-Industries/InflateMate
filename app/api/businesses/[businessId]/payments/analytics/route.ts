@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { PaymentType, PaymentStatus } from "../../../../../../prisma/generated/prisma/client";
 import { startOfDay } from "date-fns";
 
@@ -21,8 +21,8 @@ export async function GET(
   if (!businessId) return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
-  if (!userBusinessId || userBusinessId !== businessId) {
+  const membership = getMembershipByBusinessId(user, businessId);
+  if (!membership) {
     return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 

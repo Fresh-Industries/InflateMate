@@ -421,7 +421,7 @@ export default function DashboardLayout({
 }) {
   return (
     <NotificationsProvider>
-      <DashboardUI>{children}</DashboardUI>
+      <DashboardUI> {children}</DashboardUI>
     </NotificationsProvider>
   );
 } 

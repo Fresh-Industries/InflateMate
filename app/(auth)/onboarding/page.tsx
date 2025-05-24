@@ -1,27 +1,42 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import { useState, useMemo, memo } from "react";
+import { useState, useMemo, memo, useEffect } from "react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { ConnectAccountOnboarding, ConnectComponentsProvider } from "@stripe/react-connect-js";
-import { useStripeConnect } from "@/hooks/use-stripe-connect";
 import { useAuth } from "@clerk/nextjs";
 import { motion } from "framer-motion";
-import { Building2, MapPin, CreditCardIcon, Info } from "lucide-react";
+import {
+  Building2,
+  MapPin,
+  CreditCardIcon,
+  Info,
+  CheckCircle,
+  ExternalLink,
+} from "lucide-react";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useOnboarding } from "@/context/OnboardingContext";
 
 const step1Schema = z.object({
-  businessName: z.string().min(2, "Business name must be at least 2 characters"),
+  businessName: z
+    .string()
+    .min(2, "Business name must be at least 2 characters"),
 });
 
 const step2Schema = z.object({
@@ -29,15 +44,70 @@ const step2Schema = z.object({
   businessCity: z.string().min(2, "City is required"),
   businessState: z.string().length(2, "State must be 2 letters"),
   businessZip: z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code"),
-  businessPhone: z.string().regex(/^\+?1?\d{9,15}$/, "Invalid phone number"),
+  businessPhone: z
+    .string()
+    .transform((s) => s.replace(/\D/g, ""))
+    .refine((s) => s.length === 10 || s.length === 11, {
+      message: "Enter a valid phone number",
+    }),
+  businessEmail: z.string().email("Invalid email address"),
 });
 
-// Animated container for step transitions
-const AnimatedContainer = ({ children, currentStep, targetStep }: { children: React.ReactNode, currentStep: number, targetStep: number }) => (
+const stepInfoContent = [
+  {
+    id: 1,
+    title: "Business Identity",
+    description:
+      "Let's start with your business name. This will be used to create your business profile and help customers identify your bounce house rental service.",
+    icon: <Building2 className="h-10 w-10 text-violet-600" />,
+    features: [
+      "Create business profile",
+      "Set up account identity",
+      "Enable customer recognition",
+    ],
+  },
+  {
+    id: 2,
+    title: "Location & Contact",
+    description:
+      "Provide your primary business address and contact details. This helps us verify your business and ensures smooth communication with customers.",
+    icon: <MapPin className="h-10 w-10 text-violet-600" />,
+    features: [
+      "Verify business location",
+      "Enable customer contact",
+      "Set delivery zones",
+    ],
+  },
+  {
+    id: 3,
+    title: "Secure Payment Setup",
+    description:
+      "We've created your business profile. Now, let's connect with Stripe to securely process payments and manage your earnings from rentals.",
+    icon: <CreditCardIcon className="h-10 w-10 text-violet-600" />,
+    features: [
+      "Secure payment processing",
+      "Automatic transfers",
+      "Financial reporting",
+    ],
+  },
+];
+
+const AnimatedContainer = ({
+  children,
+  currentStep,
+  targetStep,
+}: {
+  children: React.ReactNode;
+  currentStep: number;
+  targetStep: number;
+}) => (
   <motion.div
-    initial={{ opacity: 0, y: 20 }}
-    animate={{ opacity: currentStep === targetStep ? 1 : 0, y: currentStep === targetStep ? 0 : 20 }}
-    exit={{ opacity: 0, y: -20 }}
+    initial={{ opacity: 0, x: 20 }}
+    animate={{
+      opacity: currentStep === targetStep ? 1 : 0,
+      x: currentStep === targetStep ? 0 : 20,
+    }}
+    exit={{ opacity: 0, x: -20 }}
     transition={{ duration: 0.4, ease: "easeInOut" }}
     style={{ display: currentStep === targetStep ? "block" : "none" }}
   >
@@ -45,70 +115,116 @@ const AnimatedContainer = ({ children, currentStep, targetStep }: { children: Re
   </motion.div>
 );
 
-// Enhanced gradient text component
-const GradientText = memo(({ children, className }: { children: React.ReactNode, className: string }) => (
-  <span className={`bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent font-bold ${className || ''}`}>
-    {children}
-  </span>
-));
-GradientText.displayName = 'GradientText';
+const GradientText = memo(
+  ({
+    children,
+    className,
+  }: {
+    children: React.ReactNode;
+    className?: string;
+  }) => (
+    <span
+      className={`bg-gradient-to-r from-violet-600 to-indigo-500 bg-clip-text text-transparent font-bold ${
+        className ?? ""
+      }`}
+    >
+      {children}
+    </span>
+  )
+);
+GradientText.displayName = "GradientText";
 
-// Step indicator component
-const StepIndicator = ({ currentStep, totalSteps }: { currentStep: number, totalSteps: number }) => {
+const StepIndicator = ({
+  currentStep,
+  totalSteps,
+}: {
+  currentStep: number;
+  totalSteps: number;
+}) => {
   const steps = Array.from({ length: totalSteps }, (_, i) => i + 1);
-  
   return (
-    <div className="flex items-center justify-center mb-8 w-full">
-      {steps.map((step) => (
-        <div key={step} className="flex items-center">
-          <div 
-            className={`flex items-center justify-center h-10 w-10 rounded-full transition-all duration-300 ${
-              step < currentStep 
-                ? "bg-violet-600 text-white" 
-                : step === currentStep 
-                ? "bg-gradient-to-r from-violet-600 to-indigo-500 text-white ring-4 ring-violet-100" 
-                : "bg-gray-100 text-gray-400"
-            }`}
-          >
-            {step < currentStep ? (
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-              </svg>
-            ) : (
-              <span className="text-sm font-medium">{step}</span>
+    <div className="flex justify-center mb-10">
+      <div className="flex items-center space-x-4">
+        {steps.map((step) => (
+          <div key={step} className="flex items-center">
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{
+                scale: step <= currentStep ? 1 : 0.9,
+                opacity: step <= currentStep ? 1 : 0.6,
+              }}
+              transition={{ duration: 0.3, delay: step * 0.1 }}
+              className={`relative flex h-12 w-12 items-center justify-center rounded-full transition-all duration-300 ${
+                step < currentStep
+                  ? "bg-gradient-to-r from-green-500 to-emerald-500 text-white"
+                  : step === currentStep
+                  ? "bg-gradient-to-r from-violet-600 to-indigo-500 text-white ring-4 ring-violet-200"
+                  : "bg-gray-100 text-gray-400 border-2 border-gray-200"
+              }`}
+            >
+              {step < currentStep ? (
+                <CheckCircle className="h-5 w-5" />
+              ) : (
+                <span className="text-sm font-semibold">{step}</span>
+              )}
+            </motion.div>
+            {step < totalSteps && (
+              <motion.div
+                initial={{ scaleX: 0 }}
+                animate={{ scaleX: step < currentStep ? 1 : 0 }}
+                transition={{ duration: 0.5, delay: step * 0.1 }}
+                className="mx-4 h-1 w-16 origin-left rounded-full"
+                style={{
+                  backgroundColor:
+                    step < currentStep ? "#10b981" : "#e5e7eb",
+                }}
+              />
             )}
           </div>
-          
-          {step < totalSteps && (
-            <div 
-              className={`h-1 w-12 ${
-                step < currentStep ? "bg-violet-600" : "bg-gray-200"
-              }`}
-            />
-          )}
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   );
 };
 
-// Animated input component with improved styling and added tooltip support
-const FormInput = ({ id, label, value, onChange, placeholder, type = "text", maxLength, className = "", tooltipContent }: { id: string, label: string, value: string, onChange: (e: React.ChangeEvent<HTMLInputElement>) => void, placeholder: string, type?: string, maxLength?: number, className?: string, tooltipContent?: string }) => (
+const FormInput = ({
+  id,
+  label,
+  value,
+  onChange,
+  placeholder,
+  type = "text",
+  maxLength,
+  tooltipContent,
+}: {
+  id: string;
+  label: string;
+  value: string;
+  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  placeholder: string;
+  type?: string;
+  maxLength?: number;
+  tooltipContent?: string;
+}) => (
   <TooltipProvider>
     <Tooltip delayDuration={150}>
       <motion.div
-        initial={{ opacity: 0, y: 10 }}
+        initial={{ opacity: 0, y: 15 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.3 }}
-        className="relative"
+        transition={{ duration: 0.4 }}
+        whileHover={{ y: -2 }}
+        className="relative group mb-6"
       >
         <TooltipTrigger asChild>
-          <div className="flex items-center mb-1.5">
-            <Label htmlFor={id} className="block text-gray-700 font-medium cursor-help">
+          <div className="flex items-center mb-2">
+            <Label
+              htmlFor={id}
+              className="cursor-help text-sm font-semibold text-gray-700"
+            >
               {label}
             </Label>
             {tooltipContent && (
-              <Info className="h-4 w-4 text-gray-400 ml-1" />
+              <Info className="ml-1.5 h-3 w-3 text-gray-400 group-hover:text-violet-500" />
             )}
           </div>
         </TooltipTrigger>
@@ -119,12 +235,12 @@ const FormInput = ({ id, label, value, onChange, placeholder, type = "text", max
           onChange={onChange}
           placeholder={placeholder}
           maxLength={maxLength}
-          className={`rounded-lg border-gray-200 bg-white/50 shadow-sm h-11 focus:border-violet-400 focus:ring-2 focus:ring-violet-400/30 transition-all ${className}`}
           required
+          className="h-12 w-full rounded-xl border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20"
         />
       </motion.div>
       {tooltipContent && (
-        <TooltipContent>
+        <TooltipContent side="top">
           <p>{tooltipContent}</p>
         </TooltipContent>
       )}
@@ -132,177 +248,171 @@ const FormInput = ({ id, label, value, onChange, placeholder, type = "text", max
   </TooltipProvider>
 );
 
-// Memoized form step components with enhanced visuals
-const Step1 = memo(({ value, onChange }: { value: string, onChange: (value: string) => void }) => (
-  <div className="space-y-6">
-    <div className="flex justify-center mb-8">
-      <div className="w-20 h-20 rounded-full bg-violet-100 flex items-center justify-center">
-        <Building2 className="h-10 w-10 text-violet-600" />
+const Step1 = memo(
+  ({
+    value,
+    onChange,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+  }) => (
+    <div>
+      <FormInput
+        id="businessName"
+        label="Business Name"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="e.g., Bounce Kingdom Rentals"
+      />
+    </div>
+  )
+);
+Step1.displayName = "Step1";
+
+const Step2 = memo(
+  ({
+    formData,
+    onFieldChange,
+  }: {
+    formData: {
+      businessAddress: string;
+      businessCity: string;
+      businessState: string;
+      businessZip: string;
+      businessPhone: string;
+      businessEmail: string;
+    };
+    onFieldChange: (field: string, value: string) => void;
+  }) => (
+    <div>
+      <FormInput
+        id="businessAddress"
+        label="Street Address"
+        value={formData.businessAddress}
+        onChange={(e) =>
+          onFieldChange("businessAddress", e.target.value)
+        }
+        placeholder="123 Main Street"
+        tooltipContent="Enter the primary address where you store your bounce houses or conduct business."
+      />
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+        <FormInput
+          id="businessCity"
+          label="City"
+          value={formData.businessCity}
+          onChange={(e) =>
+            onFieldChange("businessCity", e.target.value)
+          }
+          placeholder="Los Angeles"
+        />
+        <FormInput
+          id="businessState"
+          label="State"
+          value={formData.businessState}
+          onChange={(e) =>
+            onFieldChange("businessState", e.target.value.toUpperCase())
+          }
+          placeholder="CA"
+          maxLength={2}
+        />
+        <FormInput
+          id="businessZip"
+          label="ZIP Code"
+          value={formData.businessZip}
+          onChange={(e) =>
+            onFieldChange("businessZip", e.target.value)
+          }
+          placeholder="90210"
+        />
       </div>
-    </div>
-    
-    <h2 className="text-2xl font-bold text-center mb-6">
-      <GradientText className="text-2xl font-bold text-center mb-6">Business Identity</GradientText>
-    </h2>
-    
-    <motion.p 
-      className="text-gray-600 text-center mb-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      Let&apos;s start with your business name to create your account
-    </motion.p>
-    
-    <FormInput
-      id="businessName"
-      label="Business Name"
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder="Your Business Name"
-    />
-  </div>
-));
-Step1.displayName = 'Step1';
 
-const Step2 = memo(({ formData, onFieldChange }: { formData: { businessAddress: string, businessCity: string, businessState: string, businessZip: string, businessPhone: string, businessEmail: string }, onFieldChange: (field: string, value: string) => void }) => (
-  <div className="space-y-6">
-    <div className="flex justify-center mb-8">
-      <div className="w-20 h-20 rounded-full bg-violet-100 flex items-center justify-center">
-        <MapPin className="h-10 w-10 text-violet-600" />
-      </div>
-    </div>
-    
-    <h2 className="text-2xl font-bold text-center mb-6">
-      <GradientText className="text-2xl font-bold text-center mb-6">Location &amp; Contact</GradientText>
-    </h2>
-    
-    <motion.p 
-      className="text-gray-600 text-center mb-8"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ delay: 0.2 }}
-    >
-      Please provide your business address and contact information
-    </motion.p>
-    
-    <FormInput
-      id="businessAddress"
-      label="Street Address"
-      value={formData.businessAddress}
-      onChange={(e) => onFieldChange('businessAddress', e.target.value)}
-      placeholder="123 Main St"
-      tooltipContent="Enter the primary address where you store your bounce houses or conduct business."
-    />
-    
-    <div className="grid gap-4 grid-cols-1 sm:grid-cols-3">
       <FormInput
-        id="businessCity"
-        label="City"
-        value={formData.businessCity}
-        onChange={(e) => onFieldChange('businessCity', e.target.value)}
-        placeholder="City"
+        id="businessPhone"
+        label="Phone Number"
+        type="tel"
+        value={formData.businessPhone}
+        onChange={(e) =>
+          onFieldChange("businessPhone", e.target.value)
+        }
+        placeholder="+1 (555) 123-4567"
       />
+
+      <FormInput
+        id="businessEmail"
+        label="Business Email"
+        type="email"
+        value={formData.businessEmail}
+        onChange={(e) =>
+          onFieldChange("businessEmail", e.target.value)
+        }
+        placeholder="business@example.com"
+      />
+    </div>
+  )
+);
+Step2.displayName = "Step2";export default function OnboardingPage() {  const { toast } = useToast();  const router = useRouter();  const { userId, isLoaded: isAuthLoaded } = useAuth();  const {    state,    setCurrentStep,    updateFormData,    setConnectedAccountId,    setBusinessId,    setNewlyCreatedOrg,    setIsLoading,    setError,    setIsCreatingAccountLink,    resetToStep,  } = useOnboarding();  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+
+  // Check if user already has a business on component mount
+  useEffect(() => {
+    async function checkExistingBusiness() {
+      if (!isAuthLoaded || !userId) return;
       
-      <FormInput
-        id="businessState"
-        label="State"
-        value={formData.businessState}
-        onChange={(e) => onFieldChange('businessState', e.target.value.toUpperCase())}
-        placeholder="CA"
-        maxLength={2}
-      />
-      
-      <FormInput
-        id="businessZip"
-        label="ZIP Code"
-        value={formData.businessZip}
-        onChange={(e) => onFieldChange('businessZip', e.target.value)}
-        placeholder="90001"
-      />
-    </div>
+      setIsCheckingStatus(true);
+      try {
+        const response = await fetch("/api/me");
+        const data = await response.json();
+        console.log(data);
+        
+        if (response.ok && data.business) {
+          setCurrentStep(3);
+          setConnectedAccountId(data.stripeAccountId);
+          setNewlyCreatedOrg(data.orgId);
+          setBusinessId(data.business.id);
+        }
+      } catch (err) {
+        console.error("Failed to check business status:", err);
+      } finally {
+        setIsCheckingStatus(false);
+      }
+    }
     
-    <FormInput
-      id="businessPhone"
-      label="Phone Number"
-      type="tel"
-      value={formData.businessPhone}
-      onChange={(e) => onFieldChange('businessPhone', e.target.value)}
-      placeholder="+1 555 1234567"
-    />
-    
-    <FormInput
-      id="businessEmail"
-      label="Business Email"
-      value={formData.businessEmail}
-      onChange={(e) => onFieldChange('businessEmail', e.target.value)}
-      placeholder="business@example.com"
-    />
-  </div>
-));
-Step2.displayName = 'Step2';
+    checkExistingBusiness();
+  }, [isAuthLoaded, userId, setCurrentStep, setConnectedAccountId, setNewlyCreatedOrg, setBusinessId]);
 
-export default function OnboardingPage() {
-  const { toast } = useToast();
-  const router = useRouter();
-  const { userId, isLoaded: isAuthLoaded } = useAuth();
+  const currentStepDetails = useMemo(
+    () => stepInfoContent.find((s) => s.id === state.currentStep),
+    [state.currentStep]
+  );
 
-  const [currentStep, setCurrentStep] = useState(1);
-  const [isLoading, setIsLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const [businessId, setBusinessId] = useState(null);
-  const [error, setError] = useState(false);
-  const [connectedAccountId, setConnectedAccountId] = useState(null);
-  const [newlyCreatedOrg, setNewlyCreatedOrg] = useState(null);
-
-  const [formData, setFormData] = useState({
-    businessName: "",
-    businessAddress: "",
-    businessCity: "",
-    businessState: "",
-    businessZip: "",
-    businessPhone: "",
-    businessEmail: "",
-  });
-
-  const stripeConnectInstance = useStripeConnect(connectedAccountId || "");
-
-  const handleFieldChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
-  };
+  const handleFieldChange = (field: string, value: string) =>
+    updateFormData({ [field]: value });
 
   const handleNext = () => {
     try {
-      if (currentStep === 1) {
-        step1Schema.parse({ businessName: formData.businessName });
+      if (state.currentStep === 1) {
+        step1Schema.parse({ businessName: state.formData.businessName });
+      } else if (state.currentStep === 2) {
+        step2Schema.parse(state.formData);
       }
-      setCurrentStep((prev) => prev + 1);
-    } catch (error) {
-      if (error instanceof z.ZodError) {
+      setCurrentStep(state.currentStep + 1);
+    } catch (err) {
+      if (err instanceof z.ZodError) {
         toast({
           title: "Validation Error",
-          description: error.errors[0].message,
+          description: err.errors[0].message,
           variant: "destructive",
         });
       }
     }
   };
 
-  const handleBack = () => {
-    setCurrentStep((prev) => prev - 1);
-  };
+  const handleBack = () => setCurrentStep(Math.max(1, state.currentStep - 1));
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      step2Schema.parse({
-        businessAddress: formData.businessAddress,
-        businessCity: formData.businessCity,
-        businessState: formData.businessState,
-        businessZip: formData.businessZip,
-        businessPhone: formData.businessPhone,
-      });
-
+      step2Schema.parse(state.formData);
       setIsLoading(true);
       setError(false);
 
@@ -312,231 +422,309 @@ export default function OnboardingPage() {
           description: "You must be logged in to onboard.",
           variant: "destructive",
         });
-        router.replace('/sign-in');
+        router.replace("/sign-in");
         return;
       }
 
-      const response = await fetch("/api/auth/onboarding", {
+      const res = await fetch("/api/auth/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(state.formData),
       });
-
-      const data = await response.json();
-      if (!response.ok) {
+      const data = await res.json();
+      if (!res.ok) {
         setError(true);
-        throw new Error(data.message || "Something went wrong during onboarding");
+        throw new Error(data.message || "Onboarding failed");
       }
 
       setConnectedAccountId(data.stripeAccountId);
-      setBusinessId(data.business.id);
       setNewlyCreatedOrg(data.orgId);
-
+      setBusinessId(data.business.id);
       setCurrentStep(3);
       toast({
         title: "Success!",
         description: "Business created. Let's complete your payment setup.",
       });
-
-    } catch (error) {
+    } catch (err) {
       setError(true);
-      if (error instanceof z.ZodError) {
-        toast({
-          title: "Validation Error",
-          description: error.errors[0].message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Something went wrong",
-          variant: "destructive",
-        });
-      }
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Something went wrong",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const handleOnboardingExit = async () => {
-    if (newlyCreatedOrg) {
-      console.log("Stripe Connect exited. Redirecting to pricing with orgId:", newlyCreatedOrg);
-      router.replace(`/pricing?orgId=${newlyCreatedOrg}`);
-    } else {
-      console.warn("Stripe Connect exited, but no newlyCreatedClerkOrgId available. Redirecting to pricing without orgId.");
-      router.replace('/');
+  const handleStripeOnboarding = async () => {
+    if (!state.connectedAccountId) return;
+
+    try {
+      setIsCreatingAccountLink(true);
+      
+      const response = await fetch("/api/stripe/create-account-link", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          accountId: state.connectedAccountId,
+          returnUrl: `${window.location.origin}/pricing?orgId=${state.newlyCreatedOrg}`,
+          refreshUrl: `${window.location.origin}/onboarding`,
+        }),
+      });
+
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to create account link");
+      }
+
+      // Redirect to Stripe's hosted onboarding
+      window.location.href = data.url;
+    } catch (err) {
+      setError(true);
+      toast({
+        title: "Error",
+        description: err instanceof Error ? err.message : "Failed to start onboarding",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCreatingAccountLink(false);
     }
   };
 
-  const renderStep = () => {
-    return (
-      <>
-        <AnimatedContainer currentStep={currentStep} targetStep={1}>
-          <Step1 
-            value={formData.businessName} 
-            onChange={(value) => handleFieldChange('businessName', value)} 
-          />
-        </AnimatedContainer>
-        
-        <AnimatedContainer currentStep={currentStep} targetStep={2}>
-          <Step2 
-            formData={formData} 
-            onFieldChange={handleFieldChange} 
-          />
-        </AnimatedContainer>
-        
-        <AnimatedContainer currentStep={currentStep} targetStep={3}>
-          <div className="space-y-6">
-            <div className="flex justify-center mb-8">
-              <div className="w-20 h-20 rounded-full bg-violet-100 flex items-center justify-center">
-                <CreditCardIcon className="h-10 w-10 text-violet-600" />
-              </div>
-            </div>
-            
-            <h2 className="text-2xl font-bold text-center mb-6">
-              <GradientText className="text-2xl font-bold text-center mb-6">Complete Payment Setup</GradientText>
-            </h2>
-            
-            <motion.p 
-              className="text-gray-600 text-center mb-8"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.2 }}
+  const renderStepContent = () => {
+    if (state.currentStep === 1)
+      return (
+        <Step1
+          value={state.formData.businessName}
+          onChange={(v) => handleFieldChange("businessName", v)}
+        />
+      );
+    if (state.currentStep === 2)
+      return (
+        <Step2 formData={state.formData} onFieldChange={handleFieldChange} />
+      );
+    if (state.currentStep === 3)
+      return (
+        <div>
+          {state.connectedAccountId ? (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-xl border border-gray-100 bg-white p-8 shadow-lg text-center"
             >
-              We&apos;ve created your business profile. Now let&apos;s set up your payment processing.
-            </motion.p>
-            
-            {stripeConnectInstance && connectedAccountId ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.3 }}
-                className="rounded-lg overflow-hidden shadow-lg"
-              >
-                <ConnectComponentsProvider connectInstance={stripeConnectInstance}>
-                  <ConnectAccountOnboarding onExit={handleOnboardingExit} />
-                </ConnectComponentsProvider>
-              </motion.div>
-            ) : (
-              <div className="text-center py-8">
-                <div className="w-12 h-12 mx-auto border-4 border-t-transparent border-violet-500 rounded-full animate-spin mb-4"></div>
-                <p className="text-gray-600">Loading payment setup...</p>
-              </div>
-            )}
-            
-            {error && (
-              <motion.p 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-red-600 text-center mt-4 font-medium bg-red-50 p-3 rounded-lg"
-              >
-                Something went wrong with the payment setup!
-              </motion.p>
-            )}
-          </div>
-        </AnimatedContainer>
-      </>
-    );
+              <div className="mb-6">
+                <div className="mx-auto mb-4 h-16 w-16 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center justify-center">
+                  <CreditCardIcon className="h-8 w-8 text-white" />
+                </div>
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  Complete Your Stripe Setup
+                </h3>
+                <p className="text-gray-600 mb-6">
+                  Click the button below to securely connect your bank account and complete your payment setup with Stripe.
+                </p>
+              </div>                            <Button                onClick={handleStripeOnboarding}                disabled={state.isCreatingAccountLink}                className="bg-gradient-to-r from-violet-600 to-indigo-500 hover:from-violet-700 hover:to-indigo-600 text-white px-8 py-3 rounded-xl font-medium transition-all duration-200 flex items-center gap-2 mx-auto"              >                {state.isCreatingAccountLink ? (
+                  <>
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                    Setting up...
+                  </>
+                ) : (
+                  <>
+                    Complete Stripe Setup
+                    <ExternalLink className="h-4 w-4" />
+                  </>
+                )}
+              </Button>
+              
+              <p className="text-xs text-gray-500 mt-4">
+                You&apos;ll be redirected to Stripe&apos;s secure platform to complete your setup
+              </p>
+            </motion.div>
+          ) : (
+            <div className="rounded-xl border border-gray-100 bg-white p-12 shadow-lg text-center">
+              <div className="mx-auto mb-6 h-12 w-12 animate-spin rounded-full border-4 border-t-transparent border-violet-500" />
+              <p>Preparing your payment setup…</p>
+            </div>
+          )}
+          {state.error && (
+            <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+              Something went wrong with the payment setup. Please try again or contact support.
+            </div>
+          )}
+        </div>
+      );
+    return null;
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const progressWidth = useMemo(() => 
-    `${(currentStep / 3) * 100}%`
-  , [currentStep]);
+  // Show loading spinner while checking business status
+  if (isCheckingStatus) {
+    return (
+      <main className="flex w-full h-screen items-center justify-center">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="flex flex-col items-center space-y-4"
+        >
+          <div className="h-12 w-12 animate-spin rounded-full border-4 border-t-transparent border-violet-500" />
+          <p className="text-gray-600 font-medium">Checking your business status...</p>
+        </motion.div>
+      </main>
+    );
+  }
 
   return (
-    <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-white to-violet-50">
-      {/* Decorative elements */}
-      <div className="absolute top-0 left-0 w-full h-64 bg-gradient-to-b from-violet-100/40 to-transparent" />
-      <div className="absolute -top-24 -left-24 w-64 h-64 rounded-full bg-indigo-100/30 blur-3xl" />
-      <div className="absolute -bottom-32 -right-32 w-80 h-80 rounded-full bg-violet-100/50 blur-3xl" />
-      
-      {isLoading && newlyCreatedOrg && (
-        <motion.div 
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50"
-        >
-          <div className="flex flex-col items-center text-white bg-violet-900/40 p-8 rounded-2xl backdrop-blur-md">
-            <div className="w-14 h-14 border-4 border-t-transparent border-white rounded-full animate-spin mb-6"></div>
-            <p className="text-lg font-medium">Setting up your organization...</p>
+    <main className="flex w-full justify-center py-8">
+      {state.isLoading && (
+        <motion.div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm">
+          <div className="rounded-2xl border border-white/10 bg-violet-900/40 p-8 backdrop-blur-md text-white">
+            <div className="mb-6 h-14 w-14 animate-spin rounded-full border-4 border-t-transparent border-white" />
+            <p>Setting up your organization…</p>
           </div>
         </motion.div>
       )}
-      
-      <Card className="w-full max-w-lg shadow-2xl rounded-2xl border-0 bg-white/90 backdrop-blur-md relative overflow-hidden z-10">
-        {/* Top gradient accent */}
-        <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-violet-600 to-indigo-500" />
-        
-        <CardHeader className="text-center pb-2 pt-8">
-          <CardTitle className="text-3xl font-extrabold tracking-tight">
-            <GradientText className="text-3xl font-extrabold tracking-tight">Welcome Onboard</GradientText>
-          </CardTitle>
-          <CardDescription className="text-gray-600 mt-2 text-base">
-            Let&apos;s set up your business account
-          </CardDescription>
-        </CardHeader>
-        
-        <CardContent className="px-8 py-8">
-          <StepIndicator currentStep={currentStep} totalSteps={3} />
-          
-          <form onSubmit={handleSubmit} className="space-y-8">
-            {renderStep()}
-            
-            {/* Buttons only for steps 1 and 2 */}
-            {currentStep < 3 && (
-              <motion.div 
-                className="flex justify-between mt-10"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
+
+      <Card className="w-full max-w-7xl overflow-hidden rounded-3xl bg-white/95 shadow-2xl backdrop-blur-xl">
+        <div className="h-1 w-full bg-gradient-to-r from-violet-600 via-indigo-500 to-purple-600" />
+
+        <div className="flex flex-col lg:flex-row">
+          {/* LEFT PANEL */}
+          <div className="w-full lg:w-2/5 bg-gradient-to-br from-violet-50/80 to-indigo-50/60 p-8 lg:p-12 flex flex-col justify-center relative overflow-hidden">
+            <div className="absolute -top-16 -left-16 w-32 h-32 bg-violet-200/30 rounded-full blur-2xl" />
+            <div className="absolute -bottom-16 -right-16 w-40 h-40 bg-indigo-200/20 rounded-full blur-3xl" />
+            <div className="absolute top-1/4 -right-8 w-24 h-24 bg-purple-200/20 rounded-full blur-xl" />
+            <div className="absolute inset-0 opacity-5">
+              <div
+                className="h-full w-full"
+                style={{
+                  backgroundImage:
+                    "radial-gradient(circle at 1px 1px, #8b5cf6 1px, transparent 0)",
+                  backgroundSize: "20px 20px",
+                }}
+              />
+            </div>
+            <div className="relative z-10">
+              {currentStepDetails?.icon && (
+                <motion.div
+                  key={`icon-${state.currentStep}`}
+                  initial={{ opacity: 0, scale: 0.5, rotate: -10 }}
+                  animate={{ opacity: 1, scale: 1, rotate: 0 }}
+                  transition={{ duration: 0.6, ease: "backOut" }}
+                  className="mb-8 w-20 h-20 rounded-2xl bg-white shadow-xl border border-violet-100/50 flex items-center justify-center backdrop-blur-sm"
+                >
+                  {currentStepDetails.icon}
+                </motion.div>
+              )}
+              {currentStepDetails && (
+                <motion.div
+                  key={`content-${state.currentStep}`}
+                  initial={{ opacity: 0, y: 30 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                >
+                  <h1 className="text-4xl lg:text-5xl font-bold mb-6 leading-tight">
+                    <GradientText>
+                      {currentStepDetails.title}
+                    </GradientText>
+                  </h1>
+                  <p className="text-gray-600 text-lg leading-relaxed mb-10">
+                    {currentStepDetails.description}
+                  </p>
+                  <div className="space-y-4">
+                    {currentStepDetails.features.map((f, i) => (
+                      <motion.div
+                        key={f}
+                        initial={{ opacity: 0, x: -20 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        transition={{ delay: 0.5 + i * 0.15 }}
+                        className="flex items-center space-x-4"
+                      >
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-r from-violet-500 to-indigo-500 flex items-center justify-center shadow-lg">
+                          <CheckCircle className="w-3 h-3 text-white" />
+                        </div>
+                        <span className="text-gray-700 font-medium">
+                          {f}
+                        </span>
+                      </motion.div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </div>
+          </div>
+
+          {/* RIGHT PANEL */}
+          <div className="w-full lg:w-3/5 p-8 lg:p-12">
+            <CardHeader className="pb-8 pt-0 text-center">
+              <CardTitle className="mb-3 text-3xl font-bold tracking-tight">
+                <GradientText>Setup Your Account</GradientText>
+              </CardTitle>
+              <CardDescription className="text-gray-500">
+                Step {state.currentStep} of {stepInfoContent.length} • Almost there!
+              </CardDescription>
+            </CardHeader>
+
+            <CardContent>
+              <StepIndicator
+                currentStep={state.currentStep}
+                totalSteps={stepInfoContent.length}
+              />
+
+              <form
+                onSubmit={
+                  state.currentStep === 2
+                    ? handleSubmit
+                    : (e) => e.preventDefault()
+                }
               >
-                {currentStep > 1 && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBack}
-                    className="border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition-all h-11 px-6 shadow-sm"
-                  >
-                    Back
-                  </Button>
-                )}
-                
-                {currentStep === 1 && (
-                  <Button
-                    type="button"
-                    onClick={handleNext}
-                    variant="primary-gradient"
-                    className="h-11 px-6 ml-auto"
-                  >
-                    Next
-                  </Button>
-                )}
-                
-                {currentStep === 2 && (
-                  <Button
-                    type="submit"
-                    disabled={isLoading}
-                    variant="primary-gradient"
-                    className="h-11 px-6 ml-auto"
-                  >
-                    {isLoading ? (
-                      <span className="flex items-center">
-                        <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Creating Business...
-                      </span>
+                <AnimatedContainer
+                  currentStep={state.currentStep}
+                  targetStep={1}
+                >
+                  {renderStepContent()}
+                </AnimatedContainer>
+                <AnimatedContainer
+                  currentStep={state.currentStep}
+                  targetStep={2}
+                >
+                  {renderStepContent()}
+                </AnimatedContainer>
+                <AnimatedContainer
+                  currentStep={state.currentStep}
+                  targetStep={3}
+                >
+                  {renderStepContent()}
+                </AnimatedContainer>
+
+                {state.currentStep < 3 && (
+                  <div className="mt-8 flex justify-between border-t border-gray-100 pt-8">
+                    {state.currentStep > 1 ? (
+                      <Button
+                        variant="outline"
+                        onClick={handleBack}
+                      >
+                        ← Back
+                      </Button>
                     ) : (
-                      "Set Up Payments"
+                      <div />
                     )}
-                  </Button>
+                    {state.currentStep === 1 ? (
+                      <Button onClick={handleNext}>
+                        Continue →
+                      </Button>
+                    ) : (
+                      <Button type="submit" disabled={state.isLoading}>
+                        {state.isLoading
+                          ? "Processing…"
+                          : "Complete Setup →"}
+                      </Button>
+                    )}
+                  </div>
                 )}
-              </motion.div>
-            )}
-          </form>
-        </CardContent>
+              </form>
+            </CardContent>
+          </div>
+        </div>
       </Card>
     </main>
   );

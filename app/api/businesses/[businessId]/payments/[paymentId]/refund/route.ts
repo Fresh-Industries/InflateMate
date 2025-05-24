@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
@@ -28,8 +28,8 @@ export async function POST(
     const { businessId, paymentId } = params;
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -88,7 +88,7 @@ export async function POST(
         amount: Math.round(refundAmount * 100), // Convert to cents
         reason: 'requested_by_customer',
       }, {
-        stripeAccount: business.stripeAccountId,
+        stripeAccount: membership.organization?.business?.stripeAccountId || undefined,
       });
 
       // Determine the updates for the original payment record
