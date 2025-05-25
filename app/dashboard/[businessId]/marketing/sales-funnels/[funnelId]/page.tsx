@@ -26,7 +26,7 @@ export default async function EditSalesFunnelPage(
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
+  const userBusinessId = user.memberships[0]?.organization?.business?.id;
   if (!userBusinessId || userBusinessId !== params.businessId) {
     redirect("/");
   }
