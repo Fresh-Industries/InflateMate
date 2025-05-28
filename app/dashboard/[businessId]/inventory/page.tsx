@@ -205,22 +205,22 @@ export default function InventoryPage() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="rounded-full h-11 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 group">
+            <Button className="rounded-full h-11 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md transition-all duration-300 transform hover:scale-105 group">
               <Plus className="mr-2 h-5 w-5" />
               Add Item
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-lg shadow-lg border border-blue-200/30 mt-2 w-48">
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=BOUNCE_HOUSE`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=BOUNCE_HOUSE`)}>
               Bounce House
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=INFLATABLE`)}>
-              Inflatable
+              <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=INFLATABLE`)}>
+                Inflatable
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=GAME`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=GAME`)}>
               Game
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=OTHER`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=OTHER`)}>
               Other
             </DropdownMenuItem>
           </DropdownMenuContent>
