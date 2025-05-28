@@ -9,12 +9,17 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { accountId, returnUrl, refreshUrl } = await req.json();
+const { accountId, returnUrl, refreshUrl } = await req.json();
 
-    if (!accountId) {
-      return NextResponse.json({ error: "Missing accountId" }, { status: 400 });
-    }
+  if (!accountId) {
+    return NextResponse.json({ error: "Missing accountId" }, { status: 400 });
+  }
 
+ // Verify the user has access to this Stripe account
+ const business = user.memberships?.[0]?.organization?.business;
+ if (!business || business.stripeAccountId !== accountId) {
+   return NextResponse.json({ error: "Access denied" }, { status: 403 });
+ }
     const accountLink = await stripe.accountLinks.create({
       account: accountId,
       return_url: returnUrl || `${process.env.NEXT_PUBLIC_APP_URL}/pricing`,

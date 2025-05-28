@@ -61,6 +61,71 @@ const getCachedBusiness = unstable_cache(
   }
 );
 
+// Shared business update logic
+async function updateBusinessFromFormData(formData: FormData, businessId: string) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const updateData: Record<string, any> = {};
+
+  // Text fields
+  const textFields = [
+    'name', 'description', 'email', 'phone',
+    'address', 'city', 'state', 'zipCode', 'logo'
+  ];
+
+  textFields.forEach(field => {
+    const value = formData.get(field);
+    if (value !== null) {
+      updateData[field] = value.toString();
+    }
+  });
+
+  // Number fields
+  const numberFields = [
+    'minAdvanceBooking', 'maxAdvanceBooking',
+    'minimumPurchase', 'depositPercentage', 'taxRate'
+  ];
+
+  numberFields.forEach(field => {
+    const value = formData.get(field);
+    if (value !== null && value !== '') {
+      updateData[field] = parseFloat(value.toString());
+    }
+  });
+
+  // Handle service areas (array field)
+  const serviceAreas: string[] = [];
+  formData.forEach((value, key) => {
+    if (key.startsWith('serviceArea[') && key.endsWith(']')) {
+      serviceAreas.push(value.toString());
+    }
+  });
+
+  if (serviceAreas.length > 0) {
+    updateData.serviceArea = serviceAreas;
+  }
+
+  // Handle socialMedia (JSON field)
+  const socialMediaStr = formData.get('socialMedia');
+  if (socialMediaStr) {
+    try {
+      updateData.socialMedia = JSON.parse(socialMediaStr.toString());
+    } catch (error) {
+      console.error("Error parsing socialMedia JSON:", error);
+    }
+  }
+
+  // Update the business
+  const updatedBusiness = await prisma.business.update({
+    where: { id: businessId },
+    data: updateData,
+  });
+
+  // Revalidate cache
+  revalidateTag('business-data');
+
+  return updatedBusiness;
+}
+
 // GET /api/businesses/[businessId]
 export async function GET(
   req: NextRequest,
@@ -142,67 +207,7 @@ export async function PATCH(
     }
 
     const formData = await req.formData();
-
-    // Extract business data from form
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const updateData: Record<string, any> = {};
-
-    // Text fields
-    const textFields = [
-      'name', 'description', 'email', 'phone',
-      'address', 'city', 'state', 'zipCode', 'logo'
-    ];
-
-    textFields.forEach(field => {
-      const value = formData.get(field);
-      if (value !== null) {
-        updateData[field] = value.toString();
-      }
-    });
-
-    // Number fields
-    const numberFields = [
-      'minAdvanceBooking', 'maxAdvanceBooking',
-      'minimumPurchase', 'depositPercentage', 'taxRate'
-    ];
-
-    numberFields.forEach(field => {
-      const value = formData.get(field);
-      if (value !== null && value !== '') {
-        updateData[field] = parseFloat(value.toString());
-      }
-    });
-
-    // Handle service areas (array field)
-    const serviceAreas: string[] = [];
-    formData.forEach((value, key) => {
-      if (key.startsWith('serviceArea[') && key.endsWith(']')) {
-        serviceAreas.push(value.toString());
-      }
-    });
-
-    if (serviceAreas.length > 0) {
-      updateData.serviceArea = serviceAreas;
-    }
-
-    // Handle socialMedia (JSON field)
-    const socialMediaStr = formData.get('socialMedia');
-    if (socialMediaStr) {
-      try {
-        updateData.socialMedia = JSON.parse(socialMediaStr.toString());
-      } catch (error) {
-        console.error("Error parsing socialMedia JSON:", error);
-      }
-    }
-
-    // Update the business
-    const updatedBusiness = await prisma.business.update({
-      where: { id: businessId },
-      data: updateData,
-    });
-
-    // Revalidate cache
-    revalidateTag('business-data');
+    const updatedBusiness = await updateBusinessFromFormData(formData, businessId);
 
     return NextResponse.json({
       message: "Business updated successfully",
@@ -228,7 +233,27 @@ export async function POST(
     const methodOverride = formData.get('_method')?.toString();
 
     if (methodOverride === 'PATCH') {
-      return PATCH(req, { params: Promise.resolve(params) });
+      // Auth check
+      const user = await getCurrentUserWithOrgAndBusiness();
+      if (!user) {
+        return NextResponse.json(
+          { error: "Unauthorized" },
+          { status: 401 }
+        );
+      }
+      const businessId = params.businessId;
+      const membership = getMembershipByBusinessId(user, businessId);
+      if (!membership) {
+        return NextResponse.json(
+          { error: "Access denied" },
+          { status: 403 }
+        );
+      }
+      const updatedBusiness = await updateBusinessFromFormData(formData, businessId);
+      return NextResponse.json({
+        message: "Business updated successfully",
+        business: updatedBusiness,
+      });
     }
 
     return NextResponse.json(

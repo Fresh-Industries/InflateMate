@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import React from "react";
 
-const ITEMS_PER_PAGE = 4; // This constant should ideally be in a shared place if used elsewhere
+const ITEMS_PER_PAGE = 4;
 
 interface PaginationControlsProps {
   total: number;
