@@ -94,7 +94,7 @@ export function PaymentForm({
         console.log('Current pathname:', fullPath);
 
         // Build redirect URL to success page
-        const redirectUrl = `/success?bookingId=${confirmedBookingId}&businessId=${businessId}`;
+        const redirectUrl = `/dashboard/${businessId}/bookings`;
         
         console.log('Redirecting to:', redirectUrl);
         router.push(redirectUrl);

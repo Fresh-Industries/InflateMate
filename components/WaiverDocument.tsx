@@ -10,7 +10,7 @@ interface Props { business: Business; customer: Customer; booking: Booking; temp
 export default function WaiverHtml({ business, customer, booking, templateVersion }: Props) {
   const today = new Date().toLocaleDateString();
   const eventDate = new Date(booking.eventDate).toLocaleDateString();
-  const abs = (top:number,left:number,w:number,h:number):React.CSSProperties => ({ position:'absolute', top, left, width:w, height:h })
+  // const abs = (top:number,left:number,w:number,h:number):React.CSSProperties => ({ position:'absolute', top, left, width:w, height:h })
 
   return (
     <html>
@@ -89,10 +89,18 @@ export default function WaiverHtml({ business, customer, booking, templateVersio
           </div>
         </div>
 
-        <signature-field role="customer" name="Signature" required style={abs(560,45,180,30)} />
-        <date-field      role="customer" name="Date"       style={abs(560,330,120,30)} />
-        <text-field      role="customer" name="Name"       style={abs(615,45,180,30)} />
-        <phone-field     role="customer" name="Phone"      style={abs(615,330,150,30)} />
+        <signature-field role="customer" name="Signature" required style={{ width: '160px', height: '80px', display: 'inline-block' }} />
+        
+        <p style={{ display: 'flex', alignItems: 'center' }}>
+            <span>Date: </span>
+            <date-field
+              name="Date"
+              role="Renter"
+              style={{ width: '100px', height: '20px', display: 'inline-block' }}>
+            </date-field>
+        </p>
+        <text-field name="Name" style={{ width: '180px', height: '30px', display: 'inline-block' }} />
+        <phone-field name="Phone" style={{ width: '150px', height: '30px', display: 'inline-block' }} />
 
         <footer>
           {business.name}
