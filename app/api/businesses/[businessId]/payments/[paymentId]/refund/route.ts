@@ -72,24 +72,20 @@ export async function POST(
 
     // Process the refund through Stripe
     try {
-      // Get the business's Stripe account ID
-      const business = await prisma.business.findUnique({
-        where: { id: businessId },
-        select: { stripeAccountId: true },
-      });
-
-      if (!business?.stripeAccountId) {
+      // Get the Stripe account ID from membership
+      const stripeAccountId = membership.organization?.business?.stripeAccountId;
+      if (!stripeAccountId) {
         return NextResponse.json({ error: "Business Stripe account not found" }, { status: 400 });
       }
 
-      // Create the refund in Stripe
-      const refundResult = await stripe.refunds.create({
-        payment_intent: paymentToRefund.stripePaymentId,
-        amount: Math.round(refundAmount * 100), // Convert to cents
-        reason: 'requested_by_customer',
-      }, {
-        stripeAccount: membership.organization?.business?.stripeAccountId || undefined,
-      });
+       // Create the refund in Stripe
+       const refundResult = await stripe.refunds.create({
+         payment_intent: paymentToRefund.stripePaymentId,
+         amount: Math.round(refundAmount * 100), // Convert to cents
+         reason: 'requested_by_customer',
+       }, {
+        stripeAccount: stripeAccountId,
+       });
 
       // Determine the updates for the original payment record
       const originalAmount = Number(paymentToRefund.amount);

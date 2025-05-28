@@ -218,7 +218,12 @@ export function PaymentForm({
           
           // Use the provided bookingId from props if available
           // If not, fall back to extracting from payment intent metadata
-          const confirmedBookingId = bookingId 
+          const confirmedBookingId =
+            bookingId ||
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ((paymentIntent as any)?.metadata?.prismaBookingId as
+              | string
+              | undefined);
           
           // Redirect to success page with booking ID for processing status too
           if (confirmedBookingId) {
