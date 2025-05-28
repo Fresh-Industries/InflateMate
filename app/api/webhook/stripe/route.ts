@@ -10,6 +10,8 @@ import { syncStripeDataToDB } from "@/lib/stripe-sync";
 import { BookingStatus, InvoiceStatus } from "@/prisma/generated/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { createBookingSafely } from "@/lib/createBookingSafely";
+import { bookingConfirmationEmailHtml, BookingWithDetails } from "@/lib/EmailTemplates";
+import { SiteConfig } from "@/lib/business/domain-utils";
 
 interface Booking {
     id: string;
@@ -708,6 +710,11 @@ async function handleBookingConfirmation(bookingId: string) {
       include: {
         customer: true,
         business: true,
+        inventoryItems: {
+          include: {
+            inventory: true,
+          },
+        },
       },
     });
 
@@ -792,21 +799,37 @@ async function handleBookingConfirmation(bookingId: string) {
 
     // 6. Send Waiver Email
     console.log(`[CONFIRMATION] Sending waiver email to ${customer.email} for booking ${bookingId}...`);
-    const emailHtml = `
-      <p>Hello ${customer.name},</p>
-      <p>Your booking with ${business.name} is confirmed!</p>
-      <p>Please review and sign your rental waiver by clicking the link below:</p>
-      <p><a href="${url}">Sign Your Waiver</a></p>
-      <p>Thank you,</p>
-      <p>The ${business.name} Team</p>
-    `; // Improved email content
-    await sendSignatureEmail({
-      from: `${business.name} <waivers+inflatmate@freshdigitalsolutions.tech>`, // Use dynamic business name
-      to: customer.email,
-      subject: `Action Required: Sign Your Waiver for Booking with ${business.name}`, // More specific subject
-      html: emailHtml,
-    });
-    console.log(`[CONFIRMATION] Waiver email sent successfully to ${customer.email} for Booking ${bookingId}.`);
+    
+    // Ensure we have all required data for the email template
+    if (booking.customer && booking.business) {
+      // Transform the booking data to match BookingWithDetails interface
+      const bookingWithDetails = {
+        ...booking,
+        customer: booking.customer,
+        business: {
+          ...booking.business,
+          siteConfig: booking.business.siteConfig as unknown as SiteConfig | null,
+        },
+        eventTimeZone: booking.eventTimeZone || 'America/Chicago', // Provide fallback
+        inventoryItems: booking.inventoryItems,
+      } as unknown as BookingWithDetails;
+      
+      console.log(`[CONFIRMATION] Generating email HTML for booking ${bookingId}...`);
+      const emailHtml = bookingConfirmationEmailHtml(bookingWithDetails, url);
+      console.log(`[CONFIRMATION] Email HTML generated successfully. Length: ${emailHtml.length} characters`);
+      
+      console.log(`[CONFIRMATION] Sending email to ${customer.email}...`);
+      const emailResult = await sendSignatureEmail({
+        from: `${business.name} <waivers+inflatmate@freshdigitalsolutions.tech>`, // Use dynamic business name
+        to: customer.email,
+        subject: `Action Required: Sign Your Waiver for Booking with ${business.name}`, // More specific subject
+        html: emailHtml,
+      });
+      console.log(`[CONFIRMATION] Email send result:`, emailResult);
+      console.log(`[CONFIRMATION] Waiver email sent successfully to ${customer.email} for Booking ${bookingId}.`);
+    } else {
+      console.error(`[CONFIRMATION] Missing customer or business data for booking ${bookingId}. Cannot send email.`);
+    }
 
     console.log(`[CONFIRMATION] Post-confirmation steps completed for Booking ID: ${bookingId}`);
 

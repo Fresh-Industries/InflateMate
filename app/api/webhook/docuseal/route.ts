@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
 
   /* ---------- 2. Find matching waiver ---------- */
   const waiver = await prisma.waiver.findFirst({
-    where: { docuSealDocumentId: id.toString() },   // ← store this when you call /submissions
+    where: { docuSealDocumentId: id.toString() },   
     include: { customer: true },
   })
   if (!waiver) {

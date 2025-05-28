@@ -39,14 +39,38 @@ const toastVariants = cva(
   }
 );
 
+interface ThemedToastProps extends React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> {
+  variant?: "default" | "destructive";
+  theme?: {
+    toastStyles?: {
+      background: string;
+      border: string;
+      textColor: string;
+      closeBg: string;
+      closeColor: string;
+      boxShadow?: string;
+    };
+  };
+}
+
 const Toast = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Root>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Root> & VariantProps<typeof toastVariants>
->(({ className, variant, ...props }, ref) => {
+  ThemedToastProps & VariantProps<typeof toastVariants>
+>(({ className, variant, theme, ...props }, ref) => {
+  const themed = theme?.toastStyles;
+  const style = themed
+    ? {
+        background: themed.background,
+        border: themed.border,
+        color: themed.textColor,
+        boxShadow: themed.boxShadow,
+      }
+    : undefined;
   return (
     <ToastPrimitives.Root
       ref={ref}
-      className={cn(toastVariants({ variant }), className)}
+      className={cn(!themed && toastVariants({ variant }), className)}
+      style={style}
       {...props}
     />
   );
@@ -71,21 +95,27 @@ ToastAction.displayName = ToastPrimitives.Action.displayName;
 
 const ToastClose = React.forwardRef<
   React.ElementRef<typeof ToastPrimitives.Close>,
-  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close>
->(({ className, ...props }, ref) => (
-  <ToastPrimitives.Close
-    ref={ref}
-    className={cn(
-      "absolute right-2 top-2 rounded-md p-1 text-white/80 opacity-0 transition-opacity hover:text-white focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-white group-hover:opacity-100",
-      "group-[.destructive]:text-white/80 group-[.destructive]:hover:text-white group-[.destructive]:focus:ring-white",
-      className
-    )}
-    toast-close=""
-    {...props}
-  >
-    <X className="h-4 w-4" />
-  </ToastPrimitives.Close>
-));
+  React.ComponentPropsWithoutRef<typeof ToastPrimitives.Close> & { theme?: ThemedToastProps["theme"] }
+>(({ className, theme, ...props }, ref) => {
+  const themed = theme?.toastStyles;
+  const style = themed
+    ? {
+        background: themed.closeBg,
+        color: themed.closeColor,
+      }
+    : undefined;
+  return (
+    <ToastPrimitives.Close
+      ref={ref}
+      className={cn(!themed && "absolute right-2 top-2 rounded-md p-1 bg-white text-blue-600 shadow-md transition-opacity hover:bg-blue-600 hover:text-white focus:bg-blue-700 focus:text-white focus:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-400 group-hover:opacity-100 dark:bg-black dark:text-purple-400 dark:hover:bg-purple-700 dark:hover:text-white dark:focus:bg-purple-800 dark:focus:text-white", className)}
+      style={style}
+      toast-close=""
+      {...props}
+    >
+      <X className="h-4 w-4" />
+    </ToastPrimitives.Close>
+  );
+});
 ToastClose.displayName = ToastPrimitives.Close.displayName;
 
 const ToastTitle = React.forwardRef<
