@@ -89,6 +89,11 @@ export async function GET(
           orderBy: { eventDate: 'desc' },
           take: 1,
         },
+        business: {
+          select: {
+             timeZone: true,
+          }
+        }
       },
     });
 
@@ -135,6 +140,7 @@ export async function GET(
         bookingCount: customer.bookingCount,
         totalSpent: customer.totalSpent,
         lastBooking: customer.bookings[0]?.eventDate || null,
+        lastBookingTimeZone: customer.business.timeZone || null,
       };
     }));
 

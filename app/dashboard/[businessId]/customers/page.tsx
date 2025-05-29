@@ -77,6 +77,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { utcToLocal } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface Customer {
   id: string;
@@ -91,6 +92,7 @@ interface Customer {
   bookingCount: number;
   totalSpent: number;
   lastBooking: string | null;
+  lastBookingTimeZone: string | null;
   status: "Active" | "Inactive";
   type: "Regular" | "VIP";
   bookings?: CustomerBooking[];
@@ -351,8 +353,6 @@ export default function CustomersPage() {
     fetchCustomerBookings(customer.id);
     setIsDetailsOpen(true);
   };
-  console.log(customerBookings);
-  console.log(customers);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
@@ -560,7 +560,7 @@ export default function CustomersPage() {
                       <TableCell>${customer.totalSpent}</TableCell>
                       <TableCell className="hidden md:table-cell">
                         {customer.lastBooking
-                          ? (new Date(customer.lastBooking)).toLocaleDateString()
+                          ? format(new Date(customer.lastBooking.split('T')[0] + 'T12:00:00'), 'MMM d, yyyy')
                           : "Never"}
                       </TableCell>
                       <TableCell>
