@@ -75,6 +75,7 @@ export function EventDetailsStep({
 
   const {
     availableInventory,
+    totalAvailableItems,
     isSearchingAvailability,
     hasSearched,
     currentPage,
@@ -233,18 +234,14 @@ export function EventDetailsStep({
         <div className="mt-6">
           <h3 className="text-xl font-semibold mb-6 flex items-center gap-2">
             <Search className="h-5 w-5" />
-            {availableInventory.length > 0 // Local state
-              ? `Available Items (${availableInventory.length} found)` // Added count for clarity
+            {totalAvailableItems > 0 // Use total count
+              ? `Available Items (${totalAvailableItems} found)` // Show total count
               : "No items available for your selected time"}
           </h3>
 
-          {availableInventory.length > 0 ? (
+          {totalAvailableItems > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {availableInventory // Local state
-                .slice(
-                  (currentPage - 1) * ITEMS_PER_PAGE,
-                  currentPage * ITEMS_PER_PAGE,
-                )
+              {availableInventory // These are already paginated from the hook
                 .map((item) => {
                   const isSelected = selectedItems.has(item.id);
                   const quantity = selectedItems.get(item.id)?.quantity || 0;
@@ -364,10 +361,9 @@ export function EventDetailsStep({
              </div>
            )}
 
-
-          {availableInventory.length > ITEMS_PER_PAGE && (
+          {totalAvailableItems > ITEMS_PER_PAGE && (
             <PaginationControls
-              total={availableInventory.length} // Local state
+              total={totalAvailableItems} // Local state
               currentPage={currentPage} // Local state
               setCurrentPage={setCurrentPage} // Local setter
             />

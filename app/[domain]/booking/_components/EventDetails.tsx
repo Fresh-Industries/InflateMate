@@ -223,6 +223,7 @@ export function EventDetailsStep({
 
   const {
     availableInventory,
+    totalAvailableItems,
     isSearchingAvailability,
     hasSearched,
     currentPage,
@@ -420,18 +421,14 @@ export function EventDetailsStep({
             style={resultsHeadingStyle}
           >
             <Search className="h-5 w-5" />
-            {availableInventory.length
-              ? `Available Items (${availableInventory.length})`
-              : "No items available for that time"}
+            {totalAvailableItems > 0 ? (
+              `Available Items (${totalAvailableItems})`
+            ) : "No items available for that time"}
           </h3>
 
-          {availableInventory.length > 0 && (
+          {totalAvailableItems > 0 && (
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {availableInventory
-                .slice(
-                  (currentPage - 1) * ITEMS_PER_PAGE,
-                  currentPage * ITEMS_PER_PAGE,
-                )
                 .map((item) => {
                   const isSelected = selectedItems.has(item.id);
                   const qty = selectedItems.get(item.id)?.quantity ?? 0;
@@ -559,16 +556,16 @@ export function EventDetailsStep({
             </div>
           )}
 
-          {availableInventory.length > ITEMS_PER_PAGE && (
+          {totalAvailableItems > ITEMS_PER_PAGE && (
             <PaginationControls
-              total={availableInventory.length}
+              total={totalAvailableItems}
               currentPage={currentPage}
               setCurrentPage={setCurrentPage}
             />
           )}
 
           {/* CONTINUE BUTTON */}
-          {availableInventory.length > 0 && selectedItems.size > 0 && (
+          {totalAvailableItems > 0 && selectedItems.size > 0 && (
             <div 
               className="flex justify-center mt-8 pt-6"
               style={continueSectionStyle}

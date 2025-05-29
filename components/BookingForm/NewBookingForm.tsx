@@ -174,6 +174,17 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
     });
   };
 
+  // Separate function for preparing quote items payload
+  const prepareQuoteItemsPayload = () => {
+    return Array.from(selectedItems.values()).map(({ item, quantity }) => ({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      quantity: quantity,
+      stripeProductId: item.stripeProductId,
+    }));
+  };
+
   const handleProceedToPayment = async () => {
     if (isSubmitting) return;
     setIsSubmitting(true);
@@ -246,7 +257,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
         customerName: newBooking.customerName,
         customerEmail: newBooking.customerEmail,
         customerPhone: newBooking.customerPhone,
-        selectedItems: prepareItemsPayload(),
+        selectedItems: prepareQuoteItemsPayload(),
         eventDate: newBooking.eventDate,
         startTime: newBooking.startTime,
         endTime: newBooking.endTime,
@@ -264,6 +275,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
         taxRate: taxRate || 0,
         totalAmount: total,
         businessId: businessId,
+        holdId: holdId,
       };
       const response = await fetch(`/api/businesses/${businessId}/quotes`, {
         method: "POST",
