@@ -1,4 +1,4 @@
-import { Business, Customer, Booking, BookingItem, Inventory } from "@prisma/client";
+import { Business, Customer, Booking, BookingItem, Inventory } from "../prisma/generated/prisma/client";
 import { formatCurrency, utcToLocal } from "./utils";
 import { SiteConfig } from "./business/domain-utils";
 
