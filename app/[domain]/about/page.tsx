@@ -306,14 +306,14 @@ export default async function AboutPage({ params }: { params: Promise<{ domain: 
               className="text-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
               style={buttonStyle}
             >
-              <Link href={`/${domain}/booking`}>Book Now</Link>
+              <Link href={`/booking`}>Book Now</Link>
             </Button>
             <Button 
               asChild
               className="text-lg font-bold transition-all hover:scale-105"
               style={secondaryButtonStyle}
             >
-              <Link href={`/${domain}/inventory`}>View Inventory</Link>
+              <Link href={`/inventory`}>View Inventory</Link>
             </Button>
           </div>
         </div>

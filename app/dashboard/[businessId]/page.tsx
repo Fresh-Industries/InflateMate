@@ -35,6 +35,7 @@ import {
 } from 'recharts';
 import { cn } from "@/lib/utils";
 
+
 interface Booking {
   id: string;
   status: 'PENDING' | 'CONFIRMED' | 'COMPLETED' | 'CANCELLED' | 'HOLD';
@@ -194,7 +195,7 @@ export default function DashboardPage() {
         const todayBookings = bookingsWithCustomers.filter((booking: Booking) => {
           const bookingDate = new Date(booking.eventDate);
           return isWithinInterval(bookingDate, { start: todayStart, end: todayEnd }) && 
-                 booking.status !== 'CANCELLED';
+                 booking.status !== 'CANCELLED' && booking.status !== 'HOLD';
         });
 
         // Get upcoming bookings (next 7 days, excluding today)
@@ -202,7 +203,7 @@ export default function DashboardPage() {
           const bookingDate = new Date(booking.eventDate);
           return bookingDate > todayEnd && 
                  bookingDate <= nextWeekEnd && 
-                 booking.status !== 'CANCELLED';
+                 booking.status !== 'CANCELLED' && booking.status !== 'HOLD';
         });
 
         // Get recent bookings (last 10)
@@ -214,7 +215,7 @@ export default function DashboardPage() {
         const monthlyRevenue = bookingsWithCustomers.reduce((acc: number, booking: Booking) => {
           const bookingDate = new Date(booking.eventDate);
           if (isWithinInterval(bookingDate, { start: currentMonthStart, end: currentMonthEnd }) && 
-              booking.status !== 'CANCELLED') {
+              booking.status !== 'CANCELLED' && booking.status !== 'HOLD') {
             return acc + (booking.totalAmount || 0);
           }
           return acc;
@@ -224,7 +225,7 @@ export default function DashboardPage() {
         const lastMonthRevenue = bookingsWithCustomers.reduce((acc: number, booking: Booking) => {
           const bookingDate = new Date(booking.eventDate);
           if (isWithinInterval(bookingDate, { start: lastMonthStart, end: lastMonthEnd }) && 
-              booking.status !== 'CANCELLED') {
+              booking.status !== 'CANCELLED' && booking.status !== 'HOLD') {
             return acc + (booking.totalAmount || 0);
           }
           return acc;
@@ -239,7 +240,7 @@ export default function DashboardPage() {
         const dailyRevenue = last30Days.map(day => {
           const dayRevenue = bookingsWithCustomers.reduce((acc: number, booking: Booking) => {
             const bookingDate = new Date(booking.eventDate);
-            if (isSameDay(bookingDate, day) && booking.status !== 'CANCELLED') {
+            if (isSameDay(bookingDate, day) && booking.status !== 'CANCELLED' && booking.status !== 'HOLD') {
               return acc + (booking.totalAmount || 0);
             }
             return acc;
@@ -267,7 +268,7 @@ export default function DashboardPage() {
         
         bookingsWithCustomers.forEach((booking: Booking) => {
           console.log('Processing booking:', booking.id, 'Booking items:', booking.inventoryItems?.[0]);
-          if (booking.inventoryItems && booking.status !== 'CANCELLED') {
+          if (booking.inventoryItems && booking.status !== 'CANCELLED' && booking.status !== 'HOLD') {
             booking.inventoryItems.forEach((item: { inventory?: { name: string } }) => {
               console.log('Processing item:', item);
               const name = item.inventory?.name || 'Unknown Item';
@@ -399,13 +400,15 @@ export default function DashboardPage() {
             Get a quick glance at your business performance and key metrics for InflateMate.
           </p>
         </div>
-        <Button 
-          variant="outline" 
-          className="bg-card shadow-sm border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 w-full sm:w-auto group"
-        >
-          <Calendar className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary transition-colors" />
-          {format(new Date(), 'MMM dd, yyyy')}
-        </Button>
+        <div className="flex items-center gap-4">
+          <Button 
+            variant="outline" 
+            className="bg-card shadow-sm border-border/50 hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 w-full sm:w-auto group"
+          >
+            <Calendar className="h-4 w-4 mr-2 text-muted-foreground group-hover:text-primary transition-colors" />
+            {format(new Date(), 'MMM dd, yyyy')}
+          </Button>
+        </div>
       </div>
       
       {/* Stats Overview */}

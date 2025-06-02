@@ -805,7 +805,7 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
       if (!paymentClientSecret) throw new Error("Missing client secret from server");
       
       setClientSecret(paymentClientSecret);
-      setPaymentBookingId(paymentBookingId);
+      setPaymentBookingId(bookingDetails.booking.id);
       setShowPaymentForm(true);
       
     } catch (error) {
@@ -848,116 +848,9 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
     setIsProcessingPayment(false);
   };
 
-  // Add a new function to prepare the difference payment payload
-  const prepareDifferencePayload = () => {
-    if (selectedItems.size === 0 || !hasAddedItems) {
-      toast({
-        title: "Error",
-        description: "No new items to process payment for",
-        variant: "destructive",
-      });
-      return null;
-    }
-    
-    // Calculate start and end time in UTC for each item
-    // Use startTime for the event date to maintain consistency
-    const startTime = bookingDetails.booking?.startTime;
-    const eventDate = startTime 
-      ? typeof startTime === 'string'
-        ? new Date(startTime)
-        : startTime
-      : new Date();
-    
-    // Format the date to YYYY-MM-DD
-    const bookingDate = formatDateToYYYYMMDD(eventDate.toISOString());
-    
-    // Handle time strings, ensuring we convert Date objects to strings if needed
-    const startTimeObj = bookingDetails.booking?.startTime;
-    const startTimeStr = typeof startTimeObj === 'string' 
-      ? formatTimeToHHMM(startTimeObj) 
-      : formatTimeToHHMM(new Date(startTimeObj).toISOString());
-    
-    const endTimeObj = bookingDetails.booking?.endTime;
-    const endTimeStr = typeof endTimeObj === 'string' 
-      ? formatTimeToHHMM(endTimeObj) 
-      : formatTimeToHHMM(new Date(endTimeObj).toISOString());
-    
-    // Get timezone from booking details or use browser default
-    const timezone = bookingDetails.booking?.eventTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone;
-    
-    // Create the date strings for UTC conversion
-    const startUTC = localToUTC(bookingDate, startTimeStr, timezone);
-    const endUTC = localToUTC(bookingDate, endTimeStr, timezone);
-    
-    // Create a map of original items for comparison
-    const originalItems = new Map<string, { quantity: number }>();
-    bookingDetails.bookingItems.forEach(item => {
-      if (item.inventory) {
-        originalItems.set(item.inventory.id, { quantity: item.quantity });
-      }
-    });
-    
-    // Filter only new or increased quantity items
-    const addedItems = Array.from(selectedItems.values())
-      .filter(({ item, quantity }) => {
-        const original = originalItems.get(item.id);
-        return !original || quantity > original.quantity;
-      })
-      .map(({ item, quantity }) => {
-        const original = originalItems.get(item.id);
-        const additionalQuantity = original ? quantity - original.quantity : quantity;
-        
-        return {
-          inventoryId: item.id,
-          quantity: additionalQuantity,
-          price: item.price,
-          status: "PENDING_PAYMENT_ADDITION", // Special status for additions
-          startUTC,
-          endUTC,
-        };
-      });
-    
-    const updatedBookingData = {
-      // Customer information
-      customerName: customerData.name,
-      customerEmail: customerData.email,
-      customerPhone: customerData.phone,
-      specialInstructions: customerData.specialInstructions,
-      
-      // Event location fields
-      eventAddress: customerData.eventAddress,
-      eventCity: customerData.eventCity,
-      eventState: customerData.eventState,
-      eventZipCode: customerData.eventZipCode,
-      
-      // Participant fields
-      participantCount: customerData.participantCount,
-      participantAge: customerData.participantAge ? parseInt(customerData.participantAge) : undefined,
-      
-      // Format date and times correctly for API validation
-      eventDate: bookingDate,
-      startTime: startTimeStr,
-      endTime: endTimeStr,
-      eventTimeZone: timezone,
-      
-      // Only include the NEW or ADDITIONAL items
-      items: addedItems,
-      
-      // Amounts for validation - just for the difference
-      subtotalAmount: addedItemsTotal,
-      taxAmount: (taxRate || 0) * addedItemsTotal / 100,
-      totalAmount: addedItemsTotal + ((taxRate || 0) * addedItemsTotal / 100),
-      
-      // Coupon - we don't apply coupons to additions to confirmed bookings
-      couponCode: null,
-      
-      // Special intent for difference payment
-      intent: "prepare_for_payment_difference"
-    };
-    
-    return updatedBookingData;
-  };
-  
+  // Add the state for bookingId at the top of the component
+  const [paymentBookingId, setPaymentBookingId] = useState<string | null>(null);
+
   // Handler for paying for additional items on confirmed bookings
   const handlePayForAddedItems = async () => {
     if (isProcessingPayment || !isConfirmed || !hasAddedItems) return;
@@ -984,21 +877,21 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
     setIsProcessingPayment(true);
     
     try {
-      // Prepare the payload with only the difference items
-      const differencePayload = prepareDifferencePayload();
-      if (!differencePayload) {
+      // Use the regular prepareUpdatePayload with the difference intent
+      const updatePayload = prepareUpdatePayload("prepare_for_payment_difference");
+      if (!updatePayload) {
         setIsProcessingPayment(false);
         return;
       }
       
       // Log the data being sent to help debug
-      console.log("Sending difference payment data:", JSON.stringify(differencePayload));
+      console.log("Sending difference payment data:", JSON.stringify(updatePayload));
       
       // Call the API to update booking with the difference items
       const updateResponse = await fetch(`/api/businesses/${businessId}/bookings/${bookingDetails.booking.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(differencePayload),
+        body: JSON.stringify(updatePayload),
       });
       
       let updateData;
@@ -1027,6 +920,7 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
       });
       
       setClientSecret(paymentClientSecret);
+      setPaymentBookingId(bookingDetails.booking.id);
       setShowPaymentForm(true);
       
     } catch (error) {
@@ -1040,9 +934,6 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
       setIsProcessingPayment(false);
     }
   };
-
-  // Add the state for bookingId at the top of the component
-  const [paymentBookingId, setPaymentBookingId] = useState<string | null>(null);
 
   // Conditional rendering based on expiration
   if (isExpired) {

@@ -15,13 +15,13 @@ export const modernOverrides: Partial<ThemeDefinition> = {
 
   // Buttons
   buttonStyles: makeButtonStyles({
-    background: (c: ThemeColors) => c.primary[500],
+    background: (c: ThemeColors) => c.primary[900],
     textColor: () => '#ffffff',
-    hoverBackground: (c: ThemeColors) => c.accent[500]
+    hoverBackground: (c: ThemeColors) => c.primary[100]
   }, { role: 'primary', size: 'lg' }),
   secondaryButtonStyles: makeButtonStyles({
-    background: () => 'transparent',
-    textColor: (c: ThemeColors) => c.secondary[900],
+    background: (c: ThemeColors) => c.secondary[900],
+    textColor: () => '#ffffff',
     border: (c: ThemeColors) => `${borderWidths.thin} solid ${c.secondary[500]}`,
     hoverBackground: (c: ThemeColors) => c.secondary[100]
   }, { role: 'secondary', size: 'md' }),

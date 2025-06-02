@@ -95,8 +95,14 @@ export async function updateBookingSafely(
           }
           
           console.log(`[updateBookingSafely] CONFIRMED booking ${bookingId} includes item updates - proceeding with caution`);
-          // For confirmed bookings with item updates, continue with normal flow
-          // In a future version, we'll implement special logic to handle item additions to confirmed bookings
+          
+          // For confirmed bookings with prepare_for_payment_difference intent, only add new items
+          if (updateData.intent === "prepare_for_payment_difference") {
+            console.log(`[updateBookingSafely] CONFIRMED booking ${bookingId} - adding new items only (not replacing existing)`);
+            
+            // Skip the "delete old booking items" step for this case
+            // We'll handle adding new items separately below
+          }
         }
 
         // 2. Verify the booking is in an editable state
@@ -105,7 +111,10 @@ export async function updateBookingSafely(
           BookingStatus.PENDING,
         ];
 
-        if (!editableStates.includes(booking.status)) {
+        // Allow CONFIRMED bookings to be edited when items are provided (for adding items to confirmed bookings)
+        const isConfirmedWithItems = booking.status === "CONFIRMED" && updateData.items && updateData.items.length > 0;
+
+        if (!editableStates.includes(booking.status) && !isConfirmedWithItems) {
           console.warn(`[updateBookingSafely] Booking ${bookingId} is in status ${booking.status}, which is not editable.`);
           throw new Error(`Booking is in status '${booking.status}' and cannot be edited.`);
         }
@@ -149,6 +158,21 @@ export async function updateBookingSafely(
           where: { bookingId: booking.id },
         });
         console.log(`[updateBookingSafely] Old booking items deleted for booking ID: ${bookingId}`);
+
+        // 4. Handle BookingItems based on booking status and intent
+        const shouldReplaceAllItems = !(booking.status === "CONFIRMED" && updateData.intent === "prepare_for_payment_difference");
+        
+        if (shouldReplaceAllItems) {
+          // Normal case: delete old items and recreate all
+          console.log(`[updateBookingSafely] Deleting old booking items for booking ID: ${bookingId}`);
+          await tx.bookingItem.deleteMany({
+            where: { bookingId: booking.id },
+          });
+          console.log(`[updateBookingSafely] Old booking items deleted for booking ID: ${bookingId}`);
+        } else {
+          // Special case for CONFIRMED bookings with additional items: keep existing items
+          console.log(`[updateBookingSafely] Keeping existing items for CONFIRMED booking ${bookingId}, will only add new items`);
+        }
 
         // 5. Availability Check - Enhanced to be more rigorous
         console.log(`[updateBookingSafely] Starting availability check for ${updateData.items.length} items for booking ID: ${bookingId}`);
@@ -255,6 +279,23 @@ export async function updateBookingSafely(
         let couponDiscount = 0;
         let couponId = booking.couponId; // Keep existing coupon by default
         
+        // For CONFIRMED bookings with additional items, add to existing amounts
+        const isAddingToConfirmed = booking.status === "CONFIRMED" && updateData.intent === "prepare_for_payment_difference";
+        let finalSubtotalAmount = newSubtotalAmount;
+        let finalTaxAmount = updateData.taxAmount || 0;
+        let finalTotalAmount = newSubtotalAmount + finalTaxAmount;
+        
+        if (isAddingToConfirmed) {
+          // Add new amounts to existing amounts
+          finalSubtotalAmount = (booking.subtotalAmount || 0) + newSubtotalAmount;
+          finalTaxAmount = (booking.taxAmount || 0) + (updateData.taxAmount || 0);
+          finalTotalAmount = (booking.totalAmount || 0) + newSubtotalAmount + (updateData.taxAmount || 0);
+          console.log(`[updateBookingSafely] Adding to existing amounts - Previous: $${booking.totalAmount}, Adding: $${newSubtotalAmount + (updateData.taxAmount || 0)}, New Total: $${finalTotalAmount}`);
+        } else {
+          // Normal case: calculate amounts based on provided items
+          finalSubtotalAmount = newSubtotalAmount;
+        }
+        
         // If a new coupon code is provided, look it up and apply
         if (updateData.couponCode) {
           // Use a separate variable name to avoid variable declaration issues
@@ -288,9 +329,9 @@ export async function updateBookingSafely(
             
             // Calculate discount amount
             if (foundCoupon.discountType === "PERCENTAGE") {
-              couponDiscount = newSubtotalAmount * (foundCoupon.discountAmount / 100);
+              couponDiscount = finalSubtotalAmount * (foundCoupon.discountAmount / 100);
             } else if (foundCoupon.discountType === "FIXED") {
-              couponDiscount = Math.min(foundCoupon.discountAmount, newSubtotalAmount);
+              couponDiscount = Math.min(foundCoupon.discountAmount, finalSubtotalAmount);
             }
           } else if (updateData.couponCode) {
             // If code was provided but not found/valid, don't apply any coupon
@@ -298,12 +339,14 @@ export async function updateBookingSafely(
           }
         }
         
-        // Calculate tax if tax amount provided or calculate based on subtotal
-        const newTaxAmount = updateData.taxAmount || 0;
+        // Apply coupon discount to final amounts (only for non-confirmed bookings)
+        if (!isAddingToConfirmed && couponDiscount > 0) {
+          finalTotalAmount = finalSubtotalAmount - couponDiscount + finalTaxAmount;
+        } else if (!isAddingToConfirmed) {
+          finalTaxAmount = updateData.taxAmount || 0;
+          finalTotalAmount = finalSubtotalAmount + finalTaxAmount;
+        }
         
-        // Calculate total
-        const newTotalAmount = newSubtotalAmount - couponDiscount + newTaxAmount;
-
         // Fields that can be directly updated from updateData
         const { 
           eventDate: rawEventDateString,
@@ -439,9 +482,9 @@ export async function updateBookingSafely(
           participantAge,
           participantCount,
           specialInstructions,
-          subtotalAmount: newSubtotalAmount,
-          taxAmount: newTaxAmount,
-          totalAmount: newTotalAmount,
+          subtotalAmount: finalSubtotalAmount,
+          taxAmount: finalTaxAmount,
+          totalAmount: finalTotalAmount,
           status: newStatus,
           expiresAt: newExpiresAt,
           updatedAt: new Date(),

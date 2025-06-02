@@ -245,13 +245,104 @@ export async function PATCH(
     if (booking?.status === "CONFIRMED" && body.intent === "prepare_for_payment_difference" && body.items) {
       console.log(`[API PATCH Booking] Processing payment for additional items for CONFIRMED booking`);
       
-      // Process payment for additional items
       try {
-        // Use updateBookingSafely with our special intent
+        // First, update the booking with the new items using updateBookingSafely
         const updatedBookingWithItems = await updateBookingSafely(bookingId, businessId, body);
         
-        // Further processing will be handled by the Stripe webhook
-        return NextResponse.json(updatedBookingWithItems, { status: 200 });
+        // Now we need to create a payment intent for the difference amount
+        // Get the business for Stripe account info
+        const business = await prisma.business.findUnique({
+          where: { id: businessId },
+          select: { stripeAccountId: true }
+        });
+
+        if (!business?.stripeAccountId) {
+          return NextResponse.json({ 
+            error: "Business Stripe account not configured",
+            code: "STRIPE_ACCOUNT_MISSING"
+          }, { status: 400 });
+        }
+
+        // Calculate the difference amount (added items + tax)
+        const differenceAmount = (body.subtotalAmount || 0) + (body.taxAmount || 0);
+        const differenceAmountCents = Math.round(differenceAmount * 100);
+
+        if (differenceAmountCents <= 0) {
+          return NextResponse.json({ 
+            error: "No additional payment required",
+            code: "NO_PAYMENT_NEEDED"
+          }, { status: 400 });
+        }
+
+        // Get or create customer for Stripe
+        const customer = await prisma.customer.findFirst({
+          where: { 
+            email: body.customerEmail || "",
+            businessId: businessId 
+          }
+        });
+
+        if (!customer) {
+          return NextResponse.json({ 
+            error: "Customer not found",
+            code: "CUSTOMER_NOT_FOUND"
+          }, { status: 400 });
+        }
+
+        // Find or create Stripe customer
+        const { findOrCreateStripeCustomer } = await import("@/lib/stripe/customer-utils");
+        const stripeCustomerId = await findOrCreateStripeCustomer(
+          customer.email,
+          customer.name,
+          customer.phone || "",
+          body.eventCity || "",
+          body.eventState || "",
+          body.eventAddress || "",
+          body.eventZipCode || "",
+          businessId,
+          business.stripeAccountId
+        );
+
+        // Create payment intent for the difference
+        const { stripe } = await import("@/lib/stripe-server");
+        
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: differenceAmountCents,
+          currency: "usd",
+          customer: stripeCustomerId,
+          receipt_email: customer.email,
+          metadata: {
+            prismaBookingId: bookingId,
+            prismaBusinessId: businessId,
+            prismaCustomerId: customer.id,
+            paymentType: "booking_addition",
+            addedItemsAmount: (body.subtotalAmount || 0).toString(),
+            taxAmount: (body.taxAmount || 0).toString(),
+            totalDifferenceAmount: differenceAmount.toString(),
+            customerName: customer.name,
+            customerEmail: customer.email,
+          }
+        }, {
+          stripeAccount: business.stripeAccountId
+        });
+
+        if (!paymentIntent.client_secret) {
+          return NextResponse.json({ 
+            error: "Failed to create payment intent",
+            code: "PAYMENT_INTENT_FAILED"
+          }, { status: 500 });
+        }
+
+        console.log(`[API PATCH Booking] Created payment intent for difference: $${differenceAmount}`);
+        
+        // Return the updated booking with client secret
+        return NextResponse.json({
+          ...updatedBookingWithItems,
+          clientSecret: paymentIntent.client_secret,
+          differenceAmount: differenceAmount,
+          paymentIntentId: paymentIntent.id
+        }, { status: 200 });
+        
       } catch (error) {
         console.error("[API PATCH Booking] Error processing payment difference:", error);
         return NextResponse.json({ 
