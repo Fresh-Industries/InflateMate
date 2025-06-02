@@ -313,7 +313,7 @@ const colors: ThemeColors = {
             className="text-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
             style={buttonStyle}
           >
-            <Link href={`/${domain}/booking`} className="flex items-center gap-2">
+            <Link href={`/booking`} className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               Book Now
             </Link>

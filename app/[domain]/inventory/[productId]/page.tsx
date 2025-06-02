@@ -146,7 +146,7 @@ export default async function ProductDetailPage(props: PageProps) {
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Link 
-            href={`/${domain}/inventory`}
+            href={`/inventory`}
             className="inline-flex items-center text-sm hover:text-blue-600 transition-colors"
             style={{ color: secondaryColor }}
           >
@@ -254,7 +254,7 @@ export default async function ProductDetailPage(props: PageProps) {
                 style={{ backgroundColor: primaryColor, borderColor: primaryColor }}
                 asChild
               >
-                <Link href={`/${domain}/booking?item=${product.id}`}>
+                <Link href={`/booking?item=${product.id}`}>
                   <Calendar className="h-5 w-5 mr-2" />
                   Book This Item
                 </Link>
