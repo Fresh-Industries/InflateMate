@@ -63,7 +63,13 @@ export async function GET(
   try {
     const businessData = await prisma.business.findUnique({
       where: { id: businessId },
-      select: { timeZone: true }
+      select: { 
+        timeZone: true,
+        minNoticeHours: true,
+        maxNoticeHours: true,
+        bufferBeforeHours: true,
+        bufferAfterHours: true
+      }
     });
 
     if (!businessData) {
@@ -77,7 +83,6 @@ export async function GET(
     const requestedStartUTC = localToUTC(date, startTime, finalTz);
     const requestedEndUTC = localToUTC(date, endTime, finalTz);
     const now = new Date();
-    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
     if (isNaN(requestedStartUTC.getTime()) || isNaN(requestedEndUTC.getTime())) {
         console.error("[Availability API RAW] Invalid Date object from localToUTC conversion.");
@@ -90,6 +95,27 @@ export async function GET(
             { status: 400 }
           );
      }
+
+    // Validate notice window requirements
+    const noticeDiffMs = requestedStartUTC.getTime() - now.getTime();
+    const minNoticeMs = businessData.minNoticeHours * 60 * 60 * 1000;
+    const maxNoticeMs = businessData.maxNoticeHours * 60 * 60 * 1000;
+
+    if (noticeDiffMs < minNoticeMs) {
+      return NextResponse.json(
+        { error: `You must book at least ${businessData.minNoticeHours} hours in advance.` },
+        { status: 400 }
+      );
+    }
+    if (noticeDiffMs > maxNoticeMs) {
+      const maxDays = Math.floor(businessData.maxNoticeHours / 24);
+      return NextResponse.json(
+        { error: `You can't book more than ${maxDays} days out.` },
+        { status: 400 }
+      );
+    }
+
+    const thirtyMinutesAgo = new Date(now.getTime() - 30 * 60 * 1000);
 
     const allInventory = await prisma.inventory.findMany({
       where: { businessId, status: 'AVAILABLE' },
@@ -112,6 +138,17 @@ export async function GET(
 
     console.log("[Availability API Prisma] Fetching booked items...");
 
+    // Compute the buffer (in milliseconds)
+    const bufferBeforeMs = businessData.bufferBeforeHours * 60 * 60 * 1000;
+    const bufferAfterMs = businessData.bufferAfterHours * 60 * 60 * 1000;
+
+    // Expand the requested window by the buffer on the outside edges
+    const effectiveSearchStart = new Date(requestedStartUTC.getTime() - bufferBeforeMs);
+    const effectiveSearchEnd = new Date(requestedEndUTC.getTime() + bufferAfterMs);
+
+    console.log(`[Availability API] Buffer settings: ${businessData.bufferBeforeHours}h before, ${businessData.bufferAfterHours}h after`);
+    console.log(`[Availability API] Effective search window: ${effectiveSearchStart.toISOString()} to ${effectiveSearchEnd.toISOString()}`);
+
     const bookingWhere: Prisma.BookingWhereInput = {
       businessId: businessId,
       OR: [
@@ -132,9 +169,9 @@ export async function GET(
         inventoryId: {
           in: allInventoryIds,
         },
-        // Filter for overlapping periods using startUTC and endUTC
-        startUTC: { lte: requestedEndUTC },
-        endUTC: { gte: requestedStartUTC },
+        // Filter for overlapping periods using expanded search window to account for buffers
+        startUTC: { lte: effectiveSearchEnd },
+        endUTC: { gte: effectiveSearchStart },
         booking: bookingWhere,
       },
       select: { // Select only necessary fields

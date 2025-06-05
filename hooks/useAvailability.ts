@@ -57,31 +57,48 @@ export function useAvailability({ businessId, filters, onUnavailableItemsFound }
         console.log(`Searching availability for ${filters.date} from ${filters.startTime} to ${filters.endTime}`);
       }
       
-      const data = await BookingService.searchInventoryAvailability(businessId, filters);
-      console.log(`Found ${data.length} available items`);
+      // Use the existing service function
+      const availableItems = await BookingService.searchInventoryAvailability(businessId, filters);
+      console.log(`Found ${availableItems.length} available items`);
 
       // Always update the inventory regardless of silent mode
-      setAvailableInventory(data);
+      setAvailableInventory(availableItems);
       
       // In silent mode, also check for newly unavailable items
       if (silent) {
-        checkForUnavailableItems(data, currentSelectedItems);
-      } else if (data.length === 0) {
+        checkForUnavailableItems(availableItems, currentSelectedItems);
+      } else if (availableItems.length === 0) {
         toast({
           title: "No Availability",
           description: "No inventory items are available for your selected date. Please try a different date.",
           variant: "destructive"
         });
       }
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      
     } catch (error: any) {
       console.error("Availability check error:", error);
+      
+      // Clear inventory on error
+      setAvailableInventory([]);
+      
       if (!silent) {
-        toast({
-          title: "Error",
-          description: error.message || "Failed to search availability",
-          variant: "destructive"
-        });
+        // Check if this is a notice window violation or other specific error
+        const errorMessage = error.message || "Failed to search availability";
+        
+        // Check for specific notice window error patterns
+        if (errorMessage.includes("hours in advance") || errorMessage.includes("days out") || errorMessage.includes("book at least")) {
+          toast({
+            title: "Invalid Time Selection",
+            description: errorMessage,
+            variant: "destructive"
+          });
+        } else {
+          toast({
+            title: "Error",
+            description: "Failed to search availability. Please try again.",
+            variant: "destructive"
+          });
+        }
       } else {
         console.error("Silent availability check failed:", error);
       }

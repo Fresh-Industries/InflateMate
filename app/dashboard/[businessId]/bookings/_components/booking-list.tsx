@@ -1,6 +1,8 @@
 'use client';
 
-import { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { useAuth } from "@clerk/nextjs";
+import { createSupabaseClient } from "@/lib/supabaseClient";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { startOfDay } from "date-fns";
@@ -31,7 +33,45 @@ interface BookingItem {
 interface Waiver {
   id: string;
   status: 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED';
+  docuSealDocumentId?: string;
+  bookingId: string;
+}
+
+interface WaiverRowFromDB {
+  id: string;
+  status: 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED';
+  docuSealDocumentId?: string;
   openSignDocumentId?: string;
+  bookingId: string;
+  businessId: string;
+}
+
+interface BookingRowFromDB {
+  id: string;
+  eventDate: string;
+  startTime: string;
+  endTime: string;
+  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'HOLD';
+  totalAmount: number;
+  subtotalAmount?: number;
+  taxAmount?: number;
+  taxRate?: number;
+  depositAmount?: number;
+  depositPaid?: boolean;
+  eventType: string;
+  participantCount: number;
+  participantAge?: string;
+  customerId: string;
+  eventAddress: string;
+  eventCity: string;
+  eventState: string;
+  eventZipCode: string;
+  eventTimeZone: string;
+  specialInstructions?: string;
+  refundAmount?: number;
+  refundReason?: string;
+  isCompleted?: boolean;
+  businessId: string;
 }
 
 interface Booking {
@@ -86,8 +126,13 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { getToken } = useAuth();
+  
+  // Memoize Supabase client with Clerk JWT
+  const supabase = useMemo(() => createSupabaseClient({ getToken }), [getToken]);
+  
   const [bookings, setBookings] = useState<Booking[]>(initialData.bookings);
-  const [statusFilter, setStatusFilter] = useState("CONFIRMED");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [isViewSheetOpen, setIsViewSheetOpen] = useState(false);
@@ -107,6 +152,339 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   const [sortDirection, setSortDirection] = useState<"asc" | "desc">("asc");
   const [eventType, setEventType] = useState<string>("");
   const [showPastBookings, setShowPastBookings] = useState(false);
+
+  // Handle realtime waiver events
+  function handleWaiverRealtimeEvent(
+    eventType: 'INSERT' | 'UPDATE' | 'DELETE',
+    row: WaiverRowFromDB
+  ) {
+    console.log(`[Realtime] Waiver ${eventType} event for booking ${row.bookingId}:`, row);
+    
+    setBookings(prev =>
+      prev.map(b => {
+        if (b.id !== row.bookingId) return b;
+        const existingWaivers = b.waivers ?? [];
+        
+        if (eventType === 'INSERT') {
+          const newWaiver: Waiver = {
+            id: row.id,
+            status: row.status,
+            docuSealDocumentId: row.docuSealDocumentId ?? row.openSignDocumentId ?? undefined,
+            bookingId: row.bookingId,
+          };
+          return {
+            ...b,
+            waivers: [...existingWaivers, newWaiver],
+            hasSignedWaiver: row.status === 'SIGNED' ? true : b.hasSignedWaiver,
+          };
+        }
+        
+        if (eventType === 'UPDATE') {
+          const updatedWaivers = existingWaivers.map(w =>
+            w.id === row.id
+              ? { 
+                  ...w, 
+                  status: row.status as Waiver['status'], 
+                  docuSealDocumentId: row.docuSealDocumentId ?? row.openSignDocumentId ?? undefined 
+                }
+              : w
+          );
+          return {
+            ...b,
+            waivers: updatedWaivers,
+            hasSignedWaiver: row.status === 'SIGNED' ? true : b.hasSignedWaiver,
+          };
+        }
+        
+        if (eventType === 'DELETE') {
+          const filteredWaivers = existingWaivers.filter(w => w.id !== row.id);
+          const stillSigned = filteredWaivers.some(w => w.status === 'SIGNED');
+          return { ...b, waivers: filteredWaivers, hasSignedWaiver: stillSigned };
+        }
+        
+        return b;
+      })
+    );
+  }
+
+  // Handle realtime booking events
+  function handleBookingRealtimeEvent(
+    eventType: 'INSERT' | 'UPDATE' | 'DELETE',
+    row: BookingRowFromDB | null,
+    oldRow?: BookingRowFromDB | null
+  ) {
+    console.log(`[Realtime] ${eventType} event for booking ${row?.id || oldRow?.id}:`, row);
+    
+    if (eventType === 'UPDATE' && row) {
+      // 1) Merge only the scalar fields so the badge flips immediately
+      setBookings(prev =>
+        prev.map(b =>
+          b.id === row.id
+            ? {
+                ...b,
+                status: row.status,
+                totalAmount: row.totalAmount,
+                eventDate: row.eventDate,
+                startTime: row.startTime,
+                endTime: row.endTime,
+                eventType: row.eventType,
+                participantCount: row.participantCount,
+                participantAge: row.participantAge,
+                eventAddress: row.eventAddress,
+                eventCity: row.eventCity,
+                eventState: row.eventState,
+                eventZipCode: row.eventZipCode,
+                eventTimeZone: row.eventTimeZone,
+                specialInstructions: row.specialInstructions,
+                subtotalAmount: row.subtotalAmount,
+                taxAmount: row.taxAmount,
+                taxRate: row.taxRate,
+                depositAmount: row.depositAmount,
+                depositPaid: row.depositPaid,
+                refundAmount: row.refundAmount,
+                refundReason: row.refundReason,
+                isCompleted: row.isCompleted,
+              }
+            : b
+        )
+      );
+
+      // 2) Fetch the fully populated booking (with customer name, inventoryItems, waivers)
+      fetch(`/api/businesses/${businessId}/bookings/${row.id}`)
+        .then(res => res.json())
+        .then(fullBookingResponse => {
+          console.log(`[Realtime] Fetched full booking data for ${row.id}:`, fullBookingResponse);
+          
+          // Transform the API response to match our Booking interface
+          const transformedBooking: Booking = {
+            id: fullBookingResponse.booking.id,
+            eventDate: fullBookingResponse.booking.eventDate,
+            startTime: fullBookingResponse.booking.startTime,
+            endTime: fullBookingResponse.booking.endTime,
+            status: fullBookingResponse.booking.status,
+            totalAmount: fullBookingResponse.booking.totalAmount,
+            subtotalAmount: fullBookingResponse.booking.subtotalAmount,
+            taxAmount: fullBookingResponse.booking.taxAmount,
+            taxRate: fullBookingResponse.booking.taxRate,
+            depositAmount: fullBookingResponse.booking.depositAmount,
+            depositPaid: fullBookingResponse.booking.depositPaid,
+            eventType: fullBookingResponse.booking.eventType,
+            participantCount: fullBookingResponse.booking.participantCount,
+            participantAge: fullBookingResponse.booking.participantAge,
+            eventAddress: fullBookingResponse.booking.eventAddress,
+            eventCity: fullBookingResponse.booking.eventCity,
+            eventState: fullBookingResponse.booking.eventState,
+            eventZipCode: fullBookingResponse.booking.eventZipCode,
+            eventTimeZone: fullBookingResponse.booking.eventTimeZone,
+            specialInstructions: fullBookingResponse.booking.specialInstructions,
+            refundAmount: fullBookingResponse.booking.refundAmount,
+            refundReason: fullBookingResponse.booking.refundReason,
+            isCompleted: fullBookingResponse.booking.isCompleted,
+            // Map nested data from response
+            customer: fullBookingResponse.customer || { id: row.customerId, name: '', email: '', phone: '' },
+            inventoryItems: fullBookingResponse.inventoryItems || [],
+            waivers: fullBookingResponse.waivers || [],
+            hasSignedWaiver: fullBookingResponse.hasSignedWaiver || false,
+          };
+          
+          setBookings(prev =>
+            prev.map(b => (b.id === transformedBooking.id ? transformedBooking : b))
+          );
+        })
+        .catch(err => {
+          console.error('Failed to re-fetch full booking:', err);
+        });
+
+      return;
+    }
+    
+    if (eventType === 'INSERT') {
+      // Immediately fetch full booking data to show complete customer info
+      if (!row?.id) {
+        console.error('[Realtime] INSERT event without row data');
+        return;
+      }
+      
+      console.log(`[Realtime] Processing INSERT for booking ${row.id}`);
+      
+      fetch(`/api/businesses/${businessId}/bookings/${row.id}`)
+        .then(res => res.json())
+        .then(fullBookingResponse => {
+          console.log(`[Realtime] Fetched full new booking ${row.id}:`, fullBookingResponse);
+          
+          // Transform the API response to match our Booking interface
+          const transformedBooking: Booking = {
+            id: fullBookingResponse.booking.id,
+            eventDate: fullBookingResponse.booking.eventDate,
+            startTime: fullBookingResponse.booking.startTime,
+            endTime: fullBookingResponse.booking.endTime,
+            status: fullBookingResponse.booking.status,
+            totalAmount: fullBookingResponse.booking.totalAmount,
+            subtotalAmount: fullBookingResponse.booking.subtotalAmount,
+            taxAmount: fullBookingResponse.booking.taxAmount,
+            taxRate: fullBookingResponse.booking.taxRate,
+            depositAmount: fullBookingResponse.booking.depositAmount,
+            depositPaid: fullBookingResponse.booking.depositPaid,
+            eventType: fullBookingResponse.booking.eventType,
+            participantCount: fullBookingResponse.booking.participantCount,
+            participantAge: fullBookingResponse.booking.participantAge,
+            eventAddress: fullBookingResponse.booking.eventAddress,
+            eventCity: fullBookingResponse.booking.eventCity,
+            eventState: fullBookingResponse.booking.eventState,
+            eventZipCode: fullBookingResponse.booking.eventZipCode,
+            eventTimeZone: fullBookingResponse.booking.eventTimeZone,
+            specialInstructions: fullBookingResponse.booking.specialInstructions,
+            refundAmount: fullBookingResponse.booking.refundAmount,
+            refundReason: fullBookingResponse.booking.refundReason,
+            isCompleted: fullBookingResponse.booking.isCompleted,
+            // Map nested data from response
+            customer: fullBookingResponse.customer || { id: row.customerId, name: '', email: '', phone: '' },
+            inventoryItems: fullBookingResponse.inventoryItems || [],
+            waivers: fullBookingResponse.waivers || [],
+            hasSignedWaiver: fullBookingResponse.hasSignedWaiver || false,
+          };
+          
+          setBookings(prev => {
+            // Only add if it doesn't already exist
+            if (prev.find(b => b.id === transformedBooking.id)) return prev;
+            return [transformedBooking, ...prev];
+          });
+        })
+        .catch(err => {
+          console.error('Failed to fetch new booking:', err);
+          
+          // Fallback: create stub booking if API fetch fails
+          setBookings(prev => {
+            if (prev.find(b => b.id === row.id)) return prev;
+            const newBooking: Booking = {
+              id: row.id,
+              eventDate: row.eventDate,
+              startTime: row.startTime,
+              endTime: row.endTime,
+              status: row.status,
+              totalAmount: row.totalAmount,
+              subtotalAmount: row.subtotalAmount,
+              taxAmount: row.taxAmount,
+              taxRate: row.taxRate,
+              depositAmount: row.depositAmount,
+              depositPaid: row.depositPaid,
+              eventType: row.eventType,
+              participantCount: row.participantCount,
+              participantAge: row.participantAge,
+              // Stub out nested data - will be populated when user views details
+              customer: { id: row.customerId, name: '', email: '', phone: '' },
+              inventoryItems: [],
+              waivers: [],
+              hasSignedWaiver: false,
+              eventAddress: row.eventAddress,
+              eventCity: row.eventCity,
+              eventState: row.eventState,
+              eventZipCode: row.eventZipCode,
+              eventTimeZone: row.eventTimeZone || 'America/Chicago',
+              specialInstructions: row.specialInstructions,
+              refundAmount: row.refundAmount,
+              refundReason: row.refundReason,
+              isCompleted: row.isCompleted,
+            };
+            return [newBooking, ...prev];
+          });
+        });
+      return;
+    }
+    
+    if (eventType === 'DELETE') {
+      const deletedBookingId = row?.id || oldRow?.id;
+      if (deletedBookingId) {
+        setBookings(prev => prev.filter(b => b.id !== deletedBookingId));
+      }
+    }
+  }
+
+  // Subscribe to realtime booking changes
+  useEffect(() => {
+    console.log(`[Realtime] Setting up booking subscription for businessId: ${businessId}`);
+    
+    const bookingChannel = supabase
+      .channel('realtime-bookings')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'Booking',
+        filter: `businessId=eq.${businessId}`,
+      }, payload => {
+        console.log(`[Realtime] Booking payload received:`, payload);
+        console.log(`[Realtime] Payload eventType:`, payload.eventType);
+        console.log(`[Realtime] Payload.new:`, payload.new);
+        console.log(`[Realtime] Payload.old:`, payload.old);
+        
+        const row = payload.new as BookingRowFromDB;
+        const oldRow = payload.old as BookingRowFromDB;
+        const eventType = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
+        
+        console.log(`[Realtime] Event type:`, eventType, 'New row status:', row?.status, 'Old row status:', oldRow?.status);
+        console.log(`[Realtime] Processing ${eventType} for booking ${row?.id || oldRow?.id || 'unknown'}`);
+        
+        // For UPDATE events, also log the status transition
+        if (eventType === 'UPDATE' && oldRow && row) {
+          console.log(`[Realtime] Status transition: ${oldRow.status} → ${row.status}`);
+          
+          // Special logging for PENDING → CONFIRMED transitions
+          if (oldRow.status === 'PENDING' && row.status === 'CONFIRMED') {
+            console.log(`[Realtime] 🎉 PENDING → CONFIRMED transition detected!`);
+          }
+          
+          // Log any CONFIRMED status updates
+          if (row.status === 'CONFIRMED') {
+            console.log(`[Realtime] 🔥 CONFIRMED status update received from ${oldRow.status}`);
+          }
+        }
+        
+        // Log all UPDATE events specifically
+        if (eventType === 'UPDATE') {
+          console.log(`[Realtime] 📝 UPDATE event details:`, {
+            bookingId: row?.id || oldRow?.id,
+            oldStatus: oldRow?.status,
+            newStatus: row?.status,
+            customerId: row?.customerId || oldRow?.customerId,
+            totalAmount: row?.totalAmount || oldRow?.totalAmount,
+          });
+        }
+        
+        handleBookingRealtimeEvent(eventType, row || oldRow, oldRow);
+      })
+      .subscribe();
+
+    return () => {
+      console.log(`[Realtime] Cleaning up booking subscription`);
+      supabase.removeChannel(bookingChannel);
+    };
+  }, [supabase, businessId]);
+
+  // Subscribe to realtime waiver changes
+  useEffect(() => {
+    console.log(`[Realtime] Setting up waiver subscription for businessId: ${businessId}`);
+    
+    const waiverChannel = supabase
+      .channel('realtime-waivers')
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'Waiver',
+        filter: `businessId=eq.${businessId}`
+      }, payload => {
+        console.log(`[Realtime] Waiver payload received:`, payload);
+        const row = payload.new as WaiverRowFromDB;
+        const eventType = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
+        console.log(`[Realtime] Processing waiver ${eventType} for booking ${row?.bookingId || 'unknown'}`);
+        handleWaiverRealtimeEvent(eventType, row);
+      })
+      .subscribe();
+
+    return () => {
+      console.log(`[Realtime] Cleaning up waiver subscription`);
+      supabase.removeChannel(waiverChannel);
+    };
+  }, [supabase, businessId]);
 
   useEffect(() => {
     setBookings(initialData.bookings);
@@ -162,6 +540,8 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
           })
         : true;
       
+      // For debugging: uncomment the line below to show ALL bookings regardless of status
+      // const statusMatch = true;
       const statusMatch = statusFilter === "all" || booking.status === statusFilter;
       
       let dateMatch = true;
@@ -568,6 +948,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
                           {booking.status === 'CONFIRMED' && <ShieldCheck className="h-3 w-3" />}
                           {booking.status === 'PENDING' && <Clock className="h-3 w-3" />}
                           {booking.status === 'CANCELLED' && <X className="h-3 w-3" />}
+                          {booking.status}
                         </Badge>
                         {!booking.hasSignedWaiver && booking.status !== 'CANCELLED' && (
                           <div className="mt-1">

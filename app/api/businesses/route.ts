@@ -56,8 +56,8 @@ export async function POST(req: NextRequest) {
         organization: {
           connect: { id: org.id }
         },
-        minAdvanceBooking: 24,
-        maxAdvanceBooking: 90,
+        minNoticeHours: 24,
+        maxNoticeHours: 2160,
         siteConfig: {},
       },
     });

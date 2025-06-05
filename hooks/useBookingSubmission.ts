@@ -58,9 +58,9 @@ export function useBookingSubmission({
 
 
    // Function to handle the reservation call (Step 1 -> Step 2)
-  const handleReserveItems = useCallback(async (payload: ReservationPayload) => {
+  const handleReserveItems = useCallback(async (payload: ReservationPayload): Promise<boolean> => {
        // Check if already submitting something else
-       if (isSubmitting || isProcessingQuote) return;
+       if (isSubmitting || isProcessingQuote) return false;
        setIsSubmitting(true); // Set general submission loading
 
        try {
@@ -72,6 +72,8 @@ export function useBookingSubmission({
            if (onReservationSuccess) {
                onReservationSuccess(data.holdId, data.expiresAt);
            }
+           
+           return true; // Return success
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
        } catch (error: any) {
            console.error("Reservation failed:", error);
@@ -87,6 +89,8 @@ export function useBookingSubmission({
                    variant: "destructive"
                });
            }
+           
+           return false; // Return failure
        } finally {
            setIsSubmitting(false); // Reset general submission loading
        }

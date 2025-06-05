@@ -11,6 +11,12 @@ export async function fetchBusinessDetails(businessId: string): Promise<{
   stripeConnectedAccountId?: string;
   defaultTaxRate?: number;
   applyTaxToBookings?: boolean;
+  timeZone?: string;
+  minNoticeHours?: number;
+  maxNoticeHours?: number;
+  minBookingAmount?: number;
+  bufferBeforeHours?: number;
+  bufferAfterHours?: number;
   // Add other business fields as needed
 }> {
   const response = await fetch(`/api/businesses/${businessId}`);

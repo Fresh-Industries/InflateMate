@@ -805,7 +805,7 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
       if (!paymentClientSecret) throw new Error("Missing client secret from server");
       
       setClientSecret(paymentClientSecret);
-      setPaymentBookingId(bookingDetails.booking.id);
+      setPaymentBookingId(paymentBookingId || bookingDetails.booking.id);
       setShowPaymentForm(true);
       
     } catch (error) {

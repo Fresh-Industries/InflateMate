@@ -68,9 +68,6 @@ const mockBookingWithDetails = {
     email: testData.business.email,
     serviceArea: ['Austin', 'Round Rock', 'Cedar Park'],
     logo: testData.business.logo,
-    minAdvanceBooking: 24,
-    maxAdvanceBooking: 90,
-    minimumPurchase: 100,
     timeZone: 'America/Chicago',
     stripeAccountId: 'acct_test123',
     socialMedia: null,
@@ -93,7 +90,12 @@ const mockBookingWithDetails = {
         description: 'Premium bounce house rentals for all occasions',
         imageUrl: 'https://example.com/hero.jpg'
       }
-    }
+    },
+    minNoticeHours: 24,
+    maxNoticeHours: 2160, // 90 days * 24 hours
+    minBookingAmount: 100,
+    bufferBeforeHours: 2,
+    bufferAfterHours: 0,
   },
   
   inventoryItems: [

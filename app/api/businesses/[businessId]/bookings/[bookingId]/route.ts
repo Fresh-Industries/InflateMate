@@ -26,8 +26,21 @@ export async function GET(
     const booking = await prisma.booking.findFirst({
       where: { id: bookingId, businessId },
       include: {
-        inventoryItems: { include: { inventory: true } },
+        inventoryItems: { 
+          include: { 
+            inventory: {
+              select: { id: true, name: true, description: true, primaryImage: true }
+            }
+          }
+        },
         customer: true,
+        waivers: {
+          select: {
+            id: true,
+            status: true,
+            docuSealDocumentId: true
+          }
+        }
       },
     });
 
@@ -35,7 +48,9 @@ export async function GET(
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    // Transform the data to match BookingFullDetails format
+    // Transform to match the BookingFullDetails format expected by the edit form
+    const hasSignedWaiver = booking.waivers.some((waiver: { status: string }) => waiver.status === 'SIGNED');
+    
     const bookingFullDetails = {
       booking: {
         id: booking.id,
@@ -44,16 +59,22 @@ export async function GET(
         endTime: booking.endTime,
         status: booking.status,
         totalAmount: booking.totalAmount,
+        subtotalAmount: booking.subtotalAmount,
+        taxAmount: booking.taxAmount,
+        taxRate: booking.taxRate,
+        depositAmount: booking.depositAmount,
+        depositPaid: booking.depositPaid,
         eventType: booking.eventType,
+        participantCount: booking.participantCount,
+        participantAge: booking.participantAge,
         eventAddress: booking.eventAddress,
         eventCity: booking.eventCity,
         eventState: booking.eventState,
         eventZipCode: booking.eventZipCode,
         eventTimeZone: booking.eventTimeZone || "America/Chicago",
-        participantCount: booking.participantCount,
-        participantAge: booking.participantAge,
         specialInstructions: booking.specialInstructions,
         expiresAt: booking.expiresAt,
+        isCompleted: booking.status === 'COMPLETED',
       },
       customer: booking.customer ? {
         id: booking.customer.id,
@@ -61,19 +82,31 @@ export async function GET(
         email: booking.customer.email,
         phone: booking.customer.phone,
       } : null,
-      bookingItems: booking.inventoryItems.map(item => ({
+      bookingItems: booking.inventoryItems.map((item: any) => ({
         id: item.id,
         quantity: item.quantity,
         price: item.price,
-        startUTC: item.startUTC,
-        endUTC: item.endUTC,
+        startUTC: item.startUTC || booking.startTime,
+        endUTC: item.endUTC || booking.endTime,
+        inventoryId: item.inventoryId,
+        bookingId: item.bookingId,
         inventory: {
           id: item.inventory.id,
           name: item.inventory.name,
           description: item.inventory.description,
           primaryImage: item.inventory.primaryImage,
-        }
-      }))
+        },
+      })),
+      // Additional properties that might be used by the edit form
+      waivers: booking.waivers,
+      hasSignedWaiver,
+      inventoryItems: booking.inventoryItems.map((item: any) => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        inventoryId: item.inventoryId,
+        bookingId: item.bookingId,
+      })),
     };
 
     return NextResponse.json(bookingFullDetails);

@@ -12,23 +12,25 @@ import { cn } from '@/lib/utils';
 // Align BookingItem type with bookings-list.tsx
 interface BookingItem {
   id: string;
-  bookingId: string;
-  inventoryId: string;
   quantity: number;
   price: number;
+  inventoryId: string;
+  bookingId: string;
 }
 
-// Align Waiver type with bookings-list.tsx
+// Update the Waiver interface to match bookings-list.tsx
 interface Waiver {
   id: string;
   status: 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED';
-  openSignDocumentId?: string;
+  docuSealDocumentId?: string;
+  bookingId: string;
 }
 
 const locales = {
   'en-US': enUS,
 };
 
+// Update the Booking interface to make waivers optional
 interface Booking {
   id: string;
   eventDate: string;
@@ -51,12 +53,13 @@ interface Booking {
     phone: string;
   };
   inventoryItems: BookingItem[];
-  waivers: Waiver[];
+  waivers?: Waiver[]; // Made optional
   hasSignedWaiver: boolean;
   eventAddress: string;
   eventCity: string;
   eventState: string;
   eventZipCode: string;
+  eventTimeZone: string;
   specialInstructions?: string;
   refundAmount?: number;
   refundReason?: string;

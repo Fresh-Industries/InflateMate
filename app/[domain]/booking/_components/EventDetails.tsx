@@ -12,8 +12,9 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { format } from "date-fns";
-import { Loader2, Search, Minus, Plus, Calendar, Clock, Tag } from "lucide-react";
+import { Loader2, Search, Minus, Plus, Calendar, Clock, Tag, AlertCircle } from "lucide-react";
 import { Card, CardContent, CardFooter } from "@/components/ui/card";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PaginationControls } from "./PagnationControls";
 import {
   NewBookingState,
@@ -23,6 +24,7 @@ import {
 } from "@/types/booking";
 import { useAvailability } from "@/hooks/useAvailability";
 import { useBookingSubmission } from "@/hooks/useBookingSubmission";
+import { useBusinessDetails } from "@/hooks/useBusinessDetails";
 import { themeConfig } from "@/app/[domain]/_themes/themeConfig";
 import { ThemeColors } from "@/app/[domain]/_themes/types";
 import clsx from "clsx";
@@ -51,6 +53,14 @@ interface EventDetailsStepProps {
   holdId: string | null;
   themeName?: keyof typeof themeConfig;
   colors?: ThemeColors;
+}
+
+// Interface for existing bookings
+interface ExistingBooking {
+  id: string;
+  startTime: string;
+  endTime: string;
+  status: string;
 }
 
 /*
@@ -212,6 +222,13 @@ export function EventDetailsStep({
     tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
   }));
 
+  // New state for existing bookings and blocked times
+  const [blockedTimes, setBlockedTimes] = React.useState<{ start: string; end: string }[]>([]);
+  const [isLoadingBookings, setIsLoadingBookings] = React.useState(false);
+
+  // Get business details for notice window validation and buffer settings
+  const { businessData, isLoadingBusiness } = useBusinessDetails(businessId);
+
   React.useEffect(() => {
     setFilters({
       date: newBooking.eventDate,
@@ -220,6 +237,205 @@ export function EventDetailsStep({
       tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
     });
   }, [newBooking.eventDate, newBooking.startTime, newBooking.endTime]);
+
+  // Fetch existing bookings when date changes
+  React.useEffect(() => {
+    if (!newBooking.eventDate || !businessData) return;
+    
+    const fetchExistingBookings = async () => {
+      setIsLoadingBookings(true);
+      try {
+        const response = await fetch(`/api/businesses/${businessId}/bookings/for-date?date=${newBooking.eventDate}`);
+        if (response.ok) {
+          const bookings = await response.json();
+          
+          // Calculate blocked time ranges based on existing bookings + buffer
+          const blocked: { start: string; end: string }[] = [];
+          
+          bookings.forEach((booking: ExistingBooking) => {
+            if (booking.status === 'CONFIRMED' || booking.status === 'PENDING' || booking.status === 'HOLD') {
+              const bookingStart = new Date(booking.startTime);
+              const bookingEnd = new Date(booking.endTime);
+              
+              // Apply buffer times to create exclusion zones
+              const bufferBeforeMs = (businessData.bufferBeforeHours ?? 0) * 60 * 60 * 1000;
+              const bufferAfterMs = (businessData.bufferAfterHours ?? 0) * 60 * 60 * 1000;
+              
+              // Always block the actual delivery and pickup times (even with 0 buffer)
+              const deliveryTime = `${bookingStart.getHours().toString().padStart(2, '0')}:${bookingStart.getMinutes().toString().padStart(2, '0')}`;
+              const pickupTime = `${bookingEnd.getHours().toString().padStart(2, '0')}:${bookingEnd.getMinutes().toString().padStart(2, '0')}`;
+              
+              // Block delivery time
+              blocked.push({
+                start: deliveryTime,
+                end: deliveryTime
+              });
+              
+              // Block pickup time (if different from delivery)
+              if (pickupTime !== deliveryTime) {
+                blocked.push({
+                  start: pickupTime,
+                  end: pickupTime
+                });
+              }
+              
+              // Additionally apply buffer periods around delivery/pickup if buffers > 0
+              if (bufferBeforeMs > 0) {
+                const deliveryBufferStart = new Date(bookingStart.getTime() - bufferBeforeMs);
+                const deliveryBufferEnd = new Date(bookingStart.getTime() + bufferBeforeMs);
+                
+                const bufferStartHours = deliveryBufferStart.getHours().toString().padStart(2, '0');
+                const bufferStartMinutes = deliveryBufferStart.getMinutes().toString().padStart(2, '0');
+                const bufferEndHours = deliveryBufferEnd.getHours().toString().padStart(2, '0');
+                const bufferEndMinutes = deliveryBufferEnd.getMinutes().toString().padStart(2, '0');
+                
+                blocked.push({
+                  start: `${bufferStartHours}:${bufferStartMinutes}`,
+                  end: `${bufferEndHours}:${bufferEndMinutes}`
+                });
+              }
+              
+              if (bufferAfterMs > 0) {
+                const pickupBufferStart = new Date(bookingEnd.getTime() - bufferAfterMs);
+                const pickupBufferEnd = new Date(bookingEnd.getTime() + bufferAfterMs);
+                
+                const bufferStartHours = pickupBufferStart.getHours().toString().padStart(2, '0');
+                const bufferStartMinutes = pickupBufferStart.getMinutes().toString().padStart(2, '0');
+                const bufferEndHours = pickupBufferEnd.getHours().toString().padStart(2, '0');
+                const bufferEndMinutes = pickupBufferEnd.getMinutes().toString().padStart(2, '0');
+                
+                blocked.push({
+                  start: `${bufferStartHours}:${bufferStartMinutes}`,
+                  end: `${bufferEndHours}:${bufferEndMinutes}`
+                });
+              }
+            }
+          });
+          
+          setBlockedTimes(blocked);
+
+          console.log('businessData', businessData);
+          
+          // Debug: Log the blocked ranges
+          console.log('Blocked time ranges:', blocked);
+          console.log('Business buffer settings:', {
+            bufferBeforeHours: businessData.bufferBeforeHours ?? 0,
+            bufferAfterHours: businessData.bufferAfterHours ?? 0
+          });
+        }
+      } catch (error) {
+        console.error('Failed to fetch existing bookings:', error);
+      } finally {
+        setIsLoadingBookings(false);
+      }
+    };
+
+    fetchExistingBookings();
+  }, [newBooking.eventDate, businessId, businessData]);
+
+  // Calculate notice window validation
+  const getNoticeWindowStatus = React.useMemo(() => {
+    if (!newBooking.eventDate || !newBooking.startTime || !businessData) {
+      return { isValid: true, message: '' };
+    }
+
+    try {
+      const now = new Date();
+      const requestedStart = new Date(`${newBooking.eventDate}T${newBooking.startTime}:00`);
+      const hoursDiff = (requestedStart.getTime() - now.getTime()) / (1000 * 60 * 60);
+
+      const minNoticeHours = businessData.minNoticeHours || 24;
+      const maxNoticeHours = businessData.maxNoticeHours || 2160; // 90 days
+
+      if (hoursDiff < minNoticeHours) {
+        return {
+          isValid: false,
+          message: `Must be booked at least ${minNoticeHours} hours in advance (${Math.ceil(minNoticeHours / 24)} days)`
+        };
+      }
+
+      if (hoursDiff > maxNoticeHours) {
+        const maxDays = Math.floor(maxNoticeHours / 24);
+        return {
+          isValid: false,
+          message: `Cannot be booked more than ${maxDays} days in advance`
+        };
+      }
+
+      return { isValid: true, message: '' };
+    } catch (error) {
+      console.error('Error calculating notice window:', error);
+      return { isValid: true, message: '' };
+    }
+  }, [newBooking.eventDate, newBooking.startTime, businessData]);
+
+  // Check if a time conflicts with existing bookings
+  const isTimeConflicted = React.useCallback((time: string) => {
+    const conflicts = blockedTimes.filter(blocked => {
+      // Convert time strings to minutes since midnight for easier comparison
+      const timeToMinutes = (timeStr: string) => {
+        const [hours, minutes] = timeStr.split(':').map(Number);
+        return hours * 60 + minutes;
+      };
+      
+      const timeMinutes = timeToMinutes(time);
+      const blockedStartMinutes = timeToMinutes(blocked.start);
+      const blockedEndMinutes = timeToMinutes(blocked.end);
+      
+      // Simply check if the time falls within the blocked range
+      // For both start and end times, they cannot be scheduled during blocked periods
+      const isConflicted = timeMinutes >= blockedStartMinutes && timeMinutes <= blockedEndMinutes;
+      
+      if (isConflicted) {
+        console.log(`Time ${time} conflicts with blocked range ${blocked.start} - ${blocked.end}`);
+      }
+      
+      return isConflicted;
+    });
+    
+    return conflicts.length > 0;
+  }, [blockedTimes]);
+
+  // Generate time options with conflict checking
+  const generateTimeOptions = React.useCallback((isEndTime = false) => {
+    const options = [];
+    for (let hour = 0; hour < 24; hour++) {
+      for (let minute = 0; minute < 60; minute += 30) {
+        const time24 = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+        
+        // Convert to 12-hour format for display
+        let displayHour = hour;
+        let ampm = 'AM';
+        
+        if (hour === 0) {
+          displayHour = 12;
+        } else if (hour === 12) {
+          ampm = 'PM';
+        } else if (hour > 12) {
+          displayHour = hour - 12;
+          ampm = 'PM';
+        }
+        
+        const displayTime = `${displayHour}:${minute.toString().padStart(2, '0')} ${ampm}`;
+        
+        const isConflicted = isTimeConflicted(time24);
+        
+        // For end time, also ensure it's after start time
+        let isDisabled = isConflicted;
+        if (isEndTime && newBooking.startTime) {
+          isDisabled = isDisabled || time24 <= newBooking.startTime;
+        }
+        
+        options.push({
+          value: time24, // Keep 24-hour format for internal use
+          label: displayTime, // Show 12-hour format to user
+          disabled: isDisabled,
+          conflicted: isConflicted
+        });
+      }
+    }
+    return options;
+  }, [isTimeConflicted, newBooking.startTime]);
 
   const {
     availableInventory,
@@ -257,6 +473,9 @@ export function EventDetailsStep({
     onReservationSuccess: setHoldId,
   });
 
+  const startTimeOptions = generateTimeOptions(false);
+  const endTimeOptions = generateTimeOptions(true);
+
   return (
     <section
       className="space-y-8 relative p-6 sm:p-8 rounded-lg"
@@ -277,6 +496,27 @@ export function EventDetailsStep({
           Start by selecting your event details and checking equipment availability.
         </p>
       </div>
+
+      {/* Notice Window Warning */}
+      {!getNoticeWindowStatus.isValid && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            {getNoticeWindowStatus.message}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {/* Buffer Time Info */}
+      {businessData && ((businessData.bufferBeforeHours ?? 0) > 0 || (businessData.bufferAfterHours ?? 0) > 0) && (
+        <Alert>
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            Buffer times apply: {businessData.bufferBeforeHours ?? 0}h before and {businessData.bufferAfterHours ?? 0}h after each booking.
+            Some time slots may be blocked due to existing bookings.
+          </AlertDescription>
+        </Alert>
+      )}
       
       {/* DATE / TIME / TYPE FORM */}
       <div 
@@ -304,7 +544,8 @@ export function EventDetailsStep({
             style={inputStyle}
           />
         </div>
-        {/* START */}
+        
+        {/* START TIME */}
         <div className="space-y-1.5">
           <Label 
             htmlFor="startTime" 
@@ -313,18 +554,37 @@ export function EventDetailsStep({
           >
             <Clock className="h-4 w-4" /> Delivery / Setup
           </Label>
-          <Input
-            id="startTime"
-            type="time"
+          <Select
             value={newBooking.startTime}
-            onChange={(e) =>
-              setNewBooking((p) => ({ ...p, startTime: e.target.value }))
+            onValueChange={(value) =>
+              setNewBooking((prev) => ({ ...prev, startTime: value }))
             }
-            required
-            style={inputStyle}
-          />
+          >
+            <SelectTrigger 
+              id="startTime"
+              style={inputStyle}
+            >
+              <SelectValue placeholder="Select start time" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {startTimeOptions.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                  className={option.conflicted ? "text-red-500 line-through" : ""}
+                >
+                  {option.label} {option.conflicted ? "(Blocked)" : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs opacity-60">
+            Standard delivery time: 9:00 AM {isLoadingBookings && "(Loading conflicts...)"}
+          </p>
         </div>
-        {/* END */}
+        
+        {/* END TIME */}
         <div className="space-y-1.5">
           <Label 
             htmlFor="endTime" 
@@ -333,17 +593,34 @@ export function EventDetailsStep({
           >
             <Clock className="h-4 w-4" /> Pickup
           </Label>
-          <Input
-            id="endTime"
-            type="time"
+          <Select
             value={newBooking.endTime}
-            onChange={(e) =>
-              setNewBooking((p) => ({ ...p, endTime: e.target.value }))
+            onValueChange={(value) =>
+              setNewBooking((prev) => ({ ...prev, endTime: value }))
             }
-            required
-            style={inputStyle}
-          />
+          >
+            <SelectTrigger 
+              id="endTime"
+              style={inputStyle}
+            >
+              <SelectValue placeholder="Select end time" />
+            </SelectTrigger>
+            <SelectContent className="max-h-60">
+              {endTimeOptions.map((option) => (
+                <SelectItem
+                  key={option.value}
+                  value={option.value}
+                  disabled={option.disabled}
+                  className={option.conflicted ? "text-red-500 line-through" : ""}
+                >
+                  {option.label} {option.conflicted ? "(Blocked)" : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="text-xs opacity-60">Standard pickup time: 5:00 PM next day</p>
         </div>
+        
         {/* TYPE */}
         <div className="space-y-1.5">
           <Label 
@@ -392,9 +669,11 @@ export function EventDetailsStep({
           onMouseLeave={(e) => Object.assign(e.currentTarget.style, primaryButton)}
           disabled={
             isSearchingAvailability ||
+            isLoadingBusiness ||
             !newBooking.eventDate ||
             !newBooking.startTime ||
-            !newBooking.endTime
+            !newBooking.endTime ||
+            !getNoticeWindowStatus.isValid
           }
           onClick={() => searchAvailability(false)}
         >
@@ -599,8 +878,12 @@ export function EventDetailsStep({
                       }),
                     ),
                   };
-                  await handleReserveItems(payload);
-                  onContinue();
+                  const success = await handleReserveItems(payload);
+                  if (success) {
+                    onContinue();
+                  }
+                  // If not successful, handleReserveItems will show error message
+                  // and we don't proceed to next step
                 }}
               >
                 Continue to Next Step

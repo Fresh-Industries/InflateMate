@@ -432,38 +432,58 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           throw new Error("Neither bookingId nor holdId was provided");
         }
 
-        // Check for and cancel existing quote if exists
+        // Check for and handle existing quote if exists
+        let createdQuote;
         if (booking.id && existingBooking?.quote) {
-          await tx.quote.update({
+          // Update the existing quote instead of creating a new one
+          createdQuote = await tx.quote.update({
             where: { id: existingBooking.quote.id },
-            data: { status: QuoteStatus.CANCELED }
+            data: {
+              stripeQuoteId: sentQuote.id,
+              status: QuoteStatus.DRAFT,
+              amountTotal: totalAmount,
+              amountSubtotal: subtotalAmount,
+              amountTax: taxAmount,
+              currency: sentQuote.currency!.toUpperCase(),
+              hostedQuoteUrl: sentQuote.invoice?.toString(),
+              pdfUrl: ufsUrl,
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+              metadata: {
+                prismaBookingId: booking.id,
+                prismaBusinessId: businessId,
+                prismaCustomerId: customer.id,
+              },
+              businessId: businessId,
+              customerId: customer.id,
+              bookingId: booking.id,
+            }
           });
-          console.log(` - Existing quote ${existingBooking.quote.id} marked as CANCELED.`);
+          console.log(` - Existing quote ${existingBooking.quote.id} updated with new data.`);
+        } else {
+          // Create a new Quote record if none exists
+          createdQuote = await tx.quote.create({
+            data: {
+              stripeQuoteId: sentQuote.id,
+              status: QuoteStatus.DRAFT,
+              amountTotal: totalAmount,
+              amountSubtotal: subtotalAmount,
+              amountTax: taxAmount,
+              currency: sentQuote.currency!.toUpperCase(),
+              hostedQuoteUrl: sentQuote.invoice?.toString(),
+              pdfUrl: ufsUrl,
+              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+              metadata: {
+                prismaBookingId: booking.id,
+                prismaBusinessId: businessId,
+                prismaCustomerId: customer.id,
+              },
+              businessId: businessId,
+              customerId: customer.id,
+              bookingId: booking.id,
+            }
+          });
+          console.log(` - Quote created: ${createdQuote.id}, Stripe ID: ${createdQuote.stripeQuoteId}`);
         }
-
-        // Create the Quote record linked to the existing Booking
-        const createdQuote = await tx.quote.create({
-          data: {
-            stripeQuoteId: sentQuote.id,
-            status: QuoteStatus.DRAFT,
-            amountTotal: totalAmount,
-            amountSubtotal: subtotalAmount,
-            amountTax: taxAmount,
-            currency: sentQuote.currency!.toUpperCase(),
-            hostedQuoteUrl: sentQuote.invoice?.toString(),
-            pdfUrl: ufsUrl,
-            expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-            metadata: {
-              prismaBookingId: booking.id,
-              prismaBusinessId: businessId,
-              prismaCustomerId: customer.id,
-            },
-            businessId: businessId,
-            customerId: customer.id,
-            bookingId: booking.id,
-          }
-        });
-        console.log(` - Quote created: ${createdQuote.id}, Stripe ID: ${createdQuote.stripeQuoteId}`);
 
         return [booking, createdQuote];
       });

@@ -5,9 +5,15 @@ import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/l
 import BusinessSettingsForm from "@/app/dashboard/[businessId]/settings/_components/BusinessSettingsForm"
 
 // Business interface for settings form
-interface BusinessSettings {
+interface Business {
   id: string;
   name: string;
+  minNoticeHours: number;
+  maxNoticeHours: number;
+  minBookingAmount: number;
+  bufferBeforeHours: number;
+  bufferAfterHours: number;
+  timeZone: string;
   description?: string | null;
   email?: string | null;
   phone?: string | null;
@@ -16,9 +22,6 @@ interface BusinessSettings {
   state?: string | null;
   zipCode?: string | null;
   logo?: string | null;
-  minAdvanceBooking: number;
-  maxAdvanceBooking: number;
-  minimumPurchase: number;
   stripeAccountId?: string | null;
   depositPercentage?: number;
   taxRate?: number;
@@ -27,7 +30,7 @@ interface BusinessSettings {
 
 export const dynamic = "force-dynamic"
 
-async function getBusinessData(businessId: string): Promise<BusinessSettings | null> {
+async function getBusinessData(businessId: string): Promise<Business | null> {
   const user = await getCurrentUserWithOrgAndBusiness();
 
   if (!user) {
@@ -49,7 +52,7 @@ async function getBusinessData(businessId: string): Promise<BusinessSettings | n
     redirect("/dashboard");
   }
 
-  return business as BusinessSettings;
+  return business as Business;
 }
 
 export default async function Settings({ 

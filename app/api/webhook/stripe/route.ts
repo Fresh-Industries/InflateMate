@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { stripe } from "@/lib/stripe-server";
 import { headers } from "next/headers";
 import { prisma } from "@/lib/prisma";
+import { supabaseAdmin } from "@/lib/supabaseClient";
 import { Stripe } from "stripe";
 import { dateOnlyUTC, localToUTC } from "@/lib/utils";
 import { sendSignatureEmail } from "@/lib/sendEmail";
@@ -385,6 +386,21 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           },
         });
         console.log("Booking updated successfully:", booking.id);
+        
+        // Also update via Supabase for real-time updates
+        if (supabaseAdmin) {
+          await supabaseAdmin
+            .from('Booking')
+            .update({
+              status: 'CONFIRMED',
+              depositPaid: true,
+              expiresAt: null,
+              updatedAt: new Date().toISOString(),
+            })
+            .eq('id', metadata.prismaBookingId);
+          console.log("Booking real-time update sent via Supabase");
+        }
+        
         // Set all BookingItems to CONFIRMED
         await prisma.$executeRaw`UPDATE "BookingItem" SET "bookingStatus" = 'CONFIRMED', "updatedAt" = NOW() WHERE "bookingId" = ${booking.id}`;
         console.log("All BookingItems set to CONFIRMED for booking:", booking.id);
@@ -577,6 +593,19 @@ async function handleQuoteAccepted(stripeQuote: Stripe.Quote) {
         },
       });
     });
+    
+    // Send real-time update via Supabase
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('Booking')
+        .update({
+          status: 'PENDING',
+          expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', bookingId);
+      console.log("Quote accepted: Booking real-time update sent via Supabase");
+    }
 
     console.log(`[HANDLER] Quote ${internalQuote.id} accepted and invoice record created.`);
 
@@ -932,7 +961,7 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
           expiresAt: null, // Clear expiresAt for confirmed bookings
         },
       });
-       console.log(` - Booking ${internalInvoice.bookingId} status updated to CONFIRMED/COMPLETED.`);
+      console.log(` - Booking ${internalInvoice.bookingId} status updated to CONFIRMED/COMPLETED.`);
 
       // Update Customer (if found)
       if (customerIdToUpdate) {
@@ -951,6 +980,19 @@ async function handleInvoicePaymentSucceeded(invoice: Stripe.Invoice) {
 
     });
     console.log(`[HANDLER] Transaction committed for invoice ${internalInvoice.id}.`);
+
+    // Send real-time update via Supabase
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('Booking')
+        .update({
+          status: 'CONFIRMED',
+          expiresAt: null,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', bookingIdToConfirm);
+      console.log("Invoice payment succeeded: Booking real-time update sent via Supabase");
+    }
 
     // Call the confirmation handler
     console.log(`[HANDLER] Calling handleBookingConfirmation for Booking ID: ${bookingIdToConfirm}`);

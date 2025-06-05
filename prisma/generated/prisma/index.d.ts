@@ -3838,15 +3838,19 @@ export namespace Prisma {
   }
 
   export type BusinessAvgAggregateOutputType = {
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
+    minNoticeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    bufferBeforeHours: number | null
+    bufferAfterHours: number | null
   }
 
   export type BusinessSumAggregateOutputType = {
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
+    minNoticeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    bufferBeforeHours: number | null
+    bufferAfterHours: number | null
   }
 
   export type BusinessMinAggregateOutputType = {
@@ -3861,9 +3865,11 @@ export namespace Prisma {
     email: string | null
     onboarded: boolean | null
     logo: string | null
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
+    minNoticeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    bufferBeforeHours: number | null
+    bufferAfterHours: number | null
     timeZone: string | null
     stripeAccountId: string | null
     customDomain: string | null
@@ -3886,9 +3892,11 @@ export namespace Prisma {
     email: string | null
     onboarded: boolean | null
     logo: string | null
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
+    minNoticeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    bufferBeforeHours: number | null
+    bufferAfterHours: number | null
     timeZone: string | null
     stripeAccountId: string | null
     customDomain: string | null
@@ -3912,9 +3920,11 @@ export namespace Prisma {
     serviceArea: number
     onboarded: number
     logo: number
-    minAdvanceBooking: number
-    maxAdvanceBooking: number
-    minimumPurchase: number
+    minNoticeHours: number
+    maxNoticeHours: number
+    minBookingAmount: number
+    bufferBeforeHours: number
+    bufferAfterHours: number
     timeZone: number
     stripeAccountId: number
     socialMedia: number
@@ -3930,15 +3940,19 @@ export namespace Prisma {
 
 
   export type BusinessAvgAggregateInputType = {
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
+    minNoticeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    bufferBeforeHours?: true
+    bufferAfterHours?: true
   }
 
   export type BusinessSumAggregateInputType = {
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
+    minNoticeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    bufferBeforeHours?: true
+    bufferAfterHours?: true
   }
 
   export type BusinessMinAggregateInputType = {
@@ -3953,9 +3967,11 @@ export namespace Prisma {
     email?: true
     onboarded?: true
     logo?: true
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
+    minNoticeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    bufferBeforeHours?: true
+    bufferAfterHours?: true
     timeZone?: true
     stripeAccountId?: true
     customDomain?: true
@@ -3978,9 +3994,11 @@ export namespace Prisma {
     email?: true
     onboarded?: true
     logo?: true
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
+    minNoticeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    bufferBeforeHours?: true
+    bufferAfterHours?: true
     timeZone?: true
     stripeAccountId?: true
     customDomain?: true
@@ -4004,9 +4022,11 @@ export namespace Prisma {
     serviceArea?: true
     onboarded?: true
     logo?: true
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
+    minNoticeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    bufferBeforeHours?: true
+    bufferAfterHours?: true
     timeZone?: true
     stripeAccountId?: true
     socialMedia?: true
@@ -4119,9 +4139,11 @@ export namespace Prisma {
     serviceArea: string[]
     onboarded: boolean
     logo: string | null
-    minAdvanceBooking: number
-    maxAdvanceBooking: number
-    minimumPurchase: number
+    minNoticeHours: number
+    maxNoticeHours: number
+    minBookingAmount: number
+    bufferBeforeHours: number
+    bufferAfterHours: number
     timeZone: string
     stripeAccountId: string | null
     socialMedia: JsonValue | null
@@ -4166,9 +4188,11 @@ export namespace Prisma {
     serviceArea?: boolean
     onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
+    minNoticeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    bufferBeforeHours?: boolean
+    bufferAfterHours?: boolean
     timeZone?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -4206,9 +4230,11 @@ export namespace Prisma {
     serviceArea?: boolean
     onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
+    minNoticeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    bufferBeforeHours?: boolean
+    bufferAfterHours?: boolean
     timeZone?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -4235,9 +4261,11 @@ export namespace Prisma {
     serviceArea?: boolean
     onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
+    minNoticeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    bufferBeforeHours?: boolean
+    bufferAfterHours?: boolean
     timeZone?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -4264,9 +4292,11 @@ export namespace Prisma {
     serviceArea?: boolean
     onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
+    minNoticeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    bufferBeforeHours?: boolean
+    bufferAfterHours?: boolean
     timeZone?: boolean
     stripeAccountId?: boolean
     socialMedia?: boolean
@@ -4279,7 +4309,7 @@ export namespace Prisma {
     organizationId?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "onboarded" | "logo" | "minAdvanceBooking" | "maxAdvanceBooking" | "minimumPurchase" | "timeZone" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "onboarded" | "logo" | "minNoticeHours" | "maxNoticeHours" | "minBookingAmount" | "bufferBeforeHours" | "bufferAfterHours" | "timeZone" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     inventory?: boolean | Business$inventoryArgs<ExtArgs>
     customers?: boolean | Business$customersArgs<ExtArgs>
@@ -4329,9 +4359,11 @@ export namespace Prisma {
       serviceArea: string[]
       onboarded: boolean
       logo: string | null
-      minAdvanceBooking: number
-      maxAdvanceBooking: number
-      minimumPurchase: number
+      minNoticeHours: number
+      maxNoticeHours: number
+      minBookingAmount: number
+      bufferBeforeHours: number
+      bufferAfterHours: number
       timeZone: string
       stripeAccountId: string | null
       socialMedia: Prisma.JsonValue | null
@@ -4788,9 +4820,11 @@ export namespace Prisma {
     readonly serviceArea: FieldRef<"Business", 'String[]'>
     readonly onboarded: FieldRef<"Business", 'Boolean'>
     readonly logo: FieldRef<"Business", 'String'>
-    readonly minAdvanceBooking: FieldRef<"Business", 'Int'>
-    readonly maxAdvanceBooking: FieldRef<"Business", 'Int'>
-    readonly minimumPurchase: FieldRef<"Business", 'Float'>
+    readonly minNoticeHours: FieldRef<"Business", 'Int'>
+    readonly maxNoticeHours: FieldRef<"Business", 'Int'>
+    readonly minBookingAmount: FieldRef<"Business", 'Float'>
+    readonly bufferBeforeHours: FieldRef<"Business", 'Int'>
+    readonly bufferAfterHours: FieldRef<"Business", 'Int'>
     readonly timeZone: FieldRef<"Business", 'String'>
     readonly stripeAccountId: FieldRef<"Business", 'String'>
     readonly socialMedia: FieldRef<"Business", 'Json'>
@@ -22632,9 +22666,11 @@ export namespace Prisma {
     serviceArea: 'serviceArea',
     onboarded: 'onboarded',
     logo: 'logo',
-    minAdvanceBooking: 'minAdvanceBooking',
-    maxAdvanceBooking: 'maxAdvanceBooking',
-    minimumPurchase: 'minimumPurchase',
+    minNoticeHours: 'minNoticeHours',
+    maxNoticeHours: 'maxNoticeHours',
+    minBookingAmount: 'minBookingAmount',
+    bufferBeforeHours: 'bufferBeforeHours',
+    bufferAfterHours: 'bufferAfterHours',
     timeZone: 'timeZone',
     stripeAccountId: 'stripeAccountId',
     socialMedia: 'socialMedia',
@@ -23312,9 +23348,11 @@ export namespace Prisma {
     serviceArea?: StringNullableListFilter<"Business">
     onboarded?: BoolFilter<"Business"> | boolean
     logo?: StringNullableFilter<"Business"> | string | null
-    minAdvanceBooking?: IntFilter<"Business"> | number
-    maxAdvanceBooking?: IntFilter<"Business"> | number
-    minimumPurchase?: FloatFilter<"Business"> | number
+    minNoticeHours?: IntFilter<"Business"> | number
+    maxNoticeHours?: IntFilter<"Business"> | number
+    minBookingAmount?: FloatFilter<"Business"> | number
+    bufferBeforeHours?: IntFilter<"Business"> | number
+    bufferAfterHours?: IntFilter<"Business"> | number
     timeZone?: StringFilter<"Business"> | string
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     socialMedia?: JsonNullableFilter<"Business">
@@ -23351,9 +23389,11 @@ export namespace Prisma {
     serviceArea?: SortOrder
     onboarded?: SortOrder
     logo?: SortOrderInput | SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    minNoticeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    bufferBeforeHours?: SortOrder
+    bufferAfterHours?: SortOrder
     timeZone?: SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     socialMedia?: SortOrderInput | SortOrder
@@ -23395,9 +23435,11 @@ export namespace Prisma {
     serviceArea?: StringNullableListFilter<"Business">
     onboarded?: BoolFilter<"Business"> | boolean
     logo?: StringNullableFilter<"Business"> | string | null
-    minAdvanceBooking?: IntFilter<"Business"> | number
-    maxAdvanceBooking?: IntFilter<"Business"> | number
-    minimumPurchase?: FloatFilter<"Business"> | number
+    minNoticeHours?: IntFilter<"Business"> | number
+    maxNoticeHours?: IntFilter<"Business"> | number
+    minBookingAmount?: FloatFilter<"Business"> | number
+    bufferBeforeHours?: IntFilter<"Business"> | number
+    bufferAfterHours?: IntFilter<"Business"> | number
     timeZone?: StringFilter<"Business"> | string
     stripeAccountId?: StringNullableFilter<"Business"> | string | null
     socialMedia?: JsonNullableFilter<"Business">
@@ -23432,9 +23474,11 @@ export namespace Prisma {
     serviceArea?: SortOrder
     onboarded?: SortOrder
     logo?: SortOrderInput | SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    minNoticeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    bufferBeforeHours?: SortOrder
+    bufferAfterHours?: SortOrder
     timeZone?: SortOrder
     stripeAccountId?: SortOrderInput | SortOrder
     socialMedia?: SortOrderInput | SortOrder
@@ -23468,9 +23512,11 @@ export namespace Prisma {
     serviceArea?: StringNullableListFilter<"Business">
     onboarded?: BoolWithAggregatesFilter<"Business"> | boolean
     logo?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    minAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
-    maxAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
-    minimumPurchase?: FloatWithAggregatesFilter<"Business"> | number
+    minNoticeHours?: IntWithAggregatesFilter<"Business"> | number
+    maxNoticeHours?: IntWithAggregatesFilter<"Business"> | number
+    minBookingAmount?: FloatWithAggregatesFilter<"Business"> | number
+    bufferBeforeHours?: IntWithAggregatesFilter<"Business"> | number
+    bufferAfterHours?: IntWithAggregatesFilter<"Business"> | number
     timeZone?: StringWithAggregatesFilter<"Business"> | string
     stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
     socialMedia?: JsonNullableWithAggregatesFilter<"Business">
@@ -25069,9 +25115,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -25107,9 +25155,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -25145,9 +25195,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -25183,9 +25235,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -25221,9 +25275,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -25249,9 +25305,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -25276,9 +25334,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -27288,9 +27348,11 @@ export namespace Prisma {
     serviceArea?: SortOrder
     onboarded?: SortOrder
     logo?: SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    minNoticeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    bufferBeforeHours?: SortOrder
+    bufferAfterHours?: SortOrder
     timeZone?: SortOrder
     stripeAccountId?: SortOrder
     socialMedia?: SortOrder
@@ -27304,9 +27366,11 @@ export namespace Prisma {
   }
 
   export type BusinessAvgOrderByAggregateInput = {
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    minNoticeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    bufferBeforeHours?: SortOrder
+    bufferAfterHours?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -27321,9 +27385,11 @@ export namespace Prisma {
     email?: SortOrder
     onboarded?: SortOrder
     logo?: SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    minNoticeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    bufferBeforeHours?: SortOrder
+    bufferAfterHours?: SortOrder
     timeZone?: SortOrder
     stripeAccountId?: SortOrder
     customDomain?: SortOrder
@@ -27346,9 +27412,11 @@ export namespace Prisma {
     email?: SortOrder
     onboarded?: SortOrder
     logo?: SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    minNoticeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    bufferBeforeHours?: SortOrder
+    bufferAfterHours?: SortOrder
     timeZone?: SortOrder
     stripeAccountId?: SortOrder
     customDomain?: SortOrder
@@ -27360,9 +27428,11 @@ export namespace Prisma {
   }
 
   export type BusinessSumOrderByAggregateInput = {
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    minNoticeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    bufferBeforeHours?: SortOrder
+    bufferAfterHours?: SortOrder
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -31651,9 +31721,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -31688,9 +31760,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -31802,9 +31876,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -31839,9 +31915,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32043,9 +32121,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32080,9 +32160,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32133,9 +32215,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32170,9 +32254,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32233,9 +32319,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32270,9 +32358,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32563,9 +32653,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32600,9 +32692,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32760,9 +32854,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -32797,9 +32893,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -33118,9 +33216,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -33155,9 +33255,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -33748,9 +33850,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -33785,9 +33889,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -33919,9 +34025,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -33956,9 +34064,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -33993,9 +34103,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34030,9 +34142,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34163,9 +34277,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34200,9 +34316,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34253,9 +34371,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34290,9 +34410,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34343,9 +34465,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34380,9 +34504,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34417,9 +34543,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34454,9 +34582,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34637,9 +34767,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34674,9 +34806,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34909,9 +35043,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -34946,9 +35082,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35129,9 +35267,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35166,9 +35306,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35345,9 +35487,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35382,9 +35526,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35565,9 +35711,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35602,9 +35750,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35836,9 +35986,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35873,9 +36025,11 @@ export namespace Prisma {
     serviceArea?: BusinessCreateserviceAreaInput | string[]
     onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
+    minNoticeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    bufferBeforeHours?: number
+    bufferAfterHours?: number
     timeZone?: string
     stripeAccountId?: string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -35987,9 +36141,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
@@ -36024,9 +36180,11 @@ export namespace Prisma {
     serviceArea?: BusinessUpdateserviceAreaInput | string[]
     onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
     timeZone?: StringFieldUpdateOperationsInput | string
     stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
     socialMedia?: NullableJsonNullValueInput | InputJsonValue
