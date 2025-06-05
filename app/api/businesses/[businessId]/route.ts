@@ -11,6 +11,11 @@ const getCachedBusiness = unstable_cache(
       id: true,
       name: true,
       stripeAccountId: true,
+      minNoticeHours: true,
+      maxNoticeHours: true,
+      minBookingAmount: true,
+      bufferBeforeHours: true,
+      bufferAfterHours: true,
       inventory: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as Prisma.Payload<any, any>) : ({
@@ -24,9 +29,6 @@ const getCachedBusiness = unstable_cache(
       phone: true,
       email: true,
       logo: true,
-      minAdvanceBooking: true,
-      maxAdvanceBooking: true,
-      minimumPurchase: true,
       timeZone: true,
       stripeAccountId: true,
       socialMedia: true,
@@ -46,6 +48,11 @@ const getCachedBusiness = unstable_cache(
           eventDate: 'asc',
         },
       },
+      minNoticeHours: true,
+      maxNoticeHours: true,
+      minBookingAmount: true,
+      bufferBeforeHours: true,
+      bufferAfterHours: true,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as Prisma.Payload<any, any>);
 
@@ -81,8 +88,8 @@ async function updateBusinessFromFormData(formData: FormData, businessId: string
 
   // Number fields
   const numberFields = [
-    'minAdvanceBooking', 'maxAdvanceBooking',
-    'minimumPurchase', 'depositPercentage', 'taxRate'
+    'minNoticeHours', 'maxNoticeHours',
+    'minBookingAmount', 'bufferBeforeHours', 'bufferAfterHours'
   ];
 
   numberFields.forEach(field => {

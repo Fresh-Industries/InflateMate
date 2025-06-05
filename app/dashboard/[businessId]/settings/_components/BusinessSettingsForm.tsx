@@ -28,9 +28,11 @@ interface BusinessSettings {
   state?: string | null;
   zipCode?: string | null;
   logo?: string | null;
-  minAdvanceBooking: number;
-  maxAdvanceBooking: number;
-  minimumPurchase: number;
+  minNoticeHours: number;
+  maxNoticeHours: number;
+  minBookingAmount: number;
+  bufferBeforeHours: number;
+  bufferAfterHours: number;
   serviceArea?: string[];
   socialMedia?: {
     facebook?: string;
@@ -659,14 +661,14 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="minAdvanceBooking">Minimum Advance Booking</Label>
+                    <Label htmlFor="minNoticeHours">Minimum Notice Hours</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="minAdvanceBooking" 
-                        name="minAdvanceBooking" 
+                        id="minNoticeHours" 
+                        name="minNoticeHours" 
                         type="number" 
-                        defaultValue={business.minAdvanceBooking || 24}
+                        defaultValue={business.minNoticeHours || 24}
                         className="pl-9"
                       />
                     </div>
@@ -676,14 +678,14 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="maxAdvanceBooking">Maximum Advance Booking</Label>
+                    <Label htmlFor="maxNoticeHours">Maximum Notice Hours</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="maxAdvanceBooking" 
-                        name="maxAdvanceBooking" 
+                        id="maxNoticeHours" 
+                        name="maxNoticeHours" 
                         type="number" 
-                        defaultValue={business.maxAdvanceBooking || 90}
+                        defaultValue={business.maxNoticeHours || 90}
                         className="pl-9"
                       />
                     </div>
@@ -693,20 +695,54 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="minimumPurchase">Minimum Purchase Amount</Label>
+                    <Label htmlFor="minBookingAmount">Minimum Booking Amount</Label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="minimumPurchase" 
-                        name="minimumPurchase" 
+                        id="minBookingAmount" 
+                        name="minBookingAmount" 
                         type="number" 
                         step="0.01"
-                        defaultValue={business.minimumPurchase || 0}
+                        defaultValue={business.minBookingAmount || 0}
                         className="pl-9"
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Minimum amount in dollars required for a booking
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="bufferBeforeHours">Buffer Before Hours</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="bufferBeforeHours" 
+                        name="bufferBeforeHours" 
+                        type="number" 
+                        defaultValue={business.bufferBeforeHours || 0}
+                        className="pl-9"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Hours before the booking time to start buffer
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="bufferAfterHours">Buffer After Hours</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="bufferAfterHours" 
+                        name="bufferAfterHours" 
+                        type="number" 
+                        defaultValue={business.bufferAfterHours || 0}
+                        className="pl-9"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Hours after the booking time to end buffer
                     </p>
                   </div>
                 </div>

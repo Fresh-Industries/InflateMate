@@ -22,6 +22,12 @@ export type InventoryItem = {
     stripeConnectedAccountId?: string;
     defaultTaxRate?: number;
     applyTaxToBookings?: boolean;
+    timeZone?: string;
+    minNoticeHours?: number;
+    maxNoticeHours?: number;
+    minBookingAmount?: number;
+    bufferBeforeHours?: number;
+    bufferAfterHours?: number;
     // Add other business fields as needed
   };
   
@@ -124,6 +130,11 @@ export type InventoryItem = {
       endTime: Date;
       status: string;
       totalAmount: number | null;
+      subtotalAmount?: number | null;
+      taxAmount?: number | null;
+      taxRate?: number | null;
+      depositAmount?: number | null;
+      depositPaid?: boolean | null;
       eventType: string | null;
       eventAddress: string | null;
       eventCity: string | null;
@@ -134,6 +145,9 @@ export type InventoryItem = {
       participantAge: number | null;
       specialInstructions: string | null;
       expiresAt?: Date | null;
+      isCompleted?: boolean;
+      refundAmount?: number | null;
+      refundReason?: string | null;
       // ...other booking fields
     };
     customer: {
@@ -142,13 +156,15 @@ export type InventoryItem = {
       email: string;
       phone: string;
       // ...other customer fields
-    };
+    } | null;
     bookingItems: Array<{
       id: string;
       quantity: number;
       price: number;
       startUTC: Date;
       endUTC: Date;
+      inventoryId: string;
+      bookingId: string;
       inventory: {
         id: string;
         name: string;
@@ -156,6 +172,20 @@ export type InventoryItem = {
         primaryImage: string | null;
         // ...other inventory fields
       };
+    }>;
+    // Additional fields for compatibility
+    waivers?: Array<{
+      id: string;
+      status: 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED';
+      docuSealDocumentId?: string;
+    }>;
+    hasSignedWaiver?: boolean;
+    inventoryItems?: Array<{
+      id: string;
+      quantity: number;
+      price: number;
+      inventoryId: string;
+      bookingId: string;
     }>;
   };
   

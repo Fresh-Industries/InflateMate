@@ -190,9 +190,11 @@ export async function POST(req: NextRequest) {
           stripeAccountId: account.id,
           subdomain: finalSubdomain,
           onboardingError: onboardingErrorMessage,
-          minAdvanceBooking: 24,
-          maxAdvanceBooking: 90,
-          minimumPurchase: 100,
+          minNoticeHours: 24,
+          maxNoticeHours: 2160, // 90 days * 24 hours
+          minBookingAmount: 100,
+          bufferBeforeHours: 2,
+          bufferAfterHours: 0,
           siteConfig: {},
           organization: {
             connect: {

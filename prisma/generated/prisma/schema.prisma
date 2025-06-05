@@ -46,9 +46,11 @@ model Business {
   logo String?
 
   // Booking settings
-  minAdvanceBooking Int    @default(24)
-  maxAdvanceBooking Int    @default(90)
-  minimumPurchase   Float  @default(0)
+  minNoticeHours    Int    @default(24) // minimum hours in advance
+  maxNoticeHours    Int    @default(2160) // maximum hours in advance (90 days)
+  minBookingAmount  Float  @default(0) // minimum dollar total per booking
+  bufferBeforeHours Int    @default(2) // hours to reserve before each booking
+  bufferAfterHours  Int    @default(0) // hours to reserve after each booking
   timeZone          String @default("America/Chicago")
 
   // Integrations
