@@ -393,6 +393,8 @@ export default function DashboardPage() {
     <div className="p-6 md:p-8  min-h-screen">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 border-b border-border/40 pb-6">
         <div>
+          <div>
+          </div>
           <h1 className="text-4xl font-extrabold tracking-tight bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
             Overview
           </h1>

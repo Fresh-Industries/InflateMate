@@ -1,8 +1,8 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from "react";
-import { useAuth } from "@clerk/nextjs";
-import { createSupabaseClient } from "@/lib/supabaseClient";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
+import { useUser } from "@clerk/nextjs";
+import { useRealtimeBookings, RealtimeBooking, RealtimeWaiver } from "@/hooks/useRealtimeBookings";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { startOfDay } from "date-fns";
@@ -21,6 +21,7 @@ import { DateRange } from "react-day-picker";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { BookingsCalendarView } from './bookings-calendar-view';
+// import RealtimeDebugger from '../../../_components/RealtimeDebugger';
 
 interface BookingItem {
   id: string;
@@ -37,42 +38,7 @@ interface Waiver {
   bookingId: string;
 }
 
-interface WaiverRowFromDB {
-  id: string;
-  status: 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED';
-  docuSealDocumentId?: string;
-  openSignDocumentId?: string;
-  bookingId: string;
-  businessId: string;
-}
 
-interface BookingRowFromDB {
-  id: string;
-  eventDate: string;
-  startTime: string;
-  endTime: string;
-  status: 'PENDING' | 'CONFIRMED' | 'CANCELLED' | 'COMPLETED' | 'HOLD';
-  totalAmount: number;
-  subtotalAmount?: number;
-  taxAmount?: number;
-  taxRate?: number;
-  depositAmount?: number;
-  depositPaid?: boolean;
-  eventType: string;
-  participantCount: number;
-  participantAge?: string;
-  customerId: string;
-  eventAddress: string;
-  eventCity: string;
-  eventState: string;
-  eventZipCode: string;
-  eventTimeZone: string;
-  specialInstructions?: string;
-  refundAmount?: number;
-  refundReason?: string;
-  isCompleted?: boolean;
-  businessId: string;
-}
 
 interface Booking {
   id: string;
@@ -126,12 +92,26 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { getToken } = useAuth();
+  const { user, isLoaded } = useUser();
   
-  // Memoize Supabase client with Clerk JWT
-  const supabase = useMemo(() => createSupabaseClient({ getToken }), [getToken]);
-  
-  const [bookings, setBookings] = useState<Booking[]>(initialData.bookings);
+  const [bookings, setBookings] = useState<Booking[]>(() => {
+    // In development, try to persist bookings across Fast Refresh
+    if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem(`bookings-${businessId}`);
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          // Only use cached if it's recent (less than 5 minutes old)
+          if (parsed.timestamp && Date.now() - parsed.timestamp < 5 * 60 * 1000) {
+            return parsed.bookings;
+          }
+        } catch {
+          // Ignore parsing errors
+        }
+      }
+    }
+    return initialData.bookings;
+  });
   const [statusFilter, setStatusFilter] = useState("all");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
@@ -154,50 +134,46 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   const [showPastBookings, setShowPastBookings] = useState(false);
 
   // Handle realtime waiver events
-  function handleWaiverRealtimeEvent(
+  const handleWaiverRealtimeEvent = useCallback((
     eventType: 'INSERT' | 'UPDATE' | 'DELETE',
-    row: WaiverRowFromDB
-  ) {
-    console.log(`[Realtime] Waiver ${eventType} event for booking ${row.bookingId}:`, row);
+    waiver: RealtimeWaiver
+  ) => {
+    console.log(`[Realtime] Waiver ${eventType} event for booking ${waiver.bookingId}:`, waiver);
     
     setBookings(prev =>
       prev.map(b => {
-        if (b.id !== row.bookingId) return b;
+        if (b.id !== waiver.bookingId) return b;
         const existingWaivers = b.waivers ?? [];
         
         if (eventType === 'INSERT') {
-          const newWaiver: Waiver = {
-            id: row.id,
-            status: row.status,
-            docuSealDocumentId: row.docuSealDocumentId ?? row.openSignDocumentId ?? undefined,
-            bookingId: row.bookingId,
+          const newWaiver = {
+            id: waiver.id,
+            status: waiver.status,
+            docuSealDocumentId: undefined,
+            bookingId: waiver.bookingId,
           };
           return {
             ...b,
             waivers: [...existingWaivers, newWaiver],
-            hasSignedWaiver: row.status === 'SIGNED' ? true : b.hasSignedWaiver,
+            hasSignedWaiver: waiver.status === 'SIGNED' ? true : b.hasSignedWaiver,
           };
         }
         
         if (eventType === 'UPDATE') {
           const updatedWaivers = existingWaivers.map(w =>
-            w.id === row.id
-              ? { 
-                  ...w, 
-                  status: row.status as Waiver['status'], 
-                  docuSealDocumentId: row.docuSealDocumentId ?? row.openSignDocumentId ?? undefined 
-                }
+            w.id === waiver.id
+              ? { ...w, status: waiver.status as 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED' }
               : w
           );
           return {
             ...b,
             waivers: updatedWaivers,
-            hasSignedWaiver: row.status === 'SIGNED' ? true : b.hasSignedWaiver,
+            hasSignedWaiver: waiver.status === 'SIGNED' ? true : b.hasSignedWaiver,
           };
         }
         
         if (eventType === 'DELETE') {
-          const filteredWaivers = existingWaivers.filter(w => w.id !== row.id);
+          const filteredWaivers = existingWaivers.filter(w => w.id !== waiver.id);
           const stillSigned = filteredWaivers.some(w => w.status === 'SIGNED');
           return { ...b, waivers: filteredWaivers, hasSignedWaiver: stillSigned };
         }
@@ -205,57 +181,24 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         return b;
       })
     );
-  }
+  }, []);
 
   // Handle realtime booking events
-  function handleBookingRealtimeEvent(
+  const handleBookingRealtimeEvent = useCallback((
     eventType: 'INSERT' | 'UPDATE' | 'DELETE',
-    row: BookingRowFromDB | null,
-    oldRow?: BookingRowFromDB | null
-  ) {
-    console.log(`[Realtime] ${eventType} event for booking ${row?.id || oldRow?.id}:`, row);
+    booking: RealtimeBooking
+  ) => {
+    console.log(`[BookingList] Realtime ${eventType} event:`, { id: booking?.id, status: booking?.status, customerId: booking?.customerId });
     
-    if (eventType === 'UPDATE' && row) {
-      // 1) Merge only the scalar fields so the badge flips immediately
-      setBookings(prev =>
-        prev.map(b =>
-          b.id === row.id
-            ? {
-                ...b,
-                status: row.status,
-                totalAmount: row.totalAmount,
-                eventDate: row.eventDate,
-                startTime: row.startTime,
-                endTime: row.endTime,
-                eventType: row.eventType,
-                participantCount: row.participantCount,
-                participantAge: row.participantAge,
-                eventAddress: row.eventAddress,
-                eventCity: row.eventCity,
-                eventState: row.eventState,
-                eventZipCode: row.eventZipCode,
-                eventTimeZone: row.eventTimeZone,
-                specialInstructions: row.specialInstructions,
-                subtotalAmount: row.subtotalAmount,
-                taxAmount: row.taxAmount,
-                taxRate: row.taxRate,
-                depositAmount: row.depositAmount,
-                depositPaid: row.depositPaid,
-                refundAmount: row.refundAmount,
-                refundReason: row.refundReason,
-                isCompleted: row.isCompleted,
-              }
-            : b
-        )
-      );
-
-      // 2) Fetch the fully populated booking (with customer name, inventoryItems, waivers)
-      fetch(`/api/businesses/${businessId}/bookings/${row.id}`)
-        .then(res => res.json())
+    if (eventType === 'UPDATE' && booking) {
+      fetch(`/api/businesses/${businessId}/bookings/${booking.id}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then(fullBookingResponse => {
-          console.log(`[Realtime] Fetched full booking data for ${row.id}:`, fullBookingResponse);
-          
-          // Transform the API response to match our Booking interface
           const transformedBooking: Booking = {
             id: fullBookingResponse.booking.id,
             eventDate: fullBookingResponse.booking.eventDate,
@@ -280,39 +223,31 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
             refundAmount: fullBookingResponse.booking.refundAmount,
             refundReason: fullBookingResponse.booking.refundReason,
             isCompleted: fullBookingResponse.booking.isCompleted,
-            // Map nested data from response
-            customer: fullBookingResponse.customer || { id: row.customerId, name: '', email: '', phone: '' },
+            customer: fullBookingResponse.customer || { id: booking.customerId || '', name: '', email: '', phone: '' },
             inventoryItems: fullBookingResponse.inventoryItems || [],
             waivers: fullBookingResponse.waivers || [],
             hasSignedWaiver: fullBookingResponse.hasSignedWaiver || false,
           };
           
-          setBookings(prev =>
+          setBookings(prev => 
             prev.map(b => (b.id === transformedBooking.id ? transformedBooking : b))
           );
         })
         .catch(err => {
-          console.error('Failed to re-fetch full booking:', err);
+          console.error(`Failed to fetch fresh booking data for ${booking.id}:`, err);
         });
-
       return;
     }
     
-    if (eventType === 'INSERT') {
-      // Immediately fetch full booking data to show complete customer info
-      if (!row?.id) {
-        console.error('[Realtime] INSERT event without row data');
-        return;
-      }
-      
-      console.log(`[Realtime] Processing INSERT for booking ${row.id}`);
-      
-      fetch(`/api/businesses/${businessId}/bookings/${row.id}`)
-        .then(res => res.json())
+    if (eventType === 'INSERT' && booking?.id) {
+      fetch(`/api/businesses/${businessId}/bookings/${booking.id}`)
+        .then(res => {
+          if (!res.ok) {
+            throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+          }
+          return res.json();
+        })
         .then(fullBookingResponse => {
-          console.log(`[Realtime] Fetched full new booking ${row.id}:`, fullBookingResponse);
-          
-          // Transform the API response to match our Booking interface
           const transformedBooking: Booking = {
             id: fullBookingResponse.booking.id,
             eventDate: fullBookingResponse.booking.eventDate,
@@ -337,154 +272,59 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
             refundAmount: fullBookingResponse.booking.refundAmount,
             refundReason: fullBookingResponse.booking.refundReason,
             isCompleted: fullBookingResponse.booking.isCompleted,
-            // Map nested data from response
-            customer: fullBookingResponse.customer || { id: row.customerId, name: '', email: '', phone: '' },
+            customer: fullBookingResponse.customer || { id: booking.customerId || '', name: '', email: '', phone: '' },
             inventoryItems: fullBookingResponse.inventoryItems || [],
             waivers: fullBookingResponse.waivers || [],
             hasSignedWaiver: fullBookingResponse.hasSignedWaiver || false,
           };
           
           setBookings(prev => {
-            // Only add if it doesn't already exist
-            if (prev.find(b => b.id === transformedBooking.id)) return prev;
-            return [transformedBooking, ...prev];
+            if (prev.find(b => b.id === transformedBooking.id)) {
+              return prev;
+            }
+            const newBookings = [transformedBooking, ...prev];
+            
+            // Cache in development to survive Fast Refresh
+            if (process.env.NODE_ENV === 'development' && typeof window !== 'undefined') {
+              sessionStorage.setItem(`bookings-${businessId}`, JSON.stringify({
+                bookings: newBookings,
+                timestamp: Date.now()
+              }));
+            }
+            
+            return newBookings;
           });
         })
         .catch(err => {
-          console.error('Failed to fetch new booking:', err);
-          
-          // Fallback: create stub booking if API fetch fails
-          setBookings(prev => {
-            if (prev.find(b => b.id === row.id)) return prev;
-            const newBooking: Booking = {
-              id: row.id,
-              eventDate: row.eventDate,
-              startTime: row.startTime,
-              endTime: row.endTime,
-              status: row.status,
-              totalAmount: row.totalAmount,
-              subtotalAmount: row.subtotalAmount,
-              taxAmount: row.taxAmount,
-              taxRate: row.taxRate,
-              depositAmount: row.depositAmount,
-              depositPaid: row.depositPaid,
-              eventType: row.eventType,
-              participantCount: row.participantCount,
-              participantAge: row.participantAge,
-              // Stub out nested data - will be populated when user views details
-              customer: { id: row.customerId, name: '', email: '', phone: '' },
-              inventoryItems: [],
-              waivers: [],
-              hasSignedWaiver: false,
-              eventAddress: row.eventAddress,
-              eventCity: row.eventCity,
-              eventState: row.eventState,
-              eventZipCode: row.eventZipCode,
-              eventTimeZone: row.eventTimeZone || 'America/Chicago',
-              specialInstructions: row.specialInstructions,
-              refundAmount: row.refundAmount,
-              refundReason: row.refundReason,
-              isCompleted: row.isCompleted,
-            };
-            return [newBooking, ...prev];
-          });
+          console.error(`Failed to fetch new booking ${booking.id}:`, err);
         });
       return;
     }
     
     if (eventType === 'DELETE') {
-      const deletedBookingId = row?.id || oldRow?.id;
+      const deletedBookingId = booking?.id;
       if (deletedBookingId) {
         setBookings(prev => prev.filter(b => b.id !== deletedBookingId));
       }
     }
-  }
+  }, [businessId]);
 
-  // Subscribe to realtime booking changes
-  useEffect(() => {
-    console.log(`[Realtime] Setting up booking subscription for businessId: ${businessId}`);
-    
-    const bookingChannel = supabase
-      .channel('realtime-bookings')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'Booking',
-        filter: `businessId=eq.${businessId}`,
-      }, payload => {
-        console.log(`[Realtime] Booking payload received:`, payload);
-        console.log(`[Realtime] Payload eventType:`, payload.eventType);
-        console.log(`[Realtime] Payload.new:`, payload.new);
-        console.log(`[Realtime] Payload.old:`, payload.old);
-        
-        const row = payload.new as BookingRowFromDB;
-        const oldRow = payload.old as BookingRowFromDB;
-        const eventType = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
-        
-        console.log(`[Realtime] Event type:`, eventType, 'New row status:', row?.status, 'Old row status:', oldRow?.status);
-        console.log(`[Realtime] Processing ${eventType} for booking ${row?.id || oldRow?.id || 'unknown'}`);
-        
-        // For UPDATE events, also log the status transition
-        if (eventType === 'UPDATE' && oldRow && row) {
-          console.log(`[Realtime] Status transition: ${oldRow.status} → ${row.status}`);
-          
-          // Special logging for PENDING → CONFIRMED transitions
-          if (oldRow.status === 'PENDING' && row.status === 'CONFIRMED') {
-            console.log(`[Realtime] 🎉 PENDING → CONFIRMED transition detected!`);
-          }
-          
-          // Log any CONFIRMED status updates
-          if (row.status === 'CONFIRMED') {
-            console.log(`[Realtime] 🔥 CONFIRMED status update received from ${oldRow.status}`);
-          }
-        }
-        
-        // Log all UPDATE events specifically
-        if (eventType === 'UPDATE') {
-          console.log(`[Realtime] 📝 UPDATE event details:`, {
-            bookingId: row?.id || oldRow?.id,
-            oldStatus: oldRow?.status,
-            newStatus: row?.status,
-            customerId: row?.customerId || oldRow?.customerId,
-            totalAmount: row?.totalAmount || oldRow?.totalAmount,
-          });
-        }
-        
-        handleBookingRealtimeEvent(eventType, row || oldRow, oldRow);
-      })
-      .subscribe();
+  // Use the centralized realtime hook - only when user is loaded and authenticated
+  useRealtimeBookings({
+    businessId: isLoaded && user ? businessId : null, // Only pass businessId when user is ready
+    onBookingChange: useCallback((eventType: 'INSERT' | 'UPDATE' | 'DELETE', booking: RealtimeBooking) => {
+      console.log(`[BookingList] useRealtimeBookings onBookingChange called:`, eventType, { id: booking?.id, status: booking?.status });
+      handleBookingRealtimeEvent(eventType, booking);
+    }, [handleBookingRealtimeEvent]),
+    onWaiverChange: handleWaiverRealtimeEvent,
+    enableNotifications: false // Notifications handled elsewhere
+  });
 
-    return () => {
-      console.log(`[Realtime] Cleaning up booking subscription`);
-      supabase.removeChannel(bookingChannel);
-    };
-  }, [supabase, businessId]);
 
-  // Subscribe to realtime waiver changes
-  useEffect(() => {
-    console.log(`[Realtime] Setting up waiver subscription for businessId: ${businessId}`);
-    
-    const waiverChannel = supabase
-      .channel('realtime-waivers')
-      .on('postgres_changes', {
-        event: '*',
-        schema: 'public',
-        table: 'Waiver',
-        filter: `businessId=eq.${businessId}`
-      }, payload => {
-        console.log(`[Realtime] Waiver payload received:`, payload);
-        const row = payload.new as WaiverRowFromDB;
-        const eventType = payload.eventType as 'INSERT' | 'UPDATE' | 'DELETE';
-        console.log(`[Realtime] Processing waiver ${eventType} for booking ${row?.bookingId || 'unknown'}`);
-        handleWaiverRealtimeEvent(eventType, row);
-      })
-      .subscribe();
 
-    return () => {
-      console.log(`[Realtime] Cleaning up waiver subscription`);
-      supabase.removeChannel(waiverChannel);
-    };
-  }, [supabase, businessId]);
+
+
+  // Realtime subscriptions are now handled by useRealtimeBookings hook
 
   useEffect(() => {
     setBookings(initialData.bookings);
@@ -805,19 +645,16 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
   };
 
   // Handler for selecting a booking (used by both list and calendar)
-  const handleSelectBooking = (booking: Booking) => {
+  const handleSelectBooking = useCallback((booking: Booking) => {
     setSelectedBooking(booking);
-    console.log("Selected booking:", booking);
     setIsViewSheetOpen(true);
-  };
+  }, []);
 
   // Handler for calendar navigation
   const handleNavigate = (newDate: Date) => {
     setCurrentCalendarDate(newDate);
     // Optional: Fetch data for the new month/view if necessary
   };
-
-  console.log("Selected booking:", selectedBooking);
 
   return (
     <div className="space-y-6">
@@ -1062,6 +899,7 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
           {selectedBooking && <BookingDetails booking={selectedBooking} />}
         </SheetContent>
       </Sheet>
+
 
       {/* Cancel Booking Dialog */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>

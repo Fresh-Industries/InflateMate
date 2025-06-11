@@ -7,9 +7,6 @@ import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
 import { prisma } from "@/lib/prisma";
 import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
-import { supabaseAdmin } from "@/lib/supabaseClient";
-// We no longer create bookings here, so createBookingSafely is NOT needed in POST
-// import { createBookingSafely } from "@/lib/createBookingSafely";
 
 import { BookingStatus, Prisma } from "@/prisma/generated/prisma"; // Import necessary types/enums
 import { dateOnlyUTC, localToUTC } from "@/lib/utils";
@@ -328,17 +325,8 @@ export async function POST(
         });
         console.log(`[POST /bookings] Database transaction for booking update completed.`);
 
-        // Send real-time update via Supabase if status changed
-        if (existingBooking.status === 'HOLD' && supabaseAdmin) {
-          await supabaseAdmin
-            .from('Booking')
-            .update({
-              status: 'PENDING',
-              updatedAt: new Date().toISOString(),
-            })
-            .eq('id', existingBooking.id);
-          console.log("Booking HOLD->PENDING: real-time update sent via Supabase");
-        }
+        // Test: Relying on Prisma update to trigger realtime automatically
+        console.log("HOLD->PENDING: Prisma update completed, checking if realtime triggers automatically");
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

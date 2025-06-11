@@ -209,6 +209,8 @@ export async function POST(
         const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
         console.log(`[POST /holds] Hold expires at: ${expiresAt.toISOString()}`);
 
+  
+
         // Return success with the booking ID (which represents the hold) and expiration time
         return NextResponse.json({
           success: true,

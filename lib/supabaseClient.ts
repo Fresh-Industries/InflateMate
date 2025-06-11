@@ -1,51 +1,29 @@
 import { createClient } from '@supabase/supabase-js'
+import { auth } from '@clerk/nextjs/server'
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabaseServiceKey = process.env.NEXT_PUBLIC_SUPABASE_SERVICE_ROLE_KEY
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 
 if (!supabaseUrl || !supabaseKey) {
   throw new Error('Missing Supabase environment variables')
 }
 
-// Create authenticated client with Clerk session token (Third-Party Auth)
-export function createSupabaseClient(session?: { getToken: () => Promise<string | null> }) {
+// DEPRECATED: Use useSupabase() hook instead for authenticated client
+// This function is kept only for legacy compatibility
+export function createSupabaseClient() {
+  console.warn('[Supabase] ⚠️  createSupabaseClient is deprecated. Use useSupabase() hook for authenticated client.')
   return createClient(supabaseUrl, supabaseKey, {
     realtime: {
       params: {
         eventsPerSecond: 10,
       },
-    },
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-    // Use accessToken callback for automatic token refresh (NO TEMPLATE!)
-    accessToken: async () => {
-      if (!session?.getToken) return null
-      try {
-        // Get raw Clerk session token (NOT template)
-        const token = await session.getToken()
-        console.log('[Supabase] Got fresh Clerk token:', token ? 'valid' : 'null')
-        return token
-      } catch (error) {
-        console.error('[Supabase] Error getting token:', error)
-        return null
-      }
+      heartbeatIntervalMs: 30000,
     },
   })
-}
+} 
 
-// Default client for non-authenticated requests
-export const supabase = createClient(supabaseUrl, supabaseKey, {
-  realtime: {
-    params: {
-      eventsPerSecond: 10,
-    },
-  },
-})
-
-// TEMPORARY: Service role client for testing (DO NOT USE IN PRODUCTION)
+// TEMPORARY: Service role client for backend operations only (DO NOT USE IN FRONTEND)
 export const supabaseAdmin = supabaseServiceKey ? createClient(supabaseUrl, supabaseServiceKey, {
   realtime: {
     params: {
@@ -58,12 +36,29 @@ export const supabaseAdmin = supabaseServiceKey ? createClient(supabaseUrl, supa
   },
 }) : null
 
-// Debug connection
-if (typeof window !== 'undefined') {
-  console.log('[Supabase] Client initialized with URL:', supabaseUrl)
-  
-  // Test the connection
-  supabase.auth.onAuthStateChange((event, session) => {
-    console.log('[Supabase] Auth state changed:', event, session?.user?.id)
+// Server-side authenticated client with Clerk session token
+export function createSupabaseServerClient() {
+  return createClient(supabaseUrl, supabaseKey, {
+    realtime: {
+      params: {
+        eventsPerSecond: 10,
+      },
+      heartbeatIntervalMs: 30000,
+    },
+    // Use accessToken callback for automatic token refresh
+    accessToken: async () => {
+      try {
+        // Get raw Clerk session token
+        const { getToken } = await auth()
+        const token = await getToken()
+        return token
+      } catch (error) {
+        console.error('[Supabase] Error getting token:', error)
+        return null
+      }
+    },
   })
 }
+
+// NOTE: For frontend use, always use the authenticated client from SupabaseProvider
+// Do not create additional clients as it causes "Multiple GoTrueClient instances" warnings

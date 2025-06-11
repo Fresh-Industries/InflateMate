@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { updateBookingSafely, UpdateBookingDataInput, BookingConflictError } from '@/lib/updateBookingSafely';
 import { z } from 'zod'; // Import Zod for schema validation
+import { supabaseAdmin } from "@/lib/supabaseClient";
 
 export async function GET(
   req: NextRequest,
@@ -270,6 +271,17 @@ export async function PATCH(
         }
       });
       
+      // Send real-time update via Supabase for booking update
+      if (supabaseAdmin) {
+        await supabaseAdmin
+          .from('Booking')
+          .update({
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', bookingId);
+        console.log("Booking updated: real-time update sent via Supabase");
+      }
+      
       console.log(`[API PATCH Booking] Successfully updated CONFIRMED booking ${bookingId} (simple update)`);
       return NextResponse.json(updatedBooking, { status: 200 });
     }
@@ -389,6 +401,18 @@ export async function PATCH(
     const updatedBooking = await updateBookingSafely(bookingId, businessId, body);
 
     console.log(`[API PATCH Booking] Successfully updated booking ${updatedBooking.id} to status ${updatedBooking.status}`);
+    
+    // Send real-time update via Supabase for general booking update
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('Booking')
+        .update({
+          status: updatedBooking.status,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', updatedBooking.id);
+      console.log("Booking updated: real-time update sent via Supabase");
+    }
     
     // Return the fully updated booking
     return NextResponse.json(updatedBooking, { status: 200 });

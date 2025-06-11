@@ -3,8 +3,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { useToast } from '@/hooks/use-toast'
-import { useSession } from '@clerk/nextjs'
-import { createSupabaseClient } from '@/lib/supabaseClient'
+import { useAuth } from '@clerk/nextjs'  // CHANGED: Use useAuth instead of useSession
+import { useSupabase } from '@/context/SupabaseProvider'  // ADDED: Use authenticated client
 
 export interface Notification {
   id: string
@@ -13,133 +13,86 @@ export interface Notification {
   createdAt: string
 }
 
-interface BookingPayload {
-  businessId: string;
-  id: string;
-  eventDate: string;
-  status: string;
-  [key: string]: unknown;
-}
 
-function isBookingPayload(obj: unknown): obj is BookingPayload {
-  return typeof obj === 'object' && obj !== null && 'businessId' in obj;
-}
+
+
 
 export function useNotifications(currentBusinessId: string | null) {
   const { toast } = useToast()
-  const { session, isLoaded } = useSession()
+  const { getToken } = useAuth()
+  const supabase = useSupabase()  // Use authenticated client from context
   const [notifications, setNotifications] = useState<Notification[]>([])
 
   useEffect(() => {
-    if (!currentBusinessId || !isLoaded || !session) {
-      console.warn("[Notifications] Not ready:", { currentBusinessId, isLoaded, hasSession: !!session })
+    if (!currentBusinessId || !supabase) {
       return
     }
 
-    // Create authenticated Supabase client with Clerk session
-    const supabase = createSupabaseClient(session)
-    
-    console.log(`[Notifications] Setting up authenticated real-time subscriptions for business: ${currentBusinessId}`)
+    // Add delay in development to handle Fast Refresh
+    const setupTimeout = setTimeout(() => {
+      setupNotificationChannels();
+    }, process.env.NODE_ENV === 'development' ? 1000 : 0);
 
-    const push = (n: Notification) => {
-      console.log('[Notifications] New notification:', n)
-      setNotifications((prev) => [n, ...prev])
-      // immediate toast
-      toast({ title: n.title, description: n.description })
-    }
+    // Declare channels in outer scope for cleanup
+    let testChannel: ReturnType<typeof supabase.channel>, 
+        docusealCh: ReturnType<typeof supabase.channel>, 
+        waiverInsertCh: ReturnType<typeof supabase.channel>, 
+        leadCh: ReturnType<typeof supabase.channel>, 
+        bookCh: ReturnType<typeof supabase.channel>, 
+        bookingUpdateCh: ReturnType<typeof supabase.channel>;
 
-    // Test connection with authenticated client
-    const testChannel = supabase
-      .channel('test-connection-auth')
+    function setupNotificationChannels() {
+      const push = (n: Notification) => {
+        setNotifications((prev) => [n, ...prev])
+        // immediate toast
+        toast({ title: n.title, description: n.description })
+      }
+
+      // Test connection with authenticated client
+      testChannel = supabase
+      .channel('test-notifications-connection')
       .on('presence', { event: 'sync' }, () => {
-        console.log('[Notifications] Authenticated Supabase connection established')
+        // Connection established
       })
-      .subscribe((status) => {
-        console.log('[Notifications] Test channel status:', status)
-      })
+      .subscribe()
 
-    // Test a simple subscription to all booking changes first
-    const debugBookingChannel = supabase
-      .channel(`debug-bookings-auth-${currentBusinessId}`)
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', // Listen to all events
-          schema: 'public', 
-          table: 'Booking'
-        },
-        (payload) => {
-          console.log('[DEBUG] Any Booking change detected (authenticated):', payload)
-          console.log('[DEBUG] Event type:', payload.eventType)
-          console.log('[DEBUG] New data:', payload.new)
-          console.log('[DEBUG] Old data:', payload.old)
-          
-          // Check if this booking belongs to our business
-          const booking = payload.new || payload.old
-          if (isBookingPayload(booking)) {
-            console.log('[DEBUG] Booking businessId:', booking.businessId)
-            console.log('[DEBUG] Our businessId:', currentBusinessId)
-            console.log('[DEBUG] Match:', booking.businessId === currentBusinessId)
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('[DEBUG] Debug booking channel status:', status)
-      })
-
-    // DocuSeal Waivers - Listen for waiver status updates
-    const docusealCh = supabase
-      .channel(`docuseal-auth-${currentBusinessId}`)
+      // DocuSeal Waivers - Listen for waiver status updates
+      docusealCh = supabase
+      .channel(`notifications-waivers-${currentBusinessId}`)
       .on(
         'postgres_changes',
         { 
           event: 'UPDATE', 
           schema: 'public', 
-          table: 'Waiver'
-          // No filter needed - RLS will handle access control
+          table: 'Waiver',
+          filter: `businessId=eq.${currentBusinessId}`
         },
         (payload) => {
-          console.log('[Notifications] Waiver update received:', payload)
-          console.log('[Notifications] Waiver payload.new:', payload.new)
-          console.log('[Notifications] Waiver payload.old:', payload.old)
-          
           const waiver = payload.new
-          if (waiver) {
-            console.log('[Notifications] Waiver status:', waiver.status)
-            console.log('[Notifications] Checking if status === SIGNED:', waiver.status === 'SIGNED')
-            
-            if (waiver.status === 'SIGNED') {
-              console.log('[Notifications] Creating waiver signed notification')
-              push({
-                id: `waiver-${waiver.id}-${Date.now()}`,
-                title: 'Waiver Signed',
-                description: `A waiver has been signed for your business`,
-                createdAt: new Date().toISOString(),
-              })
-            } else {
-              console.log('[Notifications] Waiver status is not SIGNED, current status:', waiver.status)
-            }
-          } else {
-            console.log('[Notifications] No waiver data in payload.new')
+          if (waiver && waiver.status === 'SIGNED') {
+            push({
+              id: `waiver-${waiver.id}-${Date.now()}`,
+              title: 'Waiver Signed',
+              description: `A waiver has been signed for your business`,
+              createdAt: new Date().toISOString(),
+            })
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[Notifications] DocuSeal channel status:', status)
-      })
+      .subscribe()
 
-    // Also listen for waiver INSERTs in case that's how they're created
-    const waiverInsertCh = supabase
-      .channel(`waiver-inserts-auth-${currentBusinessId}`)
+      // Also listen for waiver INSERTs in case that's how they're created
+      waiverInsertCh = supabase
+      .channel(`notifications-waiver-inserts-${currentBusinessId}`)
       .on(
         'postgres_changes',
         { 
           event: 'INSERT', 
           schema: 'public', 
-          table: 'Waiver'
+          table: 'Waiver',
+          filter: `businessId=eq.${currentBusinessId}`
         },
         (payload) => {
-          console.log('[Notifications] Waiver INSERT received:', payload)
           const waiver = payload.new
           if (waiver && waiver.status === 'SIGNED') {
             push({
@@ -151,41 +104,20 @@ export function useNotifications(currentBusinessId: string | null) {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[Notifications] Waiver INSERT channel status:', status)
-      })
+      .subscribe()
 
-    // Listen for ALL waiver events for debugging
-    const waiverDebugCh = supabase
-      .channel(`waiver-debug-auth-${currentBusinessId}`)
-      .on(
-        'postgres_changes',
-        { 
-          event: '*', // All events
-          schema: 'public', 
-          table: 'Waiver'
-        },
-        (payload) => {
-          console.log('[DEBUG] ANY Waiver event detected:', payload.eventType, payload)
-        }
-      )
-      .subscribe((status) => {
-        console.log('[DEBUG] Waiver debug channel status:', status)
-      })
-
-    // Leads - Listen for new customer sign-ups
-    const leadCh = supabase
-      .channel(`leads-auth-${currentBusinessId}`)
+      // Leads - Listen for new customer sign-ups
+      leadCh = supabase
+      .channel(`notifications-leads-${currentBusinessId}`)
       .on(
         'postgres_changes',
         { 
           event: 'INSERT', 
           schema: 'public', 
-          table: 'Customer'
-          // No filter needed - RLS will handle access control
+          table: 'Customer',
+          filter: `businessId=eq.${currentBusinessId}`
         },
         (payload) => {
-          console.log('[Notifications] Customer insert received:', payload)
           const customer = payload.new
           if (customer && customer.isLead) {
             push({
@@ -197,26 +129,22 @@ export function useNotifications(currentBusinessId: string | null) {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[Notifications] Lead channel status:', status)
-      })
+      .subscribe()
 
-    // Bookings - Listen for new bookings (with debug)
-    const bookCh = supabase
-      .channel(`bookings-auth-${currentBusinessId}`)
+      // Bookings - Listen for new bookings 
+      bookCh = supabase
+      .channel(`notifications-bookings-${currentBusinessId}`)
       .on(
         'postgres_changes',
         { 
           event: 'INSERT', 
           schema: 'public', 
-          table: 'Booking'
-          // No filter needed - RLS will handle access control
+          table: 'Booking',
+          filter: `businessId=eq.${currentBusinessId}`
         },
         (payload) => {
-          console.log('[Notifications] Booking INSERT received:', payload)
           const booking = payload.new
           if (booking) {
-            console.log('[Notifications] Creating booking notification for:', booking.id)
             push({
               id: `booking-${booking.id}-${Date.now()}`,
               title: 'New Booking',
@@ -226,23 +154,20 @@ export function useNotifications(currentBusinessId: string | null) {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[Notifications] Booking channel status:', status)
-      })
+      .subscribe()
 
-    // Also listen for booking updates (status changes)
-    const bookingUpdateCh = supabase
-      .channel(`booking-updates-auth-${currentBusinessId}`)
+      // Also listen for booking updates (status changes)
+      bookingUpdateCh = supabase
+      .channel(`notifications-booking-updates-${currentBusinessId}`)
       .on(
         'postgres_changes',
         { 
           event: 'UPDATE', 
           schema: 'public', 
-          table: 'Booking'
-          // No filter needed - RLS will handle access control
+          table: 'Booking',
+          filter: `businessId=eq.${currentBusinessId}`
         },
         (payload) => {
-          console.log('[Notifications] Booking UPDATE received:', payload)
           const oldBooking = payload.old
           const newBooking = payload.new
           
@@ -259,23 +184,21 @@ export function useNotifications(currentBusinessId: string | null) {
           }
         }
       )
-      .subscribe((status) => {
-        console.log('[Notifications] Booking update channel status:', status)
-      })
+      .subscribe()
+
+    }
 
     // Cleanup function
     return () => {
-      console.log('[Notifications] Cleaning up authenticated subscriptions')
-      supabase.removeChannel(testChannel)
-      supabase.removeChannel(debugBookingChannel)
-      supabase.removeChannel(leadCh)
-      supabase.removeChannel(bookCh)
-      supabase.removeChannel(bookingUpdateCh)
-      supabase.removeChannel(docusealCh)
-      supabase.removeChannel(waiverInsertCh)
-      supabase.removeChannel(waiverDebugCh)
+      clearTimeout(setupTimeout);
+      if (testChannel) supabase.removeChannel(testChannel)
+      if (leadCh) supabase.removeChannel(leadCh)
+      if (bookCh) supabase.removeChannel(bookCh)
+      if (bookingUpdateCh) supabase.removeChannel(bookingUpdateCh)
+      if (docusealCh) supabase.removeChannel(docusealCh)
+      if (waiverInsertCh) supabase.removeChannel(waiverInsertCh)
     }
-  }, [toast, currentBusinessId, session, isLoaded])
+  }, [toast, currentBusinessId, getToken, supabase])  // CHANGED: Use supabase in dependency array
 
   const dismiss = useCallback((id: string) => {
     setNotifications((prev) => prev.filter((n) => n.id !== id))

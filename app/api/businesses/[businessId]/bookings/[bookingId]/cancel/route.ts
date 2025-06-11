@@ -3,6 +3,7 @@ import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/l
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
+import { supabaseAdmin } from "@/lib/supabaseClient";
 
 // Schema for cancellation request
 const cancelBookingSchema = z.object({
@@ -67,6 +68,19 @@ export async function POST(
           status: "CANCELLED",
         },
       });
+      
+      // Send real-time update via Supabase for cancelled booking
+      if (supabaseAdmin) {
+        await supabaseAdmin
+          .from('Booking')
+          .update({
+            status: 'CANCELLED',
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', bookingId);
+        console.log("Booking cancelled (no refund): real-time update sent via Supabase");
+      }
+      
       return NextResponse.json({ data: updatedBooking, refundAmount: 0 }, { status: 200 });
     }
 
@@ -157,6 +171,18 @@ export async function POST(
         customer: true,
       },
     });
+
+    // Send real-time update via Supabase for cancelled booking
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('Booking')
+        .update({
+          status: 'CANCELLED',
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', bookingId);
+      console.log("Booking cancelled: real-time update sent via Supabase");
+    }
 
     return NextResponse.json({
       data: updatedBooking,

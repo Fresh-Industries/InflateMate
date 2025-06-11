@@ -2,6 +2,7 @@
   "name": "supabase",
   "claims": {
     "aud": "authenticated",
+    "role": "authenticated",
     "exp": "{{session.expire_at}}",
     "iat": "{{session.created_at}}",
     "iss": "https://special-basilisk-24.clerk.accounts.dev",

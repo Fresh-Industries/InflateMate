@@ -30,26 +30,26 @@ export async function POST(req: NextRequest) {
   const sig = (await headers()).get('stripe-signature');
   const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET as string;
 
-  console.log("Received Stripe webhook, verifying signature...");
+  console.log("[WEBHOOK] Received Stripe webhook, verifying signature...");
 
   let event: Stripe.Event;
   try {
     if (!sig) {
-      console.error("No Stripe signature found in request");
+      console.error("[WEBHOOK] No Stripe signature found in request");
       return NextResponse.json({ error: "No Stripe signature" }, { status: 400 });
     }
 
     if (!webhookSecret) {
-      console.error("STRIPE_WEBHOOK_SECRET environment variable is not set");
+      console.error("[WEBHOOK] STRIPE_WEBHOOK_SECRET environment variable is not set");
       return NextResponse.json({ error: "Webhook secret not configured" }, { status: 500 });
     }
 
     const requestBody = await req.text();
     event = stripe.webhooks.constructEvent(requestBody, sig, webhookSecret);
-    console.log(`Webhook verified: ${event.type}`);
+    console.log(`[WEBHOOK] Webhook verified: ${event.type} - Event ID: ${event.id}`);
   } catch (err) {
     const errorMessage = err instanceof Error ? err.message : 'Unknown error';
-    console.error(`Webhook signature verification failed: ${errorMessage}`);
+    console.error(`[WEBHOOK] Signature verification failed: ${errorMessage}`);
     return NextResponse.json({ error: `Webhook Error: ${errorMessage}` }, { status: 400 });
   }
 
@@ -59,29 +59,30 @@ export async function POST(req: NextRequest) {
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log(`Processing payment_intent.succeeded: ${paymentIntent.id}`);
+        console.log(`[WEBHOOK] Processing payment_intent.succeeded: ${paymentIntent.id}`);
         try {
           await handlePaymentIntentSucceeded(paymentIntent);
+          console.log(`[WEBHOOK] Successfully processed payment_intent.succeeded: ${paymentIntent.id}`);
         } catch (error) {
-          console.error(`[Webhook POST] Error in handlePaymentIntentSucceeded: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.error(`[WEBHOOK] Error in handlePaymentIntentSucceeded: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
         break;
       }
 
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log(`Processing payment_intent.payment_failed: ${paymentIntent.id}`);
+        console.log(`[WEBHOOK] Processing payment_intent.payment_failed: ${paymentIntent.id}`);
         try {
           await handlePaymentIntentFailed(paymentIntent);
         } catch (error) {
-          console.error(`Error processing payment_intent.payment_failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.error(`[WEBHOOK] Error processing payment_intent.payment_failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
         break;
       }
 
       case 'charge.succeeded':
       case 'charge.updated':
-        console.log(`Received ${event.type} event - no action needed`);
+        console.log(`[WEBHOOK] Received ${event.type} event - no action needed`);
         break;
 
       case 'customer.subscription.created':
@@ -99,11 +100,11 @@ export async function POST(req: NextRequest) {
       // --- ADDED: Invoice Event Handlers ---
       case 'invoice.payment_succeeded': {
         const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Processing invoice.payment_succeeded: ${invoice.id}`);
+        console.log(`[WEBHOOK] Processing invoice.payment_succeeded: ${invoice.id}`);
         try {
           await handleInvoicePaymentSucceeded(invoice);
         } catch (error) {
-          console.error(`[Webhook POST] Error in handleInvoicePaymentSucceeded: ${error instanceof Error ? error.message : 'Unknown error'}`);
+          console.error(`[WEBHOOK] Error in handleInvoicePaymentSucceeded: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
         break;
       }
@@ -112,11 +113,11 @@ export async function POST(req: NextRequest) {
         const invoice = event.data.object as Stripe.Invoice;
         // Log finalization error if available, otherwise log generic message
         const failureReason = invoice.last_finalization_error?.message ?? 'Unknown (check related PaymentIntent/Charge)';
-        console.log(`Processing invoice.payment_failed: ${invoice.id}, Reason: ${failureReason}`);
+        console.log(`[WEBHOOK] Processing invoice.payment_failed: ${invoice.id}, Reason: ${failureReason}`);
         try {
           await handleInvoicePaymentFailed(invoice);
         } catch (error) {
-          console.error(`[HANDLER_ERROR handleInvoicePaymentFailed] Error processing Invoice ${invoice.id}:`, error);
+          console.error(`[WEBHOOK HANDLER_ERROR handleInvoicePaymentFailed] Error processing Invoice ${invoice.id}:`, error);
           if (error instanceof PrismaClientKnownRequestError) {
               console.error(` - Prisma Error Code: ${error.code}`);
               console.error(` - Prisma Meta: ${JSON.stringify(error.meta)}`);
@@ -127,11 +128,11 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.voided': {
         const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Processing invoice.voided: ${invoice.id}`);
+        console.log(`[WEBHOOK] Processing invoice.voided: ${invoice.id}`);
         try {
           await handleInvoiceVoided(invoice);
         } catch (error) {
-          console.error(`[HANDLER_ERROR handleInvoiceVoided] Error processing Invoice ${invoice.id}:`, error);
+          console.error(`[WEBHOOK HANDLER_ERROR handleInvoiceVoided] Error processing Invoice ${invoice.id}:`, error);
           if (error instanceof PrismaClientKnownRequestError) {
               console.error(` - Prisma Error Code: ${error.code}`);
               console.error(` - Prisma Meta: ${JSON.stringify(error.meta)}`);
@@ -142,11 +143,11 @@ export async function POST(req: NextRequest) {
 
       case 'invoice.deleted': { // Note: Not all invoices can be deleted
         const invoice = event.data.object as Stripe.Invoice;
-        console.log(`Processing invoice.deleted: ${invoice.id}`);
+        console.log(`[WEBHOOK] Processing invoice.deleted: ${invoice.id}`);
         try {
           await handleInvoiceDeleted(invoice);
         } catch (error) {
-          console.error(`[HANDLER_ERROR handleInvoiceDeleted] Error processing Invoice ${invoice.id}:`, error);
+          console.error(`[WEBHOOK HANDLER_ERROR handleInvoiceDeleted] Error processing Invoice ${invoice.id}:`, error);
           if (error instanceof PrismaClientKnownRequestError) {
               console.error(` - Prisma Error Code: ${error.code}`);
               console.error(` - Prisma Meta: ${JSON.stringify(error.meta)}`);
@@ -159,7 +160,7 @@ export async function POST(req: NextRequest) {
 
     case 'quote.accepted': {
         const quote = event.data.object as Stripe.Quote;
-        console.log(`Processing quote.accepted: ${quote.id}`);
+        console.log(`[WEBHOOK] Processing quote.accepted: ${quote.id}`);
         await handleQuoteAccepted(quote); // Implement this handler
         // If Stripe is configured to auto-invoice on acceptance, the invoice.paid/invoice.payment_succeeded
         // webhooks will follow and trigger booking confirmation via handleInvoicePaymentSucceeded.
@@ -168,24 +169,24 @@ export async function POST(req: NextRequest) {
 
     case 'quote.canceled': {
         const quote = event.data.object as Stripe.Quote;
-        console.log(`Processing quote.canceled: ${quote.id}`);
+        console.log(`[WEBHOOK] Processing quote.canceled: ${quote.id}`);
         await handleQuoteCanceled(quote); // Implement this handler
         break;
     }
 
       default:
-        console.log(`[Webhook POST] Unhandled event type: ${event.type}`);
+        console.log(`[WEBHOOK] Unhandled event type: ${event.type}`);
     }
 
     // Return a 200 response to acknowledge receipt of the event to Stripe
-    console.log(`[Webhook POST] Finished processing event ${event.id} (${event.type}). Sending 200 OK to Stripe.`);
+    console.log(`[WEBHOOK] Finished processing event ${event.id} (${event.type}). Sending 200 OK to Stripe.`);
     return NextResponse.json({ message: "Webhook processed successfully" }, { status: 200 });
 
   } catch (error) {
     // --- THIS CATCH BLOCK IS NOW FOR UNEXPECTED ERRORS *OUTSIDE* HANDLERS ---
     const eventId = (event as Stripe.Event | undefined)?.id ?? 'unknown';
     const eventType = (event as Stripe.Event | undefined)?.type ?? 'unknown';
-    console.error(`[Webhook POST] Critical error during webhook processing (event ${eventId}, type ${eventType}):`, error);
+    console.error(`[WEBHOOK] Critical error during webhook processing (event ${eventId}, type ${eventType}):`, error);
     // Log specific message if it's an Error instance
     if (error instanceof Error) {
         console.error(` - Error Message: ${error.message}`);
@@ -196,45 +197,39 @@ export async function POST(req: NextRequest) {
 }
 
 async function handleSubscription(subscription: Stripe.Subscription) {
-  console.log(`Subscription event: ${subscription.id}`);
+  console.log(`[WEBHOOK] Subscription event: ${subscription.id}`);
 
-  // 1️⃣ Get the customer
-  const customerId = subscription.customer as string;
+  try {
+    const organizationId = subscription.metadata?.organizationId;
+    if (!organizationId) {
+      console.warn(`[WEBHOOK] Subscription ${subscription.id} missing organizationId metadata`);
+      return;
+    }
 
-  // 2️⃣ Extract the priceId from the first line item
-  const priceId = subscription.items.data[0]?.price.id;
-  console.log(` → priceId: ${priceId}`);
-
-  // 3️⃣ Map that back to your plan key
-  let plan: string;
-  if (priceId === process.env.STRIPE_SOLO_PRICE_ID) {
-    plan = 'solo';
-  } else if (priceId === process.env.STRIPE_GROWTH_PRICE_ID) {
-    plan = 'growth';
-  } else {
-    console.warn(`Unrecognized priceId for subscription ${subscription.id}:`, priceId);
-    plan = 'unknown';
+    console.log(`[WEBHOOK] Syncing subscription data to DB for org: ${organizationId}`);
+    await syncStripeDataToDB(organizationId, subscription.customer as string);
+  } catch (error) {
+    console.error(`[WEBHOOK] Error handling subscription ${subscription.id}:`, error);
   }
-
-  // 4️⃣ Now sync, passing the plan
-  await syncStripeDataToDB(customerId, plan);
 }
+
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
-  console.log(`PaymentIntent succeeded: ${paymentIntent.id}`);
+  console.log(`[WEBHOOK] PaymentIntent succeeded: ${paymentIntent.id}`);
   
   if (!paymentIntent) {
-    console.error("PaymentIntent object is null or undefined");
+    console.error("[WEBHOOK] PaymentIntent object is null or undefined");
     return;
   }
 
   const metadata = paymentIntent.metadata;
-  console.log("PaymentIntent object:", JSON.stringify(paymentIntent, null, 2));
-  console.log("Metadata:", metadata);
+  console.log("[WEBHOOK] PaymentIntent metadata:", JSON.stringify(metadata, null, 2));
 
   if (!metadata || !metadata.prismaBookingId) {
-    console.log("No booking metadata found in payment intent");
+    console.log("[WEBHOOK] No booking metadata found in payment intent");
     return;
   }
+
+  console.log(`[WEBHOOK] Processing booking confirmation for booking ID: ${metadata.prismaBookingId}`);
 
   try {
     const email = paymentIntent.receipt_email || '';
@@ -243,7 +238,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       where: { id: businessId },
     });
 
-    console.log("Creating/updating customer with:", { email, businessId });
+    console.log("[WEBHOOK] Creating/updating customer with:", { email, businessId });
 
     // Replace upsert with findFirst + create/update approach
     let customer;
@@ -271,7 +266,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             status: 'Active',
           },
         });
-        console.log("Customer updated successfully:", customer.id);
+        console.log("[WEBHOOK] Customer updated successfully:", customer.id);
       } else {
         // Create new customer
         customer = await prisma.customer.create({
@@ -290,10 +285,10 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             totalSpent: paymentIntent.amount / 100,
           },
         });
-        console.log("Customer created successfully:", customer.id);
+        console.log("[WEBHOOK] Customer created successfully:", customer.id);
       }
     } catch (customerError) {
-      console.error("Error creating/updating customer:", 
+      console.error("[WEBHOOK] Error creating/updating customer:", 
         customerError instanceof Error ? customerError.message : 'Unknown error');
       throw customerError;
     }
@@ -302,7 +297,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
     let booking;
     try {
       // Log the raw date and time values from metadata
-      console.log("Raw date/time values from metadata:", {
+      console.log("[WEBHOOK] Raw date/time values from metadata:", {
         eventDate: metadata.eventDate,
         startTime: metadata.startTime,
         endTime: metadata.endTime,
@@ -312,7 +307,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       // Determine the timezone to use
       // Use metadata timezone, fallback to business timezone, or default if business is null
       const tz = metadata.eventTimeZone ?? business?.timeZone ?? 'America/Chicago'; 
-      console.log(`Using timezone: ${tz}`);
+      console.log(`[WEBHOOK] Using timezone: ${tz}`);
 
       // Use new utility functions for date/time conversion
       const eventDate = dateOnlyUTC(metadata.eventDate);
@@ -320,7 +315,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       const endUTC    = localToUTC(metadata.eventDate, metadata.endTime,   tz);
       
       // Log the converted UTC times
-      console.log("Converted UTC times:", {
+      console.log("[WEBHOOK] Converted UTC times:", {
         eventDate: eventDate.toISOString(),
         startUTC: startUTC.toISOString(),
         endUTC: endUTC.toISOString(),
@@ -335,7 +330,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       try {
         if (metadata.selectedItems) {
           const selectedItems = JSON.parse(metadata.selectedItems);
-          console.log("Parsed selectedItems:", selectedItems);
+          console.log("[WEBHOOK] Parsed selectedItems:", selectedItems);
           
           // Map the selected items to the format expected by createBookingSafely
           inventoryItems = selectedItems.map((item: { id: string; quantity?: number; price?: number }) => ({
@@ -358,7 +353,7 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
           }];
         }
       } catch (parseError) {
-        console.error("Error parsing selectedItems:", parseError);
+        console.error("[WEBHOOK] Error parsing selectedItems:", parseError);
         // Fallback to legacy method if parsing fails
         inventoryItems = [{
           inventoryId: metadata.bounceHouseId,
@@ -371,11 +366,14 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
       }
 
       // Check if booking exists
+      console.log(`[WEBHOOK] Looking for existing booking: ${metadata.prismaBookingId}`);
       const existingBooking = await prisma.booking.findUnique({
         where: { id: metadata.prismaBookingId },
       });
 
       if (existingBooking) {
+        console.log(`[WEBHOOK] Found existing booking with status: ${existingBooking.status}`);
+        
         // Only update status and depositPaid
         booking = await prisma.booking.update({
           where: { id: metadata.prismaBookingId },
@@ -385,11 +383,13 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
             expiresAt: null, // Clear expiresAt for confirmed bookings
           },
         });
-        console.log("Booking updated successfully:", booking.id);
+        console.log(`[WEBHOOK] Booking updated successfully: ${booking.id} - Status changed from ${existingBooking.status} to CONFIRMED`);
         
-        // Also update via Supabase for real-time updates
+        // Send real-time update via Supabase for PENDING->CONFIRMED transition
+        console.log(`[WEBHOOK] Attempting Supabase real-time update for booking: ${metadata.prismaBookingId}`);
         if (supabaseAdmin) {
-          await supabaseAdmin
+          try {
+            const supabaseResult = await supabaseAdmin
             .from('Booking')
             .update({
               status: 'CONFIRMED',
@@ -398,13 +398,24 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
               updatedAt: new Date().toISOString(),
             })
             .eq('id', metadata.prismaBookingId);
-          console.log("Booking real-time update sent via Supabase");
+            
+            if (supabaseResult.error) {
+              console.error("[WEBHOOK] Supabase real-time update failed:", supabaseResult.error);
+            } else {
+              console.log(`[WEBHOOK] Booking PENDING->CONFIRMED: real-time update sent via Supabase for booking: ${metadata.prismaBookingId}`);
+            }
+          } catch (supabaseError) {
+            console.error("[WEBHOOK] Error sending Supabase real-time update:", supabaseError);
+          }
+        } else {
+          console.warn("[WEBHOOK] supabaseAdmin is not available for real-time updates");
         }
         
         // Set all BookingItems to CONFIRMED
         await prisma.$executeRaw`UPDATE "BookingItem" SET "bookingStatus" = 'CONFIRMED', "updatedAt" = NOW() WHERE "bookingId" = ${booking.id}`;
-        console.log("All BookingItems set to CONFIRMED for booking:", booking.id);
+        console.log("[WEBHOOK] All BookingItems set to CONFIRMED for booking:", booking.id);
       } else {
+        console.log("[WEBHOOK] No existing booking found, creating new booking");
         // Remove inventoryItems from bookingData
         const bookingData = {
           id: metadata.prismaBookingId || '',
