@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SiteConfig, BusinessWithSiteConfig, Theme, DynamicSection } from "@/lib/business/domain-utils";
@@ -43,7 +43,6 @@ const getSectionArrayKey = (page: PageSectionKey): 'sections' | 'dynamicSections
 
 export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCustomizerProps) {
   const router = useRouter();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
@@ -120,19 +119,12 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
         throw new Error("Failed to save website configuration");
       }
       
-      toast({
-        title: "Website updated",
-        description: "Your website configuration has been saved successfully.",
-      });
+      toast.success("Website updated");
       
       router.refresh();
     } catch (error) {
       console.error("Error saving website configuration:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem saving your website configuration.",
-        variant: "destructive",
-      });
+      toast.error("There was a problem saving your website configuration.");
     } finally {
       setIsLoading(false);
     }
@@ -236,11 +228,11 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
          };
        });
        // --- END TEMPORARY ---
-       toast({ title: "Section Deleted", description: "Remember to save your changes.", variant: "destructive" });
+       toast.error("Remember to save your changes.");
        // If using server action: await deleteSection(businessId, sectionId); router.refresh();
     } catch (error) { 
         console.error("Error deleting section:", error); 
-        toast({ title: "Error", description: "Could not delete section.", variant: "destructive", });
+        toast.error("Could not delete section.");
     } finally { 
         setIsLoading(false); 
     }
@@ -284,7 +276,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       };
     });
     handleCloseSectionForm();
-    toast({ title: "Section Added", description: "Remember to save your changes." });
+    toast.success("Section Added");
   };
 
   const handleEditSection = (updatedSectionData: DynamicSection) => {
@@ -305,7 +297,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       };
     });
     handleCloseSectionForm();
-    toast({ title: "Section Updated", description: "Remember to save your changes." });
+    toast.success("Section Updated");
   };
 
   const renderSections = (page: PageSectionKey) => {

@@ -3,7 +3,7 @@ import { Send } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 interface MessageComposerProps {
   customer: {
@@ -17,15 +17,10 @@ interface MessageComposerProps {
 export function MessageComposer({ customer, businessId }: MessageComposerProps) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
-  const { toast } = useToast();
 
   const handleSend = async () => {
     if (!message.trim()) {
-      toast({
-        title: "Message is empty",
-        description: "Please enter a message before sending.",
-        variant: "destructive",
-      });
+      toast.error("Please enter a message before sending.");
       return;
     }
 
@@ -45,19 +40,12 @@ export function MessageComposer({ customer, businessId }: MessageComposerProps) 
         throw new Error("Failed to send message");
       }
 
-      toast({
-        title: "Message sent",
-        description: `Your text message has been sent to ${customer.name}.`,
-      });
+      toast.success(`Your text message has been sent to ${customer.name}.`);
 
       setMessage("");
     } catch (error) {
       console.error("Error sending message:", error);
-      toast({
-        title: "Error",
-        description: "Failed to send text message. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to send text message. Please try again.");
     } finally {
       setSending(false);
     }

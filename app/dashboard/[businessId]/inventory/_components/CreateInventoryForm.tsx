@@ -16,28 +16,35 @@ import {
 import { toast } from "sonner";
 import { useUploadThing } from "@/lib/uploadthing";
 
-export interface CreateBounceHouseFormData {
+export type InventoryType = "BOUNCE_HOUSE" | "WATER_SLIDE" | "GAME" | "OTHER";
+
+export interface CreateInventoryFormData {
   name: string;
   description: string;
-  dimensions: string;
-  capacity: number;
+  type: InventoryType;
   price: number;
-  setupTime: number;
-  teardownTime: number;
   status: "AVAILABLE" | "MAINTENANCE" | "RETIRED";
-  minimumSpace: string;
-  weightLimit: number;
-  ageRange: string;
-  weatherRestrictions: string[];
+  quantity: number;
   images: { url: string; isPrimary: boolean }[];
+  
+  // Optional fields that depend on type
+  dimensions?: string;
+  capacity?: number;
+  setupTime?: number;
+  teardownTime?: number;
+  minimumSpace?: string;
+  weightLimit?: number;
+  ageRange?: string;
+  weatherRestrictions?: string[];
 }
 
-interface CreateBounceHouseFormProps {
+interface CreateInventoryFormProps {
   onSuccess: () => void;
   onCancel: () => void;
-  onFormDataChange: (data: CreateBounceHouseFormData) => void;
-  onSubmit: (data: CreateBounceHouseFormData) => Promise<void>;
+  onFormDataChange: (data: CreateInventoryFormData) => void;
+  onSubmit: (data: CreateInventoryFormData) => Promise<void>;
   isSubmitting: boolean;
+  initialType?: InventoryType;
 }
 
 interface ImageFile {
@@ -50,24 +57,49 @@ interface ImageFile {
 interface LocalFormState {
   name: string;
   description: string;
+  type: InventoryType;
+  price: string;
+  status: "AVAILABLE" | "MAINTENANCE" | "RETIRED";
+  quantity: string;
   dimensions: string;
   capacity: string;
-  price: string;
   setupTime: string;
   teardownTime: string;
-  status: "AVAILABLE" | "MAINTENANCE" | "RETIRED";
   minimumSpace: string;
   weightLimit: string;
   ageRange: string;
   weatherRestrictions: string[];
 }
 
-export function CreateBounceHouseForm({
+// Define which fields are required/shown for each type
+type FieldName = 'dimensions' | 'capacity' | 'setupTime' | 'teardownTime' | 'minimumSpace' | 'weightLimit' | 'ageRange' | 'weatherRestrictions';
+
+const typeFieldConfig: Record<InventoryType, { required: FieldName[]; optional: FieldName[] }> = {
+  BOUNCE_HOUSE: {
+    required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+    optional: ['weatherRestrictions']
+  },
+  WATER_SLIDE: {
+    required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+    optional: ['weatherRestrictions']
+  },
+  GAME: {
+    required: ['ageRange'],
+    optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime']
+  },
+  OTHER: {
+    required: [],
+    optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange']
+  }
+};
+
+export function CreateInventoryForm({
   onSuccess,
   onCancel,
   onFormDataChange,
   onSubmit,
-}: CreateBounceHouseFormProps) {
+  initialType = "BOUNCE_HOUSE"
+}: CreateInventoryFormProps) {
   const { startUpload } = useUploadThing("imageUploader");
   const [selectedFiles, setSelectedFiles] = useState<ImageFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -77,17 +109,44 @@ export function CreateBounceHouseForm({
   const [formData, setFormData] = useState<LocalFormState>({
     name: "",
     description: "",
+    type: initialType,
+    price: "",
+    status: "AVAILABLE",
+    quantity: "1",
     dimensions: "",
     capacity: "",
-    price: "",
-    setupTime: "",
-    teardownTime: "",
-    status: "AVAILABLE",
+    setupTime: "30",
+    teardownTime: "30",
     minimumSpace: "",
     weightLimit: "",
     ageRange: "",
     weatherRestrictions: [],
   });
+
+  const getTypeDisplayName = (type: InventoryType) => {
+    switch (type) {
+      case 'BOUNCE_HOUSE':
+        return 'Bounce House';
+      case 'WATER_SLIDE':
+        return 'Water Slide';
+      case 'GAME':
+        return 'Game';
+      case 'OTHER':
+        return 'Other';
+      default:
+        return type;
+    }
+  };
+
+  const shouldShowField = (fieldName: FieldName) => {
+    const config = typeFieldConfig[formData.type];
+    return config.required.includes(fieldName) || config.optional.includes(fieldName);
+  };
+
+  const isFieldRequired = (fieldName: FieldName) => {
+    const config = typeFieldConfig[formData.type];
+    return config.required.includes(fieldName);
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
@@ -153,30 +212,55 @@ export function CreateBounceHouseForm({
       }
 
       // Convert local form values to proper types for submission.
-      const completeFormData: CreateBounceHouseFormData = {
+      const completeFormData: CreateInventoryFormData = {
         name: formData.name,
         description: formData.description,
-        dimensions: formData.dimensions,
-        capacity: parseInt(formData.capacity) || 0,
+        type: formData.type,
         price: parseFloat(formData.price) || 0,
-        setupTime: parseInt(formData.setupTime) || 0,
-        teardownTime: parseInt(formData.teardownTime) || 0,
         status: formData.status,
-        minimumSpace: formData.minimumSpace,
-        weightLimit: parseInt(formData.weightLimit) || 0,
-        ageRange: formData.ageRange,
-        weatherRestrictions: formData.weatherRestrictions,
+        quantity: parseInt(formData.quantity) || 1,
         images: uploadedImages,
       };
 
+      // Add optional fields if they should be shown for this type
+      if (shouldShowField('dimensions')) {
+        completeFormData.dimensions = formData.dimensions;
+      }
+      if (shouldShowField('capacity')) {
+        completeFormData.capacity = parseInt(formData.capacity) || 0;
+      }
+      if (shouldShowField('setupTime')) {
+        completeFormData.setupTime = parseInt(formData.setupTime) || 0;
+      }
+      if (shouldShowField('teardownTime')) {
+        completeFormData.teardownTime = parseInt(formData.teardownTime) || 0;
+      }
+      if (shouldShowField('minimumSpace')) {
+        completeFormData.minimumSpace = formData.minimumSpace;
+      }
+      if (shouldShowField('weightLimit')) {
+        completeFormData.weightLimit = parseInt(formData.weightLimit) || 0;
+      }
+      if (shouldShowField('ageRange')) {
+        completeFormData.ageRange = formData.ageRange;
+      }
+      if (shouldShowField('weatherRestrictions')) {
+        completeFormData.weatherRestrictions = formData.weatherRestrictions;
+      }
+
       // Basic local validations
       if (!completeFormData.name) throw new Error("Name is required");
-      if (!completeFormData.dimensions) throw new Error("Dimensions are required");
-      if (!completeFormData.capacity) throw new Error("Capacity is required");
       if (!completeFormData.price) throw new Error("Price is required");
-      if (!completeFormData.minimumSpace) throw new Error("Minimum space is required");
-      if (!completeFormData.weightLimit) throw new Error("Weight limit is required");
-      if (!completeFormData.ageRange) throw new Error("Age range is required");
+
+      // Type-specific required field validations
+      const config = typeFieldConfig[formData.type];
+      for (const fieldName of config.required) {
+        const value = completeFormData[fieldName as keyof CreateInventoryFormData];
+        if (!value || value === "" || value === 0) {
+          const displayName = fieldName.replace(/([A-Z])/g, ' $1').toLowerCase();
+          throw new Error(`${displayName.charAt(0).toUpperCase() + displayName.slice(1)} is required for ${getTypeDisplayName(formData.type)}`);
+        }
+      }
 
       // Inform the parent about the complete data
       onFormDataChange(completeFormData);
@@ -202,16 +286,17 @@ export function CreateBounceHouseForm({
     }));
   };
 
-  const handleSelectChange = (value: string) => {
+  const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
-      status: value as "AVAILABLE" | "MAINTENANCE" | "RETIRED",
+      [name]: value,
     }));
   };
 
   return (
     <form onSubmit={handleFormSubmit} className="space-y-6">
       <div className="grid gap-4 md:grid-cols-2">
+        {/* Always show these basic fields */}
         <div className="space-y-2">
           <Label htmlFor="name">Name</Label>
           <Input
@@ -219,14 +304,29 @@ export function CreateBounceHouseForm({
             name="name"
             value={formData.name}
             onChange={handleInputChange}
-            placeholder="Castle Bounce House"
+            placeholder={`Enter ${getTypeDisplayName(formData.type).toLowerCase()} name`}
             required
           />
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="type">Type</Label>
+          <Select value={formData.type} onValueChange={(value) => handleSelectChange('type', value as InventoryType)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select type" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="BOUNCE_HOUSE">Bounce House</SelectItem>
+              <SelectItem value="WATER_SLIDE">Water Slide</SelectItem>
+              <SelectItem value="GAME">Game</SelectItem>
+              <SelectItem value="OTHER">Other</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="status">Status</Label>
-          <Select value={formData.status} onValueChange={handleSelectChange}>
+          <Select value={formData.status} onValueChange={(value) => handleSelectChange('status', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select status" />
             </SelectTrigger>
@@ -236,32 +336,6 @@ export function CreateBounceHouseForm({
               <SelectItem value="RETIRED">Retired</SelectItem>
             </SelectContent>
           </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="dimensions">Dimensions</Label>
-          <Input
-            id="dimensions"
-            name="dimensions"
-            value={formData.dimensions}
-            onChange={handleInputChange}
-            placeholder="15' x 15'"
-            required
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="capacity">Capacity</Label>
-          <Input
-            id="capacity"
-            name="capacity"
-            type="number"
-            value={formData.capacity}
-            onChange={handleInputChange}
-            placeholder="10"
-            min="1"
-            required
-          />
         </div>
 
         <div className="space-y-2">
@@ -280,70 +354,125 @@ export function CreateBounceHouseForm({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="setupTime">Setup Time (minutes)</Label>
+          <Label htmlFor="quantity">Quantity</Label>
           <Input
-            id="setupTime"
-            name="setupTime"
+            id="quantity"
+            name="quantity"
             type="number"
-            value={formData.setupTime}
+            value={formData.quantity}
             onChange={handleInputChange}
-            placeholder="30"
-            min="0"
+            placeholder="1"
+            min="1"
             required
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="teardownTime">Teardown Time (minutes)</Label>
-          <Input
-            id="teardownTime"
-            name="teardownTime"
-            type="number"
-            value={formData.teardownTime}
-            onChange={handleInputChange}
-            placeholder="30"
-            min="0"
-            required
-          />
-        </div>
+        {/* Conditionally show fields based on type */}
+        {shouldShowField('dimensions') && (
+          <div className="space-y-2">
+            <Label htmlFor="dimensions">Dimensions {isFieldRequired('dimensions') && '*'}</Label>
+            <Input
+              id="dimensions"
+              name="dimensions"
+              value={formData.dimensions}
+              onChange={handleInputChange}
+              placeholder="15' x 15'"
+              required={isFieldRequired('dimensions')}
+            />
+          </div>
+        )}
 
-        <div className="space-y-2">
-          <Label htmlFor="minimumSpace">Minimum Space Required</Label>
-          <Input
-            id="minimumSpace"
-            name="minimumSpace"
-            value={formData.minimumSpace}
-            onChange={handleInputChange}
-            placeholder="20' x 20'"
-            required
-          />
-        </div>
+        {shouldShowField('capacity') && (
+          <div className="space-y-2">
+            <Label htmlFor="capacity">Capacity {isFieldRequired('capacity') && '*'}</Label>
+            <Input
+              id="capacity"
+              name="capacity"
+              type="number"
+              value={formData.capacity}
+              onChange={handleInputChange}
+              placeholder="10"
+              min="1"
+              required={isFieldRequired('capacity')}
+            />
+          </div>
+        )}
 
-        <div className="space-y-2">
-          <Label htmlFor="weightLimit">Weight Limit (lbs)</Label>
-          <Input
-            id="weightLimit"
-            name="weightLimit"
-            type="number"
-            value={formData.weightLimit}
-            onChange={handleInputChange}
-            placeholder="500"
-            min="0"
-            required
-          />
-        </div>
+        {shouldShowField('setupTime') && (
+          <div className="space-y-2">
+            <Label htmlFor="setupTime">Setup Time (minutes) {isFieldRequired('setupTime') && '*'}</Label>
+            <Input
+              id="setupTime"
+              name="setupTime"
+              type="number"
+              value={formData.setupTime}
+              onChange={handleInputChange}
+              placeholder="30"
+              min="0"
+              required={isFieldRequired('setupTime')}
+            />
+          </div>
+        )}
 
-        <div className="space-y-2">
-          <Label htmlFor="ageRange">Age Range</Label>
-          <Input
-            id="ageRange"
-            name="ageRange"
-            value={formData.ageRange}
-            onChange={handleInputChange}
-            placeholder="5-12 years"
-            required
-          />
-        </div>
+        {shouldShowField('teardownTime') && (
+          <div className="space-y-2">
+            <Label htmlFor="teardownTime">Teardown Time (minutes) {isFieldRequired('teardownTime') && '*'}</Label>
+            <Input
+              id="teardownTime"
+              name="teardownTime"
+              type="number"
+              value={formData.teardownTime}
+              onChange={handleInputChange}
+              placeholder="30"
+              min="0"
+              required={isFieldRequired('teardownTime')}
+            />
+          </div>
+        )}
+
+        {shouldShowField('minimumSpace') && (
+          <div className="space-y-2">
+            <Label htmlFor="minimumSpace">Minimum Space Required {isFieldRequired('minimumSpace') && '*'}</Label>
+            <Input
+              id="minimumSpace"
+              name="minimumSpace"
+              value={formData.minimumSpace}
+              onChange={handleInputChange}
+              placeholder="20' x 20'"
+              required={isFieldRequired('minimumSpace')}
+            />
+          </div>
+        )}
+
+        {shouldShowField('weightLimit') && (
+          <div className="space-y-2">
+            <Label htmlFor="weightLimit">Weight Limit (lbs) {isFieldRequired('weightLimit') && '*'}</Label>
+            <Input
+              id="weightLimit"
+              name="weightLimit"
+              type="number"
+              value={formData.weightLimit}
+              onChange={handleInputChange}
+              placeholder="500"
+              min="0"
+              required={isFieldRequired('weightLimit')}
+            />
+          </div>
+        )}
+
+        {shouldShowField('ageRange') && (
+          <div className="space-y-2">
+            <Label htmlFor="ageRange">Age Range {isFieldRequired('ageRange') && '*'}</Label>
+            <Input
+              id="ageRange"
+              name="ageRange"
+              value={formData.ageRange}
+              onChange={handleInputChange}
+              placeholder="5-12 years"
+              required={isFieldRequired('ageRange')}
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-2">
@@ -353,7 +482,7 @@ export function CreateBounceHouseForm({
           name="description"
           value={formData.description}
           onChange={handleInputChange}
-          placeholder="Describe the bounce house..."
+          placeholder={`Describe the ${getTypeDisplayName(formData.type).toLowerCase()}...`}
           className="h-32"
         />
       </div>
@@ -432,9 +561,9 @@ export function CreateBounceHouseForm({
           Cancel
         </Button>
         <Button type="submit" disabled={isLoading || isUploading}>
-          {isLoading || isUploading ? "Creating..." : "Create Bounce House"}
+          {isLoading || isUploading ? "Creating..." : `Create ${getTypeDisplayName(formData.type)}`}
         </Button>
       </div>
     </form>
   );
-}
+} 

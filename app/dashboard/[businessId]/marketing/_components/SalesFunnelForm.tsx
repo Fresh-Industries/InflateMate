@@ -9,7 +9,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { UploadDropzone } from "@/lib/uploadthing";
 import Image from "next/image";
 import { X } from "lucide-react";
@@ -58,7 +58,6 @@ export function SalesFunnelForm({ businessId, funnel, onSuccess, onCancel }: Sal
   const [isLoadingCoupons, setIsLoadingCoupons] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | undefined>(funnel?.popupImage);
   const [isDeleting, setIsDeleting] = useState(false);
-  const { toast } = useToast();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -88,11 +87,7 @@ export function SalesFunnelForm({ businessId, funnel, onSuccess, onCancel }: Sal
         setCoupons(data);
       } catch (error) {
         console.error("Error fetching coupons:", error);
-        toast({
-          title: "Error",
-          description: "Failed to load coupons. Please try again.",
-          variant: "destructive",
-        });
+        toast.error("Failed to load coupons. Please try again.");
       } finally {
         setIsLoadingCoupons(false);
       }
@@ -130,19 +125,12 @@ export function SalesFunnelForm({ businessId, funnel, onSuccess, onCancel }: Sal
         throw new Error(`Failed to ${funnel ? "update" : "create"} sales funnel`);
       }
       
-      toast({
-        title: "Success",
-        description: `Sales funnel ${funnel ? "updated" : "created"} successfully.`,
-      });
+      toast.success(`Sales funnel ${funnel ? "updated" : "created"} successfully.`);
       
       onSuccess();
     } catch (error) {
       console.error(`Error ${funnel ? "updating" : "creating"} sales funnel:`, error);
-      toast({
-        title: "Error",
-        description: `Failed to ${funnel ? "update" : "create"} sales funnel. Please try again.`,
-        variant: "destructive",
-      });
+      toast.error(`Failed to ${funnel ? "update" : "create"} sales funnel. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }
@@ -163,17 +151,10 @@ export function SalesFunnelForm({ businessId, funnel, onSuccess, onCancel }: Sal
       
       setImageUrl(undefined);
       
-      toast({
-        title: "Success",
-        description: "Image deleted successfully.",
-      });
+      toast.success("Image deleted successfully.");
     } catch (error) {
       console.error("Error deleting image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete image. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete image. Please try again.");
     } finally {
       setIsDeleting(false);
     }
@@ -268,18 +249,11 @@ export function SalesFunnelForm({ businessId, funnel, onSuccess, onCancel }: Sal
                   onClientUploadComplete={(res) => {
                     if (res && res.length > 0) {
                       setImageUrl(res[0].url);
-                      toast({
-                        title: "Success",
-                        description: "Image uploaded successfully.",
-                      });
+                      toast.success("Image uploaded successfully.");
                     }
                   }}
                   onUploadError={(error: Error) => {
-                    toast({
-                      title: "Error",
-                      description: `Failed to upload image: ${error.message}`,
-                      variant: "destructive",
-                    });
+                    toast.error(`Failed to upload image: ${error.message}`);
                   }}
                 />
               </div>

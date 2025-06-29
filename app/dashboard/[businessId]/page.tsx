@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { format, startOfToday, endOfToday, addDays, isWithinInterval, subMonths, startOfMonth, endOfMonth, eachDayOfInterval, isSameDay } from "date-fns";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -106,7 +106,6 @@ const pieChartColors = [
 export default function DashboardPage() {
   const params = useParams();
   const router = useRouter();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(true);
   const [data, setData] = useState<DashboardData | null>(null);
   const businessId = params.businessId as string;
@@ -116,11 +115,7 @@ export default function DashboardPage() {
     const fetchDashboardData = async () => {
       if (!businessId) {
         console.error('No business ID found');
-        toast({
-          title: "Error",
-          description: "No business ID found",
-          variant: "destructive",
-        });
+        toast.error("No business ID found");
         return;
       }
 
@@ -320,11 +315,7 @@ export default function DashboardPage() {
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        toast({
-          title: "Error",
-          description: error instanceof Error ? error.message : "Failed to fetch dashboard data",
-          variant: "destructive",
-        });
+        toast.error(error instanceof Error ? error.message : "Failed to fetch dashboard data");
         
         if (error instanceof Error && error.message.includes('Unauthorized')) {
           window.location.href = '/sign-in';

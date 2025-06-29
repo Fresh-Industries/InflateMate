@@ -1,6 +1,5 @@
 "use client"
 
-
 import * as React from "react"
 
 import type {
@@ -27,20 +26,20 @@ function genId() {
 
 type Action =
   | {
-      type: "ADD_TOAST";
-      toast: ToasterToast;
+      type: "ADD_TOAST"
+      toast: ToasterToast
     }
   | {
-      type: "UPDATE_TOAST";
-      toast: Partial<ToasterToast>;
+      type: "UPDATE_TOAST"
+      toast: Partial<ToasterToast>
     }
   | {
-      type: "DISMISS_TOAST";
-      toastId?: ToasterToast["id"];
+      type: "DISMISS_TOAST"
+      toastId?: ToasterToast["id"]
     }
   | {
-      type: "REMOVE_TOAST";
-      toastId?: ToasterToast["id"];
+      type: "REMOVE_TOAST"
+      toastId?: ToasterToast["id"]
     }
 
 interface State {
@@ -84,8 +83,6 @@ export const reducer = (state: State, action: Action): State => {
     case "DISMISS_TOAST": {
       const { toastId } = action
 
-      // ! Side effects ! - This could be extracted into a dismissToast() action,
-      // but I'll keep it here for simplicity
       if (toastId) {
         addToRemoveQueue(toastId)
       } else {
@@ -163,9 +160,19 @@ function toast({ ...props }: Toast) {
 }
 
 function useToast() {
-  const [state, setState] = React.useState<State>(memoryState)
+  // SSR safety check - return empty state during SSR
+  const [state, setState] = React.useState<State>(() => {
+    // During SSR, React might not be fully initialized
+    if (typeof window === 'undefined') {
+      return { toasts: [] }
+    }
+    return memoryState
+  })
 
   React.useEffect(() => {
+    // Only run on client-side
+    if (typeof window === 'undefined') return
+
     listeners.push(setState)
     return () => {
       const index = listeners.indexOf(setState)
@@ -173,7 +180,16 @@ function useToast() {
         listeners.splice(index, 1)
       }
     }
-  }, [state])
+  }, [])
+
+  // During SSR, return empty state
+  if (typeof window === 'undefined') {
+    return {
+      toasts: [],
+      toast,
+      dismiss: () => {},
+    }
+  }
 
   return {
     ...state,

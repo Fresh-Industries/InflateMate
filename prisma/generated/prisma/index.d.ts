@@ -128,7 +128,7 @@ export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus]
 
 export const InventoryType: {
   BOUNCE_HOUSE: 'BOUNCE_HOUSE',
-  INFLATABLE: 'INFLATABLE',
+  WATER_SLIDE: 'WATER_SLIDE',
   GAME: 'GAME',
   OTHER: 'OTHER'
 };

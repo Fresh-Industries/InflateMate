@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowLeft, Loader2, Trash2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import {
@@ -33,7 +33,7 @@ interface ImageFile {
 interface InventoryItem {
   id: string;
   status: 'AVAILABLE' | 'MAINTENANCE' | 'RETIRED';
-  type: 'BOUNCE_HOUSE' | 'INFLATABLE' | 'GAME' | 'OTHER';
+  type: 'BOUNCE_HOUSE' | 'WATER_SLIDE' | 'GAME' | 'OTHER';
   name: string;
   description?: string;
   dimensions: string;
@@ -53,7 +53,6 @@ interface InventoryItem {
 export default function EditInventoryPage() {
   const params = useParams();
   const router = useRouter();
-  const { toast } = useToast();
   const businessId = params?.businessId as string;
   const inventoryId = params?.inventoryId as string;
 
@@ -96,11 +95,7 @@ export default function EditInventoryPage() {
         setExistingImages(images);
       } catch (error) {
         console.error('Error fetching inventory item:', error);
-        toast({
-          title: 'Error',
-          description: error instanceof Error ? error.message : 'Failed to fetch inventory item',
-          variant: 'destructive',
-        });
+        toast.error(error instanceof Error ? error.message : 'Failed to fetch inventory item');
       } finally {
         setIsLoading(false);
       }
@@ -240,15 +235,11 @@ export default function EditInventoryPage() {
 
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to update inventory item');
-      toast({ title: 'Success', description: 'Inventory item updated successfully' });
+      toast.success('Inventory item updated successfully');
       router.push(`/dashboard/${businessId}/inventory`);
     } catch (error) {
       console.error('Error updating inventory item:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to update inventory item',
-        variant: 'destructive',
-      });
+      toast.error(error instanceof Error ? error.message : 'Failed to update inventory item');
     } finally {
       setIsSubmitting(false);
     }
@@ -260,15 +251,11 @@ export default function EditInventoryPage() {
       const response = await fetch(`/api/businesses/${businessId}/inventory/${inventoryId}`, { method: 'DELETE' });
       const data = await response.json();
       if (!response.ok) throw new Error(data.message || 'Failed to delete inventory item');
-      toast({ title: 'Success', description: 'Inventory item deleted successfully' });
+      toast.success('Inventory item deleted successfully');
       router.push(`/dashboard/${businessId}/inventory`);
     } catch (error) {
       console.error('Error deleting inventory item:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to delete inventory item',
-        variant: 'destructive',
-      });
+        toast.error(error instanceof Error ? error.message : 'Failed to delete inventory item');
     } finally {
       setIsSubmitting(false);
       setDeleteDialogOpen(false);
@@ -278,11 +265,43 @@ export default function EditInventoryPage() {
   const getTypeDisplayName = (type: string) => {
     switch (type) {
       case 'BOUNCE_HOUSE': return 'Bounce House';
-      case 'INFLATABLE': return 'Inflatable';
+      case 'WATER_SLIDE': return 'Water Slide';
       case 'GAME': return 'Game';
       case 'OTHER': return 'Other';
       default: return type;
     }
+  };
+
+  // Define which fields are required/shown for each type
+  const typeFieldConfig: Record<string, { required: string[], optional: string[] }> = {
+    BOUNCE_HOUSE: {
+      required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+      optional: ['weatherRestrictions']
+    },
+    WATER_SLIDE: {
+      required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+      optional: ['weatherRestrictions']
+    },
+    GAME: {
+      required: ['ageRange'],
+      optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime']
+    },
+    OTHER: {
+      required: [],
+      optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange']
+    }
+  };
+
+  const shouldShowField = (fieldName: string) => {
+    if (!inventoryItem) return false;
+    const config = typeFieldConfig[inventoryItem.type];
+    return config.required.includes(fieldName) || config.optional.includes(fieldName);
+  };
+
+  const isFieldRequired = (fieldName: string) => {
+    if (!inventoryItem) return false;
+    const config = typeFieldConfig[inventoryItem.type];
+    return config.required.includes(fieldName);
   };
 
   if (isLoading) {
@@ -407,26 +426,83 @@ export default function EditInventoryPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="dimensions">Dimensions</Label>
-                <Input id="dimensions" name="dimensions" value={inventoryItem.dimensions} onChange={handleInputChange} placeholder="e.g. 15ft x 15ft x 10ft" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="minimumSpace">Minimum Space Required</Label>
-                <Input id="minimumSpace" name="minimumSpace" value={inventoryItem.minimumSpace} onChange={handleInputChange} placeholder="e.g. 20ft x 20ft" required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="capacity">Capacity (people)</Label>
-                <Input id="capacity" name="capacity" type="number" min="1" value={inventoryItem.capacity} onChange={handleNumberInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="weightLimit">Weight Limit (lbs)</Label>
-                <Input id="weightLimit" name="weightLimit" type="number" min="0" value={inventoryItem.weightLimit} onChange={handleNumberInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="ageRange">Age Range</Label>
-                <Input id="ageRange" name="ageRange" value={inventoryItem.ageRange} onChange={handleInputChange} placeholder="e.g. 5-12 years" required />
-              </div>
+              {shouldShowField('dimensions') && (
+                <div className="space-y-2">
+                  <Label htmlFor="dimensions">
+                    Dimensions {isFieldRequired('dimensions') && '*'}
+                  </Label>
+                  <Input 
+                    id="dimensions" 
+                    name="dimensions" 
+                    value={inventoryItem.dimensions} 
+                    onChange={handleInputChange} 
+                    placeholder="e.g. 15ft x 15ft x 10ft" 
+                    required={isFieldRequired('dimensions')} 
+                  />
+                </div>
+              )}
+              {shouldShowField('minimumSpace') && (
+                <div className="space-y-2">
+                  <Label htmlFor="minimumSpace">
+                    Minimum Space Required {isFieldRequired('minimumSpace') && '*'}
+                  </Label>
+                  <Input 
+                    id="minimumSpace" 
+                    name="minimumSpace" 
+                    value={inventoryItem.minimumSpace} 
+                    onChange={handleInputChange} 
+                    placeholder="e.g. 20ft x 20ft" 
+                    required={isFieldRequired('minimumSpace')} 
+                  />
+                </div>
+              )}
+              {shouldShowField('capacity') && (
+                <div className="space-y-2">
+                  <Label htmlFor="capacity">
+                    Capacity (people) {isFieldRequired('capacity') && '*'}
+                  </Label>
+                  <Input 
+                    id="capacity" 
+                    name="capacity" 
+                    type="number" 
+                    min="1" 
+                    value={inventoryItem.capacity} 
+                    onChange={handleNumberInputChange} 
+                    required={isFieldRequired('capacity')} 
+                  />
+                </div>
+              )}
+              {shouldShowField('weightLimit') && (
+                <div className="space-y-2">
+                  <Label htmlFor="weightLimit">
+                    Weight Limit (lbs) {isFieldRequired('weightLimit') && '*'}
+                  </Label>
+                  <Input 
+                    id="weightLimit" 
+                    name="weightLimit" 
+                    type="number" 
+                    min="0" 
+                    value={inventoryItem.weightLimit} 
+                    onChange={handleNumberInputChange} 
+                    required={isFieldRequired('weightLimit')} 
+                  />
+                </div>
+              )}
+              {shouldShowField('ageRange') && (
+                <div className="space-y-2">
+                  <Label htmlFor="ageRange">
+                    Age Range {isFieldRequired('ageRange') && '*'}
+                  </Label>
+                  <Input 
+                    id="ageRange" 
+                    name="ageRange" 
+                    value={inventoryItem.ageRange} 
+                    onChange={handleInputChange} 
+                    placeholder="e.g. 5-12 years" 
+                    required={isFieldRequired('ageRange')} 
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -437,14 +513,38 @@ export default function EditInventoryPage() {
               <CardDescription>Update setup and teardown details</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="setupTime">Setup Time (minutes)</Label>
-                <Input id="setupTime" name="setupTime" type="number" min="0" value={inventoryItem.setupTime} onChange={handleNumberInputChange} required />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="teardownTime">Teardown Time (minutes)</Label>
-                <Input id="teardownTime" name="teardownTime" type="number" min="0" value={inventoryItem.teardownTime} onChange={handleNumberInputChange} required />
-              </div>
+              {shouldShowField('setupTime') && (
+                <div className="space-y-2">
+                  <Label htmlFor="setupTime">
+                    Setup Time (minutes) {isFieldRequired('setupTime') && '*'}
+                  </Label>
+                  <Input 
+                    id="setupTime" 
+                    name="setupTime" 
+                    type="number" 
+                    min="0" 
+                    value={inventoryItem.setupTime} 
+                    onChange={handleNumberInputChange} 
+                    required={isFieldRequired('setupTime')} 
+                  />
+                </div>
+              )}
+              {shouldShowField('teardownTime') && (
+                <div className="space-y-2">
+                  <Label htmlFor="teardownTime">
+                    Teardown Time (minutes) {isFieldRequired('teardownTime') && '*'}
+                  </Label>
+                  <Input 
+                    id="teardownTime" 
+                    name="teardownTime" 
+                    type="number" 
+                    min="0" 
+                    value={inventoryItem.teardownTime} 
+                    onChange={handleNumberInputChange} 
+                    required={isFieldRequired('teardownTime')} 
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -483,17 +583,10 @@ export default function EditInventoryPage() {
                       setExistingImages(existingImages.map(img => ({ ...img, isPrimary: false })));
                     }
                     setExistingImages([...existingImages, ...newImages]);
-                    toast({
-                      title: "Upload Complete",
-                      description: `Uploaded ${res.length} image${res.length > 1 ? 's' : ''}`,
-                    });
+                    toast.success(`Uploaded ${res.length} image${res.length > 1 ? 's' : ''}`);
                   }}
                   onUploadError={(error: Error) => {
-                    toast({
-                      title: "Upload Error",
-                      description: error.message,
-                      variant: "destructive",
-                    });
+                    toast.error(error.message);
                   }}
                 />
               </div>

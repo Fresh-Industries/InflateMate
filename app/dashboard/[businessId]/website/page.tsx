@@ -18,7 +18,7 @@ async function getBusinessData(businessId: string) {
   const membership = getMembershipByBusinessId(user, businessId);
   const userBusinessId = membership?.organization?.business?.id;
   if (!userBusinessId || userBusinessId !== businessId) {
-    redirect('/dashboard');
+    redirect('/');
   }
 
   const business = await prisma.business.findUnique({
@@ -26,7 +26,7 @@ async function getBusinessData(businessId: string) {
   });
 
   if (!business) {
-    redirect('/dashboard');
+    redirect('/');
   }
 
   return business;

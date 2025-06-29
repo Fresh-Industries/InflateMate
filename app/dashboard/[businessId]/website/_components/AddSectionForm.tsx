@@ -12,7 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { UploadDropzone } from "@/lib/uploadthing";
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { X, PlusCircle, Loader2, Palette } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { IconPicker } from '@/components/IconPicker';
@@ -62,7 +62,6 @@ export default function AddSectionForm({
   presetColors,
   page: initialPage
 }: AddSectionFormProps) {
-  const { toast } = useToast();
   const [sectionType, setSectionType] = useState<SectionType>(initialData?.type || 'Image');
   const [content, setContent] = useState<CommonContentFields>(initialData?.content || {});
   const [backgroundColor, setBackgroundColor] = useState<string>(initialData?.backgroundColor || '#ffffff');
@@ -126,15 +125,15 @@ export default function AddSectionForm({
     e.preventDefault();
     
     if (sectionType === 'Image' && !content.imageUrl) {
-      toast({ title: "Missing Image", description: "Please upload an image.", variant: "destructive" });
+      toast.error("Please upload an image.");
       return;
     }
     if (sectionType === 'Video' && !content.videoUrl) {
-      toast({ title: "Missing Video", description: "Please upload a video.", variant: "destructive" });
+      toast.error("Please upload a video.");
       return;
     }
     if (sectionType === 'Cards' && (!content.cards || content.cards.length === 0)) {
-      toast({ title: "Missing Cards", description: "Please add at least one card.", variant: "destructive" });
+      toast.error("Please add at least one card.");
       return;
     }
 
@@ -195,12 +194,12 @@ export default function AddSectionForm({
                     if (res && res.length > 0) {
                       handleContentChange('imageUrl', res[0].url);
                       handleContentChange('imageKey', res[0].key);
-                      toast({ title: "Upload Complete", description: "Image uploaded successfully." });
+                      toast.success("Image uploaded successfully.");
                     }
                     setIsUploadingImage(false);
                   }}
                   onUploadError={(error: Error) => {
-                    toast({ title: "Upload Error", description: error.message, variant: "destructive" });
+                    toast.error(error.message);
                     setIsUploadingImage(false);
                   }}
                   onUploadBegin={() => setIsUploadingImage(true)}
@@ -256,12 +255,12 @@ export default function AddSectionForm({
                   onClientUploadComplete={(res) => {
                     if (res && res.length > 0) {
                       handleContentChange('videoUrl', res[0].url);
-                      toast({ title: "Upload Complete", description: "Video uploaded successfully." });
+                      toast.success("Video uploaded successfully.");
                     }
                     setIsUploadingVideo(false);
                   }}
                   onUploadError={(error: Error) => {
-                    toast({ title: "Upload Error", description: error.message, variant: "destructive" });
+                    toast.error(error.message);
                     setIsUploadingVideo(false);
                   }}
                   onUploadBegin={() => setIsUploadingVideo(true)}

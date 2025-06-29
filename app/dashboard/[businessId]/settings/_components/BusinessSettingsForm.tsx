@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info, CreditCard, CircleCheck } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { useUploadThing } from "@/lib/uploadthing";
 import StripeSettingsForm from "./StripeSettingsForm";
@@ -59,7 +59,6 @@ const TikTokIcon = () => (
 
 export default function BusinessSettingsForm({ business }: { business: BusinessSettings }) {
   const router = useRouter();
-  const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(business.logo || null);
@@ -134,11 +133,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
 
     // Max 2MB
     if (files[0].size > 2 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "Logo image must be less than 2MB",
-        variant: "destructive",
-      });
+      toast.error("Logo image must be less than 2MB");
       return;
     }
 
@@ -148,19 +143,11 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       const uploadedFiles = await startUpload(files);
       if (uploadedFiles && uploadedFiles.length > 0) {
         setLogoUrl(uploadedFiles[0].url);
-        toast({
-          title: "Success",
-          description: "Logo uploaded successfully",
-          variant: "default",
-        });
+        toast.success("Logo uploaded successfully");
       }
     } catch (error) {
       console.error("Upload error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload logo",
-        variant: "destructive",
-      });
+      toast.error("Failed to upload logo");
     } finally {
       setIsUploading(false);
     }
@@ -209,27 +196,15 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       });
 
       if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Business settings updated",
-          variant: "default",
-        });
+        toast.success("Business settings updated");
         router.refresh();
       } else {
         console.error("Failed to update settings");
-        toast({
-          title: "Error",
-          description: "Failed to update settings",
-          variant: "destructive",
-        });
+        toast.error("Failed to update settings");
       }
     } catch (error) {
       console.error("Error updating settings:", error);
-      toast({
-        title: "Error",
-        description: "Error updating settings",
-        variant: "destructive",
-      });
+      toast.error("Error updating settings");
     } finally {
       setIsLoading(false);
     }

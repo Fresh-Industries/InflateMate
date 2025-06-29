@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 // Type for the payment
 interface Payment {
@@ -55,7 +55,6 @@ export default function RefundModal({
   const [refundReason, setRefundReason] = useState("");
   const [isFullRefund, setIsFullRefund] = useState(true);
   const [refundProcessing, setRefundProcessing] = useState(false);
-  const { toast } = useToast();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -88,25 +87,14 @@ export default function RefundModal({
       const data = await response.json();
       
       if (response.ok) {
-        toast({
-          title: "Refund processed",
-          description: `Successfully refunded ${formatCurrency(data.refundAmount)}`,
-        });
+        toast.success(`Successfully refunded ${formatCurrency(data.refundAmount)}`);
         onOpenChange(false);
         onRefundProcessed();
       } else {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to process refund",
-          variant: "destructive",
-        });
+        toast.error(data.error || "Failed to process refund");
       }
     } catch {
-      toast({
-        title: "Error",
-        description: "Failed to process refund",
-        variant: "destructive",
-      });
+      toast.error("Failed to process refund");
     } finally {
       setRefundProcessing(false);
     }

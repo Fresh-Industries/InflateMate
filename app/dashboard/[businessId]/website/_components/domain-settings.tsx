@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from "sonner";
 import { Badge } from '@/components/ui/badge';
 
 // Schema for domain validation
@@ -31,7 +31,6 @@ type DomainStatus = 'loading' | 'valid' | 'invalid' | 'configuring' | 'active';
 
 export default function DomainSettings() {
   const params = useParams();
-  const { toast } = useToast();
   const businessId = typeof params.businessId === 'string' ? params.businessId : '';
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -101,21 +100,13 @@ export default function DomainSettings() {
       setDomainStatus('active');
       form.reset();
       
-      toast({
-        title: "Domain added successfully",
-        description: "Your domain has been added and configured.",
-        variant: "default",
-      });
+      toast.success("Domain added successfully");
     } catch (error) {
       console.error('Error adding domain:', error);
       setErrorMessage(error instanceof Error ? error.message : 'Failed to add domain');
       setDomainStatus('invalid');
       
-      toast({
-        title: "Domain configuration failed",
-        description: error instanceof Error ? error.message : 'Failed to add domain',
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : 'Failed to add domain');
     } finally {
       setIsSubmitting(false);
     }
@@ -148,19 +139,11 @@ export default function DomainSettings() {
       setCurrentDomain(null);
       setDomainStatus('valid');
       
-      toast({
-        title: "Domain removed",
-        description: "Your custom domain has been removed.",
-        variant: "default",
-      });
+      toast.success("Domain removed");
     } catch (error) {
       console.error('Error removing domain:', error);
       
-      toast({
-        title: "Failed to remove domain",
-        description: error instanceof Error ? error.message : 'An error occurred',
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : 'An error occurred');
     } finally {
       setIsSubmitting(false);
     }

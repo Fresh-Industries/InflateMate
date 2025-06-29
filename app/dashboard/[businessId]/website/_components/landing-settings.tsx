@@ -8,7 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Trash2, UploadCloud } from "lucide-react";
 import Image from "next/image";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useUploadThing } from "@/lib/uploadthing";
 
 interface HeroSettingsProps {
@@ -31,7 +31,6 @@ export default function LandingSettings({ hero, updateHero }: HeroSettingsProps)
   );
   const [imageUrl, setImageUrl] = useState(hero.imageUrl || "");
   const [isUploading, setIsUploading] = useState(false);
-  const { toast } = useToast();
   const { startUpload } = useUploadThing("imageUploader");
   
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -53,11 +52,7 @@ export default function LandingSettings({ hero, updateHero }: HeroSettingsProps)
     // Validate file size
     const file = files[0];
     if (file.size > 4 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "Image exceeds 4MB limit",
-        variant: "destructive",
-      });
+      toast.error("Image exceeds 4MB limit");
       return;
     }
     
@@ -74,11 +69,7 @@ export default function LandingSettings({ hero, updateHero }: HeroSettingsProps)
       updateHero({ imageUrl: url });
     } catch (error) {
       console.error("Error uploading image:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload image",
-        variant: "destructive",
-      });
+      toast.error("Failed to upload image");
     } finally {
       setIsUploading(false);
     }

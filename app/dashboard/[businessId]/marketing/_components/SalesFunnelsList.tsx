@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Plus, Edit, Trash2 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { SalesFunnelForm } from "./SalesFunnelForm";
@@ -36,7 +36,6 @@ export function SalesFunnelsList({ businessId }: SalesFunnelsListProps) {
   const [isCreating, setIsCreating] = useState(false);
   const [editingFunnel, setEditingFunnel] = useState<SalesFunnel | null>(null);
   const [deletingFunnelId, setDeletingFunnelId] = useState<string | null>(null);
-  const { toast } = useToast();
 
   const fetchSalesFunnels = async () => {
     try {
@@ -51,11 +50,7 @@ export function SalesFunnelsList({ businessId }: SalesFunnelsListProps) {
       setSalesFunnels(data);
     } catch (error) {
       console.error("Error fetching sales funnels:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load sales funnels. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to load sales funnels. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -87,17 +82,10 @@ export function SalesFunnelsList({ businessId }: SalesFunnelsListProps) {
         )
       );
 
-      toast({
-        title: "Success",
-        description: `Sales funnel ${isActive ? "deactivated" : "activated"} successfully.`,
-      });
+      toast.success(`Sales funnel ${isActive ? "deactivated" : "activated"} successfully.`);
     } catch (error) {
       console.error("Error updating funnel status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update funnel status. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to update funnel status. Please try again.");
     }
   };
 
@@ -115,17 +103,10 @@ export function SalesFunnelsList({ businessId }: SalesFunnelsListProps) {
 
       setSalesFunnels(prev => prev.filter(funnel => funnel.id !== deletingFunnelId));
       
-      toast({
-        title: "Success",
-        description: "Sales funnel deleted successfully.",
-      });
+      toast.success("Sales funnel deleted successfully.");
     } catch (error) {
       console.error("Error deleting sales funnel:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete sales funnel. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete sales funnel. Please try again.");
     } finally {
       setDeletingFunnelId(null);
     }

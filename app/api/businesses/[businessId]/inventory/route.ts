@@ -16,7 +16,7 @@ const baseInventorySchema = z.object({
     isPrimary: z.boolean()
   })),
   quantity: z.number().int().min(0).default(1),
-  type: z.enum(["BOUNCE_HOUSE", "INFLATABLE", "GAME", "OTHER"]),
+  type: z.enum(["BOUNCE_HOUSE", "WATER_SLIDE", "GAME", "OTHER"]),
 });
 
 // Type-specific schemas
@@ -43,6 +43,10 @@ const otherSchema = baseInventorySchema.extend({
   dimensions: z.string().optional(),
   setupTime: z.number().min(0).optional(),
   teardownTime: z.number().min(0).optional(),
+  capacity: z.number().min(1).optional(),
+  minimumSpace: z.string().optional(),
+  weightLimit: z.number().min(0).optional(),
+  ageRange: z.string().optional(),
 });
 
 export async function POST(
@@ -73,7 +77,7 @@ export async function POST(
 
     switch (type) {
       case "BOUNCE_HOUSE":
-      case "INFLATABLE":
+      case "WATER_SLIDE":
         validatedData = bounceHouseSchema.parse(body);
         break;
       case "GAME":

@@ -1,6 +1,6 @@
 'use client';
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Globe, ExternalLink, Eye, Copy } from "lucide-react";
 import Link from "next/link";
 
@@ -11,7 +11,7 @@ interface WebsiteHeaderProps {
 }
 
 export default function WebsiteHeader({ businessId, businessName, customDomain }: WebsiteHeaderProps) {
-  const { toast } = useToast();
+
   
   // Format business name for subdomain
   const formattedBusinessName = businessName
@@ -41,10 +41,7 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
   
   const handleCopyDomain = () => {
     navigator.clipboard.writeText(domain);
-    toast({
-      title: "Domain copied",
-      description: "The domain has been copied to your clipboard.",
-    });
+    toast.success("Domain copied");
   };
   
   return (

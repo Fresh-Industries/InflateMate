@@ -33,8 +33,6 @@ export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
   const host = (req.headers.get('host') ?? '').toLowerCase().replace(/^www\./, '');
 
- 
-
   /* ── A. skip Next.js internals & static assets ─────────────────────── */
   if (
     url.pathname.startsWith('/_next/') || 
@@ -49,6 +47,11 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   if (isStaticAsset(host)) {
+    return NextResponse.next();
+  }
+
+  // Skip Next.js development error overlay domains
+  if (host.includes('__nextjs_original-stack-frame') || host.startsWith('__nextjs')) {
     return NextResponse.next();
   }
 

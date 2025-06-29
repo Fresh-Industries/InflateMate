@@ -6,7 +6,7 @@ import { useRealtimeBookings, RealtimeBooking, RealtimeWaiver } from "@/hooks/us
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { startOfDay } from "date-fns";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { BookingsViewControls } from "./bookings-view-controls";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
@@ -89,7 +89,6 @@ interface BookingsListProps {
 }
 
 export default function BookingsList({ businessId, initialData }: BookingsListProps) {
-  const { toast } = useToast();
   const router = useRouter();
   const searchParams = useSearchParams();
   const { user, isLoaded } = useUser();
@@ -446,18 +445,11 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         )
       );
 
-      toast({
-        title: "Booking Completed",
-        description: `Booking #${completedBooking.id}  marked as completed.`,
-      });
+      toast.success(`Booking #${completedBooking.id} marked as completed.`);
 
     } catch (error) {
       console.error("Error completing booking:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to complete booking",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to complete booking");
     } finally {
       setIsCompleting(null);
     }
@@ -508,24 +500,16 @@ export default function BookingsList({ businessId, initialData }: BookingsListPr
         )
       );
       
-      toast({
-        title: "Booking Cancelled",
-        description: result.refundAmount > 0 
-          ? `Refund of $${result.refundAmount.toFixed(2)} (${result.refundPercentage}%) processed.` 
-          : "The booking has been cancelled.",
-        variant: "default",
-      });
+      toast.success(result.refundAmount > 0 
+        ? `Booking cancelled. Refund of $${result.refundAmount.toFixed(2)} (${result.refundPercentage}%) processed.` 
+        : "The booking has been cancelled.");
       
       setIsCancelDialogOpen(false);
       setBookingToCancel(null);
       
     } catch (error) {
       console.error("Error cancelling booking:", error);
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to cancel booking",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to cancel booking");
     } finally {
       setIsCancelling(false);
     }

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { ArrowLeft, Loader2 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UploadButton } from "@/lib/uploadthing";
@@ -30,7 +30,7 @@ interface InventoryFormData {
   weightLimit: number;
   ageRange: string;
   weatherRestrictions: string[];
-  type: "BOUNCE_HOUSE" | "INFLATABLE" | "GAME" | "OTHER";
+  type: "BOUNCE_HOUSE" | "WATER_SLIDE" | "GAME" | "OTHER";
   quantity: number;
 }
 
@@ -38,7 +38,6 @@ export default function CreateInventoryPage() {
   const params = useParams();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { toast } = useToast();
   const businessId = params?.businessId as string;
   const inventoryType = searchParams.get('type') || 'BOUNCE_HOUSE';
 
@@ -57,15 +56,16 @@ export default function CreateInventoryPage() {
     weightLimit: 0,
     ageRange: '',
     weatherRestrictions: [],
-    type: inventoryType as "BOUNCE_HOUSE" | "INFLATABLE" | "GAME" | "OTHER",
+    type: inventoryType as "BOUNCE_HOUSE" | "WATER_SLIDE" | "GAME" | "OTHER",
     quantity: 1,
   });
 
   // Update form type when URL parameter changes
   useEffect(() => {
+    const validType = inventoryType === "INFLATABLE" ? "WATER_SLIDE" : inventoryType;
     setFormData(prev => ({
       ...prev,
-      type: inventoryType as "BOUNCE_HOUSE" | "INFLATABLE" | "GAME" | "OTHER"
+      type: validType as "BOUNCE_HOUSE" | "WATER_SLIDE" | "GAME" | "OTHER"
     }));
   }, [inventoryType]);
 
@@ -130,19 +130,12 @@ export default function CreateInventoryPage() {
         throw new Error(errorData.error || 'Failed to create inventory item');
       }
 
-      toast({
-        title: 'Success',
-        description: 'Inventory item created successfully',
-      });
+      toast.success('Inventory item created successfully');
 
       router.push(`/dashboard/${businessId}/inventory`);
     } catch (error) {
       console.error('Error creating inventory item:', error);
-      toast({
-        title: 'Error',
-        description: error instanceof Error ? error.message : 'Failed to create inventory item',
-        variant: 'destructive',
-      });
+      toast.error(error instanceof Error ? error.message : 'Failed to create inventory item');
     } finally {
       setIsSubmitting(false);
     }
@@ -152,8 +145,8 @@ export default function CreateInventoryPage() {
     switch (type) {
       case 'BOUNCE_HOUSE':
         return 'Bounce House';
-      case 'INFLATABLE':
-        return 'Inflatable';
+      case 'WATER_SLIDE':
+        return 'Water Slide';
       case 'GAME':
         return 'Game';
       case 'OTHER':
@@ -161,6 +154,36 @@ export default function CreateInventoryPage() {
       default:
         return type;
     }
+  };
+
+  // Define which fields are required/shown for each type
+  const typeFieldConfig: Record<string, { required: string[], optional: string[] }> = {
+    BOUNCE_HOUSE: {
+      required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+      optional: ['weatherRestrictions']
+    },
+    WATER_SLIDE: {
+      required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+      optional: ['weatherRestrictions']
+    },
+    GAME: {
+      required: ['ageRange'],
+      optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime']
+    },
+    OTHER: {
+      required: [],
+      optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange']
+    }
+  };
+
+  const shouldShowField = (fieldName: string) => {
+    const config = typeFieldConfig[formData.type];
+    return config.required.includes(fieldName) || config.optional.includes(fieldName);
+  };
+
+  const isFieldRequired = (fieldName: string) => {
+    const config = typeFieldConfig[formData.type];
+    return config.required.includes(fieldName);
   };
 
   return (
@@ -205,6 +228,24 @@ export default function CreateInventoryPage() {
                 />
               </div>
               
+              <div className="space-y-2">
+                <Label htmlFor="type">Type</Label>
+                <Select
+                  value={formData.type}
+                  onValueChange={(value) => handleSelectChange('type', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select type" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="BOUNCE_HOUSE">Bounce House</SelectItem>
+                    <SelectItem value="WATER_SLIDE">Water Slide</SelectItem>
+                    <SelectItem value="GAME">Game</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description</Label>
                 <Textarea
@@ -271,67 +312,87 @@ export default function CreateInventoryPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="dimensions">Dimensions</Label>
-                <Input
-                  id="dimensions"
-                  name="dimensions"
-                  value={formData.dimensions}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 15ft x 15ft x 10ft"
-                  required
-                />
-              </div>
+              {shouldShowField('dimensions') && (
+                <div className="space-y-2">
+                  <Label htmlFor="dimensions">
+                    Dimensions {isFieldRequired('dimensions') && '*'}
+                  </Label>
+                  <Input
+                    id="dimensions"
+                    name="dimensions"
+                    value={formData.dimensions}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 15ft x 15ft x 10ft"
+                    required={isFieldRequired('dimensions')}
+                  />
+                </div>
+              )}
               
-              <div className="space-y-2">
-                <Label htmlFor="minimumSpace">Minimum Space Required</Label>
-                <Input
-                  id="minimumSpace"
-                  name="minimumSpace"
-                  value={formData.minimumSpace}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 20ft x 20ft"
-                  required
-                />
-              </div>
+              {shouldShowField('minimumSpace') && (
+                <div className="space-y-2">
+                  <Label htmlFor="minimumSpace">
+                    Minimum Space Required {isFieldRequired('minimumSpace') && '*'}
+                  </Label>
+                  <Input
+                    id="minimumSpace"
+                    name="minimumSpace"
+                    value={formData.minimumSpace}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 20ft x 20ft"
+                    required={isFieldRequired('minimumSpace')}
+                  />
+                </div>
+              )}
               
-              <div className="space-y-2">
-                <Label htmlFor="capacity">Capacity (people)</Label>
-                <Input
-                  id="capacity"
-                  name="capacity"
-                  type="number"
-                  min="1"
-                  value={formData.capacity}
-                  onChange={handleNumberInputChange}
-                  required
-                />
-              </div>
+              {shouldShowField('capacity') && (
+                <div className="space-y-2">
+                  <Label htmlFor="capacity">
+                    Capacity (people) {isFieldRequired('capacity') && '*'}
+                  </Label>
+                  <Input
+                    id="capacity"
+                    name="capacity"
+                    type="number"
+                    min="1"
+                    value={formData.capacity}
+                    onChange={handleNumberInputChange}
+                    required={isFieldRequired('capacity')}
+                  />
+                </div>
+              )}
               
-              <div className="space-y-2">
-                <Label htmlFor="weightLimit">Weight Limit (lbs)</Label>
-                <Input
-                  id="weightLimit"
-                  name="weightLimit"
-                  type="number"
-                  min="0"
-                  value={formData.weightLimit}
-                  onChange={handleNumberInputChange}
-                  required
-                />
-              </div>
+              {shouldShowField('weightLimit') && (
+                <div className="space-y-2">
+                  <Label htmlFor="weightLimit">
+                    Weight Limit (lbs) {isFieldRequired('weightLimit') && '*'}
+                  </Label>
+                  <Input
+                    id="weightLimit"
+                    name="weightLimit"
+                    type="number"
+                    min="0"
+                    value={formData.weightLimit}
+                    onChange={handleNumberInputChange}
+                    required={isFieldRequired('weightLimit')}
+                  />
+                </div>
+              )}
               
-              <div className="space-y-2">
-                <Label htmlFor="ageRange">Age Range</Label>
-                <Input
-                  id="ageRange"
-                  name="ageRange"
-                  value={formData.ageRange}
-                  onChange={handleInputChange}
-                  placeholder="e.g. 5-12 years"
-                  required
-                />
-              </div>
+              {shouldShowField('ageRange') && (
+                <div className="space-y-2">
+                  <Label htmlFor="ageRange">
+                    Age Range {isFieldRequired('ageRange') && '*'}
+                  </Label>
+                  <Input
+                    id="ageRange"
+                    name="ageRange"
+                    value={formData.ageRange}
+                    onChange={handleInputChange}
+                    placeholder="e.g. 5-12 years"
+                    required={isFieldRequired('ageRange')}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -344,31 +405,39 @@ export default function CreateInventoryPage() {
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="setupTime">Setup Time (minutes)</Label>
-                <Input
-                  id="setupTime"
-                  name="setupTime"
-                  type="number"
-                  min="0"
-                  value={formData.setupTime}
-                  onChange={handleNumberInputChange}
-                  required
-                />
-              </div>
+              {shouldShowField('setupTime') && (
+                <div className="space-y-2">
+                  <Label htmlFor="setupTime">
+                    Setup Time (minutes) {isFieldRequired('setupTime') && '*'}
+                  </Label>
+                  <Input
+                    id="setupTime"
+                    name="setupTime"
+                    type="number"
+                    min="0"
+                    value={formData.setupTime}
+                    onChange={handleNumberInputChange}
+                    required={isFieldRequired('setupTime')}
+                  />
+                </div>
+              )}
               
-              <div className="space-y-2">
-                <Label htmlFor="teardownTime">Teardown Time (minutes)</Label>
-                <Input
-                  id="teardownTime"
-                  name="teardownTime"
-                  type="number"
-                  min="0"
-                  value={formData.teardownTime}
-                  onChange={handleNumberInputChange}
-                  required
-                />
-              </div>
+              {shouldShowField('teardownTime') && (
+                <div className="space-y-2">
+                  <Label htmlFor="teardownTime">
+                    Teardown Time (minutes) {isFieldRequired('teardownTime') && '*'}
+                  </Label>
+                  <Input
+                    id="teardownTime"
+                    name="teardownTime"
+                    type="number"
+                    min="0"
+                    value={formData.teardownTime}
+                    onChange={handleNumberInputChange}
+                    required={isFieldRequired('teardownTime')}
+                  />
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -400,17 +469,10 @@ export default function CreateInventoryPage() {
                       isPrimary: uploadedImages.length === 0 && index === 0
                     }));
                     setUploadedImages([...uploadedImages, ...newImages]);
-                    toast({
-                      title: "Upload Complete",
-                      description: `Successfully uploaded ${res.length} image${res.length > 1 ? 's' : ''}`
-                    });
+                    toast.success(`Successfully uploaded ${res.length} image${res.length > 1 ? 's' : ''}`);
                   }}
                   onUploadError={(error: Error) => {
-                    toast({
-                      title: "Upload Error",
-                      description: error.message,
-                      variant: "destructive"
-                    });
+                    toast.error(error.message);
                   }}
                 />
               </div>

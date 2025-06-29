@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format, parseISO } from "date-fns";
@@ -80,7 +80,6 @@ export default function PaymentsList({ businessId }: PaymentsListProps) {
   const [businessHasStripeAccount, setBusinessHasStripeAccount] = useState(false);
   const [businessStripeAccountId, setBusinessStripeAccountId] = useState<string | null>(null);
   
-  const { toast } = useToast();
 
   // Load payments
   const fetchPayments = async (page = 1) => {
@@ -100,18 +99,10 @@ export default function PaymentsList({ businessId }: PaymentsListProps) {
         setPayments(data.data);
         setPagination(data.pagination);
       } else {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to load payments",
-          variant: "destructive",
-        });
+        toast.error(data.error || "Failed to load payments");
       }
     } catch {
-      toast({
-        title: "Error",
-        description: "Failed to load payments",
-        variant: "destructive",
-      });
+      toast.error("Failed to load payments");
     } finally {
       setIsLoading(false);
     }
@@ -210,11 +201,7 @@ export default function PaymentsList({ businessId }: PaymentsListProps) {
   // Add this function to handle viewing Stripe payment details, right after handleDateSelection
   const handleViewPaymentDetails = (payment: Payment) => {
     if (!payment.stripePaymentId) {
-      toast({
-        title: "Error",
-        description: "This payment doesn't have a Stripe payment ID",
-        variant: "destructive",
-      });
+      toast.error("This payment doesn't have a Stripe payment ID");
       return;
     }
     

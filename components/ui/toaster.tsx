@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import { useToast } from "@/hooks/use-toast"
 import {
   Toast,
@@ -12,6 +13,16 @@ import {
 
 export function Toaster() {
   const { toasts } = useToast()
+  const [isMounted, setIsMounted] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsMounted(true)
+  }, [])
+
+  // Don't render anything during SSR
+  if (!isMounted) {
+    return null
+  }
 
   return (
     <ToastProvider>

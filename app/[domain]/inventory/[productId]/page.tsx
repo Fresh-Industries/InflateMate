@@ -41,6 +41,28 @@ interface Inventory {
   type: string;
 }
 
+// Field configuration for different inventory types
+type FieldName = 'dimensions' | 'capacity' | 'setupTime' | 'teardownTime' | 'minimumSpace' | 'weightLimit' | 'ageRange' | 'weatherRestrictions';
+
+const typeFieldConfig: Record<string, { required: FieldName[]; optional: FieldName[] }> = {
+  BOUNCE_HOUSE: {
+    required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+    optional: ['weatherRestrictions']
+  },
+  WATER_SLIDE: {
+    required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+    optional: ['weatherRestrictions']
+  },
+  GAME: {
+    required: ['ageRange'],
+    optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime']
+  },
+  OTHER: {
+    required: [],
+    optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange']
+  }
+};
+
 export async function generateMetadata(props: PageProps): Promise<Metadata> {
   const params = await props.params;
   const { domain, productId } = params;
@@ -98,6 +120,129 @@ const formatInventoryType = (type: string) => {
   return type.replace('_', ' ').split(' ').map(word => 
     word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()
   ).join(' ');
+};
+
+// Helper functions to check field visibility
+const shouldShowField = (fieldName: FieldName, inventoryType: string) => {
+  const config = typeFieldConfig[inventoryType] || typeFieldConfig.OTHER;
+  return config.required.includes(fieldName) || config.optional.includes(fieldName);
+};
+
+const hasValue = (value: unknown) => {
+  return value !== null && value !== undefined && value !== '' && value !== 0;
+};
+
+// Type-specific requirements and safety content
+const getRequirementsContent = (type: string) => {
+  const requirementsByType: Record<string, { title: string; items: string[] }> = {
+    BOUNCE_HOUSE: {
+      title: "Setup Requirements",
+      items: [
+        "Flat, level surface required for setup",
+        "Access to electrical outlet within 100 feet",
+        "Minimum clearance space around the inflatable",
+        "Adult supervision required at all times",
+        "No setup during rain or high winds",
+        "Clear path for delivery (36\" minimum gate width)"
+      ]
+    },
+    WATER_SLIDE: {
+      title: "Setup Requirements", 
+      items: [
+        "Flat, level surface required for setup",
+        "Access to electrical outlet within 100 feet", 
+        "Access to water source for slide operation",
+        "Minimum clearance space around the slide",
+        "Adult supervision required at all times",
+        "No setup during rain, high winds, or freezing temperatures",
+        "Clear path for delivery (36\" minimum gate width)"
+      ]
+    },
+    GAME: {
+      title: "Setup Requirements",
+      items: [
+        "Flat surface for game setup",
+        "Adult supervision recommended",
+        "Adequate space for players to move safely",
+        "Indoor or covered area recommended for weather protection"
+      ]
+    },
+    OTHER: {
+      title: "General Requirements", 
+      items: [
+        "Appropriate setup space as specified",
+        "Adult supervision recommended", 
+        "Follow any specific instructions provided",
+        "Weather considerations as applicable"
+      ]
+    }
+  };
+
+  return requirementsByType[type] || requirementsByType.OTHER;
+};
+
+const getSafetyContent = (type: string) => {
+  const safetyByType: Record<string, { guidelines: string[]; restrictions: string[] }> = {
+    BOUNCE_HOUSE: {
+      guidelines: [
+        "Remove shoes, glasses, and jewelry before entering",
+        "No food, drinks, or gum inside the inflatable", 
+        "No flips, rough play, or climbing on walls",
+        "Children of similar age and size should play together",
+        "Exit immediately if the inflatable begins to deflate",
+        "Maximum occupancy must not be exceeded"
+      ],
+      restrictions: [
+        "Do not use during inclement weather",
+        "No sharp objects or pets allowed",
+        "No smoking or open flames near the unit"
+      ]
+    },
+    WATER_SLIDE: {
+      guidelines: [
+        "Remove shoes, glasses, and jewelry before use",
+        "No running or diving on the slide",
+        "One person on slide at a time", 
+        "Slide feet first only - no head first sliding",
+        "Exit pool area immediately after sliding",
+        "Adult supervision required at all times around water"
+      ],
+      restrictions: [
+        "Do not use during lightning, rain, or high winds",
+        "No glass containers or sharp objects near water areas",
+        "Children must be able to swim or have flotation devices"
+      ]
+    },
+    GAME: {
+      guidelines: [
+        "Read and follow all game instructions before play",
+        "Adult supervision recommended for young children",
+        "Play in designated area only",
+        "Take turns and play fairly",
+        "Handle game pieces with care"
+      ],
+      restrictions: [
+        "Small parts may present choking hazard for children under 3",
+        "Do not use damaged game pieces", 
+        "Keep game dry and protected from weather"
+      ]
+    },
+    OTHER: {
+      guidelines: [
+        "Follow all provided instructions carefully",
+        "Adult supervision recommended",
+        "Use item only as intended",
+        "Inspect item before each use"
+      ],
+      restrictions: [
+        "Do not exceed weight or capacity limits",
+        "Report any damage immediately",
+        "Use appropriate safety precautions"
+      ]
+    }
+  };
+
+  return safetyByType[type] || safetyByType.OTHER;
 };
 
 export default async function ProductDetailPage(props: PageProps) {
@@ -229,22 +374,30 @@ export default async function ProductDetailPage(props: PageProps) {
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Ruler className="h-5 w-5" style={{ color: primaryColor }} />
-                <span>Dimensions: {product.dimensions}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Users className="h-5 w-5" style={{ color: primaryColor }} />
-                <span>Capacity: {product.capacity} people</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Weight className="h-5 w-5" style={{ color: primaryColor }} />
-                <span>Weight Limit: {product.weightLimit} lbs</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm text-gray-600">
-                <Clock className="h-5 w-5" style={{ color: primaryColor }} />
-                <span>Setup: {product.setupTime} minutes</span>
-              </div>
+              {shouldShowField('dimensions', product.type) && hasValue(product.dimensions) && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Ruler className="h-5 w-5" style={{ color: primaryColor }} />
+                  <span>Dimensions: {product.dimensions}</span>
+                </div>
+              )}
+              {shouldShowField('capacity', product.type) && hasValue(product.capacity) && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Users className="h-5 w-5" style={{ color: primaryColor }} />
+                  <span>Capacity: {product.capacity} people</span>
+                </div>
+              )}
+              {shouldShowField('weightLimit', product.type) && hasValue(product.weightLimit) && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Weight className="h-5 w-5" style={{ color: primaryColor }} />
+                  <span>Weight Limit: {product.weightLimit} lbs</span>
+                </div>
+              )}
+              {shouldShowField('setupTime', product.type) && hasValue(product.setupTime) && (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                  <Clock className="h-5 w-5" style={{ color: primaryColor }} />
+                  <span>Setup: {product.setupTime} minutes</span>
+                </div>
+              )}
             </div>
             
             <div className="pt-6 border-t">
@@ -301,94 +454,131 @@ export default async function ProductDetailPage(props: PageProps) {
             <div className="space-y-4">
               <h3 className="text-lg font-medium">Product Specifications</h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex justify-between p-3 bg-gray-50 rounded">
-                  <span className="text-gray-600">Dimensions</span>
-                  <span className="font-medium">{product.dimensions}</span>
-                </div>
-                <div className="flex justify-between p-3 bg-gray-50 rounded">
-                  <span className="text-gray-600">Weight Limit</span>
-                  <span className="font-medium">{product.weightLimit} lbs</span>
-                </div>
-                <div className="flex justify-between p-3 bg-gray-50 rounded">
-                  <span className="text-gray-600">Age Range</span>
-                  <span className="font-medium">{product.ageRange}</span>
-                </div>
-                <div className="flex justify-between p-3 bg-gray-50 rounded">
-                  <span className="text-gray-600">Max Capacity</span>
-                  <span className="font-medium">{product.capacity} people</span>
-                </div>
-                <div className="flex justify-between p-3 bg-gray-50 rounded">
-                  <span className="text-gray-600">Setup Time</span>
-                  <span className="font-medium">{product.setupTime} minutes</span>
-                </div>
-                <div className="flex justify-between p-3 bg-gray-50 rounded">
-                  <span className="text-gray-600">Teardown Time</span>
-                  <span className="font-medium">{product.teardownTime} minutes</span>
-                </div>
+                {shouldShowField('dimensions', product.type) && hasValue(product.dimensions) && (
+                  <div className="flex justify-between p-3 bg-gray-50 rounded">
+                    <span className="text-gray-600">Dimensions</span>
+                    <span className="font-medium">{product.dimensions}</span>
+                  </div>
+                )}
+                {shouldShowField('weightLimit', product.type) && hasValue(product.weightLimit) && (
+                  <div className="flex justify-between p-3 bg-gray-50 rounded">
+                    <span className="text-gray-600">Weight Limit</span>
+                    <span className="font-medium">{product.weightLimit} lbs</span>
+                  </div>
+                )}
+                {shouldShowField('ageRange', product.type) && hasValue(product.ageRange) && (
+                  <div className="flex justify-between p-3 bg-gray-50 rounded">
+                    <span className="text-gray-600">Age Range</span>
+                    <span className="font-medium">{product.ageRange}</span>
+                  </div>
+                )}
+                {shouldShowField('capacity', product.type) && hasValue(product.capacity) && (
+                  <div className="flex justify-between p-3 bg-gray-50 rounded">
+                    <span className="text-gray-600">Max Capacity</span>
+                    <span className="font-medium">{product.capacity} people</span>
+                  </div>
+                )}
+                {shouldShowField('setupTime', product.type) && hasValue(product.setupTime) && (
+                  <div className="flex justify-between p-3 bg-gray-50 rounded">
+                    <span className="text-gray-600">Setup Time</span>
+                    <span className="font-medium">{product.setupTime} minutes</span>
+                  </div>
+                )}
+                {shouldShowField('teardownTime', product.type) && hasValue(product.teardownTime) && (
+                  <div className="flex justify-between p-3 bg-gray-50 rounded">
+                    <span className="text-gray-600">Teardown Time</span>
+                    <span className="font-medium">{product.teardownTime} minutes</span>
+                  </div>
+                )}
               </div>
             </div>
           </TabsContent>
           <TabsContent value="requirements" className="p-6 border rounded-b-lg bg-white">
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Setup Requirements</h3>
-              <div className="flex items-start gap-2 mb-4">
-                <Ruler className="h-5 w-5 mt-0.5" style={{ color: primaryColor }} />
-                <div>
-                  <p className="font-medium">Minimum Space Required</p>
-                  <p className="text-gray-600">{product.minimumSpace}</p>
+            {(() => {
+              const requirements = getRequirementsContent(product.type);
+              return (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">{requirements.title}</h3>
+                  {shouldShowField('minimumSpace', product.type) && hasValue(product.minimumSpace) && (
+                    <div className="flex items-start gap-2 mb-4">
+                      <Ruler className="h-5 w-5 mt-0.5" style={{ color: primaryColor }} />
+                      <div>
+                        <p className="font-medium">Minimum Space Required</p>
+                        <p className="text-gray-600">{product.minimumSpace}</p>
+                      </div>
+                    </div>
+                  )}
+                  <ul className="list-disc pl-5 space-y-2 text-gray-700">
+                    {requirements.items.map((item, index) => (
+                      <li key={index}>{item}</li>
+                    ))}
+                  </ul>
                 </div>
-              </div>
-              <ul className="list-disc pl-5 space-y-2 text-gray-700">
-                <li>Flat, level surface required for setup</li>
-                <li>Access to electrical outlet within 100 feet</li>
-                <li>Minimum clearance space around the inflatable</li>
-                <li>Adult supervision required at all times</li>
-                <li>No setup during rain or high winds</li>
-              </ul>
-            </div>
+              );
+            })()}
           </TabsContent>
           <TabsContent value="safety" className="p-6 border rounded-b-lg bg-white">
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Safety Guidelines</h3>
-              <div className="flex items-start gap-2 mb-4">
-                <Users className="h-5 w-5 mt-0.5" style={{ color: primaryColor }} />
-                <div>
-                  <p className="font-medium">Age Range</p>
-                  <p className="text-gray-600">{product.ageRange}</p>
-                </div>
-              </div>
-              
-              {product.weatherRestrictions && product.weatherRestrictions.length > 0 && (
-                <div className="flex items-start gap-2 mb-4">
-                  <CloudRain className="h-5 w-5 mt-0.5" style={{ color: primaryColor }} />
-                  <div>
-                    <p className="font-medium">Weather Restrictions</p>
-                    <ul className="list-disc pl-5 text-gray-600">
-                      {product.weatherRestrictions.map((restriction: string, index: number) => (
-                        <li key={index}>{restriction}</li>
-                      ))}
-                    </ul>
+            {(() => {
+              const safety = getSafetyContent(product.type);
+              return (
+                <div className="space-y-4">
+                  <h3 className="text-lg font-medium">Safety Guidelines</h3>
+                  {shouldShowField('ageRange', product.type) && hasValue(product.ageRange) && (
+                    <div className="flex items-start gap-2 mb-4">
+                      <Users className="h-5 w-5 mt-0.5" style={{ color: primaryColor }} />
+                      <div>
+                        <p className="font-medium">Age Range</p>
+                        <p className="text-gray-600">{product.ageRange}</p>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {shouldShowField('weatherRestrictions', product.type) && product.weatherRestrictions && product.weatherRestrictions.length > 0 && (
+                    <div className="flex items-start gap-2 mb-4">
+                      <CloudRain className="h-5 w-5 mt-0.5" style={{ color: primaryColor }} />
+                      <div>
+                        <p className="font-medium">Weather Restrictions</p>
+                        <ul className="list-disc pl-5 text-gray-600">
+                          {(product.weatherRestrictions as string[]).map((restriction: string, index: number) => (
+                            <li key={index}>{restriction}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
+                  )}
+                  
+                  <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
+                    <div className="flex items-start">
+                      <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" />
+                      <div>
+                        <p className="font-medium text-yellow-700">Important Safety Guidelines</p>
+                        <ul className="list-disc pl-5 space-y-2 text-yellow-700 mt-2">
+                          {safety.guidelines.map((guideline, index) => (
+                            <li key={index}>{guideline}</li>
+                          ))}
+                        </ul>
+                      </div>
+                    </div>
                   </div>
+                  
+                  {safety.restrictions.length > 0 && (
+                    <div className="bg-red-50 border-l-4 border-red-400 p-4">
+                      <div className="flex items-start">
+                        <AlertTriangle className="h-5 w-5 text-red-500 mr-2 mt-0.5" />
+                        <div>
+                          <p className="font-medium text-red-700">Important Restrictions</p>
+                          <ul className="list-disc pl-5 space-y-2 text-red-700 mt-2">
+                            {safety.restrictions.map((restriction, index) => (
+                              <li key={index}>{restriction}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              )}
-              
-              <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4">
-                <div className="flex items-start">
-                  <AlertTriangle className="h-5 w-5 text-yellow-500 mr-2 mt-0.5" />
-                  <div>
-                    <p className="font-medium text-yellow-700">Important Safety Information</p>
-                    <ul className="list-disc pl-5 space-y-2 text-yellow-700 mt-2">
-                      <li>Remove shoes, glasses, and jewelry before entering</li>
-                      <li>No food, drinks, or gum inside the inflatable</li>
-                      <li>No flips, rough play, or climbing on walls</li>
-                      <li>Children of similar age and size should play together</li>
-                      <li>Exit immediately if the inflatable begins to deflate</li>
-                      <li>Do not use during inclement weather</li>
-                    </ul>
-                  </div>
-                </div>
-              </div>
-            </div>
+              );
+            })()}
           </TabsContent>
         </Tabs>
         

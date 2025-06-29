@@ -428,7 +428,7 @@ enum QuoteStatus {
 
 enum InventoryType {
   BOUNCE_HOUSE
-  INFLATABLE
+  WATER_SLIDE
   GAME
   OTHER
 }

@@ -30,11 +30,43 @@ const formatInventoryType = (type: string) => {
 const getTypeEmoji = (type: string) => {
   const typeMap: Record<string, string> = {
     'BOUNCE_HOUSE': '🏰',
-    'INFLATABLE': '🌊',
+    'WATER_SLIDE': '🌊',
     'GAME': '🎮',
     'OTHER': '🎉',
   };
   return typeMap[type] || '🎈';
+};
+
+// Field configuration for different inventory types
+type FieldName = 'dimensions' | 'capacity' | 'setupTime' | 'teardownTime' | 'minimumSpace' | 'weightLimit' | 'ageRange' | 'weatherRestrictions';
+
+const typeFieldConfig: Record<string, { required: FieldName[]; optional: FieldName[] }> = {
+  BOUNCE_HOUSE: {
+    required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+    optional: ['weatherRestrictions']
+  },
+  WATER_SLIDE: {
+    required: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange'],
+    optional: ['weatherRestrictions']
+  },
+  GAME: {
+    required: ['ageRange'],
+    optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime']
+  },
+  OTHER: {
+    required: [],
+    optional: ['dimensions', 'capacity', 'setupTime', 'teardownTime', 'minimumSpace', 'weightLimit', 'ageRange']
+  }
+};
+
+// Helper functions to check field visibility
+const shouldShowField = (fieldName: FieldName, inventoryType: string) => {
+  const config = typeFieldConfig[inventoryType] || typeFieldConfig.OTHER;
+  return config.required.includes(fieldName) || config.optional.includes(fieldName);
+};
+
+const hasValue = (value: any) => {
+  return value !== null && value !== undefined && value !== '' && value !== 0;
 };
 
 // Client component for the inventory page with filtering functionality
@@ -310,18 +342,24 @@ export default function InventoryClient({
                     
                     {/* Item Specs */}
                     <div className="grid grid-cols-2 gap-3 mb-4">
-                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
-                        <Users className="h-4 w-4" />
-                        <span className="text-sm">Up to {item.capacity}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
-                        <Ruler className="h-4 w-4" />
-                        <span className="text-sm">{item.dimensions}</span>
-                      </div>
-                      <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
-                        <Clock className="h-4 w-4" />
-                        <span className="text-sm">Setup: {item.setupTime}min</span>
-                      </div>
+                      {shouldShowField('capacity', item.type) && hasValue(item.capacity) && (
+                        <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
+                          <Users className="h-4 w-4" />
+                          <span className="text-sm">Up to {item.capacity}</span>
+                        </div>
+                      )}
+                      {shouldShowField('dimensions', item.type) && hasValue(item.dimensions) && (
+                        <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
+                          <Ruler className="h-4 w-4" />
+                          <span className="text-sm">{item.dimensions}</span>
+                        </div>
+                      )}
+                      {shouldShowField('setupTime', item.type) && hasValue(item.setupTime) && (
+                        <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
+                          <Clock className="h-4 w-4" />
+                          <span className="text-sm">Setup: {item.setupTime}min</span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
                         <Package className="h-4 w-4" />
                         <span className="text-sm">{formatInventoryType(item.type)}</span>
