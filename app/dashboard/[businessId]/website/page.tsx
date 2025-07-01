@@ -38,7 +38,7 @@ export default async function WebsitePage({ params }: { params: Promise<{ busine
 
   return (
     <div className="space-y-8">
-      <WebsiteHeader businessId={businessId} businessName={business.name} customDomain={business.customDomain} />
+      <WebsiteHeader businessId={businessId} businessName={business.name} customDomain={business.customDomain} embeddedComponents={business.embeddedComponents} />
       <Suspense fallback={<WebsiteCustomizerSkeleton />}>
         <WebsiteCustomizer businessId={businessId} initialData={business} />
       </Suspense>

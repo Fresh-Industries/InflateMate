@@ -155,6 +155,7 @@ exports.Prisma.BusinessScalarFieldEnum = {
   subdomain: 'subdomain',
   siteConfig: 'siteConfig',
   onboardingError: 'onboardingError',
+  embeddedComponents: 'embeddedComponents',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   organizationId: 'organizationId'

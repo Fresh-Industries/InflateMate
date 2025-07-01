@@ -208,21 +208,21 @@ export default function InventoryClient({
   }
   
   return (
-    <div className="min-h-screen w-full" style={{ background: colors.background[500] }}>
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div className="w-full" style={{ background: colors.background[500] }}>
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
         {/* Page Header with Theme Background */}
-        <div className="mb-10 relative overflow-hidden p-8" style={headerStyle}>
+        <div className="mb-6 sm:mb-8 relative overflow-hidden p-4 sm:p-6" style={headerStyle}>
           <div className="absolute top-0 right-0 opacity-10">
             <PartyPopper className="h-32 w-32 text-white transform rotate-12" />
           </div>
           <h1 
-            className="text-4xl font-bold mb-3"
+            className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 sm:mb-3"
             style={{ color: theme.heroTitleColor ? theme.heroTitleColor(colors) : getContrastColor(colors.primary[500]) }}
           >
             Our Awesome Inventory
           </h1>
           <p 
-            className="text-lg opacity-90 max-w-3xl"
+            className="text-sm sm:text-base lg:text-lg opacity-90 max-w-3xl"
             style={{ color: theme.heroTextColor ? theme.heroTextColor(colors) : getContrastColor(colors.primary[500]) }}
           >
             Browse our selection of premium inflatable rentals for your next event!
@@ -231,16 +231,16 @@ export default function InventoryClient({
         </div>
         
         {/* Search and Filter Bar */}
-        <div className="mb-8" style={filterContainerStyle}>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-5">
+        <div className="mb-6 sm:mb-8" style={filterContainerStyle}>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 p-3 sm:p-4">
             {/* Search */}
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5" style={{ color: colors.primary[500] }} />
+            <div className="relative sm:col-span-2 lg:col-span-1">
+              <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                <Search className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary[500] }} />
               </div>
               <input
                 type="text"
-                className="block w-full pl-10 pr-3 py-3 focus:ring-2 focus:outline-none"
+                className="block w-full pl-8 sm:pl-10 pr-3 py-2 sm:py-3 text-sm sm:text-base focus:ring-2 focus:outline-none"
                 style={inputStyle}
                 placeholder="Search inventory..."
                 value={searchTerm}
@@ -250,11 +250,11 @@ export default function InventoryClient({
             
             {/* Type Filter */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Tag className="h-5 w-5" style={{ color: colors.primary[500] }} />
+              <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                <Tag className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary[500] }} />
               </div>
               <select 
-                className="block w-full pl-10 pr-3 py-3 focus:ring-2 focus:outline-none appearance-none"
+                className="block w-full pl-8 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 text-sm sm:text-base focus:ring-2 focus:outline-none appearance-none"
                 style={inputStyle}
                 value={selectedType}
                 onChange={(e) => setSelectedType(e.target.value)}
@@ -266,18 +266,18 @@ export default function InventoryClient({
                   </option>
                 ))}
               </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronRight className="h-5 w-5" style={{ color: colors.primary[500] }} />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary[500] }} />
               </div>
             </div>
             
             {/* Sort Options */}
             <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <ArrowUpDown className="h-5 w-5" style={{ color: colors.primary[500] }} />
+              <div className="absolute inset-y-0 left-0 pl-2 sm:pl-3 flex items-center pointer-events-none">
+                <ArrowUpDown className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary[500] }} />
               </div>
               <select 
-                className="block w-full pl-10 pr-3 py-3 focus:ring-2 focus:outline-none appearance-none"
+                className="block w-full pl-8 sm:pl-10 pr-8 sm:pr-10 py-2 sm:py-3 text-sm sm:text-base focus:ring-2 focus:outline-none appearance-none"
                 style={inputStyle}
                 value={sortOption}
                 onChange={(e) => setSortOption(e.target.value)}
@@ -287,8 +287,8 @@ export default function InventoryClient({
                 <option value="price-asc">Price: Low to High</option>
                 <option value="price-desc">Price: High to Low</option>
               </select>
-              <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-                <ChevronRight className="h-5 w-5" style={{ color: colors.primary[500]  }} />
+              <div className="absolute inset-y-0 right-0 flex items-center pr-2 sm:pr-3 pointer-events-none">
+                <ChevronRight className="h-4 w-4 sm:h-5 sm:w-5" style={{ color: colors.primary[500]  }} />
               </div>
             </div>
           </div>
@@ -296,15 +296,15 @@ export default function InventoryClient({
         
         {/* Inventory Grid */}
         {Object.entries(itemsByType).map(([type, items]) => (
-          <div key={type} className="mb-12">
-            <h2 className="text-2xl font-bold mb-6 flex items-center gap-2" style={{ color: colors.primary[500] }}>
+          <div key={type} className="mb-8 sm:mb-10">
+            <h2 className="text-lg sm:text-xl lg:text-2xl font-bold mb-4 sm:mb-6 flex items-center gap-2" style={{ color: colors.primary[500] }}>
               {getTypeEmoji(type)} {formatInventoryType(type)}
-              <span className="text-sm font-normal ml-2" style={{ color: colors.secondary[500] }}>
+              <span className="text-xs sm:text-sm font-normal ml-2" style={{ color: colors.secondary[500] }}>
                 ({items.length} items)
               </span>
             </h2>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
               {items.map((item) => (
                 <div key={item.id} style={cardStyle} className="group hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
                   {/* Item Image or Emoji */}
@@ -334,50 +334,50 @@ export default function InventoryClient({
                   </div>
                   
                   {/* Item Details */}
-                  <div className="p-6">
-                    <h3 className="text-xl font-bold mb-2" style={{ color: colors.primary[500] }}>{item.name}</h3>
-                    <p className="mb-4 line-clamp-2" style={{ color: cardStyle.color }}>
+                  <div className="p-3 sm:p-4 lg:p-6">
+                    <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: colors.primary[500] }}>{item.name}</h3>
+                    <p className="mb-3 sm:mb-4 line-clamp-2 text-sm sm:text-base" style={{ color: cardStyle.color }}>
                       {item.description || 'Perfect for any event or party!'}
                     </p>
                     
                     {/* Item Specs */}
-                    <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-3 mb-3 sm:mb-4">
                       {shouldShowField('capacity', item.type) && hasValue(item.capacity) && (
                         <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
-                          <Users className="h-4 w-4" />
-                          <span className="text-sm">Up to {item.capacity}</span>
+                          <Users className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="text-xs sm:text-sm">Up to {item.capacity}</span>
                         </div>
                       )}
                       {shouldShowField('dimensions', item.type) && hasValue(item.dimensions) && (
                         <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
-                          <Ruler className="h-4 w-4" />
-                          <span className="text-sm">{item.dimensions}</span>
+                          <Ruler className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="text-xs sm:text-sm">{item.dimensions}</span>
                         </div>
                       )}
                       {shouldShowField('setupTime', item.type) && hasValue(item.setupTime) && (
                         <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
-                          <Clock className="h-4 w-4" />
-                          <span className="text-sm">Setup: {item.setupTime}min</span>
+                          <Clock className="h-3 w-3 sm:h-4 sm:w-4" />
+                          <span className="text-xs sm:text-sm">Setup: {item.setupTime}min</span>
                         </div>
                       )}
                       <div className="flex items-center gap-1.5" style={{ color: colors.secondary[500] }}>
-                        <Package className="h-4 w-4" />
-                        <span className="text-sm">{formatInventoryType(item.type)}</span>
+                        <Package className="h-3 w-3 sm:h-4 sm:w-4" />
+                        <span className="text-xs sm:text-sm">{formatInventoryType(item.type)}</span>
                       </div>
                     </div>
                     
                     {/* Price and Action */}
-                    <div className="flex items-center justify-between mt-6">
-                      <div className="text-2xl font-bold" style={{ color: colors.accent[500] }}>
+                    <div className="mt-4 sm:mt-6">
+                      <div className="text-xl sm:text-2xl font-bold mb-3 sm:mb-4" style={{ color: colors.accent[500] }}>
                         ${item.price}/day
                       </div>
-                      <div className="flex items-center gap-2">
-                        <Button asChild style={buttonStyle} className="font-bold hover:scale-105 transition-transform duration-300">
+                      <div className="flex flex-col sm:flex-row gap-2">
+                        <Button asChild style={buttonStyle} className="flex-1 text-sm sm:text-base font-bold hover:scale-105 transition-transform duration-300">
                           <Link href={`/booking`}>
                             Book Now
                         </Link>
                       </Button>
-                      <Button asChild style={buttonStyle} className="font-bold hover:scale-105 transition-transform duration-300">
+                      <Button asChild style={buttonStyle} className="flex-1 text-sm sm:text-base font-bold hover:scale-105 transition-transform duration-300">
                         <Link href={`/inventory/${item.id}`}>
                           Details
                         </Link>
@@ -393,16 +393,16 @@ export default function InventoryClient({
         
         {/* Empty State */}
         {filteredItems.length === 0 && (
-          <div className="text-center py-12" style={cardStyle}>
-            <Package className="h-12 w-12 mx-auto mb-4" style={{ color: colors.primary[500] }} />
-            <h3 className="text-xl font-bold mb-2" style={{ color: colors.primary[500] }}>No items found</h3>
-            <p className="mb-6" style={{ color: cardStyle.color }}>
+          <div className="text-center py-8 sm:py-12" style={cardStyle}>
+            <Package className="h-8 w-8 sm:h-12 sm:w-12 mx-auto mb-3 sm:mb-4" style={{ color: colors.primary[500] }} />
+            <h3 className="text-lg sm:text-xl font-bold mb-2" style={{ color: colors.primary[500] }}>No items found</h3>
+            <p className="mb-4 sm:mb-6 text-sm sm:text-base" style={{ color: cardStyle.color }}>
               Try adjusting your search or filters to find what you&apos;re looking for.
             </p>
             <Button 
               onClick={() => { setSearchTerm(''); setSelectedType(''); }}
               style={buttonStyle}
-              className="font-bold hover:scale-105 transition-transform duration-300"
+              className="text-sm sm:text-base font-bold hover:scale-105 transition-transform duration-300"
             >
               Clear Filters
             </Button>

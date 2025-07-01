@@ -121,6 +121,12 @@ async function updateBusinessFromFormData(formData: FormData, businessId: string
     }
   }
 
+  // Handle embeddedComponents (boolean field)
+  const embeddedComponentsStr = formData.get('embeddedComponents');
+  if (embeddedComponentsStr !== null) {
+    updateData.embeddedComponents = embeddedComponentsStr.toString() === 'true';
+  }
+
   // Update the business
   const updatedBusiness = await prisma.business.update({
     where: { id: businessId },

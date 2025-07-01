@@ -56,11 +56,12 @@ model Business {
   // Integrations
   stripeAccountId String?
 
-  socialMedia     Json?
-  customDomain    String?
-  subdomain       String? @unique
-  siteConfig      Json
-  onboardingError String?
+  socialMedia        Json?
+  customDomain       String?
+  subdomain          String? @unique
+  siteConfig         Json
+  onboardingError    String?
+  embeddedComponents Boolean @default(false)
 
   // Timestamps
   createdAt DateTime @default(now())

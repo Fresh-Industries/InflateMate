@@ -25,6 +25,7 @@ interface Business {
   stripeAccountId?: string | null;
   depositPercentage?: number;
   taxRate?: number;
+  embeddedComponents?: boolean;
   [key: string]: unknown;
 }
 

@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info, CreditCard, CircleCheck } from "lucide-react";
 import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
@@ -40,6 +41,7 @@ interface BusinessSettings {
     twitter?: string;
     tiktok?: string;
   };
+  embeddedComponents?: boolean;
   [key: string]: unknown;
 }
 
@@ -63,6 +65,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
   const [isLoading, setIsLoading] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(business.logo || null);
   const [isUploading, setIsUploading] = useState(false);
+  const [embeddedComponents, setEmbeddedComponents] = useState<boolean>(business.embeddedComponents || false);
 
   const { startUpload } = useUploadThing("logoUploader");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -187,6 +190,9 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       formData.append("city", addressData.city);
       formData.append("state", addressData.state);
       formData.append("zipCode", addressData.zipCode);
+
+      // Add embedded components setting
+      formData.append("embeddedComponents", embeddedComponents.toString());
 
       console.log("Form data keys:", [...formData.keys()]);
 
@@ -366,6 +372,41 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                     placeholder="Describe your business, services, and what makes you special"
                     className="resize-none"
                   />
+                </div>
+
+                <Separator />
+
+                {/* Embedded Components Toggle */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label className="text-base">Embedded Components</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Enable embeddable widgets that customers can integrate into their websites
+                      </p>
+                    </div>
+                    <Switch
+                      checked={embeddedComponents}
+                      onCheckedChange={setEmbeddedComponents}
+                    />
+                  </div>
+                  
+                  {embeddedComponents && (
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex gap-2">
+                        <div className="text-blue-500 shrink-0">
+                          <Info className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-blue-700">Embedded Components Enabled</h4>
+                          <p className="text-xs text-blue-600 mt-1">
+                            You can now create embeddable widgets in the Website section. 
+                            These widgets allow you to embed booking forms, inventory listings, and more into external websites.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>

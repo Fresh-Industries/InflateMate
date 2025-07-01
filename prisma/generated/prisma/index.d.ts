@@ -3875,6 +3875,7 @@ export namespace Prisma {
     customDomain: string | null
     subdomain: string | null
     onboardingError: string | null
+    embeddedComponents: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     organizationId: string | null
@@ -3902,6 +3903,7 @@ export namespace Prisma {
     customDomain: string | null
     subdomain: string | null
     onboardingError: string | null
+    embeddedComponents: boolean | null
     createdAt: Date | null
     updatedAt: Date | null
     organizationId: string | null
@@ -3932,6 +3934,7 @@ export namespace Prisma {
     subdomain: number
     siteConfig: number
     onboardingError: number
+    embeddedComponents: number
     createdAt: number
     updatedAt: number
     organizationId: number
@@ -3977,6 +3980,7 @@ export namespace Prisma {
     customDomain?: true
     subdomain?: true
     onboardingError?: true
+    embeddedComponents?: true
     createdAt?: true
     updatedAt?: true
     organizationId?: true
@@ -4004,6 +4008,7 @@ export namespace Prisma {
     customDomain?: true
     subdomain?: true
     onboardingError?: true
+    embeddedComponents?: true
     createdAt?: true
     updatedAt?: true
     organizationId?: true
@@ -4034,6 +4039,7 @@ export namespace Prisma {
     subdomain?: true
     siteConfig?: true
     onboardingError?: true
+    embeddedComponents?: true
     createdAt?: true
     updatedAt?: true
     organizationId?: true
@@ -4151,6 +4157,7 @@ export namespace Prisma {
     subdomain: string | null
     siteConfig: JsonValue
     onboardingError: string | null
+    embeddedComponents: boolean
     createdAt: Date
     updatedAt: Date
     organizationId: string
@@ -4200,6 +4207,7 @@ export namespace Prisma {
     subdomain?: boolean
     siteConfig?: boolean
     onboardingError?: boolean
+    embeddedComponents?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     organizationId?: boolean
@@ -4242,6 +4250,7 @@ export namespace Prisma {
     subdomain?: boolean
     siteConfig?: boolean
     onboardingError?: boolean
+    embeddedComponents?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     organizationId?: boolean
@@ -4273,6 +4282,7 @@ export namespace Prisma {
     subdomain?: boolean
     siteConfig?: boolean
     onboardingError?: boolean
+    embeddedComponents?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     organizationId?: boolean
@@ -4304,12 +4314,13 @@ export namespace Prisma {
     subdomain?: boolean
     siteConfig?: boolean
     onboardingError?: boolean
+    embeddedComponents?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     organizationId?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "onboarded" | "logo" | "minNoticeHours" | "maxNoticeHours" | "minBookingAmount" | "bufferBeforeHours" | "bufferAfterHours" | "timeZone" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "onboarded" | "logo" | "minNoticeHours" | "maxNoticeHours" | "minBookingAmount" | "bufferBeforeHours" | "bufferAfterHours" | "timeZone" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError" | "embeddedComponents" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     inventory?: boolean | Business$inventoryArgs<ExtArgs>
     customers?: boolean | Business$customersArgs<ExtArgs>
@@ -4371,6 +4382,7 @@ export namespace Prisma {
       subdomain: string | null
       siteConfig: Prisma.JsonValue
       onboardingError: string | null
+      embeddedComponents: boolean
       createdAt: Date
       updatedAt: Date
       organizationId: string
@@ -4832,6 +4844,7 @@ export namespace Prisma {
     readonly subdomain: FieldRef<"Business", 'String'>
     readonly siteConfig: FieldRef<"Business", 'Json'>
     readonly onboardingError: FieldRef<"Business", 'String'>
+    readonly embeddedComponents: FieldRef<"Business", 'Boolean'>
     readonly createdAt: FieldRef<"Business", 'DateTime'>
     readonly updatedAt: FieldRef<"Business", 'DateTime'>
     readonly organizationId: FieldRef<"Business", 'String'>
@@ -22678,6 +22691,7 @@ export namespace Prisma {
     subdomain: 'subdomain',
     siteConfig: 'siteConfig',
     onboardingError: 'onboardingError',
+    embeddedComponents: 'embeddedComponents',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     organizationId: 'organizationId'
@@ -23360,6 +23374,7 @@ export namespace Prisma {
     subdomain?: StringNullableFilter<"Business"> | string | null
     siteConfig?: JsonFilter<"Business">
     onboardingError?: StringNullableFilter<"Business"> | string | null
+    embeddedComponents?: BoolFilter<"Business"> | boolean
     createdAt?: DateTimeFilter<"Business"> | Date | string
     updatedAt?: DateTimeFilter<"Business"> | Date | string
     organizationId?: StringFilter<"Business"> | string
@@ -23401,6 +23416,7 @@ export namespace Prisma {
     subdomain?: SortOrderInput | SortOrder
     siteConfig?: SortOrder
     onboardingError?: SortOrderInput | SortOrder
+    embeddedComponents?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
@@ -23446,6 +23462,7 @@ export namespace Prisma {
     customDomain?: StringNullableFilter<"Business"> | string | null
     siteConfig?: JsonFilter<"Business">
     onboardingError?: StringNullableFilter<"Business"> | string | null
+    embeddedComponents?: BoolFilter<"Business"> | boolean
     createdAt?: DateTimeFilter<"Business"> | Date | string
     updatedAt?: DateTimeFilter<"Business"> | Date | string
     inventory?: InventoryListRelationFilter
@@ -23486,6 +23503,7 @@ export namespace Prisma {
     subdomain?: SortOrderInput | SortOrder
     siteConfig?: SortOrder
     onboardingError?: SortOrderInput | SortOrder
+    embeddedComponents?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
@@ -23524,6 +23542,7 @@ export namespace Prisma {
     subdomain?: StringNullableWithAggregatesFilter<"Business"> | string | null
     siteConfig?: JsonWithAggregatesFilter<"Business">
     onboardingError?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    embeddedComponents?: BoolWithAggregatesFilter<"Business"> | boolean
     createdAt?: DateTimeWithAggregatesFilter<"Business"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Business"> | Date | string
     organizationId?: StringWithAggregatesFilter<"Business"> | string
@@ -25127,6 +25146,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -25167,6 +25187,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -25207,6 +25228,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -25247,6 +25269,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -25287,6 +25310,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -25317,6 +25341,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -25346,6 +25371,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -27360,6 +27386,7 @@ export namespace Prisma {
     subdomain?: SortOrder
     siteConfig?: SortOrder
     onboardingError?: SortOrder
+    embeddedComponents?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
@@ -27395,6 +27422,7 @@ export namespace Prisma {
     customDomain?: SortOrder
     subdomain?: SortOrder
     onboardingError?: SortOrder
+    embeddedComponents?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
@@ -27422,6 +27450,7 @@ export namespace Prisma {
     customDomain?: SortOrder
     subdomain?: SortOrder
     onboardingError?: SortOrder
+    embeddedComponents?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     organizationId?: SortOrder
@@ -31733,6 +31762,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -31772,6 +31802,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
@@ -31888,6 +31919,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -31927,6 +31959,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
@@ -32133,6 +32166,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     customers?: CustomerCreateNestedManyWithoutBusinessInput
@@ -32172,6 +32206,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -32227,6 +32262,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customers?: CustomerUpdateManyWithoutBusinessNestedInput
@@ -32266,6 +32302,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -32331,6 +32368,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -32370,6 +32408,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -32665,6 +32704,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -32704,6 +32744,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -32866,6 +32907,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -32905,6 +32947,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -33228,6 +33271,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -33267,6 +33311,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -33862,6 +33907,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -33901,6 +33947,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -34037,6 +34084,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -34076,6 +34124,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -34115,6 +34164,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -34154,6 +34204,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -34289,6 +34340,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -34328,6 +34380,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -34383,6 +34436,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -34422,6 +34476,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -34477,6 +34532,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -34516,6 +34572,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -34555,6 +34612,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -34594,6 +34652,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -34779,6 +34838,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -34818,6 +34878,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -35055,6 +35116,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -35094,6 +35156,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -35279,6 +35342,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -35318,6 +35382,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -35499,6 +35564,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -35538,6 +35604,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -35723,6 +35790,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -35762,6 +35830,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string
@@ -35998,6 +36067,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     inventory?: InventoryCreateNestedManyWithoutBusinessInput
@@ -36037,6 +36107,7 @@ export namespace Prisma {
     subdomain?: string | null
     siteConfig: JsonNullValueInput | InputJsonValue
     onboardingError?: string | null
+    embeddedComponents?: boolean
     createdAt?: Date | string
     updatedAt?: Date | string
     organizationId: string
@@ -36153,6 +36224,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateManyWithoutBusinessNestedInput
@@ -36192,6 +36264,7 @@ export namespace Prisma {
     subdomain?: NullableStringFieldUpdateOperationsInput | string | null
     siteConfig?: JsonNullValueInput | InputJsonValue
     onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     organizationId?: StringFieldUpdateOperationsInput | string

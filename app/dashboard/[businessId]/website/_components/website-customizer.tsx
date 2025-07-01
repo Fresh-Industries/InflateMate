@@ -21,6 +21,7 @@ import ColorSettings from "./color-settings";
 import LandingSettings from "./landing-settings";
 import ThemeSelector from "./ThemeSelector";
 import AddSectionForm from "./AddSectionForm";
+import EmbeddedComponents from "./EmbeddedComponents";
 import { modern } from "@/lib/config/themes";
 
 interface WebsiteCustomizerProps {
@@ -28,7 +29,7 @@ interface WebsiteCustomizerProps {
   initialData: Record<string, unknown>;
 }
 
-type PageSectionKey = 'landing' | 'about';
+type PageSectionKey = 'landing' | 'about' 
 type PageConfig = {
   sections?: DynamicSection[];
   dynamicSections?: DynamicSection[];
@@ -48,7 +49,9 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   
   const [isSectionFormOpen, setIsSectionFormOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<DynamicSection | null>(null);
-  const [activeTab, setActiveTab] = useState<PageSectionKey>('landing');
+  const [activeTab, setActiveTab] = useState<string>(
+    (initialData.embeddedComponents as boolean) ? 'embedded' : 'landing'
+  );
 
   const defaultTheme: Theme = { id: modern.id, name: modern.themeName };
 
@@ -199,8 +202,8 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   };
 
   const handleTabChange = (value: string) => {
-    if (value === 'landing' || value === 'about' || value === 'contact' || value === 'colors' || value === 'themeSettings') {
-      setActiveTab(value as PageSectionKey);
+    if (value === 'landing' || value === 'about' || value === 'contact' || value === 'colors' || value === 'themeSettings' || value === 'embedded') {
+      setActiveTab(value);
     }
   };
 
@@ -241,7 +244,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   const handleOpenAddSection = (page: PageSectionKey) => {
     setEditingSection(null);
     if (page !== activeTab) {
-      setActiveTab(page); 
+      setActiveTab(page as string); 
     }
     setIsSectionFormOpen(true);
   };
@@ -360,38 +363,63 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
           </Button>
         </div>
       
-        <Tabs defaultValue="landing" className="w-full" value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto border-b rounded-none p-0">
-            <TabsTrigger
-              value="landing"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Landing Page
-            </TabsTrigger>
-            <TabsTrigger
-              value="about"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              About Page
-            </TabsTrigger>
-            <TabsTrigger
-              value="contact"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Contact Page
-            </TabsTrigger>
-            <TabsTrigger
-              value="colors"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Colors
-            </TabsTrigger>
-            <TabsTrigger
-              value="themeSettings"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Theme Settings
-            </TabsTrigger>
+        <Tabs defaultValue={initialData.embeddedComponents ? "embedded" : "landing"} className="w-full" value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className={`grid w-full ${initialData.embeddedComponents ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-5'} h-auto border-b rounded-none p-0`}>
+            {initialData.embeddedComponents ? (
+              <>
+                <TabsTrigger
+                  value="embedded"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Embedded
+                </TabsTrigger>
+                <TabsTrigger
+                  value="colors"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Colors
+                </TabsTrigger>
+                <TabsTrigger
+                  value="themeSettings"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Theme Settings
+                </TabsTrigger>
+              </>
+            ) : (
+              <>
+                <TabsTrigger
+                  value="landing"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Landing Page
+                </TabsTrigger>
+                <TabsTrigger
+                  value="about"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  About Page
+                </TabsTrigger>
+                <TabsTrigger
+                  value="contact"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Contact Page
+                </TabsTrigger>
+                <TabsTrigger
+                  value="colors"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Colors
+                </TabsTrigger>
+                <TabsTrigger
+                  value="themeSettings"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Theme Settings
+                </TabsTrigger>
+              </>
+            )}
           </TabsList>
           
           <div className="mt-8">
@@ -484,6 +512,16 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
               </Card>
             </TabsContent>
 
+            <TabsContent value="embedded" className="m-0">
+              <EmbeddedComponents 
+                businessId={businessId}
+                embeddedComponents={initialData.embeddedComponents as boolean || false}
+                currentDomain={initialData.customDomain as string}
+                colors={siteConfig.colors}
+                theme={siteConfig.themeName?.name || 'modern'}
+              />
+            </TabsContent>
+
           </div>
         </Tabs>
     </div>
@@ -502,7 +540,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
             onAddSection={handleAddSection} 
             onEditSection={handleEditSection} 
             onCancel={handleCloseSectionForm}
-            page={editingSection ? editingSection.page as PageSectionKey : activeTab}
+            page={editingSection ? editingSection.page as PageSectionKey : (activeTab as PageSectionKey || 'landing')}
             presetColors={{
               primary: siteConfig.colors?.primary,
               secondary: siteConfig.colors?.secondary,
