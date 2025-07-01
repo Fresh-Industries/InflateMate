@@ -6,6 +6,7 @@ export interface BusinessForEmbed {
   name: string;
   description?: string | null;
   logo?: string | null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   siteConfig: any;
   [key: string]: unknown;
 }
