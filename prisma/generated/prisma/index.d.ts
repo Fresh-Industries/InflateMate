@@ -2700,10 +2700,12 @@ export namespace Prisma {
 
   export type CouponCountOutputType = {
     booking: number
+    salesFunnels: number
   }
 
   export type CouponCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     booking?: boolean | CouponCountOutputTypeCountBookingArgs
+    salesFunnels?: boolean | CouponCountOutputTypeCountSalesFunnelsArgs
   }
 
   // Custom InputTypes
@@ -2722,6 +2724,13 @@ export namespace Prisma {
    */
   export type CouponCountOutputTypeCountBookingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BookingWhereInput
+  }
+
+  /**
+   * CouponCountOutputType without action
+   */
+  export type CouponCountOutputTypeCountSalesFunnelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SalesFunnelWhereInput
   }
 
 
@@ -14584,6 +14593,7 @@ export namespace Prisma {
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     booking?: boolean | Coupon$bookingArgs<ExtArgs>
+    salesFunnels?: boolean | Coupon$salesFunnelsArgs<ExtArgs>
     _count?: boolean | CouponCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["coupon"]>
 
@@ -14650,6 +14660,7 @@ export namespace Prisma {
   export type CouponInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     booking?: boolean | Coupon$bookingArgs<ExtArgs>
+    salesFunnels?: boolean | Coupon$salesFunnelsArgs<ExtArgs>
     _count?: boolean | CouponCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CouponIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -14664,6 +14675,7 @@ export namespace Prisma {
     objects: {
       business: Prisma.$BusinessPayload<ExtArgs>
       booking: Prisma.$BookingPayload<ExtArgs>[]
+      salesFunnels: Prisma.$SalesFunnelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -15078,6 +15090,7 @@ export namespace Prisma {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     booking<T extends Coupon$bookingArgs<ExtArgs> = {}>(args?: Subset<T, Coupon$bookingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    salesFunnels<T extends Coupon$salesFunnelsArgs<ExtArgs> = {}>(args?: Subset<T, Coupon$salesFunnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SalesFunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15543,6 +15556,30 @@ export namespace Prisma {
   }
 
   /**
+   * Coupon.salesFunnels
+   */
+  export type Coupon$salesFunnelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SalesFunnel
+     */
+    select?: SalesFunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SalesFunnel
+     */
+    omit?: SalesFunnelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SalesFunnelInclude<ExtArgs> | null
+    where?: SalesFunnelWhereInput
+    orderBy?: SalesFunnelOrderByWithRelationInput | SalesFunnelOrderByWithRelationInput[]
+    cursor?: SalesFunnelWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SalesFunnelScalarFieldEnum | SalesFunnelScalarFieldEnum[]
+  }
+
+  /**
    * Coupon without action
    */
   export type CouponDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -15782,6 +15819,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }, ExtArgs["result"]["salesFunnel"]>
 
   export type SalesFunnelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15798,6 +15836,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }, ExtArgs["result"]["salesFunnel"]>
 
   export type SalesFunnelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15814,6 +15853,7 @@ export namespace Prisma {
     createdAt?: boolean
     updatedAt?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }, ExtArgs["result"]["salesFunnel"]>
 
   export type SalesFunnelSelectScalar = {
@@ -15834,18 +15874,22 @@ export namespace Prisma {
   export type SalesFunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "isActive" | "popupTitle" | "popupText" | "popupImage" | "formTitle" | "thankYouMessage" | "couponId" | "businessId" | "createdAt" | "updatedAt", ExtArgs["result"]["salesFunnel"]>
   export type SalesFunnelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }
   export type SalesFunnelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }
   export type SalesFunnelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }
 
   export type $SalesFunnelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "SalesFunnel"
     objects: {
       business: Prisma.$BusinessPayload<ExtArgs>
+      coupon: Prisma.$CouponPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -16255,6 +16299,7 @@ export namespace Prisma {
   export interface Prisma__SalesFunnelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    coupon<T extends SalesFunnel$couponArgs<ExtArgs> = {}>(args?: Subset<T, SalesFunnel$couponArgs<ExtArgs>>): Prisma__CouponClient<$Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -16689,6 +16734,25 @@ export namespace Prisma {
      * Limit how many SalesFunnels to delete.
      */
     limit?: number
+  }
+
+  /**
+   * SalesFunnel.coupon
+   */
+  export type SalesFunnel$couponArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Coupon
+     */
+    select?: CouponSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Coupon
+     */
+    omit?: CouponOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CouponInclude<ExtArgs> | null
+    where?: CouponWhereInput
   }
 
   /**
@@ -24366,6 +24430,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Coupon"> | Date | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     booking?: BookingListRelationFilter
+    salesFunnels?: SalesFunnelListRelationFilter
   }
 
   export type CouponOrderByWithRelationInput = {
@@ -24387,6 +24452,7 @@ export namespace Prisma {
     updatedAt?: SortOrder
     business?: BusinessOrderByWithRelationInput
     booking?: BookingOrderByRelationAggregateInput
+    salesFunnels?: SalesFunnelOrderByRelationAggregateInput
   }
 
   export type CouponWhereUniqueInput = Prisma.AtLeast<{
@@ -24412,6 +24478,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Coupon"> | Date | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     booking?: BookingListRelationFilter
+    salesFunnels?: SalesFunnelListRelationFilter
   }, "id" | "code_businessId">
 
   export type CouponOrderByWithAggregationInput = {
@@ -24477,6 +24544,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"SalesFunnel"> | Date | string
     updatedAt?: DateTimeFilter<"SalesFunnel"> | Date | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
   }
 
   export type SalesFunnelOrderByWithRelationInput = {
@@ -24493,6 +24561,7 @@ export namespace Prisma {
     createdAt?: SortOrder
     updatedAt?: SortOrder
     business?: BusinessOrderByWithRelationInput
+    coupon?: CouponOrderByWithRelationInput
   }
 
   export type SalesFunnelWhereUniqueInput = Prisma.AtLeast<{
@@ -24512,6 +24581,7 @@ export namespace Prisma {
     createdAt?: DateTimeFilter<"SalesFunnel"> | Date | string
     updatedAt?: DateTimeFilter<"SalesFunnel"> | Date | string
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
   }, "id">
 
   export type SalesFunnelOrderByWithAggregationInput = {
@@ -26276,6 +26346,7 @@ export namespace Prisma {
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutCouponsInput
     booking?: BookingCreateNestedManyWithoutCouponInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutCouponInput
   }
 
   export type CouponUncheckedCreateInput = {
@@ -26296,6 +26367,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     booking?: BookingUncheckedCreateNestedManyWithoutCouponInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutCouponInput
   }
 
   export type CouponUpdateInput = {
@@ -26316,6 +26388,7 @@ export namespace Prisma {
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutCouponsNestedInput
     booking?: BookingUpdateManyWithoutCouponNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponUncheckedUpdateInput = {
@@ -26336,6 +26409,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     booking?: BookingUncheckedUpdateManyWithoutCouponNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponCreateManyInput = {
@@ -26403,10 +26477,10 @@ export namespace Prisma {
     popupImage?: string | null
     formTitle: string
     thankYouMessage: string
-    couponId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutSalesFunnelsInput
+    coupon?: CouponCreateNestedOneWithoutSalesFunnelsInput
   }
 
   export type SalesFunnelUncheckedCreateInput = {
@@ -26433,10 +26507,10 @@ export namespace Prisma {
     popupImage?: NullableStringFieldUpdateOperationsInput | string | null
     formTitle?: StringFieldUpdateOperationsInput | string
     thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutSalesFunnelsNestedInput
+    coupon?: CouponUpdateOneWithoutSalesFunnelsNestedInput
   }
 
   export type SalesFunnelUncheckedUpdateInput = {
@@ -26478,7 +26552,6 @@ export namespace Prisma {
     popupImage?: NullableStringFieldUpdateOperationsInput | string | null
     formTitle?: StringFieldUpdateOperationsInput | string
     thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -30016,11 +30089,25 @@ export namespace Prisma {
     connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
   }
 
+  export type SalesFunnelCreateNestedManyWithoutCouponInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+  }
+
   export type BookingUncheckedCreateNestedManyWithoutCouponInput = {
     create?: XOR<BookingCreateWithoutCouponInput, BookingUncheckedCreateWithoutCouponInput> | BookingCreateWithoutCouponInput[] | BookingUncheckedCreateWithoutCouponInput[]
     connectOrCreate?: BookingCreateOrConnectWithoutCouponInput | BookingCreateOrConnectWithoutCouponInput[]
     createMany?: BookingCreateManyCouponInputEnvelope
     connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+  }
+
+  export type SalesFunnelUncheckedCreateNestedManyWithoutCouponInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
   }
 
   export type EnumDiscountTypeFieldUpdateOperationsInput = {
@@ -30049,6 +30136,20 @@ export namespace Prisma {
     deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
+  export type SalesFunnelUpdateManyWithoutCouponNestedInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    upsert?: SalesFunnelUpsertWithWhereUniqueWithoutCouponInput | SalesFunnelUpsertWithWhereUniqueWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    set?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    disconnect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    delete?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    update?: SalesFunnelUpdateWithWhereUniqueWithoutCouponInput | SalesFunnelUpdateWithWhereUniqueWithoutCouponInput[]
+    updateMany?: SalesFunnelUpdateManyWithWhereWithoutCouponInput | SalesFunnelUpdateManyWithWhereWithoutCouponInput[]
+    deleteMany?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
+  }
+
   export type BookingUncheckedUpdateManyWithoutCouponNestedInput = {
     create?: XOR<BookingCreateWithoutCouponInput, BookingUncheckedCreateWithoutCouponInput> | BookingCreateWithoutCouponInput[] | BookingUncheckedCreateWithoutCouponInput[]
     connectOrCreate?: BookingCreateOrConnectWithoutCouponInput | BookingCreateOrConnectWithoutCouponInput[]
@@ -30063,10 +30164,30 @@ export namespace Prisma {
     deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
+  export type SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    upsert?: SalesFunnelUpsertWithWhereUniqueWithoutCouponInput | SalesFunnelUpsertWithWhereUniqueWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    set?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    disconnect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    delete?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    update?: SalesFunnelUpdateWithWhereUniqueWithoutCouponInput | SalesFunnelUpdateWithWhereUniqueWithoutCouponInput[]
+    updateMany?: SalesFunnelUpdateManyWithWhereWithoutCouponInput | SalesFunnelUpdateManyWithWhereWithoutCouponInput[]
+    deleteMany?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutSalesFunnelsInput = {
     create?: XOR<BusinessCreateWithoutSalesFunnelsInput, BusinessUncheckedCreateWithoutSalesFunnelsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutSalesFunnelsInput
     connect?: BusinessWhereUniqueInput
+  }
+
+  export type CouponCreateNestedOneWithoutSalesFunnelsInput = {
+    create?: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
+    connectOrCreate?: CouponCreateOrConnectWithoutSalesFunnelsInput
+    connect?: CouponWhereUniqueInput
   }
 
   export type BusinessUpdateOneRequiredWithoutSalesFunnelsNestedInput = {
@@ -30075,6 +30196,16 @@ export namespace Prisma {
     upsert?: BusinessUpsertWithoutSalesFunnelsInput
     connect?: BusinessWhereUniqueInput
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutSalesFunnelsInput, BusinessUpdateWithoutSalesFunnelsInput>, BusinessUncheckedUpdateWithoutSalesFunnelsInput>
+  }
+
+  export type CouponUpdateOneWithoutSalesFunnelsNestedInput = {
+    create?: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
+    connectOrCreate?: CouponCreateOrConnectWithoutSalesFunnelsInput
+    upsert?: CouponUpsertWithoutSalesFunnelsInput
+    disconnect?: CouponWhereInput | boolean
+    delete?: CouponWhereInput | boolean
+    connect?: CouponWhereUniqueInput
+    update?: XOR<XOR<CouponUpdateToOneWithWhereWithoutSalesFunnelsInput, CouponUpdateWithoutSalesFunnelsInput>, CouponUncheckedUpdateWithoutSalesFunnelsInput>
   }
 
   export type BusinessCreateNestedOneWithoutWaiversInput = {
@@ -31070,6 +31201,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     booking?: BookingCreateNestedManyWithoutCouponInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutCouponInput
   }
 
   export type CouponUncheckedCreateWithoutBusinessInput = {
@@ -31089,6 +31221,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     booking?: BookingUncheckedCreateNestedManyWithoutCouponInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutCouponInput
   }
 
   export type CouponCreateOrConnectWithoutBusinessInput = {
@@ -31110,9 +31243,9 @@ export namespace Prisma {
     popupImage?: string | null
     formTitle: string
     thankYouMessage: string
-    couponId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    coupon?: CouponCreateNestedOneWithoutSalesFunnelsInput
   }
 
   export type SalesFunnelUncheckedCreateWithoutBusinessInput = {
@@ -32856,6 +32989,7 @@ export namespace Prisma {
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutCouponsInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutCouponInput
   }
 
   export type CouponUncheckedCreateWithoutBookingInput = {
@@ -32875,6 +33009,7 @@ export namespace Prisma {
     stripePromotionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutCouponInput
   }
 
   export type CouponCreateOrConnectWithoutBookingInput = {
@@ -33214,6 +33349,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutCouponsNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponUncheckedUpdateWithoutBookingInput = {
@@ -33233,6 +33369,7 @@ export namespace Prisma {
     stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput
   }
 
   export type BusinessUpsertWithoutBookingsInput = {
@@ -34304,6 +34441,44 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type SalesFunnelCreateWithoutCouponInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutSalesFunnelsInput
+  }
+
+  export type SalesFunnelUncheckedCreateWithoutCouponInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
+    businessId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SalesFunnelCreateOrConnectWithoutCouponInput = {
+    where: SalesFunnelWhereUniqueInput
+    create: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput>
+  }
+
+  export type SalesFunnelCreateManyCouponInputEnvelope = {
+    data: SalesFunnelCreateManyCouponInput | SalesFunnelCreateManyCouponInput[]
+    skipDuplicates?: boolean
+  }
+
   export type BusinessUpsertWithoutCouponsInput = {
     update: XOR<BusinessUpdateWithoutCouponsInput, BusinessUncheckedUpdateWithoutCouponsInput>
     create: XOR<BusinessCreateWithoutCouponsInput, BusinessUncheckedCreateWithoutCouponsInput>
@@ -34411,6 +34586,22 @@ export namespace Prisma {
     data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutCouponInput>
   }
 
+  export type SalesFunnelUpsertWithWhereUniqueWithoutCouponInput = {
+    where: SalesFunnelWhereUniqueInput
+    update: XOR<SalesFunnelUpdateWithoutCouponInput, SalesFunnelUncheckedUpdateWithoutCouponInput>
+    create: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput>
+  }
+
+  export type SalesFunnelUpdateWithWhereUniqueWithoutCouponInput = {
+    where: SalesFunnelWhereUniqueInput
+    data: XOR<SalesFunnelUpdateWithoutCouponInput, SalesFunnelUncheckedUpdateWithoutCouponInput>
+  }
+
+  export type SalesFunnelUpdateManyWithWhereWithoutCouponInput = {
+    where: SalesFunnelScalarWhereInput
+    data: XOR<SalesFunnelUpdateManyMutationInput, SalesFunnelUncheckedUpdateManyWithoutCouponInput>
+  }
+
   export type BusinessCreateWithoutSalesFunnelsInput = {
     id?: string
     name: string
@@ -34494,6 +34685,51 @@ export namespace Prisma {
   export type BusinessCreateOrConnectWithoutSalesFunnelsInput = {
     where: BusinessWhereUniqueInput
     create: XOR<BusinessCreateWithoutSalesFunnelsInput, BusinessUncheckedCreateWithoutSalesFunnelsInput>
+  }
+
+  export type CouponCreateWithoutSalesFunnelsInput = {
+    id?: string
+    code: string
+    description?: string | null
+    discountType: $Enums.DiscountType
+    discountAmount: number
+    maxUses?: number | null
+    usedCount?: number
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    isActive?: boolean
+    minimumAmount?: number | null
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutCouponsInput
+    booking?: BookingCreateNestedManyWithoutCouponInput
+  }
+
+  export type CouponUncheckedCreateWithoutSalesFunnelsInput = {
+    id?: string
+    code: string
+    description?: string | null
+    discountType: $Enums.DiscountType
+    discountAmount: number
+    maxUses?: number | null
+    usedCount?: number
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    isActive?: boolean
+    minimumAmount?: number | null
+    businessId: string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    booking?: BookingUncheckedCreateNestedManyWithoutCouponInput
+  }
+
+  export type CouponCreateOrConnectWithoutSalesFunnelsInput = {
+    where: CouponWhereUniqueInput
+    create: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
   }
 
   export type BusinessUpsertWithoutSalesFunnelsInput = {
@@ -34585,6 +34821,57 @@ export namespace Prisma {
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type CouponUpsertWithoutSalesFunnelsInput = {
+    update: XOR<CouponUpdateWithoutSalesFunnelsInput, CouponUncheckedUpdateWithoutSalesFunnelsInput>
+    create: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
+    where?: CouponWhereInput
+  }
+
+  export type CouponUpdateToOneWithWhereWithoutSalesFunnelsInput = {
+    where?: CouponWhereInput
+    data: XOR<CouponUpdateWithoutSalesFunnelsInput, CouponUncheckedUpdateWithoutSalesFunnelsInput>
+  }
+
+  export type CouponUpdateWithoutSalesFunnelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
+    usedCount?: IntFieldUpdateOperationsInput | number
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutCouponsNestedInput
+    booking?: BookingUpdateManyWithoutCouponNestedInput
+  }
+
+  export type CouponUncheckedUpdateWithoutSalesFunnelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
+    usedCount?: IntFieldUpdateOperationsInput | number
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUncheckedUpdateManyWithoutCouponNestedInput
   }
 
   export type BusinessCreateWithoutWaiversInput = {
@@ -36806,6 +37093,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     booking?: BookingUpdateManyWithoutCouponNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponUncheckedUpdateWithoutBusinessInput = {
@@ -36825,6 +37113,7 @@ export namespace Prisma {
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     booking?: BookingUncheckedUpdateManyWithoutCouponNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponUncheckedUpdateManyWithoutBusinessInput = {
@@ -36854,9 +37143,9 @@ export namespace Prisma {
     popupImage?: NullableStringFieldUpdateOperationsInput | string | null
     formTitle?: StringFieldUpdateOperationsInput | string
     thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    coupon?: CouponUpdateOneWithoutSalesFunnelsNestedInput
   }
 
   export type SalesFunnelUncheckedUpdateWithoutBusinessInput = {
@@ -37683,6 +37972,20 @@ export namespace Prisma {
     customerId?: string | null
   }
 
+  export type SalesFunnelCreateManyCouponInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
+    businessId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
   export type BookingUpdateWithoutCouponInput = {
     id?: StringFieldUpdateOperationsInput | string
     eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
@@ -37781,6 +38084,48 @@ export namespace Prisma {
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type SalesFunnelUpdateWithoutCouponInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutSalesFunnelsNestedInput
+  }
+
+  export type SalesFunnelUncheckedUpdateWithoutCouponInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SalesFunnelUncheckedUpdateManyWithoutCouponInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
 

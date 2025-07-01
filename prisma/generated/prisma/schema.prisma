@@ -266,24 +266,25 @@ model Payment {
 }
 
 model Coupon {
-  id                String       @id @default(cuid())
+  id                String        @id @default(cuid())
   code              String
   description       String?
   discountType      DiscountType
   discountAmount    Float
   maxUses           Int?
-  usedCount         Int          @default(0)
+  usedCount         Int           @default(0)
   startDate         DateTime?
   endDate           DateTime?
-  isActive          Boolean      @default(true)
+  isActive          Boolean       @default(true)
   minimumAmount     Float?
   businessId        String
   stripeCouponId    String?
   stripePromotionId String?
-  createdAt         DateTime     @default(now())
-  updatedAt         DateTime     @updatedAt
-  business          Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+  business          Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   booking           Booking[]
+  salesFunnels      SalesFunnel[]
 
   @@unique([code, businessId])
   @@index([businessId])
@@ -303,6 +304,7 @@ model SalesFunnel {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
   business        Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  coupon          Coupon?  @relation(fields: [couponId], references: [id])
 
   @@index([businessId])
 }

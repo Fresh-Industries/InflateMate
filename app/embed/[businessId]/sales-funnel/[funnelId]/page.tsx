@@ -20,7 +20,7 @@ export default async function EmbedSalesFunnelPage({ params, searchParams }: Pag
       prisma.salesFunnel.findFirst({
         where: { id: funnelId, businessId },
         include: {
-          coupon: true,
+          coupon: true ,
         }
       })
     ]);
@@ -51,7 +51,7 @@ export default async function EmbedSalesFunnelPage({ params, searchParams }: Pag
 
     return (
       <div className="min-h-screen relative" style={{ 
-        backgroundColor: colors.background[50],
+        backgroundColor: colors.background[500],
       }}>
         <SalesFunnelPopup
           businessId={business.id}
