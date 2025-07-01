@@ -1,7 +1,5 @@
 import { getBusinessForEmbed } from '@/lib/business/embed-utils';
 import { prisma } from '@/lib/prisma';
-import { makeScale } from '@/app/[domain]/_themes/utils';
-import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
 import { notFound } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";

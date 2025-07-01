@@ -11,7 +11,7 @@ export default async function EmbedLayout({
   const { businessId } = await params;
   
   try {
-    const business = await getBusinessForEmbed(businessId);
+    await getBusinessForEmbed(businessId);
     
     return (
       <>
@@ -70,7 +70,7 @@ export default async function EmbedLayout({
         {children}
       </>
     );
-  } catch (error) {
+  } catch {
     return notFound();
   }
 } 

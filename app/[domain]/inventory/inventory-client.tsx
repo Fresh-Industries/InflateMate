@@ -65,6 +65,7 @@ const shouldShowField = (fieldName: FieldName, inventoryType: string) => {
   return config.required.includes(fieldName) || config.optional.includes(fieldName);
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const hasValue = (value: any) => {
   return value !== null && value !== undefined && value !== '' && value !== 0;
 };
