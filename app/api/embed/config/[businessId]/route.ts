@@ -13,7 +13,7 @@ export async function GET(
 
     // Get available widgets data
     const [inventoryCount, salesFunnels] = await Promise.all([
-      prisma.inventoryItem.count({
+      prisma.inventory.count({
         where: { businessId: business.id, status: 'AVAILABLE' }
       }),
       prisma.salesFunnel.findMany({
