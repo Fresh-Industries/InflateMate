@@ -42,11 +42,12 @@ export default clerkMiddleware(async (auth, req) => {
     return NextResponse.next();
   }
 
-  if (url.pathname.startsWith('/api')) {
+  /* ── Skip embed routes early ─────────────────────── */
+  if (url.pathname.startsWith('/embed/')) {
     return NextResponse.next();
   }
 
-  if (url.pathname.startsWith('/embed/')) {
+  if (url.pathname.startsWith('/api')) {
     return NextResponse.next();
   }
 
