@@ -1,5 +1,6 @@
+'use client';
+
 import React from 'react';
-import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { ThemeColors } from '@/app/[domain]/_themes/types';
 import { Button } from '@/components/ui/button';
@@ -17,26 +18,74 @@ export interface RentalItem {
   type: string;
 }
 
+interface EmbedConfig {
+  pageRoutes?: {
+    booking?: string;
+    inventory?: string;
+    product?: string;
+  };
+  showPrices?: boolean;
+  showDescriptions?: boolean;
+  redirectUrl?: string;
+  successMessage?: string;
+}
+
 interface Props {
   items: RentalItem[];
   colors: ThemeColors;
   themeName: keyof typeof themeConfig;
+  businessDomain?: string | null; // customDomain from business
+  embedConfig?: EmbedConfig | null;
   fallbackEmoji?: string;
 }
 
 const typeEmoji: Record<string, string> = {
   BOUNCE_HOUSE: '🏰',
-  INFLATABLE: '🌊',
+  WATER_SLIDE: '🌊',
   GAME: '🎮',
   OTHER: '🎉',
 };
 
-export default function PopularRentalsGrid({ items, colors, themeName, fallbackEmoji = '🎈' }: Props) {
+export default function PopularRentals({ 
+  items, 
+  colors, 
+  themeName, 
+  businessDomain,
+  embedConfig,
+  fallbackEmoji = '🎈' 
+}: Props) {
   const theme = themeConfig[themeName];
   const sectionAnimation = theme.animations?.sectionTransition || "fadeIn 0.3s ease";
   const itemAnimation = theme.animations?.elementEntrance || "popIn 0.3s ease-out";
 
-  /** Primary button style (pre‑computed so no functions travel to the client) */
+  // Helper function to get the correct booking link
+  const getBookingLink = () => {
+    if (!businessDomain) return '/booking';
+    
+    const pageRoute = embedConfig?.pageRoutes?.booking || '/booking';
+    return `${businessDomain}${pageRoute}`;
+  };
+
+  // Helper function to get the correct product link
+  const getProductLink = (itemId: string) => {
+    if (!businessDomain) return `/inventory/${itemId}`;
+    
+    const pageRoute = embedConfig?.pageRoutes?.product || '/inventory';
+    return `${businessDomain}${pageRoute}/${itemId}`;
+  };
+
+  const handleItemClick = (itemId: string) => {
+    const url = getProductLink(itemId);
+    window.top!.location.href = url;
+  };
+
+  const handleBookingClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    const url = getBookingLink();
+    window.top!.location.href = url;
+  };
+
+  /** Primary button style */
   const buttonStyles: React.CSSProperties = {
     background: theme.buttonStyles.background(colors),
     color: theme.buttonStyles.textColor(colors),
@@ -61,6 +110,9 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
 
   const priceColour = theme.popularRentalsStyles?.priceColor(colors) ?? colors.accent;
 
+  const showPrices = embedConfig?.showPrices !== false;
+  const showDescriptions = embedConfig?.showDescriptions !== false;
+
   return (
     <section
       className={`py-20 relative overflow-hidden ${themeName}-theme popular-rentals`}
@@ -68,7 +120,7 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
         background: theme.popularRentalsStyles?.background(colors) ?? 'transparent',
         animation: sectionAnimation
       }}
-      >
+    >
       <div className="container mx-auto px-4 relative z-10">
         <h2
           className={`text-3xl md:text-5xl font-bold text-center mb-16 ${themeName}-theme section-title`}
@@ -80,10 +132,15 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
         {items.length === 0 ? (
           <div className="text-center py-10 bg-white/70 rounded-2xl shadow-lg max-w-2xl mx-auto">
             <p className="text-gray-600 mb-8 text-xl">No inventory items available right now.</p>
-            <Button asChild size="lg" style={buttonStyles} className="text-lg font-bold hover:scale-105 transition-transform duration-300">
-              <Link href="/booking" className="flex items-center gap-2">
+            <Button 
+              size="lg" 
+              style={buttonStyles} 
+              className="text-lg font-bold hover:scale-105 transition-transform duration-300"
+              onClick={handleBookingClick}
+            >
+              <div className="flex items-center gap-2">
                 Contact Us to Book <ArrowRight className="h-5 w-5" />
-              </Link>
+              </div>
             </Button>
           </div>
         ) : (
@@ -98,12 +155,13 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
                 }}
               >
                 <div
-                  className="h-56 flex items-center justify-center overflow-hidden"
+                  className="h-56 flex items-center justify-center overflow-hidden cursor-pointer"
                   style={{
                     background: topBackground,
                     borderTopLeftRadius: baseCard.borderRadius,
                     borderTopRightRadius: baseCard.borderRadius,
                   }}
+                  onClick={() => handleItemClick(item.id)}
                 >
                   {item.primaryImage ? (
                     <img
@@ -120,29 +178,32 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
                 </div>
 
                 <div className="p-8">
-                  <Link href={`/inventory/${item.id}`}>
-                    <h3 
-                      className="text-2xl font-bold mb-3 cursor-pointer hover:opacity-80" 
-                      style={{ color: baseCard.color }}
-                    >
-                      {item.name}
-                    </h3>
-                  </Link>
-                  <p className="mb-6 text-lg" style={{ color: baseCard.color }}>
-                    {item.description ?? 'Perfect for any event or party!'}
-                  </p>
+                  <h3 
+                    className="text-2xl font-bold mb-3 cursor-pointer hover:opacity-80" 
+                    style={{ color: baseCard.color }}
+                    onClick={() => handleItemClick(item.id)}
+                  >
+                    {item.name}
+                  </h3>
+                  {showDescriptions && (
+                    <p className="mb-6 text-lg" style={{ color: baseCard.color }}>
+                      {item.description ?? 'Perfect for any event or party!'}
+                    </p>
+                  )}
                   <div className="flex justify-between items-center">
-                    <span className="text-2xl font-bold" style={{ color: priceColour as string }}>
-                      ${item.price}/day
-                    </span>
+                    {showPrices && (
+                      <span className="text-2xl font-bold" style={{ color: priceColour as string }}>
+                        ${item.price}/day
+                      </span>
+                    )}
 
                     <Button
-                      asChild
                       size="default"
                       className="px-6 py-2 font-bold hover:scale-105 transition-transform duration-300"
                       style={buttonStyles}
+                      onClick={handleBookingClick}
                     >
-                      <Link href="/booking">Book Now</Link>
+                      Book Now
                     </Button>
                   </div>
                 </div>

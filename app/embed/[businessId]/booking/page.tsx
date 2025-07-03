@@ -1,7 +1,7 @@
 import { getBusinessForEmbed } from '@/lib/business/embed-utils';
-import { NewBookingForm } from '@/app/[domain]/booking/_components/customer-booking-form';
-import { makeScale } from '@/app/[domain]/_themes/utils';
+import { BookingWrapper } from './_components/BookingWrapper';
 import { notFound } from 'next/navigation';
+import { makeScale } from '@/app/[domain]/_themes/utils';
 
 interface PageProps {
   params: Promise<{ businessId: string }>;
@@ -16,23 +16,17 @@ export default async function EmbedBookingPage({ params, searchParams }: PagePro
     const business = await getBusinessForEmbed(businessId);
     const siteConfig = business.siteConfig || {};
     
-    // Extract configuration from URL params, fallback to business colors
-    const primaryColor = (search.primaryColor as string) || siteConfig.colors?.primary || '#4f46e5';
-    const accentColor = (search.accentColor as string) || siteConfig.colors?.accent || '#f97316';
-    const secondaryColor = (search.secondaryColor as string) || siteConfig.colors?.secondary || '#06b6d4';
-    const backgroundColor = (search.backgroundColor as string) || siteConfig.colors?.background || '#ffffff';
-    const textColor = (search.textColor as string) || siteConfig.colors?.text || '#333333';
-    const themeName = (search.theme as string) || siteConfig.themeName?.name || 'modern';
+    // Extract theme name correctly - use .name property like other pages
+    const themeName = siteConfig.themeName?.name || 'modern';
     
-    console.log('Embed booking colors:', {
-      primary: primaryColor,
-      accent: accentColor,
-      secondary: secondaryColor,
-      background: backgroundColor,
-      text: textColor
-    });
+    // Extract individual color values like other embed pages
+    const primaryColor = siteConfig.colors?.primary || '#4f46e5';
+    const accentColor = siteConfig.colors?.accent || '#f97316';
+    const secondaryColor = siteConfig.colors?.secondary || '#06b6d4';
+    const backgroundColor = siteConfig.colors?.background || '#ffffff';
+    const textColor = siteConfig.colors?.text || '#333333';
     
-    // Build color scales
+    // Construct colors object using makeScale like other pages do
     const colors = {
       primary: makeScale(primaryColor),
       accent: makeScale(accentColor),
@@ -41,12 +35,27 @@ export default async function EmbedBookingPage({ params, searchParams }: PagePro
       text: makeScale(textColor)
     };
 
+    if (!business) {
+      notFound();
+    }
+
+    // Extract widget configuration
+    const redirectUrl = search.redirectUrl as string;
+    const successMessage = search.successMessage as string || 'Thank you for your booking! We\'ll contact you soon.';
+
     return (
-      <div className="p-4 min-h-screen">
-        <NewBookingForm 
+      <div style={{
+        minHeight: '100vh',
+        backgroundColor: '#ffffff',
+        padding: '1rem',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      }}>
+        <BookingWrapper 
           businessId={business.id}
           themeName={themeName}
           colors={colors}
+          successMessage={successMessage}
+          redirectUrl={redirectUrl || (typeof business.website === 'string' ? business.website : undefined)}
         />
       </div>
     );

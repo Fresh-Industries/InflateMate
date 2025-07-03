@@ -6,476 +6,260 @@
     <title>InflateMate Embed Widgets Demo</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: system-ui, -apple-system, sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 20px;
-            background-color: #f5f5f5;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
         }
+        
         .container {
             max-width: 1200px;
             margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
         }
+        
         .header {
             text-align: center;
-            margin-bottom: 40px;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            margin-bottom: 50px;
         }
-        .demo-section {
-            margin-bottom: 40px;
-            background: white;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        .demo-section h2 {
-            margin-top: 0;
+        
+        .header h1 {
             color: #333;
-            border-bottom: 2px solid #4f46e5;
-            padding-bottom: 10px;
+            font-size: 3rem;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
+        
+        .header p {
+            color: #666;
+            font-size: 1.2rem;
+        }
+        
+        .demo-section {
+            margin-bottom: 60px;
+            padding: 30px;
+            border: 2px solid #f0f0f0;
+            border-radius: 15px;
+            background: #fafafa;
+        }
+        
+        .demo-section h2 {
+            color: #333;
+            font-size: 2rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+        
+        .demo-section h2::before {
+            content: "🎈";
+            margin-right: 10px;
+            font-size: 1.5rem;
+        }
+        
+        .demo-section p {
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 1.1rem;
+        }
+        
         .widget-container {
-            border: 2px dashed #e5e5e5;
-            border-radius: 8px;
+            background: white;
+            border-radius: 12px;
             padding: 20px;
-            margin: 20px 0;
-            min-height: 200px;
+            margin-top: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        .controls {
+        
+        .config-info {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 15px;
             margin-bottom: 20px;
-            padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
-        }
-        .controls label {
-            display: block;
-            margin: 10px 0 5px 0;
-            font-weight: bold;
-        }
-        .controls input, .controls select {
-            width: 100%;
-            max-width: 300px;
-            padding: 8px;
-            border: 1px solid #ddd;
             border-radius: 4px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
         }
-        .controls button {
-            background: #4f46e5;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
-            cursor: pointer;
-            margin: 10px 10px 0 0;
+        
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
         }
-        .controls button:hover {
-            background: #3730a3;
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .demo-section {
+                padding: 20px;
+            }
         }
-        .code-example {
-            background: #f8f8f8;
-            border: 1px solid #e5e5e5;
-            border-radius: 4px;
-            padding: 15px;
-            margin: 15px 0;
-            overflow-x: auto;
-        }
-        .code-example pre {
-            margin: 0;
-            font-family: 'Monaco', 'Menlo', monospace;
-            font-size: 14px;
-        }
-        .status {
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 4px;
-            font-weight: bold;
-        }
-        .status.success { background: #d4edda; color: #155724; }
-        .status.error { background: #f8d7da; color: #721c24; }
-        .status.info { background: #d1ecf1; color: #0c5460; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>🎈 InflateMate Embed Widgets Demo</h1>
-            <p>This page demonstrates how to embed InflateMate widgets into your website.</p>
-            <p><strong>Note:</strong> Replace 'your-business-id' with your actual business ID in the examples below.</p>
+            <h1>🎈 InflateMate Embed Widgets</h1>
+            <p>Experience all our powerful embeddable widgets in action</p>
         </div>
 
-        <!-- Booking Widget Demo -->
+        <!-- Booking Widget -->
         <div class="demo-section">
-            <h2>📅 Booking Widget</h2>
-            <p>Allow customers to book your services directly from your website.</p>
-            
-            <div class="controls">
-                <label for="booking-business-id">Business ID:</label>
-                <input type="text" id="booking-business-id" value="cmb5lnorg000bcvbcwbpxii0p" placeholder="Enter your business ID">
-                
-                <label for="booking-theme">Theme:</label>
-                <select id="booking-theme">
-                    <option value="modern">Modern</option>
-                    <option value="playful">Playful</option>
-                    <option value="retro">Retro</option>
-                </select>
-                
-                <label for="booking-color">Primary Color (optional override):</label>
-                <input type="text" id="booking-color" value="" placeholder="e.g. #FF6BB8 (leave empty for business default)">
-                
-                <button onclick="createBookingWidget()">Create Booking Widget</button>
-                <button onclick="destroyWidget('booking-widget')">Destroy Widget</button>
+            <h2>Booking Widget</h2>
+            <p>Complete booking experience with date selection, inventory picking, and customer details.</p>
+            <div class="config-info">
+                Configuration: Default theme with custom success message and redirect URL
             </div>
-
-            <div id="booking-widget" class="widget-container">
-                <p>Booking widget will appear here...</p>
-            </div>
-
-            <div class="code-example">
-                <pre><code>&lt;script src="https://yourdomain.com/embed/sdk"&gt;&lt;/script&gt;
-&lt;div id="booking-widget"&gt;&lt;/div&gt;
-&lt;script&gt;
-    InflateMateEmbed.create({
-        businessId: 'your-business-id',
-        type: 'booking',
-        container: '#booking-widget',
-        theme: 'modern',
-        primaryColor: '#4f46e5'
-    });
-&lt;/script&gt;</code></pre>
+            <div class="widget-container">
+                <div class="inflatemate-widget" 
+                     data-business-id="test-business-id"
+                     data-type="booking"
+                     data-theme="modern"
+                     data-primary-color="#4f46e5"
+                     data-accent-color="#f59e0b"
+                     data-redirect-url="https://yoursite.com/thank-you"
+                     data-success-message="Awesome! Your booking request has been received. We'll contact you within 24 hours!"
+                     data-link-target="website">
+                </div>
             </div>
         </div>
 
-        <!-- Inventory Widget Demo -->
+        <!-- Popular Rentals Widget -->
         <div class="demo-section">
-            <h2>📦 Inventory Widget</h2>
-            <p>Display your available inventory items.</p>
-            
-            <div class="controls">
-                <label for="inventory-business-id">Business ID:</label>
-                <input type="text" id="inventory-business-id" value="cmb5lnorg000bcvbcwbpxii0p" placeholder="Enter your business ID">
-                
-                <label for="inventory-theme">Theme:</label>
-                <select id="inventory-theme">
-                    <option value="modern">Modern</option>
-                    <option value="playful">Playful</option>
-                    <option value="retro">Retro</option>
-                </select>
-                
-                <label for="inventory-color">Primary Color (optional override):</label>
-                <input type="text" id="inventory-color" value="" placeholder="e.g. #FF6BB8 (leave empty for business default)">
-                
-                <button onclick="createInventoryWidget()">Create Inventory Widget</button>
-                <button onclick="destroyWidget('inventory-widget')">Destroy Widget</button>
+            <h2>Popular Rentals Widget</h2>
+            <p>Showcase your most popular items in an attractive grid layout.</p>
+            <div class="config-info">
+                Configuration: 6 items, playful theme, show prices and descriptions
             </div>
-
-            <div id="inventory-widget" class="widget-container">
-                <p>Inventory widget will appear here...</p>
-            </div>
-
-            <div class="code-example">
-                <pre><code>&lt;script src="https://yourdomain.com/embed/sdk"&gt;&lt;/script&gt;
-&lt;div id="inventory-widget"&gt;&lt;/div&gt;
-&lt;script&gt;
-    InflateMateEmbed.create({
-        businessId: 'your-business-id',
-        type: 'inventory',
-        container: '#inventory-widget',
-        theme: 'modern',
-        primaryColor: '#06b6d4'
-    });
-&lt;/script&gt;</code></pre>
+            <div class="widget-container">
+                <div class="inflatemate-widget" 
+                     data-business-id="test-business-id"
+                     data-type="popular-rentals"
+                     data-theme="playful"
+                     data-primary-color="#8b5cf6"
+                     data-accent-color="#f59e0b"
+                     data-limit="6"
+                     data-show-prices="true"
+                     data-show-descriptions="true"
+                     data-link-target="website">
+                </div>
             </div>
         </div>
 
-        <!-- Product Widget Demo -->
+        <div class="grid">
+            <!-- Inventory Widget -->
+            <div class="demo-section">
+                <h2>Inventory Widget</h2>
+                <p>Browse all available inventory with search and filtering.</p>
+                <div class="config-info">
+                    Configuration: Retro theme, custom colors
+                </div>
+                <div class="widget-container">
+                    <div class="inflatemate-widget" 
+                         data-business-id="test-business-id"
+                         data-type="inventory"
+                         data-theme="retro"
+                         data-primary-color="#000000"
+                         data-accent-color="#ff3e3e"
+                         data-link-target="embed">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Product Detail Widget -->
+            <div class="demo-section">
+                <h2>Product Detail Widget</h2>
+                <p>Detailed view of a specific product with specs and booking.</p>
+                <div class="config-info">
+                    Configuration: Modern theme, specific product ID
+                </div>
+                <div class="widget-container">
+                    <div class="inflatemate-widget" 
+                         data-business-id="test-business-id"
+                         data-type="product"
+                         data-product-id="sample-product-id"
+                         data-theme="modern"
+                         data-primary-color="#3b82f6"
+                         data-accent-color="#10b981">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Custom Link Configuration Example -->
         <div class="demo-section">
-            <h2>🎪 Product Detail Widget</h2>
-            <p>Show details for a specific product.</p>
-            
-            <div class="controls">
-                <label for="product-business-id">Business ID:</label>
-                <input type="text" id="product-business-id" value="cmb5lnorg000bcvbcwbpxii0p" placeholder="Enter your business ID">
-                
-                <label for="product-id">Product ID:</label>
-                <input type="text" id="product-id" value="product-123" placeholder="Enter product ID">
-                
-                <label for="product-theme">Theme:</label>
-                <select id="product-theme">
-                    <option value="modern">Modern</option>
-                    <option value="playful">Playful</option>
-                    <option value="retro">Retro</option>
-                </select>
-                
-                <label for="product-color">Primary Color (optional override):</label>
-                <input type="text" id="product-color" value="" placeholder="e.g. #FF6BB8 (leave empty for business default)">
-                
-                <button onclick="createProductWidget()">Create Product Widget</button>
-                <button onclick="destroyWidget('product-widget')">Destroy Widget</button>
+            <h2>Custom Link Configuration</h2>
+            <p>Widget configured to redirect to your own website pages.</p>
+            <div class="config-info">
+                Configuration: Custom URLs for booking, inventory, and product pages
             </div>
-
-            <div id="product-widget" class="widget-container">
-                <p>Product widget will appear here...</p>
-            </div>
-
-            <div class="code-example">
-                <pre><code>&lt;script src="https://yourdomain.com/embed/sdk"&gt;&lt;/script&gt;
-&lt;div id="product-widget"&gt;&lt;/div&gt;
-&lt;script&gt;
-    InflateMateEmbed.create({
-        businessId: 'your-business-id',
-        type: 'product',
-        productId: 'product-123',
-        container: '#product-widget',
-        theme: 'modern',
-        primaryColor: '#f97316'
-    });
-&lt;/script&gt;</code></pre>
+            <div class="widget-container">
+                <div class="inflatemate-widget" 
+                     data-business-id="test-business-id"
+                     data-type="popular-rentals"
+                     data-theme="modern"
+                     data-limit="3"
+                     data-link-target="custom"
+                     data-booking-url="https://yoursite.com/book-now"
+                     data-inventory-url="https://yoursite.com/rentals"
+                     data-product-url="https://yoursite.com/rentals/{id}"
+                     data-show-prices="false">
+                </div>
             </div>
         </div>
 
-        <!-- Sales Funnel Widget Demo -->
+        <!-- Integration Instructions -->
         <div class="demo-section">
-            <h2>🎯 Sales Funnel Widget</h2>
-            <p>Display your sales funnel popup.</p>
+            <h2>Integration Instructions</h2>
+            <p>Copy any of the HTML snippets above and paste them into your website. The widgets will automatically load and resize to fit your content.</p>
             
-            <div class="controls">
-                <label for="funnel-business-id">Business ID:</label>
-                <input type="text" id="funnel-business-id" value="cmb5lnorg000bcvbcwbpxii0p" placeholder="Enter your business ID">
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 8px; margin-top: 20px;">
+                <h3 style="margin-top: 0; color: #333;">Basic Integration Steps:</h3>
+                <ol style="color: #666; line-height: 1.8;">
+                    <li>Copy the HTML snippet for the widget you want</li>
+                    <li>Replace <code>test-business-id</code> with your actual business ID</li>
+                    <li>Customize colors, theme, and configuration as needed</li>
+                    <li>Paste the snippet into your website's HTML</li>
+                    <li>The widget loads automatically and handles responsive sizing</li>
+                </ol>
                 
-                <label for="funnel-id">Funnel ID:</label>
-                <input type="text" id="funnel-id" value="funnel-456" placeholder="Enter funnel ID">
-                
-                <label for="funnel-theme">Theme:</label>
-                <select id="funnel-theme">
-                    <option value="modern">Modern</option>
-                    <option value="playful">Playful</option>
-                    <option value="retro">Retro</option>
-                </select>
-                
-                <label for="funnel-color">Primary Color (optional override):</label>
-                <input type="text" id="funnel-color" value="" placeholder="e.g. #FF6BB8 (leave empty for business default)">
-                
-                <button onclick="createFunnelWidget()">Create Funnel Widget</button>
-                <button onclick="destroyWidget('funnel-widget')">Destroy Widget</button>
-            </div>
-
-            <div id="funnel-widget" class="widget-container">
-                <p>Sales funnel widget will appear here...</p>
-            </div>
-
-            <div class="code-example">
-                <pre><code>&lt;script src="https://yourdomain.com/embed/sdk"&gt;&lt;/script&gt;
-&lt;div id="funnel-widget"&gt;&lt;/div&gt;
-&lt;script&gt;
-    InflateMateEmbed.create({
-        businessId: 'your-business-id',
-        type: 'sales-funnel',
-        funnelId: 'funnel-456',
-        container: '#funnel-widget',
-        theme: 'modern',
-        primaryColor: '#8b5cf6'
-    });
-&lt;/script&gt;</code></pre>
+                <h3 style="color: #333;">Available Themes:</h3>
+                <ul style="color: #666; line-height: 1.8;">
+                    <li><strong>modern</strong> - Clean, minimal design with subtle shadows</li>
+                    <li><strong>playful</strong> - Vibrant, energetic with rounded corners</li>
+                    <li><strong>retro</strong> - Bold, brutalist design with sharp edges</li>
+                </ul>
             </div>
         </div>
-
-        <div id="status" class="status" style="display: none;"></div>
     </div>
 
     <!-- Load the InflateMate SDK -->
-    <script src="/embed/sdk"></script>
+    <script src="/embed/embed.js?v=2.1.0"></script>
     
     <script>
-        // Store widget instances
-        const widgets = {};
+        // Add some demo functionality
+        window.addEventListener('message', function(event) {
+            if (event.data.type === 'INFLATEMATE_BOOKING_SUCCESS') {
+                alert('🎉 Booking Success!\n\nMessage: ' + event.data.message);
+            }
+        });
         
-        // Helper function to validate hex colors
-        function isValidHexColor(color) {
-            return /^#([0-9A-F]{3}){1,2}$/i.test(color) && color !== '#000000';
-        }
-        
-        function showStatus(message, type = 'info') {
-            const statusEl = document.getElementById('status');
-            statusEl.textContent = message;
-            statusEl.className = `status ${type}`;
-            statusEl.style.display = 'block';
-            
-            setTimeout(() => {
-                statusEl.style.display = 'none';
-            }, 3000);
-        }
-        
-        function destroyWidget(containerId) {
-            if (widgets[containerId]) {
-                widgets[containerId].destroy();
-                delete widgets[containerId];
-                document.getElementById(containerId).innerHTML = '<p>Widget destroyed. Click "Create" to recreate.</p>';
-                showStatus('Widget destroyed successfully!', 'success');
-            }
-        }
-        
-        function createBookingWidget() {
-            const businessId = document.getElementById('booking-business-id').value;
-            const theme = document.getElementById('booking-theme').value;
-            const primaryColor = document.getElementById('booking-color').value;
-            
-            if (!businessId) {
-                showStatus('Please enter a valid business ID', 'error');
-                return;
-            }
-            
-            // Destroy existing widget
-            destroyWidget('booking-widget');
-            
-            try {
-                const config = {
-                    businessId: businessId,
-                    type: 'booking',
-                    container: '#booking-widget',
-                    theme: theme,
-                    autoResize: true,
-                    onLoad: function() {
-                        showStatus('Booking widget loaded successfully!', 'success');
-                    },
-                    onError: function(error) {
-                        showStatus(`Error loading booking widget: ${error}`, 'error');
-                    },
-                    onResize: function(height) {
-                        console.log('Booking widget resized to:', height);
-                    }
-                };
-                
-                // Only add primaryColor if provided and is a valid hex color
-                if (primaryColor && primaryColor.trim() && isValidHexColor(primaryColor.trim())) {
-                    config.primaryColor = primaryColor.trim();
-                }
-                
-                widgets['booking-widget'] = InflateMateEmbed.create(config);
-            } catch (error) {
-                showStatus(`Error creating booking widget: ${error.message}`, 'error');
-            }
-        }
-        
-        function createInventoryWidget() {
-            const businessId = document.getElementById('inventory-business-id').value;
-            const theme = document.getElementById('inventory-theme').value;
-            const primaryColor = document.getElementById('inventory-color').value;
-            
-            if (!businessId) {
-                showStatus('Please enter a valid business ID', 'error');
-                return;
-            }
-            
-            destroyWidget('inventory-widget');
-            
-            try {
-                const config = {
-                    businessId: businessId,
-                    type: 'inventory',
-                    container: '#inventory-widget',
-                    theme: theme,
-                    autoResize: true,
-                    onLoad: function() {
-                        showStatus('Inventory widget loaded successfully!', 'success');
-                    },
-                    onError: function(error) {
-                        showStatus(`Error loading inventory widget: ${error}`, 'error');
-                    }
-                };
-                
-                // Only add primaryColor if provided and is a valid hex color
-                if (primaryColor && primaryColor.trim() && isValidHexColor(primaryColor.trim())) {
-                    config.primaryColor = primaryColor.trim();
-                }
-                
-                widgets['inventory-widget'] = InflateMateEmbed.create(config);
-            } catch (error) {
-                showStatus(`Error creating inventory widget: ${error.message}`, 'error');
-            }
-        }
-        
-        function createProductWidget() {
-            const businessId = document.getElementById('product-business-id').value;
-            const productId = document.getElementById('product-id').value;
-            const theme = document.getElementById('product-theme').value;
-            const primaryColor = document.getElementById('product-color').value;
-            
-            if (!businessId) {
-                showStatus('Please enter a valid business ID', 'error');
-                return;
-            }
-            
-            destroyWidget('product-widget');
-            
-            try {
-                const config = {
-                    businessId: businessId,
-                    type: 'product',
-                    productId: productId,
-                    container: '#product-widget',
-                    theme: theme,
-                    autoResize: true,
-                    onLoad: function() {
-                        showStatus('Product widget loaded successfully!', 'success');
-                    },
-                    onError: function(error) {
-                        showStatus(`Error loading product widget: ${error}`, 'error');
-                    }
-                };
-                
-                // Only add primaryColor if provided and is a valid hex color
-                if (primaryColor && primaryColor.trim() && isValidHexColor(primaryColor.trim())) {
-                    config.primaryColor = primaryColor.trim();
-                }
-                
-                widgets['product-widget'] = InflateMateEmbed.create(config);
-            } catch (error) {
-                showStatus(`Error creating product widget: ${error.message}`, 'error');
-            }
-        }
-        
-        function createFunnelWidget() {
-            const businessId = document.getElementById('funnel-business-id').value;
-            const funnelId = document.getElementById('funnel-id').value;
-            const theme = document.getElementById('funnel-theme').value;
-            const primaryColor = document.getElementById('funnel-color').value;
-            
-            if (!businessId) {
-                showStatus('Please enter a valid business ID', 'error');
-                return;
-            }
-            
-            destroyWidget('funnel-widget');
-            
-            try {
-                const config = {
-                    businessId: businessId,
-                    type: 'sales-funnel',
-                    funnelId: funnelId,
-                    container: '#funnel-widget',
-                    theme: theme,
-                    autoResize: true,
-                    onLoad: function() {
-                        showStatus('Sales funnel widget loaded successfully!', 'success');
-                    },
-                    onError: function(error) {
-                        showStatus(`Error loading sales funnel widget: ${error}`, 'error');
-                    }
-                };
-                
-                // Only add primaryColor if provided and is a valid hex color
-                if (primaryColor && primaryColor.trim() && isValidHexColor(primaryColor.trim())) {
-                    config.primaryColor = primaryColor.trim();
-                }
-                
-                widgets['funnel-widget'] = InflateMateEmbed.create(config);
-            } catch (error) {
-                showStatus(`Error creating sales funnel widget: ${error.message}`, 'error');
-            }
-        }
+        console.log('InflateMate Embed Demo loaded! Check the browser network tab to see widget requests.');
     </script>
 </body>
 </html> 

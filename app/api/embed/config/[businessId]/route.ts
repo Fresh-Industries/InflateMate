@@ -53,6 +53,7 @@ export async function GET(
         booking: `/embed/${businessId}/booking`,
         inventory: `/embed/${businessId}/inventory`,
         product: `/embed/${businessId}/inventory/[productId]`,
+        popularRentals: `/embed/${businessId}/popular-rentals`,
         salesFunnel: `/embed/${businessId}/sales-funnel/[funnelId]`
       },
       sdkUrl: '/embed/sdk'

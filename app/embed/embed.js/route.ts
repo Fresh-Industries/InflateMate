@@ -4,16 +4,16 @@ import path from 'path';
 
 export async function GET() {
   try {
-    const sdkPath = path.join(process.cwd(), 'public', 'embed', 'inflatemate-embed.js');
+    const embedPath = path.join(process.cwd(), 'public', 'embed', 'inflatemate-embed.js');
     
     // Check if file exists
-    if (!fs.existsSync(sdkPath)) {
-      return new NextResponse('SDK not found', { status: 404 });
+    if (!fs.existsSync(embedPath)) {
+      return new NextResponse('Embed script not found', { status: 404 });
     }
     
-    const sdkContent = fs.readFileSync(sdkPath, 'utf8');
+    const embedContent = fs.readFileSync(embedPath, 'utf8');
     
-    return new NextResponse(sdkContent, {
+    return new NextResponse(embedContent, {
       headers: {
         'Content-Type': 'application/javascript',
         'Cache-Control': 'no-cache, no-store, must-revalidate', // Disable all caching for development
@@ -23,12 +23,12 @@ export async function GET() {
         'Access-Control-Allow-Methods': 'GET',
         'Access-Control-Allow-Headers': 'Content-Type',
         'X-Content-Type-Options': 'nosniff',
-        'ETag': `"sdk-${Date.now()}"`, // Add ETag for cache busting
+        'ETag': `"embed-${Date.now()}"`, // Add ETag for cache busting
       },
     });
   } catch (error) {
-    console.error('Error serving SDK:', error);
-    return new NextResponse('Error loading SDK', { status: 500 });
+    console.error('Error serving embed script:', error);
+    return new NextResponse('Error loading embed script', { status: 500 });
   }
 }
 
