@@ -9,7 +9,8 @@ const publicRoute = createRouteMatcher([
   '/:domain(.*)',
   '/api/webhook(.*)',
   '/api(.*)',
-  '/public(.*)'
+  '/public(.*)',
+  '/embed(.*)'
 ]);
 
 const internalRoute = createRouteMatcher([
