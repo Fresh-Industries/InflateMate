@@ -517,6 +517,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
                 businessId={businessId}
                 embeddedComponents={initialData.embeddedComponents as boolean || false}
                 currentDomain={initialData.customDomain as string}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 embedConfig={initialData.embedConfig as any}
                 colors={siteConfig.colors}
                 theme={siteConfig.themeName?.name || 'modern'}

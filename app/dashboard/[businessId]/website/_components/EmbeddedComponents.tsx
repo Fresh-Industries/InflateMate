@@ -45,6 +45,13 @@ interface EmbeddedComponentsProps {
   currentDomain?: string | null;
   embedConfig?: EmbedConfig;
   theme?: string;
+  colors?: {
+    primary?: string;
+    secondary?: string;
+    accent?: string;
+    background?: string;
+    text?: string;
+  };
 }
 
 export default function EmbeddedComponents({ 
