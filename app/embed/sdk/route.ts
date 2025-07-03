@@ -1,35 +1,9 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextRequest, NextResponse } from 'next/server';
 
-export async function GET() {
-  try {
-    const sdkPath = path.join(process.cwd(), 'public', 'embed', 'inflatemate-embed.js');
-    
-    // Check if file exists
-    if (!fs.existsSync(sdkPath)) {
-      return new NextResponse('SDK not found', { status: 404 });
-    }
-    
-    const sdkContent = fs.readFileSync(sdkPath, 'utf8');
-    
-    return new NextResponse(sdkContent, {
-      headers: {
-        'Content-Type': 'application/javascript',
-        'Cache-Control': 'no-cache, no-store, must-revalidate', // Disable all caching for development
-        'Pragma': 'no-cache',
-        'Expires': '0',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET',
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'X-Content-Type-Options': 'nosniff',
-        'ETag': `"sdk-${Date.now()}"`, // Add ETag for cache busting
-      },
-    });
-  } catch (error) {
-    console.error('Error serving SDK:', error);
-    return new NextResponse('Error loading SDK', { status: 500 });
-  }
+export async function GET(request: NextRequest) {
+  // Redirect to the dynamic embed.js route
+  const url = new URL('/embed/embed.js', request.url);
+  return NextResponse.redirect(url);
 }
 
 // Handle preflight requests for CORS

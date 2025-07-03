@@ -130,7 +130,7 @@ export default function EmbeddedComponents({
     });
     
     return `<!-- InflateMate Widget -->
-<script src="${baseUrl}/embed/embed.js?v=2.1.0"></script>
+<script src="${baseUrl}/embed/embed.js"></script>
 <div class="inflatemate-widget" ${dataAttrs.join(' ')}></div>`;
   };
 
