@@ -34,17 +34,17 @@ export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
   const host = (req.headers.get('host') ?? '').toLowerCase().replace(/^www\./, '');
 
+  /* ── FIRST: Skip embed routes completely ─────────────────────── */
+  if (url.pathname.startsWith('/embed/')) {
+    return NextResponse.next();
+  }
+
   /* ── A. skip Next.js internals & static assets ─────────────────────── */
   if (
     url.pathname.startsWith('/_next/') || 
     url.pathname === '/favicon.ico' ||
     url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|css|js)$/)
   ) {
-    return NextResponse.next();
-  }
-
-  /* ── Skip embed routes early ─────────────────────── */
-  if (url.pathname.startsWith('/embed/')) {
     return NextResponse.next();
   }
 
@@ -86,11 +86,13 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - embed (embed routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!api|embed|_next/static|_next/image|favicon.ico).*)',
   ],
 };
