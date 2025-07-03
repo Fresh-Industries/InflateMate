@@ -5,7 +5,7 @@
   const EMBED_CONFIG = {
     baseUrl: window.location.hostname === 'localhost' 
       ? 'http://localhost:3001' 
-      : 'https://app.inflatemate.com',
+      : 'https://staging.inflatemate.com',
     version: '2.1.0'
   };
 
