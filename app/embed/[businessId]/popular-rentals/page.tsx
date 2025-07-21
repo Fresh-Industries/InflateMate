@@ -3,7 +3,7 @@ import { makeScale } from '@/app/[domain]/_themes/utils';
 import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
-import PopularRentals from '@/app/embed/_components/PopularRentals';
+import { PopularRentalsWrapper } from './_components/PopularRentalsWrapper';
 
 interface PageProps {
   params: Promise<{ businessId: string }>;
@@ -19,7 +19,7 @@ export default async function EmbedPopularRentalsPage({ params, searchParams }: 
     const siteConfig = business.siteConfig || {};
     
     // Extract color overrides from URL params, fallback to business colors
-    const primaryColor = (search.primaryColor as string) || siteConfig.colors?.primary || '#4f46e5';
+    const primaryColor =(search.primaryColor as string) || siteConfig.colors?.primary || '#4f46e5';
     const accentColor = (search.accentColor as string) || siteConfig.colors?.accent || '#f97316';
     const secondaryColor = (search.secondaryColor as string) || siteConfig.colors?.secondary || '#06b6d4';
     const backgroundColor = (search.backgroundColor as string) || siteConfig.colors?.background || '#ffffff';
@@ -66,7 +66,8 @@ export default async function EmbedPopularRentalsPage({ params, searchParams }: 
         color: colors.text[900],
         minHeight: '400px'
       }}>
-        <PopularRentals 
+        <PopularRentalsWrapper 
+          businessId={business.id}
           items={inventoryItems}
           colors={colors}
           themeName={themeName as keyof typeof themeConfig}

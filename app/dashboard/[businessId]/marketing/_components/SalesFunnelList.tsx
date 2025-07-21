@@ -192,8 +192,12 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle>{funnel.name}</CardTitle>
+
                     <CardDescription className="mt-1">
                       {funnel.popupTitle}
+                    </CardDescription>
+                    <CardDescription className="mt-1">
+                      {funnel.id}
                     </CardDescription>
                   </div>
                   <DropdownMenu>

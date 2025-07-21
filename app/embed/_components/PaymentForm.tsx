@@ -5,14 +5,13 @@ import { useStripe, useElements, PaymentElement } from "@stripe/react-stripe-js"
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { Loader2, CreditCard, DollarSign, AlertCircle, CheckCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { themeConfig } from "@/app/[domain]/_themes/themeConfig";
 import { ThemeColors } from "@/app/[domain]/_themes/types";
 
 interface PaymentFormProps {
   amount: number;
   customerEmail: string;
-  onSuccess: () => Promise<void>;
+  onSuccess: (bookingId?: string) => Promise<void>;
   onError?: (error: string) => void;
   businessId: string;
   subtotal?: number;
@@ -41,7 +40,6 @@ export function PaymentForm({
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const { toast } = useToast();
-  const router = useRouter();
 
   const theme = themeConfig[themeName] ?? themeConfig.modern;
 
@@ -164,48 +162,8 @@ export function PaymentForm({
           description: "Your booking has been confirmed",
         });
         
-        // Use the provided bookingId from props if available
-        // If not, fall back to extracting from payment intent metadata
-        const confirmedBookingId =
-  bookingId ||
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ((paymentIntent as any)?.metadata?.prismaBookingId as string | undefined);
-
-        console.log('Booking ID:', confirmedBookingId);
-        
-        // Extract domain from the URL path
-        const fullPath = window.location.pathname;
-        console.log('Current pathname:', fullPath);
-
-        // Extract just the domain part without additional path segments
-        let domain = null;
-        const domainMatch = fullPath.match(/^\/([^/]+)/);
-
-        console.log('Domain match:', domainMatch);
-
-        if (domainMatch && domainMatch[1]) {
-          domain = domainMatch[1];
-        }
-
-        console.log('Extracted domain:', domain);
-
-        // If domain is clearly not a real domain but a Next.js placeholder, ignore it
-        if (domain === '[domain]' || domain === '%5Bdomain%5D') {
-          domain = null;
-          console.log('Ignoring Next.js placeholder domain');
-        }
-
-        // Build redirect URL - prevent double booking path by removing the booking segment
-        const redirectUrl = domain
-          ? `/${domain}/success?bookingId=${confirmedBookingId}&businessId=${businessId}`
-          : `/success?bookingId=${confirmedBookingId}&businessId=${businessId}`;
-            
-        console.log('Redirecting to:', redirectUrl);
-        
-        // Redirect to success page
-        router.push(redirectUrl);
-        
-        await onSuccess();
+        // Let the parent handle navigation to the configured success page
+        await onSuccess(bookingId);
       } else {
         // Handle other paymentIntent statuses
         console.log("Payment status:", paymentIntent?.status);
@@ -216,53 +174,8 @@ export function PaymentForm({
             description: "Your payment is processing. We'll update you when it's complete.",
           });
           
-          // Use the provided bookingId from props if available
-          // If not, fall back to extracting from payment intent metadata
-          const confirmedBookingId =
-            bookingId ||
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ((paymentIntent as any)?.metadata?.prismaBookingId as
-              | string
-              | undefined);
-          
-          // Redirect to success page with booking ID for processing status too
-          if (confirmedBookingId) {
-            // Extract domain from the URL path
-            const fullPath = window.location.pathname;
-            console.log('Current pathname:', fullPath);
-
-            // Extract just the domain part without additional path segments
-            let domain = null;
-            const domainMatch = fullPath.match(/^\/([^/]+)/);
-
-            console.log('Domain match:', domainMatch);
-
-            if (domainMatch && domainMatch[1]) {
-              domain = domainMatch[1];
-            }
-
-            console.log('Extracted domain:', domain);
-
-            // If domain is clearly not a real domain but a Next.js placeholder, ignore it
-            if (domain === '[domain]' || domain === '%5Bdomain%5D') {
-              domain = null;
-              console.log('Ignoring Next.js placeholder domain');
-            }
-
-            // Build redirect URL - prevent double booking path by removing the booking segment
-            const redirectUrl = domain
-              ? `/${domain}/success?bookingId=${confirmedBookingId}&businessId=${businessId}`
-              : `/success?bookingId=${confirmedBookingId}&businessId=${businessId}`;
-            
-            console.log('Redirecting to:', redirectUrl);
-            
-            // Redirect to success page
-            router.push(redirectUrl);
-          } else {
-            // Fallback if bookingId not available
-            console.log('No bookingId found, redirecting to home');
-            router.push(`/`);
-          }
+          // Let the parent handle navigation for processing status too
+          await onSuccess(bookingId);
         } else {
           // Some other status
           setErrorMessage("Payment result unclear. Please check your email for confirmation.");

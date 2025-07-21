@@ -23,7 +23,7 @@ export async function PUT(
 
   try {
     const body = await req.json();
-    const { siteConfig } = body;
+    const { siteConfig, embedConfig } = body;
 
     if (!siteConfig) {
       return NextResponse.json(
@@ -32,14 +32,18 @@ export async function PUT(
       );
     }
 
+    // Prepare update data
+    const updateData = {
+      siteConfig,
+      ...(embedConfig !== undefined && { embedConfig }),
+    };
+
     // Update the business with the new site configuration
     const updatedBusiness = await prisma.business.update({
       where: {
         id: businessId,
       },
-      data: {
-        siteConfig,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(updatedBusiness);
@@ -74,7 +78,7 @@ export async function GET(
   try {
     const business = await prisma.business.findUnique({
       where: { id: businessId },
-      select: { siteConfig: true, customDomain: true },
+      select: { siteConfig: true, customDomain: true, embedConfig: true },
     });
 
     if (!business) {
@@ -84,6 +88,7 @@ export async function GET(
     return NextResponse.json({
       siteConfig: business.siteConfig || {},
       customDomain: business.customDomain,
+      embedConfig: business.embedConfig || {},
     });
   } catch (error) {
     console.error("Error fetching website configuration:", error);

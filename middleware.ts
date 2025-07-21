@@ -8,26 +8,24 @@ const publicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/:domain(.*)',
   '/api/webhook(.*)',
-  '/api(.*)',
-  '/public(.*)',
-  '/embed(.*)'
+  '/api/embed/(.*)',          // Embed routes for public access
+  '/api/monitoring',          // Monitoring endpoint
+  '/public(.*)'
 ]);
 
 const internalRoute = createRouteMatcher([
   '/dashboard(.*)',           // keep dashboard on the root app
-  '/api(.*)',                 // your API
+  '/api(.*)',                 // your API (now protected by default)
 ]);
 
-const isStaticAsset = (domain: string) =>
-  domain.endsWith('.svg') ||
-  domain.endsWith('.png') ||
-  domain.endsWith('.jpg') ||
-  domain.endsWith('.ico') ||
-  domain.endsWith('.webmanifest') ||
-  domain.endsWith('.css') ||
-  domain.endsWith('.js') ||
-  domain.startsWith('_next/') ||
-  domain === 'favicon.ico';
+// Enhanced pathname-based asset detection
+import { 
+  isStaticAsset as detectStaticAsset, 
+  isEmbedRoute,
+  validateAssetPath
+} from '@/lib/security/embed-asset-detection';
+
+const isStaticAsset = (pathname: string) => detectStaticAsset(pathname);
 
 
 export default clerkMiddleware(async (auth, req) => {
@@ -40,20 +38,16 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   /* ── A. skip Next.js internals & static assets ─────────────────────── */
-  if (
-    url.pathname.startsWith('/_next/') || 
-    url.pathname === '/favicon.ico' ||
-    url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|css|js)$/)
-  ) {
+  if (isStaticAsset(url.pathname)) {
     return NextResponse.next();
   }
 
-  if (url.pathname.startsWith('/api')) {
-    return NextResponse.next();
-  }
-
-  if (isStaticAsset(host)) {
-    return NextResponse.next();
+  /* ── Enhanced security validation for embed routes ─────────────────── */
+  if (isEmbedRoute(url.pathname)) {
+    // Validate asset path for security (prevent directory traversal, etc.)
+    if (!validateAssetPath(url.pathname)) {
+      return new NextResponse('Invalid path', { status: 400 });
+    }
   }
 
   // Skip Next.js development error overlay domains

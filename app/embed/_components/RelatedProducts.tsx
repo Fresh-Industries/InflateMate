@@ -48,8 +48,13 @@ export function RelatedProducts({
   };
 
   const handleProductClick = (itemId: string) => {
-    const url = getProductLink(itemId);
-    window.top!.location.href = url;
+    // Send relative path info instead of full URL
+    window.parent.postMessage({
+      type: 'navigation',
+      action: 'product-detail',
+      path: `/services/${itemId}`,
+      itemId: itemId
+    }, '*');
   };
 
   if (relatedProducts.length === 0) {

@@ -1,5 +1,5 @@
 import { getBusinessForEmbed } from '@/lib/business/embed-utils';
-import InventoryClient from '@/app/embed/_components/InventoryPage';
+import { InventoryWrapper } from './_components/InventoryWrapper';
 import { makeScale } from '@/app/[domain]/_themes/utils';
 import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
@@ -47,7 +47,8 @@ export default async function EmbedInventoryPage({ params, searchParams }: PageP
         backgroundColor: colors.background[500],
         color: colors.text[900]
       }}>
-        <InventoryClient 
+        <InventoryWrapper 
+          businessId={business.id}
           inventoryItems={inventoryItems}
           themeName={themeName}
           colors={colors}

@@ -1,3 +1,4 @@
+// app/embed/_components/BookingForm.tsx
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
@@ -45,7 +46,7 @@ interface BookingFormProps {
   businessId: string;
   themeName?: keyof typeof themeConfig;
   colors?: ThemeColors;
-  onSuccess?: () => void;
+  onSuccess?: (bookingId?: string) => void;
   onError?: (error: string) => void;
 }
 
@@ -346,14 +347,14 @@ export function BookingForm({ businessId, themeName, colors, onSuccess, onError 
             themeName={themeName}
             colors={colors}
             bookingId={bookingId || undefined}
-            onSuccess={async () => {
+            onSuccess={async (receivedBookingId) => {
               setShowPaymentForm(false);
               setHoldId(null);
               setHoldExpiresAt(null);
               setCurrentStep(1);
               setNewBooking(initialBooking);
               setCouponCode("");
-              onSuccess?.(); // Call the parent's success callback
+              onSuccess?.(receivedBookingId || undefined); // Call the parent's success callback with bookingId
               setTimeout(() => router.refresh(), 500);
             }}
             onError={(error) => {

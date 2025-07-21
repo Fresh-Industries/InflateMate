@@ -24,6 +24,16 @@ import AddSectionForm from "./AddSectionForm";
 import EmbeddedComponents from "./EmbeddedComponents";
 import { modern } from "@/lib/config/themes";
 
+interface EmbedConfig {
+  pageRoutes?: {
+    booking?: string;
+    inventory?: string;
+    product?: string;
+  };
+  popularRentalsCount?: number;
+  redirectUrl?: string;
+}
+
 interface WebsiteCustomizerProps {
   businessId: string;
   initialData: Record<string, unknown>;
@@ -54,6 +64,11 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   );
 
   const defaultTheme: Theme = { id: modern.id, name: modern.themeName };
+
+  // Add embedConfig state
+  const [embedConfig, setEmbedConfig] = useState<EmbedConfig>(() => {
+    return (initialData.embedConfig as EmbedConfig) || {};
+  });
 
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(() => {
     const initialSiteConfig = (initialData.siteConfig as SiteConfig | undefined);
@@ -110,12 +125,20 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
     setIsLoading(true);
     
     try {
+      // Save both siteConfig and embedConfig
+      const payload: { siteConfig: SiteConfig; embedConfig?: EmbedConfig } = { siteConfig };
+      
+      // Only include embedConfig if embedded components are enabled
+      if (initialData.embeddedComponents) {
+        payload.embedConfig = embedConfig;
+      }
+      
       const response = await fetch(`/api/businesses/${businessId}/website`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ siteConfig }), // Saves the entire siteConfig including sections
+        body: JSON.stringify(payload),
       });
       
       if (!response.ok) {
@@ -200,6 +223,16 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       themeName: theme,
     }));
   };
+
+  // Handle embed config updates
+  const handleEmbedConfigUpdate = useCallback((data: EmbedConfig) => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+    updateTimeoutRef.current = setTimeout(() => {
+      setEmbedConfig(prev => ({ ...prev, ...data }));
+    }, 100);
+  }, []);
 
   const handleTabChange = (value: string) => {
     if (value === 'landing' || value === 'about' || value === 'contact' || value === 'colors' || value === 'themeSettings' || value === 'embedded') {
@@ -517,10 +550,10 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
                 businessId={businessId}
                 embeddedComponents={initialData.embeddedComponents as boolean || false}
                 currentDomain={initialData.customDomain as string}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                embedConfig={initialData.embedConfig as any}
+                embedConfig={embedConfig}
                 colors={siteConfig.colors}
                 theme={siteConfig.themeName?.name || 'modern'}
+                onUpdateEmbedConfig={handleEmbedConfigUpdate}
               />
             </TabsContent>
 

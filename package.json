@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "postinstall": "prisma generate && prisma migrate deploy",
-    "build": "next build",
+    "build": "npm run build:embed && next build",
+    "build:embed": "node scripts/build-embed.js",
     "start": "next start",
     "lint": "next lint",
     "test": "vitest"
@@ -49,6 +50,7 @@
     "@stripe/react-stripe-js": "^3.1.1",
     "@stripe/stripe-js": "^5.6.0",
     "@supabase/supabase-js": "^2.49.4",
+    "@types/dompurify": "^3.0.5",
     "@types/pdfkit": "^0.13.9",
     "@uploadthing/react": "^7.2.0",
     "chroma-js": "^3.1.2",
@@ -57,6 +59,7 @@
     "cuid": "^3.0.0",
     "date-fns": "^3.6.0",
     "date-fns-tz": "^3.2.0",
+    "dompurify": "^3.2.6",
     "dotenv": "^16.5.0",
     "embla-carousel-react": "^8.6.0",
     "framer-motion": "^12.6.3",

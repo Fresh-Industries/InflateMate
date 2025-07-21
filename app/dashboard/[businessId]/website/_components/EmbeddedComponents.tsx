@@ -8,9 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Switch } from "@/components/ui/switch";
-import { Textarea } from "@/components/ui/textarea";
-import { Copy, Code, Calendar, Package, ShoppingCart, Target, Star, Globe, Settings, Palette, Monitor, Eye, CheckCircle } from "lucide-react";
+import { Copy, Code, Calendar, Package, ShoppingCart, Target, Star, Globe, Palette, Monitor, CheckCircle, Check, Zap } from "lucide-react";
 import { toast } from "sonner";
 
 interface EmbedConfig {
@@ -20,23 +18,17 @@ interface EmbedConfig {
     product?: string;
   };
   popularRentalsCount?: number;
-  showPrices?: boolean;
-  showDescriptions?: boolean;
   redirectUrl?: string;
-  successMessage?: string;
 }
 
 interface WidgetConfig {
-  redirectUrl?: string;
-  successMessage?: string;
+  redirectUrl: string;
   pageRoutes: {
     booking: string;
     inventory: string;
     product: string;
   };
   popularRentalsCount: number;
-  showPrices: boolean;
-  showDescriptions: boolean;
 }
 
 interface EmbeddedComponentsProps {
@@ -52,6 +44,7 @@ interface EmbeddedComponentsProps {
     background?: string;
     text?: string;
   };
+  onUpdateEmbedConfig?: (config: EmbedConfig) => void;
 }
 
 export default function EmbeddedComponents({ 
@@ -59,15 +52,13 @@ export default function EmbeddedComponents({
   embeddedComponents,
   currentDomain,
   embedConfig,
-  theme = 'modern'
+  theme = 'modern',
+  onUpdateEmbedConfig
 }: EmbeddedComponentsProps) {
   
   const [config, setConfig] = useState<WidgetConfig>({
     popularRentalsCount: embedConfig?.popularRentalsCount || 6,
-    showPrices: embedConfig?.showPrices ?? true,
-    showDescriptions: embedConfig?.showDescriptions ?? true,
-    redirectUrl: embedConfig?.redirectUrl || '',
-    successMessage: embedConfig?.successMessage || 'Thank you for your booking! We\'ll contact you soon.',
+    redirectUrl: embedConfig?.redirectUrl || '/success',
     pageRoutes: {
       booking: embedConfig?.pageRoutes?.booking || '/booking',
       inventory: embedConfig?.pageRoutes?.inventory || '/inventory', 
@@ -76,8 +67,6 @@ export default function EmbeddedComponents({
   });
 
   const [activeWidget, setActiveWidget] = useState('booking');
-  const [previewMode, setPreviewMode] = useState(false);
-  const [isSaving, setIsSaving] = useState(false);
 
   const businessDomain = currentDomain || `${businessId}.${process.env.NEXT_PUBLIC_ROOT_DOMAIN}`;
   
@@ -88,6 +77,7 @@ export default function EmbeddedComponents({
   const generateCode = (widgetType: string, extraParams: Record<string, string> = {}) => {
     // Build data attributes
     const dataAttrs = [
+      `data-inflatemate-widget`,
       `data-business-id="${businessId}"`,
       `data-type="${widgetType}"`
     ];
@@ -102,24 +92,12 @@ export default function EmbeddedComponents({
       dataAttrs.push(`data-redirect-url="${encodeURIComponent(config.redirectUrl)}"`);
     }
 
-    if (config.successMessage && config.successMessage !== 'Thank you for your booking! We\'ll contact you soon.') {
-      dataAttrs.push(`data-success-message="${encodeURIComponent(config.successMessage)}"`);
-    }
-
     // Add page routes for linking to business website
     Object.entries(config.pageRoutes).forEach(([key, value]) => {
       if (value) {
         dataAttrs.push(`data-${key}-page-route="${encodeURIComponent(value)}"`);
       }
     });
-
-    if (!config.showPrices) {
-      dataAttrs.push(`data-show-prices="false"`);
-    }
-
-    if (!config.showDescriptions) {
-      dataAttrs.push(`data-show-descriptions="false"`);
-    }
 
     // Add extra parameters
     Object.entries(extraParams).forEach(([key, value]) => {
@@ -130,11 +108,9 @@ export default function EmbeddedComponents({
     });
     
     return `<!-- InflateMate Widget -->
-<script src="${baseUrl}/embed/embed.js"></script>
-<div class="inflatemate-widget" ${dataAttrs.join(' ')}></div>`;
+<script src="${baseUrl}/embed/loader.js"></script>
+<div ${dataAttrs.join(' ')}></div>`;
   };
-
-
 
   const copyToClipboard = (widgetType: string, extraParams: Record<string, string> = {}) => {
     const code = generateCode(widgetType, extraParams);
@@ -143,31 +119,17 @@ export default function EmbeddedComponents({
   };
 
   const updateConfig = (updates: Partial<WidgetConfig>) => {
-    setConfig(prev => ({ ...prev, ...updates }));
-  };
-
-  // NEW: Save embed configuration
-  const saveEmbedConfig = async () => {
-    setIsSaving(true);
-    try {
-      const response = await fetch(`/api/businesses/${businessId}/embed-config`, {
-        method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ embedConfig: config }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to save configuration');
-      }
-
-      toast.success('Embed configuration saved!');
-    } catch (error) {
-      console.error('Error saving embed config:', error);
-      toast.error('Failed to save configuration');
-    } finally {
-      setIsSaving(false);
+    const newConfig = { ...config, ...updates };
+    setConfig(newConfig);
+    
+    // Notify parent of changes
+    if (onUpdateEmbedConfig) {
+      const embedConfigUpdate: EmbedConfig = {
+        popularRentalsCount: newConfig.popularRentalsCount,
+        redirectUrl: newConfig.redirectUrl,
+        pageRoutes: newConfig.pageRoutes
+      };
+      onUpdateEmbedConfig(embedConfigUpdate);
     }
   };
 
@@ -200,7 +162,7 @@ export default function EmbeddedComponents({
 
   return (
     <div className="space-y-6">
-      {/* Header Card */}
+      {/* Header Card with Domain Info */}
       <Card className="rounded-xl border border-gray-100 bg-gradient-to-r from-blue-50 to-purple-50 shadow-md">
         <CardHeader>
           <CardTitle className="text-2xl font-semibold flex items-center gap-2">
@@ -216,47 +178,28 @@ export default function EmbeddedComponents({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center justify-between mb-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
-                <Globe className="h-5 w-5 text-blue-600" />
-                <div>
-                  <p className="font-medium text-sm">Domain</p>
-                  <p className="text-xs text-gray-600">{businessDomain}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
-                <Palette className="h-5 w-5 text-purple-600" />
-                <div>
-                  <p className="font-medium text-sm">Theme</p>
-                  <p className="text-xs text-gray-600 capitalize">{theme}</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
-                <Monitor className="h-5 w-5 text-green-600" />
-                <div>
-                  <p className="font-medium text-sm">Responsive</p>
-                  <p className="text-xs text-gray-600">Auto-sizing</p>
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+              <Globe className="h-5 w-5 text-blue-600" />
+              <div>
+                <p className="font-medium text-sm">Domain</p>
+                <p className="text-xs text-gray-600">{businessDomain}</p>
               </div>
             </div>
-            <Button 
-              onClick={saveEmbedConfig} 
-              disabled={isSaving}
-              className="bg-blue-600 hover:bg-blue-700"
-            >
-              {isSaving ? (
-                <>
-                  <Settings className="h-4 w-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Settings className="h-4 w-4 mr-2" />
-                  Save Config
-                </>
-              )}
-            </Button>
+            <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+              <Palette className="h-5 w-5 text-purple-600" />
+              <div>
+                <p className="font-medium text-sm">Theme</p>
+                <p className="text-xs text-gray-600 capitalize">{theme}</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+              <Monitor className="h-5 w-5 text-green-600" />
+              <div>
+                <p className="font-medium text-sm">Responsive</p>
+                <p className="text-xs text-gray-600">Auto-sizing</p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -265,119 +208,98 @@ export default function EmbeddedComponents({
       <Card className="rounded-xl border border-gray-100 bg-white shadow-md">
         <CardHeader>
           <CardTitle className="text-xl font-semibold flex items-center gap-2">
-            <Settings className="h-5 w-5" />
+            <Zap className="h-5 w-5" />
             Widget Configuration
           </CardTitle>
           <CardDescription>
-            Customize how your widgets behave and where they redirect users
+            Configure how your widgets behave and where they redirect users
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Website Page Routes */}
-          <div className="space-y-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-            <Label className="text-sm font-medium">Your Website Page Routes</Label>
-            <p className="text-xs text-gray-600 mb-3">
-              Configure the page routes on your website. Widgets will link to your domain + these routes.
-            </p>
-            <div className="grid grid-cols-1 gap-3">
-              <div>
-                <Label className="text-xs">Booking Page Route</Label>
-                <Input
-                  placeholder="/booking"
-                  value={config.pageRoutes.booking}
-                  onChange={(e) => updateConfig({
-                    pageRoutes: { ...config.pageRoutes, booking: e.target.value }
-                  })}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Will link to: {businessDomain}{config.pageRoutes.booking}
-                </p>
+          {/* Quick Settings Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Popular Rentals</Label>
+              <div className="space-y-3">
+                <div className="space-y-2">
+                  <Label className="text-sm">Items to Display</Label>
+                  <Select 
+                    value={config.popularRentalsCount.toString()} 
+                    onValueChange={(value) => updateConfig({ popularRentalsCount: parseInt(value) })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="3">3 items</SelectItem>
+                      <SelectItem value="6">6 items</SelectItem>
+                      <SelectItem value="9">9 items</SelectItem>
+                      <SelectItem value="12">12 items</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
-              <div>
-                <Label className="text-xs">Inventory/Catalog Page Route</Label>
-                <Input
-                  placeholder="/inventory or /products or /rentals"
-                  value={config.pageRoutes.inventory}
-                  onChange={(e) => updateConfig({
-                    pageRoutes: { ...config.pageRoutes, inventory: e.target.value }
-                  })}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Will link to: {businessDomain}{config.pageRoutes.inventory}
-                </p>
-              </div>
-              <div>
-                <Label className="text-xs">Product Detail Page Route Pattern</Label>
-                <Input
-                  placeholder="/inventory or /products or /rentals"
-                  value={config.pageRoutes.product}
-                  onChange={(e) => updateConfig({
-                    pageRoutes: { ...config.pageRoutes, product: e.target.value }
-                  })}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  Will link to: {businessDomain}{config.pageRoutes.product}/[product-id]
-                </p>
+            </div>
+            
+            <div className="space-y-4">
+              <Label className="text-base font-medium">Website Integration</Label>
+              <div className="space-y-3">
+                <div>
+                  <Label className="text-xs">Booking Page Route</Label>
+                  <Input
+                    placeholder="/booking"
+                    value={config.pageRoutes.booking}
+                    onChange={(e) => updateConfig({
+                      pageRoutes: { ...config.pageRoutes, booking: e.target.value }
+                    })}
+                  />
+                  <p className="text-xs text-blue-600 mt-1">
+                    → {businessDomain}{config.pageRoutes.booking}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs">Inventory Page Route</Label>
+                  <Input
+                    placeholder="/inventory or /products or /rentals"
+                    value={config.pageRoutes.inventory}
+                    onChange={(e) => updateConfig({
+                      pageRoutes: { ...config.pageRoutes, inventory: e.target.value }
+                    })}
+                  />
+                  <p className="text-xs text-blue-600 mt-1">
+                    → {businessDomain}{config.pageRoutes.inventory}
+                  </p>
+                </div>
+                <div>
+                  <Label className="text-xs">Product Page Route Pattern</Label>
+                  <Input
+                    placeholder="/inventory or /products or /rentals"
+                    value={config.pageRoutes.product}
+                    onChange={(e) => updateConfig({
+                      pageRoutes: { ...config.pageRoutes, product: e.target.value }
+                    })}
+                  />
+                  <p className="text-xs text-blue-600 mt-1">
+                    → {businessDomain}{config.pageRoutes.product}/[product-id]
+                  </p>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Success Configuration */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 gap-4">
             <div className="space-y-2">
-              <Label>Success Redirect URL (Optional)</Label>
+              <Label>Success Redirect Path (Required)</Label>
               <Input
-                placeholder="https://yoursite.com/thank-you"
+                placeholder="/success"
                 value={config.redirectUrl}
                 onChange={(e) => updateConfig({ redirectUrl: e.target.value })}
+                required
               />
-              <p className="text-xs text-gray-500">Where to redirect after successful booking</p>
-            </div>
-            <div className="space-y-2">
-              <Label>Popular Rentals Count</Label>
-              <Select 
-                value={config.popularRentalsCount.toString()} 
-                onValueChange={(value) => updateConfig({ popularRentalsCount: parseInt(value) })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="3">3 items</SelectItem>
-                  <SelectItem value="6">6 items</SelectItem>
-                  <SelectItem value="9">9 items</SelectItem>
-                  <SelectItem value="12">12 items</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label>Success Message</Label>
-            <Textarea
-              placeholder="Thank you for your booking! We'll contact you soon."
-              value={config.successMessage}
-              onChange={(e) => updateConfig({ successMessage: e.target.value })}
-              rows={2}
-            />
-          </div>
-
-          {/* Display Options */}
-          <div className="space-y-4">
-            <Label className="text-base font-medium">Display Options</Label>
-            <div className="flex items-center justify-between">
-              <Label className="text-sm">Show Prices</Label>
-              <Switch
-                checked={config.showPrices}
-                onCheckedChange={(checked) => updateConfig({ showPrices: checked })}
-              />
-            </div>
-            <div className="flex items-center justify-between">
-              <Label className="text-sm">Show Descriptions</Label>
-              <Switch
-                checked={config.showDescriptions}
-                onCheckedChange={(checked) => updateConfig({ showDescriptions: checked })}
-              />
+              <p className="text-xs text-gray-500">
+                Redirect customers to this page after successful booking → {businessDomain}{config.redirectUrl || '/success'}
+              </p>
             </div>
           </div>
         </CardContent>
@@ -390,43 +312,37 @@ export default function EmbeddedComponents({
             <div>
               <CardTitle className="text-xl font-semibold">Widget Generator</CardTitle>
               <CardDescription>
-                Generate embed codes for your customized widgets
+                Copy and paste these codes into your website
               </CardDescription>
-            </div>
-            <div className="flex items-center gap-2">
-              <Button
-                variant={previewMode ? "default" : "outline"}
-                size="sm"
-                onClick={() => setPreviewMode(!previewMode)}
-              >
-                <Eye className="h-4 w-4 mr-1" />
-                {previewMode ? 'Hide' : 'Show'} Preview
-              </Button>
             </div>
           </div>
         </CardHeader>
         <CardContent>
           <Tabs value={activeWidget} onValueChange={setActiveWidget} className="w-full">
-            <TabsList className="grid w-full grid-cols-5">
-              <TabsTrigger value="booking" className="flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
-                Booking
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6">
+              <TabsTrigger value="booking" className="flex items-center gap-2 text-xs lg:text-sm">
+                <Calendar className="h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden sm:inline">Booking</span>
               </TabsTrigger>
-              <TabsTrigger value="inventory" className="flex items-center gap-2">
-                <Package className="h-4 w-4" />
-                Inventory
+              <TabsTrigger value="inventory" className="flex items-center gap-2 text-xs lg:text-sm">
+                <Package className="h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden sm:inline">Inventory</span>
               </TabsTrigger>
-              <TabsTrigger value="product" className="flex items-center gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                Product
+              <TabsTrigger value="product" className="flex items-center gap-2 text-xs lg:text-sm">
+                <ShoppingCart className="h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden sm:inline">Product</span>
               </TabsTrigger>
-              <TabsTrigger value="popular" className="flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                Popular
+              <TabsTrigger value="popular" className="flex items-center gap-2 text-xs lg:text-sm">
+                <Star className="h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden sm:inline">Popular</span>
               </TabsTrigger>
-              <TabsTrigger value="funnel" className="flex items-center gap-2">
-                <Target className="h-4 w-4" />
-                Sales Funnel
+              <TabsTrigger value="funnel" className="flex items-center gap-2 text-xs lg:text-sm">
+                <Target className="h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden sm:inline">Funnel</span>
+              </TabsTrigger>
+              <TabsTrigger value="success" className="flex items-center gap-2 text-xs lg:text-sm">
+                <Check className="h-3 w-3 lg:h-4 lg:w-4" />
+                <span className="hidden sm:inline">Success</span>
               </TabsTrigger>
             </TabsList>
 
@@ -434,7 +350,7 @@ export default function EmbeddedComponents({
               <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
                 <h3 className="font-medium text-blue-900 mb-2">Booking Widget</h3>
                 <p className="text-sm text-blue-700">
-                  Allows customers to book your services directly. Includes date selection, item picking, and customer details form.
+                  Complete booking form with date selection, item picking, and payment processing.
                 </p>
               </div>
               <div className="bg-gray-900 p-4 rounded-lg mb-4">
@@ -442,7 +358,7 @@ export default function EmbeddedComponents({
                   {generateCode('booking')}
                 </code>
               </div>
-              <Button onClick={() => copyToClipboard('booking')} className="gap-2">
+              <Button onClick={() => copyToClipboard('booking')} className="gap-2 w-full sm:w-auto">
                 <Copy className="h-4 w-4" />
                 Copy Booking Widget Code
               </Button>
@@ -452,7 +368,7 @@ export default function EmbeddedComponents({
               <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                 <h3 className="font-medium text-green-900 mb-2">Inventory Widget</h3>
                 <p className="text-sm text-green-700">
-                  Displays your available inventory in a searchable, filterable grid with booking buttons.
+                  Searchable catalog of all your available rental items.
                 </p>
               </div>
               <div className="bg-gray-900 p-4 rounded-lg mb-4">
@@ -460,7 +376,7 @@ export default function EmbeddedComponents({
                   {generateCode('inventory')}
                 </code>
               </div>
-              <Button onClick={() => copyToClipboard('inventory')} className="gap-2">
+              <Button onClick={() => copyToClipboard('inventory')} className="gap-2 w-full sm:w-auto">
                 <Copy className="h-4 w-4" />
                 Copy Inventory Widget Code
               </Button>
@@ -470,7 +386,7 @@ export default function EmbeddedComponents({
               <div className="p-4 bg-purple-50 border border-purple-200 rounded-lg">
                 <h3 className="font-medium text-purple-900 mb-2">Product Detail Widget</h3>
                 <p className="text-sm text-purple-700">
-                  Shows detailed information for a specific product with specifications, images, and booking functionality.
+                  Detailed product page with specs, images, and booking button.
                 </p>
               </div>
               <div className="space-y-3">
@@ -478,11 +394,11 @@ export default function EmbeddedComponents({
                   <Label htmlFor="productId" className="text-sm font-medium">Product ID</Label>
                   <Input
                     id="productId"
-                    placeholder="Enter product ID or leave {productId} for dynamic"
+                    placeholder="Enter specific product ID or use {productId}"
                     defaultValue="{productId}"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    Use {'{productId}'} for dynamic insertion, or specific ID for fixed widget
+                    Use {'{productId}'} for dynamic insertion
                   </p>
                 </div>
               </div>
@@ -491,7 +407,7 @@ export default function EmbeddedComponents({
                   {generateCode('product', { productId: '{productId}' })}
                 </code>
               </div>
-              <Button onClick={() => copyToClipboard('product', { productId: '{productId}' })} className="gap-2">
+              <Button onClick={() => copyToClipboard('product', { productId: '{productId}' })} className="gap-2 w-full sm:w-auto">
                 <Copy className="h-4 w-4" />
                 Copy Product Widget Code
               </Button>
@@ -501,7 +417,7 @@ export default function EmbeddedComponents({
               <div className="p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
                 <h3 className="font-medium text-yellow-900 mb-2">Popular Rentals Widget</h3>
                 <p className="text-sm text-yellow-700">
-                  Showcases your most popular items in an attractive grid. Perfect for landing pages and promotional sections.
+                  Showcase your most popular items ({config.popularRentalsCount} items displayed).
                 </p>
               </div>
               <div className="bg-gray-900 p-4 rounded-lg mb-4">
@@ -509,7 +425,7 @@ export default function EmbeddedComponents({
                   {generateCode('popular-rentals', { limit: config.popularRentalsCount.toString() })}
                 </code>
               </div>
-              <Button onClick={() => copyToClipboard('popular-rentals', { limit: config.popularRentalsCount.toString() })} className="gap-2">
+              <Button onClick={() => copyToClipboard('popular-rentals', { limit: config.popularRentalsCount.toString() })} className="gap-2 w-full sm:w-auto">
                 <Copy className="h-4 w-4" />
                 Copy Popular Rentals Widget Code
               </Button>
@@ -519,7 +435,7 @@ export default function EmbeddedComponents({
               <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
                 <h3 className="font-medium text-red-900 mb-2">Sales Funnel Widget</h3>
                 <p className="text-sm text-red-700">
-                  Embed your sales funnel popup to capture leads and drive conversions with targeted offers.
+                  Lead capture popup with special offers and promotions.
                 </p>
               </div>
               <div className="space-y-3">
@@ -527,11 +443,11 @@ export default function EmbeddedComponents({
                   <Label htmlFor="funnelId" className="text-sm font-medium">Sales Funnel ID</Label>
                   <Input
                     id="funnelId"
-                    placeholder="Select from your active funnels"
+                    placeholder="your-funnel-id"
                     defaultValue="your-funnel-id"
                   />
                   <p className="text-xs text-gray-500 mt-1">
-                    You can find funnel IDs in Marketing → Sales Funnels
+                    Find this in Marketing → Sales Funnels
                   </p>
                 </div>
               </div>
@@ -540,9 +456,40 @@ export default function EmbeddedComponents({
                   {generateCode('sales-funnel', { funnelId: 'your-funnel-id' })}
                 </code>
               </div>
-              <Button onClick={() => copyToClipboard('sales-funnel', { funnelId: 'your-funnel-id' })} className="gap-2">
+              <Button onClick={() => copyToClipboard('sales-funnel', { funnelId: 'your-funnel-id' })} className="gap-2 w-full sm:w-auto">
                 <Copy className="h-4 w-4" />
                 Copy Sales Funnel Widget Code
+              </Button>
+            </TabsContent>
+
+            <TabsContent value="success" className="space-y-4 mt-6">
+              <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
+                <h3 className="font-medium text-green-900 mb-2">Booking Success Page</h3>
+                <p className="text-sm text-green-700">
+                  Confirmation page showing booking details and next steps.
+                </p>
+              </div>
+              <div className="space-y-3">
+                <div>
+                  <Label htmlFor="bookingId" className="text-sm font-medium">Booking ID</Label>
+                  <Input
+                    id="bookingId"
+                    placeholder="Use {bookingId} for dynamic insertion"
+                    defaultValue="{bookingId}"
+                  />
+                  <p className="text-xs text-gray-500 mt-1">
+                    Use in redirect URLs after successful payment
+                  </p>
+                </div>
+              </div>
+              <div className="bg-gray-900 p-4 rounded-lg mb-4">
+                <code className="text-sm text-green-400 whitespace-pre-wrap font-mono">
+                  {generateCode('booking-success', { bookingId: '{bookingId}' })}
+                </code>
+              </div>
+              <Button onClick={() => copyToClipboard('booking-success', { bookingId: '{bookingId}' })} className="gap-2 w-full sm:w-auto">
+                <Copy className="h-4 w-4" />
+                Copy Success Page Widget Code
               </Button>
             </TabsContent>
           </Tabs>
@@ -558,41 +505,39 @@ export default function EmbeddedComponents({
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="text-center p-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl font-bold text-blue-600">1</span>
-                </div>
-                <h3 className="font-medium mb-2">Configure</h3>
-                <p className="text-sm text-gray-600">Set up your widget behavior and styling preferences above</p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div className="text-center p-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-xl font-bold text-blue-600">1</span>
               </div>
-              <div className="text-center p-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl font-bold text-blue-600">2</span>
-                </div>
-                <h3 className="font-medium mb-2">Copy Code</h3>
-                <p className="text-sm text-gray-600">Generate and copy the embed code for your chosen widget</p>
-              </div>
-              <div className="text-center p-4">
-                <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                  <span className="text-xl font-bold text-blue-600">3</span>
-                </div>
-                <h3 className="font-medium mb-2">Embed</h3>
-                <p className="text-sm text-gray-600">Paste the code into your website&apos;s HTML where you want the widget</p>
-              </div>
+              <h3 className="font-medium mb-2">Configure</h3>
+              <p className="text-sm text-gray-600">Set your preferences in the configuration panel above</p>
             </div>
+            <div className="text-center p-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-xl font-bold text-blue-600">2</span>
+              </div>
+              <h3 className="font-medium mb-2">Copy Code</h3>
+              <p className="text-sm text-gray-600">Choose a widget and copy the generated embed code</p>
+            </div>
+            <div className="text-center p-4">
+              <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <span className="text-xl font-bold text-blue-600">3</span>
+              </div>
+              <h3 className="font-medium mb-2">Embed</h3>
+              <p className="text-sm text-gray-600">Paste the code into your website&apos;s HTML</p>
+            </div>
+          </div>
 
-            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
-              <h4 className="font-medium text-blue-900 mb-2">Pro Tips</h4>
-              <ul className="text-sm text-blue-700 space-y-1">
-                <li>• Widgets automatically inherit your brand colors and theme</li>
-                <li>• All widgets are fully responsive and mobile-optimized</li>
-                <li>• Widgets link directly to your custom domain ({businessDomain})</li>
-                <li>• Use custom redirect URLs to keep users on your website after booking</li>
-                <li>• Configure page routes to match your website structure</li>
-              </ul>
-            </div>
+          <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+            <h4 className="font-medium text-blue-900 mb-2">✨ Key Features</h4>
+            <ul className="text-sm text-blue-700 space-y-1">
+              <li>• Automatically matches your brand colors and theme</li>
+              <li>• Fully responsive and mobile-optimized</li>
+              <li>• Links directly to your website ({businessDomain})</li>
+              <li>• Secure payment processing with Stripe</li>
+              <li>• Real-time availability checking</li>
+            </ul>
           </div>
         </CardContent>
       </Card>

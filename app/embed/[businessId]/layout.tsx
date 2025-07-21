@@ -1,5 +1,7 @@
+// app/embed/[businessId]/layout.tsx
 import { getBusinessForEmbed } from '@/lib/business/embed-utils';
 import { notFound } from 'next/navigation';
+import Script from 'next/script';
 
 export default async function EmbedLayout({
   children,
@@ -15,58 +17,45 @@ export default async function EmbedLayout({
     
     return (
       <>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            // Auto-resize iframe communication
-            function sendHeight() {
-              const height = document.documentElement.scrollHeight;
-              window.parent.postMessage({
-                type: 'INFLATEMATE_RESIZE',
-                height: height
-              }, '*');
-            }
-            
-            // Send height on load and resize
-            window.addEventListener('load', sendHeight);
-            window.addEventListener('resize', sendHeight);
-            
-            // MutationObserver for dynamic content changes
-            const observer = new MutationObserver(sendHeight);
-            document.addEventListener('DOMContentLoaded', () => {
-              observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-                attributes: true
-              });
-              
-              // Initial height send
-              setTimeout(sendHeight, 100);
-            });
-            
-            // Send loaded message
-            window.addEventListener('load', () => {
-              window.parent.postMessage({
-                type: 'INFLATEMATE_LOADED'
-              }, '*');
-            });
-          `
-        }} />
-        <style dangerouslySetInnerHTML={{
-          __html: `
-            body { 
+        <Script src="/embed-resize.js" strategy="beforeInteractive" />
+        <style suppressHydrationWarning>
+          {`
+            html, body { 
               margin: 0; 
               padding: 0; 
               font-family: system-ui, -apple-system, sans-serif;
-            }
-            * { box-sizing: border-box; }
-            
-            /* Ensure content doesn't overflow */
-            html, body {
               overflow-x: hidden;
+              width: 100%;
+              height: auto;
+              background: transparent !important;
+              background-color: transparent !important;
+            }
+            
+            * { 
+              box-sizing: border-box; 
+            }
+            
+            /* Simple, stable layout */
+            #__next {
+              width: 100%;
+              height: auto;
+              overflow-x: hidden;
+              background: transparent !important;
+            }
+            
+            /* Prevent layout shifts */
+            .container {
+              width: 100%;
               max-width: 100%;
             }
-          `
-        }} />
+            
+            /* Ensure complete transparency for sales funnel embeds */
+            body, html, #__next, main {
+              background: transparent !important;
+              background-color: transparent !important;
+            }
+          `}
+        </style>
         {children}
       </>
     );

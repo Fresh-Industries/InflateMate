@@ -112,8 +112,7 @@ export default function InventoryClient({
   inventoryItems, 
   themeName,
   colors,
-  businessDomain,
-  embedConfig
+
 }: InventoryClientProps) {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedType, setSelectedType] = useState('');
@@ -124,30 +123,39 @@ export default function InventoryClient({
   const types = Array.from(new Set(inventoryItems.map(item => item.type)));
 
   // Helper function to get the correct booking link
-  const getBookingLink = (itemId?: string) => {
-    if (!businessDomain) return itemId ? `/booking?item=${itemId}` : '/booking';
+  // const getBookingLink = (itemId?: string) => {
+  //   if (!businessDomain) return itemId ? `/booking?item=${itemId}` : '/booking';
     
-    const pageRoute = embedConfig?.pageRoutes?.booking || '/booking';
-    const itemParam = itemId ? `?item=${itemId}` : '';
-    return `${businessDomain}${pageRoute}${itemParam}`;
-  };
+  //   const pageRoute = embedConfig?.pageRoutes?.booking || '/booking';
+  //   const itemParam = itemId ? `?item=${itemId}` : '';
+  //   return `${businessDomain}${pageRoute}${itemParam}`;
+  // };
 
-  // Helper function to get the correct product link
-  const getProductLink = (itemId: string) => {
-    if (!businessDomain) return `/inventory/${itemId}`;
+  // // Helper function to get the correct product link
+  // const getProductLink = (itemId?: string) => {
+  //   if (!businessDomain) return `/inventory/${itemId}`;
     
-    const pageRoute = embedConfig?.pageRoutes?.product || '/inventory';
-    return `${businessDomain}${pageRoute}/${itemId}`;
-  };
+  //   const pageRoute = embedConfig?.pageRoutes?.product || '/inventory';
+  //   return `${businessDomain}${pageRoute}/${itemId}`;
+  // };
 
   const handleItemClick = (itemId: string) => {
-    const url = getProductLink(itemId);
-    window.top!.location.href = url;
+    // Send relative path info instead of full URL
+    window.parent.postMessage({
+      type: 'navigation',
+      action: 'product-detail',
+      path: `/services/${itemId}`,
+      itemId: itemId
+    }, '*');
   };
 
-  const handleBookingClick = (itemId?: string) => {
-    const url = getBookingLink(itemId);
-    window.top!.location.href = url;
+  const handleBookingClick = () => {
+    // Send relative path info instead of full URL
+    window.parent.postMessage({
+      type: 'navigation', 
+      action: 'booking',
+      path: `/booking`,
+    }, '*');
   };
 
   // Get theme configuration
@@ -269,8 +277,8 @@ export default function InventoryClient({
   }
   
   return (
-    <div className="w-full" style={{ background: colors.background[500] }}>
-      <div className="max-w-7xl mx-auto px-3 sm:px-4 lg:px-6 py-4 sm:py-6">
+    <div className="w-full overflow-x-hidden" style={{ background: colors.background[500] }}>
+      <div className="w-full max-w-none mx-auto px-2 sm:px-3 lg:px-4 py-4 sm:py-6">
         {/* Page Header with Theme Background */}
         <div className="mb-6 sm:mb-8 relative overflow-hidden p-4 sm:p-6" style={headerStyle}>
           <div className="absolute top-0 right-0 opacity-10">
@@ -436,7 +444,7 @@ export default function InventoryClient({
                         <Button 
                           style={buttonStyle} 
                           className="flex-1 text-sm sm:text-base font-bold hover:scale-105 transition-transform duration-300"
-                          onClick={() => handleBookingClick(item.id)}
+                          onClick={() => handleBookingClick()}
                         >
                           Book Now
                         </Button>

@@ -75,14 +75,23 @@ export default function PopularRentals({
   };
 
   const handleItemClick = (itemId: string) => {
-    const url = getProductLink(itemId);
-    window.top!.location.href = url;
+    // Send relative path info instead of full URL
+    window.parent.postMessage({
+      type: 'navigation',
+      action: 'product-detail',
+      path: `/services/${itemId}`,
+      itemId: itemId
+    }, '*');
   };
 
   const handleBookingClick = (e: React.MouseEvent) => {
     e.preventDefault();
-    const url = getBookingLink();
-    window.top!.location.href = url;
+    // Send relative path info instead of full URL
+    window.parent.postMessage({
+      type: 'navigation',
+      action: 'booking',
+      path: '/booking'
+    }, '*');
   };
 
   /** Primary button style */
@@ -115,15 +124,17 @@ export default function PopularRentals({
 
   return (
     <section
-      className={`py-20 relative overflow-hidden ${themeName}-theme popular-rentals`}
+      className={`py-8 sm:py-12 lg:py-20 relative overflow-hidden ${themeName}-theme popular-rentals`}
       style={{ 
         background: theme.popularRentalsStyles?.background(colors) ?? 'transparent',
-        animation: sectionAnimation
+        animation: sectionAnimation,
+        width: '100%',
+        maxWidth: '100%'
       }}
     >
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="w-full max-w-none mx-auto px-2 sm:px-4 relative z-10">
         <h2
-          className={`text-3xl md:text-5xl font-bold text-center mb-16 ${themeName}-theme section-title`}
+          className={`text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-center mb-8 sm:mb-12 lg:mb-16 ${themeName}-theme section-title`}
           style={{ color: theme.popularRentalsStyles?.titleColor(colors) ?? colors.primary[500] }}
         >
           Our Most Popular Rentals
@@ -144,7 +155,7 @@ export default function PopularRentals({
             </Button>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-10">
             {items.map((item) => (
               <div
                 key={item.id}
@@ -177,7 +188,7 @@ export default function PopularRentals({
                   )}
                 </div>
 
-                <div className="p-8">
+                <div className="p-4 sm:p-6 lg:p-8">
                   <h3 
                     className="text-2xl font-bold mb-3 cursor-pointer hover:opacity-80" 
                     style={{ color: baseCard.color }}

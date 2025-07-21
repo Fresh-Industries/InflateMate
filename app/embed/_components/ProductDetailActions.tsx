@@ -23,35 +23,28 @@ interface ProductDetailActionsProps {
 }
 
 export function ProductDetailActions({ 
-  productId, 
-  businessDomain, 
-  embedConfig, 
+ 
   primaryColor 
 }: ProductDetailActionsProps) {
   // Helper function to get the correct booking link
-  const getBookingLink = (itemId: string) => {
-    if (!businessDomain) return `../booking?item=${itemId}`;
-    
-    const pageRoute = embedConfig?.pageRoutes?.booking || '/booking';
-    return `${businessDomain}${pageRoute}?item=${itemId}`;
-  };
-
-  // Helper function to get the correct inventory link
-  const getInventoryLink = () => {
-    if (!businessDomain) return '../inventory';
-    
-    const pageRoute = embedConfig?.pageRoutes?.inventory || '/inventory';
-    return `${businessDomain}${pageRoute}`;
-  };
+ 
 
   const handleBackClick = () => {
-    const url = getInventoryLink();
-    window.top!.location.href = url;
+    // Send relative path info instead of full URL
+    window.parent.postMessage({
+      type: 'navigation',
+      action: 'back-to-inventory',
+      path: '/services'
+    }, '*');
   };
 
   const handleBookingClick = () => {
-    const url = getBookingLink(productId);
-    window.top!.location.href = url;
+    // Send relative path info instead of full URL
+    window.parent.postMessage({
+      type: 'navigation',
+      action: 'booking',
+      path: `/booking`,
+    }, '*');
   };
 
   return (

@@ -1,3 +1,4 @@
+// app/embed/[businessId]/booking/page.tsx
 import { getBusinessForEmbed } from '@/lib/business/embed-utils';
 import { BookingWrapper } from './_components/BookingWrapper';
 import { notFound } from 'next/navigation';
@@ -20,7 +21,7 @@ export default async function EmbedBookingPage({ params, searchParams }: PagePro
     const themeName = siteConfig.themeName?.name || 'modern';
     
     // Extract individual color values like other embed pages
-    const primaryColor = siteConfig.colors?.primary || '#4f46e5';
+    const primaryColor =  siteConfig.colors?.primary || '#4f46e5';
     const accentColor = siteConfig.colors?.accent || '#f97316';
     const secondaryColor = siteConfig.colors?.secondary || '#06b6d4';
     const backgroundColor = siteConfig.colors?.background || '#ffffff';
@@ -41,7 +42,6 @@ export default async function EmbedBookingPage({ params, searchParams }: PagePro
 
     // Extract widget configuration
     const redirectUrl = search.redirectUrl as string;
-    const successMessage = search.successMessage as string || 'Thank you for your booking! We\'ll contact you soon.';
 
     return (
       <div style={{
@@ -54,7 +54,6 @@ export default async function EmbedBookingPage({ params, searchParams }: PagePro
           businessId={business.id}
           themeName={themeName}
           colors={colors}
-          successMessage={successMessage}
           redirectUrl={redirectUrl || (typeof business.website === 'string' ? business.website : undefined)}
         />
       </div>

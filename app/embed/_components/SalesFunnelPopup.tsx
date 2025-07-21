@@ -1,3 +1,4 @@
+//app/embed/_components/SalesFunnelPopup.tsx
 'use client'
 import { useState, useEffect, useRef } from "react";
 import { X, ChevronUp, PartyPopper, Gift, Sparkles, ArrowRight, Check } from "lucide-react";
@@ -9,10 +10,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import { ThemeColors, ThemeDefinition } from '@/app/[domain]/_themes/types';
 import { getContrastColor } from '@/app/[domain]/_themes/utils';
 
-
 export interface SalesFunnel {
   id: string;
-  name: string;
+  name: string; 
   popupTitle: string;
   popupText: string;
   popupImage: string | null;
@@ -103,6 +103,31 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
     }
   }, [funnel.id]);
   
+  // Listen for external maximize requests
+  useEffect(() => {
+    const handleMessage = (event: MessageEvent) => {
+      if (event.data.type === 'maximize-request') {
+        setIsMinimized(false);
+        localStorage.removeItem(`funnel-${funnel.id}-minimized`);
+      }
+    };
+    
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, [funnel.id]);
+
+  // Add this useEffect to trigger resize on state changes
+  useEffect(() => {
+    // Small delay to ensure DOM has updated
+    const timer = setTimeout(() => {
+      if (isEmbed && window.parent) {
+        window.parent.postMessage({ type: 'resize-request' }, '*');
+      }
+    }, 100);
+    
+    return () => clearTimeout(timer);
+  }, [isMinimized, showForm, showThankYou, isEmbed]);
+  
   const handleClose = () => {
     setIsVisible(false);
     localStorage.setItem(`funnel-${funnel.id}-closed`, 'true');
@@ -121,17 +146,59 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
   const handleMinimize = () => {
     setIsMinimized(true);
     localStorage.setItem(`funnel-${funnel.id}-minimized`, 'true');
+    
+    // Notify parent window if in embed mode
+    if (isEmbed && window.parent) {
+      window.parent.postMessage({
+        type: 'sales-funnel:minimize',
+        businessId,
+        funnelId: funnel.id
+      }, '*');
+      
+      // Trigger resize after a brief delay to allow DOM update
+      setTimeout(() => {
+        window.parent.postMessage({ type: 'resize-request' }, '*');
+      }, 100);
+    }
   };
   
   const handleMaximize = () => {
     setIsMinimized(false);
     localStorage.removeItem(`funnel-${funnel.id}-minimized`);
+    
+    // Notify parent window if in embed mode
+    if (isEmbed && window.parent) {
+      window.parent.postMessage({
+        type: 'sales-funnel:maximize',
+        businessId,
+        funnelId: funnel.id
+      }, '*');
+      
+      // Trigger resize after a brief delay to allow DOM update
+      setTimeout(() => {
+        window.parent.postMessage({ type: 'resize-request' }, '*');
+      }, 100);
+    }
   };
   
   const handleShowDiscountForm = () => {
     setShowForm(true);
     setIsMinimized(false);
     localStorage.removeItem(`funnel-${funnel.id}-minimized`);
+    
+    // Notify parent window if in embed mode
+    if (isEmbed && window.parent) {
+      window.parent.postMessage({
+        type: 'sales-funnel:form:opened',
+        businessId,
+        funnelId: funnel.id
+      }, '*');
+      
+      // Trigger resize after a brief delay to allow DOM update
+      setTimeout(() => {
+        window.parent.postMessage({ type: 'resize-request' }, '*');
+      }, 100);
+    }
   };
   
   const handleFormSuccess = (code: string | null) => {
@@ -147,6 +214,11 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
         funnelId: funnel.id,
         couponCode: code
       }, '*');
+      
+      // Trigger resize after a brief delay to allow DOM update
+      setTimeout(() => {
+        window.parent.postMessage({ type: 'resize-request' }, '*');
+      }, 100);
     }
   };
   
@@ -181,7 +253,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
   };
 
   return (
-    <div className="fixed bottom-6 left-6 z-50 pointer-events-none">
+    <div className="fixed bottom-0 left-0 z-50 pointer-events-none" data-popup="true" data-widget-type="sales-funnel" data-minimized={isMinimized ? "true" : "false"}>
       <AnimatePresence>
         {isMinimized ? (
           <motion.div
@@ -190,6 +262,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.4, type: "spring" }}
             className="pointer-events-auto"
+            data-minimized="true"
           >
             <button
               onClick={handleMaximize}
@@ -210,6 +283,7 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
             exit={{ opacity: 0, y: 40 }}
             transition={{ type: "spring", damping: 30 }}
             className="pointer-events-auto"
+            data-minimized="false"
             style={{ filter: "drop-shadow(0 20px 50px rgba(0, 0, 0, 0.15))" }}
           >
             <div className="w-[600px] max-w-[95vw] overflow-hidden" style={cardStyle}>

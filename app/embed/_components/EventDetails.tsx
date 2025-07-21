@@ -230,11 +230,12 @@ export function EventDetailsStep({
   const { businessData, isLoadingBusiness } = useBusinessDetails(businessId);
 
   React.useEffect(() => {
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
     setFilters({
       date: newBooking.eventDate,
       startTime: newBooking.startTime,
       endTime: newBooking.endTime,
-      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+      tz,
     });
   }, [newBooking.eventDate, newBooking.startTime, newBooking.endTime]);
 
