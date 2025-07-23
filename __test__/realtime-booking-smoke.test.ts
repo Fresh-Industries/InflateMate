@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { expect, test } from 'vitest';
+import { expect, test } from '@jest/globals';
 import 'dotenv/config';
 
 test('Booking realtime smoke', async () => {

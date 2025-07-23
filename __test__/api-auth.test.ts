@@ -1,4 +1,3 @@
-import { NextRequest } from 'next/server';
 import { createMocks } from 'node-mocks-http';
 
 // Mock Clerk middleware
@@ -47,8 +46,8 @@ describe('API Authentication', () => {
       try {
         // This would normally be handled by middleware
         await mockAuth.protect();
-        fail(`Expected ${route} to be protected`);
-      } catch (error) {
+        throw new Error(`Expected ${route} to be protected`);
+      } catch (error: any) {
         expect(error).toBeInstanceOf(Error);
         expect(error.message).toBe('Unauthorized');
       }
@@ -101,8 +100,8 @@ describe('API Authentication', () => {
 
       try {
         await mockAuth.protect();
-        fail(`Expected ${route} to be protected`);
-      } catch (error) {
+        throw new Error(`Expected ${route} to be protected`);
+      } catch (error: any) {
         expect(error).toBeInstanceOf(Error);
         expect(error.message).toBe('Unauthorized');
       }
