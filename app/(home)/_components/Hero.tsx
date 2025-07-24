@@ -66,7 +66,7 @@ export default function Hero() {
               transition={{ duration: 0.5, delay: 0.3 }}
             >
               <Button variant="primary-gradient" size="lg" className="group" asChild>
-                <Link href="/signup">
+                <Link href="/sign-up">
                   <div className="flex items-center">
                     <span className="font-bold">Get Started Now</span>
                     <span className="ml-2 flex items-center justify-center rounded-full bg-white/20 p-2 transform transition-transform group-hover:translate-x-1">

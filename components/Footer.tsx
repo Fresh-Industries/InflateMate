@@ -3,7 +3,6 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { 
-  Send, 
   Heart, 
   ArrowRight, 
   Mail, 
@@ -14,8 +13,7 @@ import {
   Youtube,
   ChevronRight
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+
 
 // Footer Navigation Links based on Sitemap
 const footerNav = [
@@ -72,53 +70,7 @@ export default function Footer() {
       <div className="absolute inset-0 bg-grid-black/[0.02] bg-[length:20px_20px] pointer-events-none"></div>
 
       <div className="container mx-auto px-4 relative">
-        {/* Newsletter Section */}
-        <motion.div 
-          className="max-w-3xl mx-auto mb-20 relative"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
-        >
-          <div className="absolute -inset-3 bg-gradient-to-r from-primary to-accent rounded-[2rem] blur-2xl opacity-20"></div>
-          <div className="bg-card rounded-[2rem] shadow-xl p-8 sm:p-12 relative">
-            <div className="text-center mb-8">
-              <span className="inline-block text-sm font-medium bg-primary/10 text-primary px-3 py-1 rounded-full mb-3">
-                Stay Updated
-              </span>
-              <h3 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent mb-3">
-                Join Our Newsletter 🎈
-              </h3>
-              <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-                Get inflatable inspiration, industry tips, and exclusive offers delivered to your inbox
-              </p>
-            </div>
-            
-            <form className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Input
-                  type="email"
-                  placeholder="Enter your email"
-                  className="h-14 pl-6 pr-14 rounded-full border-2 border-primary/20 focus:border-primary/40 bg-card/70 text-base"
-                  aria-label="Enter your email for newsletter"
-                />
-                <div className="absolute right-6 top-1/2 -translate-y-1/2 text-primary/40">
-                  <Mail className="h-5 w-5" />
-                </div>
-              </div>
-              
-              <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
-                <Button
-                  className="h-14 px-8 rounded-full bg-gradient-to-r from-primary to-accent hover:from-primary/90 hover:to-accent/90 text-primary-foreground shadow-lg shadow-primary/20 w-full sm:w-auto"
-                  type="submit"
-                >
-                  Subscribe <Send className="ml-2 h-5 w-5" />
-                </Button>
-              </motion.div>
-            </form>
-          </div>
-        </motion.div>
-
+       
         <div className="grid grid-cols-1 md:grid-cols-12 gap-12 xl:gap-16">
           {/* Brand Section */}
           <motion.div 

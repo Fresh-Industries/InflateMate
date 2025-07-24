@@ -1,3 +1,4 @@
+// updated pricing grid to reflect Starter and Growth plans as discussed
 'use client';
 
 import React, { useState } from 'react';
@@ -15,7 +16,11 @@ import {
 import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
-type PlanId = 'solo' | 'growth';
+// --------------------
+// Types & Data Models
+// --------------------
+
+type PlanId = 'starter' | 'growth';
 
 interface Plan {
   id: PlanId;
@@ -30,25 +35,29 @@ interface Plan {
   callout?: string;
 }
 
+// --------------------
+// Plan Configuration
+// --------------------
+
 const plans: Plan[] = [
   {
-    id: 'solo',
-    name: 'Solo Plan',
-    price: 60,
-    description: 'Manage your entire operation as a one‑person show.',
+    id: 'starter',
+    name: 'Starter Plan',
+    price: 49,
+    description: 'Everything you need to run a single‑operator rental business.',
     features: [
-      '1 user account',
-      'Core online booking system',
-      'Inflatable inventory management',
-      'Customer tracking (CRM)',
-      'Quotes & invoicing',
-      'Website builder access',
-      'Automated email notifications & waivers'
+      '1 admin seat',
+      'Branded booking website / subdomain',
+      'Unlimited items & bookings',
+      'Real‑time conflict checks',
+      'Coupons & lead‑capture pop‑ups',
+      'Stripe payments & digital waivers',
+      'Embedded booking components',
+      'Basic CRM & revenue dashboard'
     ],
     limitations: [
-      'No team members (1 user only)',
-      'No integrated SMS messaging',
-      'No embedded booking components'
+      'Pay‑as‑you‑go SMS when released',
+      'No additional team members'
     ],
     icon: <Users className="h-5 w-5" />,
     recommended: false,
@@ -56,24 +65,27 @@ const plans: Plan[] = [
   },
   {
     id: 'growth',
-    name: 'Growth Plan',
-    price: 99,
-    description: 'Scale your operations with a team and unlock advanced features.',
+    name: 'Growth Plan (Founding Members)',
+    price: 119,
+    description: 'Invite your team and get first access to every new feature we ship.',
     features: [
-      'Up to 5 team members',
-      'All Solo Plan features included',
-      'Integrated SMS messaging',
-      'Seamless team collaboration',
-      'Embed booking on your existing site',
-      'Priority customer support'
+      'Up to 3 user seats (add more $15/user)',
+      'All Starter features',
+      'Priority chat support',
+      '500 outbound SMS/mo included when SMS launches',
+      'Early access to new modules & roadmap voting'
     ],
     limitations: [],
     icon: <Zap className="h-5 w-5" />,
     recommended: true,
     gradient: 'from-primary/20 to-primary/5',
-    callout: 'MOST POPULAR'
+    callout: 'FOUNDING MEMBERS'
   }
 ];
+
+// --------------------
+// Component
+// --------------------
 
 export default function PricingGrid() {
   const [hoveredPlan, setHoveredPlan] = useState<PlanId | null>(null);
@@ -84,7 +96,7 @@ export default function PricingGrid() {
   const orgId = useSearchParams().get('orgId') ?? undefined;
 
   async function handleSubscribe(planId: PlanId) {
-    if (!isLoaded) return;          // wait for Clerk
+    if (!isLoaded) return; // wait for Clerk
     if (!userId || !orgId) {
       router.replace('/sign-in');
       return;
@@ -101,7 +113,7 @@ export default function PricingGrid() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Checkout failed');
       window.location.href = data.url!;
-      //eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
       toast({
         title: 'Subscription Error',
@@ -129,7 +141,7 @@ export default function PricingGrid() {
           {/* gradient overlay */}
           <div className={`absolute inset-0 bg-gradient-to-b ${plan.gradient} -z-10`} />
 
-          {/* “Most Popular” badge */}
+          {/* badge */}
           {plan.recommended && (
             <div className="absolute top-0 right-0">
               <div className="bg-primary text-primary-foreground text-xs px-4 py-1 rounded-bl-lg font-semibold">
@@ -157,7 +169,8 @@ export default function PricingGrid() {
               </div>
               <div className="text-right text-foreground">
                 <div className="text-3xl font-bold">
-                  <span className="text-xl">$</span>{plan.price}
+                  <span className="text-xl">$</span>
+                  {plan.price}
                   <span className="text-sm font-normal text-muted-foreground">/mo</span>
                 </div>
               </div>
