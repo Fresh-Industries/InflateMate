@@ -75,6 +75,7 @@ export function useAvailability({ businessId, filters, onUnavailableItemsFound }
         });
       }
       
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       console.error("Availability check error:", error);
       

@@ -26,6 +26,8 @@ import { useAvailability } from '@/hooks/useAvailability';
 import { useBookingSubmission } from '@/hooks/useBookingSubmission';
 import { useBusinessDetails } from '@/hooks/useBusinessDetails';
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { toZonedTime } from "date-fns-tz";
+import { localToUTC } from "@/lib/utils";
 
 // Assuming these types are defined in a shared file or will be moved there
 
@@ -107,16 +109,20 @@ export function EventDetailsStep({
           
           bookings.forEach((booking: ExistingBooking) => {
             if (booking.status === 'CONFIRMED' || booking.status === 'PENDING' || booking.status === 'HOLD') {
-              const bookingStart = new Date(booking.startTime);
-              const bookingEnd = new Date(booking.endTime);
+              // Convert UTC timestamps to business timezone for proper time extraction
+              const businessTz = businessData.timeZone || 'America/Chicago';
+              
+              // Use date-fns-tz to convert UTC to business timezone
+              const bookingStartLocal = toZonedTime(new Date(booking.startTime), businessTz);
+              const bookingEndLocal = toZonedTime(new Date(booking.endTime), businessTz);
               
               // Apply buffer times to create exclusion zones
               const bufferBeforeMs = (businessData.bufferBeforeHours ?? 0) * 60 * 60 * 1000;
               const bufferAfterMs = (businessData.bufferAfterHours ?? 0) * 60 * 60 * 1000;
               
               // Always block the actual delivery and pickup times (even with 0 buffer)
-              const deliveryTime = `${bookingStart.getHours().toString().padStart(2, '0')}:${bookingStart.getMinutes().toString().padStart(2, '0')}`;
-              const pickupTime = `${bookingEnd.getHours().toString().padStart(2, '0')}:${bookingEnd.getMinutes().toString().padStart(2, '0')}`;
+              const deliveryTime = `${bookingStartLocal.getHours().toString().padStart(2, '0')}:${bookingStartLocal.getMinutes().toString().padStart(2, '0')}`;
+              const pickupTime = `${bookingEndLocal.getHours().toString().padStart(2, '0')}:${bookingEndLocal.getMinutes().toString().padStart(2, '0')}`;
               
               // Block delivery time
               blocked.push({
@@ -132,10 +138,11 @@ export function EventDetailsStep({
                 });
               }
               
-              // Additionally apply buffer periods around delivery/pickup if buffers > 0
+              // Apply buffer periods around delivery/pickup if buffers > 0
+              // Buffer should prevent new bookings from overlapping with existing ones
               if (bufferBeforeMs > 0) {
-                const deliveryBufferStart = new Date(bookingStart.getTime() - bufferBeforeMs);
-                const deliveryBufferEnd = new Date(bookingStart.getTime() + bufferBeforeMs);
+                const deliveryBufferStart = new Date(bookingStartLocal.getTime() - bufferBeforeMs);
+                const deliveryBufferEnd = new Date(bookingStartLocal.getTime() + bufferBeforeMs);
                 
                 const bufferStartHours = deliveryBufferStart.getHours().toString().padStart(2, '0');
                 const bufferStartMinutes = deliveryBufferStart.getMinutes().toString().padStart(2, '0');
@@ -149,8 +156,8 @@ export function EventDetailsStep({
               }
               
               if (bufferAfterMs > 0) {
-                const pickupBufferStart = new Date(bookingEnd.getTime() - bufferAfterMs);
-                const pickupBufferEnd = new Date(bookingEnd.getTime() + bufferAfterMs);
+                const pickupBufferStart = new Date(bookingEndLocal.getTime() - bufferAfterMs);
+                const pickupBufferEnd = new Date(bookingEndLocal.getTime() + bufferAfterMs);
                 
                 const bufferStartHours = pickupBufferStart.getHours().toString().padStart(2, '0');
                 const bufferStartMinutes = pickupBufferStart.getMinutes().toString().padStart(2, '0');
@@ -192,8 +199,11 @@ export function EventDetailsStep({
 
     try {
       const now = new Date();
-      const requestedStart = new Date(`${newBooking.eventDate}T${newBooking.startTime}:00`);
-      const hoursDiff = (requestedStart.getTime() - now.getTime()) / (1000 * 60 * 60);
+      const businessTz = businessData.timeZone || 'America/Chicago';
+      
+      // Convert the requested start time to UTC using the business timezone
+      const requestedStartUTC = localToUTC(newBooking.eventDate, newBooking.startTime, businessTz);
+      const hoursDiff = (requestedStartUTC.getTime() - now.getTime()) / (1000 * 60 * 60);
 
       const minNoticeHours = businessData.minNoticeHours || 24;
       const maxNoticeHours = businessData.maxNoticeHours || 2160; // 90 days

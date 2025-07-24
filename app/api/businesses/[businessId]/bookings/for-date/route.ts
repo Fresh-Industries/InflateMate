@@ -21,19 +21,18 @@ export async function GET(
 
     // Parse the date and get the full day range
     const targetDate = new Date(date);
-    const dayStart = startOfDay(targetDate);
-    const dayEnd = endOfDay(targetDate);
+    
+    // Format the date as YYYY-MM-DD to match the eventDate field format
+    const formattedDate = format(targetDate, 'yyyy-MM-dd');
 
-    console.log(`[Bookings for Date] Fetching bookings for ${businessId} on ${format(targetDate, 'yyyy-MM-dd')}`);
+    console.log(`[Bookings for Date] Fetching bookings for ${businessId} on ${formattedDate}`);
 
     // Find all bookings for this business on the specified date
+    // Use the eventDate field directly since it's stored as a date
     const bookings = await prisma.booking.findMany({
       where: {
         businessId,
-        eventDate: {
-          gte: dayStart,
-          lte: dayEnd,
-        },
+        eventDate: targetDate, // This will be converted to the proper date format by Prisma
         status: {
           in: ['CONFIRMED', 'PENDING', 'HOLD']
         }
@@ -49,7 +48,7 @@ export async function GET(
       }
     });
 
-    console.log(`[Bookings for Date] Found ${bookings.length} bookings for ${format(targetDate, 'yyyy-MM-dd')}`);
+    console.log(`[Bookings for Date] Found ${bookings.length} bookings for ${formattedDate}`);
 
     // Transform to return ISO strings
     const formattedBookings = bookings.map(booking => ({
