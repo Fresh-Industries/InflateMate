@@ -50,7 +50,6 @@ export default function PopularRentals({
   items, 
   colors, 
   themeName, 
-  businessDomain,
   embedConfig,
   fallbackEmoji = '🎈' 
 }: Props) {
@@ -58,21 +57,6 @@ export default function PopularRentals({
   const sectionAnimation = theme.animations?.sectionTransition || "fadeIn 0.3s ease";
   const itemAnimation = theme.animations?.elementEntrance || "popIn 0.3s ease-out";
 
-  // Helper function to get the correct booking link
-  const getBookingLink = () => {
-    if (!businessDomain) return '/booking';
-    
-    const pageRoute = embedConfig?.pageRoutes?.booking || '/booking';
-    return `${businessDomain}${pageRoute}`;
-  };
-
-  // Helper function to get the correct product link
-  const getProductLink = (itemId: string) => {
-    if (!businessDomain) return `/inventory/${itemId}`;
-    
-    const pageRoute = embedConfig?.pageRoutes?.product || '/inventory';
-    return `${businessDomain}${pageRoute}/${itemId}`;
-  };
 
   const handleItemClick = (itemId: string) => {
     // Send relative path info instead of full URL

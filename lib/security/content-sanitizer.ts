@@ -95,6 +95,7 @@ function initializeDOMPurify() {
         } catch (error) {
           // Invalid URL, remove href
           node.removeAttribute('href');
+          console.error('Invalid URL:', error);
         }
       }
     }

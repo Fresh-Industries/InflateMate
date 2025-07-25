@@ -20,21 +20,6 @@ export function ProductDetailWrapper({ businessId, productId, children }: Produc
     }, '*');
   }, [businessId, productId]);
   
-  const handleBookingClick = () => {
-    window.parent.postMessage({
-      type: 'product:booking:click',
-      productId,
-      businessId
-    }, '*');
-  };
-  
-  const handleError = (error: string) => {
-    window.parent.postMessage({
-      type: 'product:error',
-      error
-    }, '*');
-  };
-
   return (
     <div>
       {children}

@@ -27,7 +27,6 @@ export function PaymentForm({
   customerEmail,
   onSuccess,
   onError = () => {},
-  businessId,
   subtotal,
   taxAmount,
   taxRate,

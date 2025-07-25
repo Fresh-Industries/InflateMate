@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import PopularRentals from '@/app/embed/_components/PopularRentals';
@@ -33,21 +34,6 @@ export function PopularRentalsWrapper({
     }, '*');
   }, [businessId, items.length]);
   
-  const handleProductClick = (productId: string) => {
-    window.parent.postMessage({
-      type: 'popular-rentals:product:click',
-      productId,
-      businessId
-    }, '*');
-  };
-  
-  const handleError = (error: string) => {
-    window.parent.postMessage({
-      type: 'popular-rentals:error',
-      error
-    }, '*');
-  };
-
   return (
     <PopularRentals 
       items={items}

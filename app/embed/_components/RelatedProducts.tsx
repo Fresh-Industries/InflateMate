@@ -34,18 +34,10 @@ interface RelatedProductsProps {
 
 export function RelatedProducts({ 
   relatedProducts, 
-  businessDomain, 
-  embedConfig, 
   primaryColor, 
   secondaryColor 
 }: RelatedProductsProps) {
-  // Helper function to get the correct product link
-  const getProductLink = (itemId: string) => {
-    if (!businessDomain) return `./${itemId}`;
-    
-    const pageRoute = embedConfig?.pageRoutes?.product || '/inventory';
-    return `${businessDomain}${pageRoute}/${itemId}`;
-  };
+
 
   const handleProductClick = (itemId: string) => {
     // Send relative path info instead of full URL

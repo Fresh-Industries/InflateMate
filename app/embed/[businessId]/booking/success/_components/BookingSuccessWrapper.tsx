@@ -64,13 +64,6 @@ export function BookingSuccessWrapper({ businessId, colors }: BookingSuccessWrap
       path: '/'
     }, '*');
   };
-  
-  const handleError = (error: string) => {
-    window.parent.postMessage({
-      type: 'booking-success:error',
-      error
-    }, '*');
-  };
 
   return (
     <BookingSuccessDisplay
@@ -79,7 +72,6 @@ export function BookingSuccessWrapper({ businessId, colors }: BookingSuccessWrap
       error={error}
       colors={colors}
       onReturnHome={handleReturnHome}
-      onError={handleError}
     />
   );
 } 
