@@ -860,7 +860,7 @@ async function handleBookingConfirmation(bookingId: string) {
       
       console.log(`[CONFIRMATION] Sending email to ${customer.email}...`);
       const emailResult = await sendSignatureEmail({
-        from: `${business.name} <waivers+inflatmate@freshdigitalsolutions.tech>`, // Use dynamic business name
+        from: `${business.name} <waivers@mail.inflatmate.co>`, 
         to: customer.email,
         subject: `Action Required: Sign Your Waiver for Booking with ${business.name}`, // More specific subject
         html: emailHtml,

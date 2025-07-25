@@ -50,7 +50,7 @@ export async function sendCouponEmail({ to, subject, couponCode, businessName, h
 
   try {
     return await resend.emails.send({
-      from: 'InflateMate <noreply@inflatmate.co>',
+      from: 'InflateMate <noreply@mail.inflatmate.co>',
       to,
       subject,
       html: finalHtml,
