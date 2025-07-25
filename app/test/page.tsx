@@ -647,7 +647,6 @@ export default function EmbedTestPage() {
                 </Button>
               </CardContent>
             </Card>
-          </div>
 
             {/* Widget Preview */}
             <Card className="lg:col-span-2">
