@@ -8,9 +8,8 @@ interface PageProps {
   searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }
 
-export default async function EmbedBookingSuccessPage({ params, searchParams }: PageProps) {
+export default async function EmbedBookingSuccessPage({ params }: PageProps) {
   const { businessId } = await params;
-  const search = await searchParams;
 
   try {
     const business = await getBusinessForEmbed(businessId);
