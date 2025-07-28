@@ -5,7 +5,7 @@
     // Auto-detect the current domain or use a default
     const INFLATEMATE_API = window.location.origin.includes('localhost') 
       ? 'http://localhost:3000'
-      : 'https://inflatemate.co';
+      : process.env.NEXT_PUBLIC_API_HOST;
     
     // Track initialized widgets to prevent duplicates
     const initializedWidgets = new WeakMap();
