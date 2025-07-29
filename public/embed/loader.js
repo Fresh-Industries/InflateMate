@@ -1,11 +1,46 @@
 //public/embed/loader.js
+
 (function(window, document) {
     'use strict';
     
     // Auto-detect the current domain or use a default
-    const INFLATEMATE_API = window.location.origin.includes('localhost') 
+    const scriptEl = document.currentScript || document.querySelector('script[src*="embed/loader.js"]');
+    const scriptOrigin = (() => { try { return new URL(scriptEl?.src || '').origin; } catch { return 'https://inflatemate.co'; } })();
+    const dataHost = scriptEl?.getAttribute('data-api-host');
+    const INFLATEMATE_API = window.location.origin.includes('localhost')
       ? 'http://localhost:3000'
-      : process.env.NEXT_PUBLIC_API_HOST;
+      : (dataHost || scriptOrigin);
+    
+    // Generate unique widget ID for security
+    function generateWidgetId() {
+      // Use crypto.randomUUID() for better entropy, fallback to current method
+      if (typeof crypto !== 'undefined' && crypto.randomUUID) {
+        return 'inflatemate-' + crypto.randomUUID();
+      }
+      // Fallback for older browsers
+      return 'inflatemate-' + Math.random().toString(36).substr(2, 9) + '-' + Date.now();
+    }
+    
+    // Validate message origin - aligned with embed-security.ts ALLOWED_ORIGINS
+    function isValidOrigin(origin) {
+      const allowedOrigins = [
+        'https://inflatemate.co',
+        'https://www.inflatemate.co',
+        'https://staging.inflatemate.co',
+        'https://www.staging.inflatemate.co',
+        'http://localhost:3000',
+        'http://localhost:3001',
+        'http://127.0.0.1:3000',
+        'http://127.0.0.1:3001'
+      ];
+      
+      // Also check for Vercel preview domains for CI/CD
+      if (origin && origin.includes('.vercel.app')) {
+        return true;
+      }
+      
+      return allowedOrigins.includes(origin);
+    }
     
     // Track initialized widgets to prevent duplicates
     const initializedWidgets = new WeakMap();
@@ -13,8 +48,10 @@
     class InflateMateWidget {
       constructor(config) {
         this.config = this.validateConfig(config);
+        this.widgetId = generateWidgetId();
         this.iframe = null;
         this.container = null;
+        this.cleanup = null;
         this.init();
       }
       
@@ -125,14 +162,14 @@
           this.iframe = this.createIframe(widgetUrl);
           
           if (this.config.type === 'sales-funnel') {
-            // For sales funnel, append directly to body as overlay
             document.body.appendChild(this.iframe);
           } else {
             // For other widgets, use normal element placement
+            this.container = this.config.element;
             if (this.placeholder) {
               this.placeholder.replaceWith(this.iframe);
             } else {
-              this.config.element.appendChild(this.iframe);
+              this.container.appendChild(this.iframe);
             }
           }
                   
@@ -145,6 +182,9 @@
       
       buildWidgetUrl() {
         const params = new URLSearchParams();
+        
+        // Add widgetId for security validation
+        params.set('widgetId', this.widgetId);
         
         Object.entries(this.config).forEach(([key, value]) => {
           if (value && !['element', 'businessId', 'type', 'lazy', 'productId', 'funnelId'].includes(key)) {
@@ -185,67 +225,88 @@
             bottom: 24px;
             left: 24px;
             z-index: 2147483647;
-            width: 624px;
+            display: block;
+            width: 600px;
+            max-width: min(600px, 95vw);
             height: ${this.config.height === 'auto' ? 'auto' : this.config.height};
-            max-width: calc(100vw - 48px);
             border: none;
             border-radius: 12px;
             background: transparent;
             pointer-events: auto;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
           `;
         } else {
           iframe.style.cssText = `
-            width: ${this.config.width};
+            width: 100%;
+            max-width: 100%;
             height: ${this.config.height === 'auto' ? '400px' : this.config.height};
             border: none;
             border-radius: 8px;
             background: #fff;
             transition: height 0.3s ease;
+            display: block;
           `;
         }
         
-        iframe.setAttribute('sandbox', 'allow-scripts allow-forms allow-same-origin allow-popups allow-popups-to-escape-sandbox');
+        // Dynamic sandboxing: relaxed for widgets that need Clerk/Stripe, strict for others
+        const needsStorage = [
+          'booking', 'booking-success',                // already good
+          'inventory', 'product', 'popular-rentals',   // NEW – these call Clerk
+          'sales-funnel'                               // already good
+        ];
+        const sandbox = needsStorage.includes(this.config.type)
+          ? 'allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-same-origin allow-storage-access-by-user-activation allow-top-navigation'
+          : 'allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox';
+        
+        iframe.setAttribute('sandbox', sandbox);
         iframe.setAttribute('loading', 'eager');
-        iframe.setAttribute('title', 'InflateMate Sales Funnel Widget');
+        iframe.setAttribute('title', 'InflateMate Widget');
         iframe.setAttribute('allowtransparency', 'true');
         iframe.setAttribute('frameborder', '0');
         iframe.setAttribute('scrolling', 'no');
+        
+        // Tell Stripe that payments are allowed for widgets that might need it
+        if (needsStorage.includes(this.config.type)) {
+          iframe.setAttribute('allow', 'payment *');
+        }
         
         return iframe;
       }
       
       setupMessageListener() {
         const messageHandler = (event) => {
-          if (!event.origin.includes('inflatemate.co') && 
-              !event.origin.includes('localhost')) return;
+          // Validate origin for security
+          if (!isValidOrigin(event.origin)) {
+            return;
+          }
           
-          if (event.data.type === 'resize' && event.source === this.iframe.contentWindow) {
-            // For all widgets, set height
+          // Validate widgetId to prevent message collisions
+          if (event.data.widgetId && event.data.widgetId !== this.widgetId) {
+            return;
+          }
+          
+          // Only process messages from this widget's iframe
+          if (event.source !== this.iframe.contentWindow) {
+            return;
+          }
+          
+          if (event.data.type === 'resize') {
+            // For all widgets, set height only (responsive width handling)
             this.iframe.style.height = event.data.height + 'px';
             
-            // Handle width and pointer events for sales-funnel
+            // Handle special sales-funnel positioning
             if (this.config.type === 'sales-funnel') {
-              if (event.data.minimized) {
-                // Use the actual measured width, with a minimum
-                const measuredWidth = Math.max(event.data.width, 200);
-                this.iframe.style.width = measuredWidth + 'px';
-                this.iframe.style.pointerEvents = 'none';
-                this.createClickableOverlay(measuredWidth, event.data.height);
-              } else {
-                // Use the actual measured width for expanded state too
-                const expandedWidth = Math.max(event.data.width, 600);
-                this.iframe.style.width = expandedWidth + 'px';
-                this.iframe.style.pointerEvents = 'auto';
-                this.removeClickableOverlay();
-              }
+              const w = Math.max(200, Math.min(event.data.width || 600, 600));
+              this.iframe.style.width = w + 'px';
             }
           }
           
           // Handle external maximize requests
           if (event.data.type === 'maximize-request') {
             this.iframe.contentWindow.postMessage({
-              type: 'maximize-request'
-            }, '*');
+              type: 'maximize-request',
+              widgetId: this.widgetId
+            }, event.origin);
           }
           
           if (event.data.type === 'booking:success') {
@@ -278,22 +339,6 @@
               window.location.href = event.data.url;
             }
           }
-          
-          if (event.data.type === 'sales-funnel:minimize' && this.config.type === 'sales-funnel') {
-            // These will be overridden by the resize message, but set initial values
-            this.iframe.style.height = '60px';
-            this.iframe.style.width = '250px';
-            this.iframe.style.pointerEvents = 'none';
-            this.createClickableOverlay(250, 60);
-          }
-          
-          if ((event.data.type === 'sales-funnel:maximize' ||
-              event.data.type === 'sales-funnel:form:opened') && this.config.type === 'sales-funnel') {
-            this.iframe.style.height = 'auto';
-            this.iframe.style.width = this.config.width === 'auto' ? '600px' : this.config.width;
-            this.iframe.style.pointerEvents = 'auto';
-            this.removeClickableOverlay();
-          }
         };
         
         window.addEventListener('message', messageHandler);
@@ -303,30 +348,33 @@
         };
       }
       
-      createClickableOverlay(width = 250, height = 60) {
-        if (this.clickableOverlay) return;
+      createClickableOverlay() {
+        if (this.clickableOverlay || this.config.type === 'sales-funnel') return;
         
         this.clickableOverlay = document.createElement('div');
         this.clickableOverlay.style.cssText = `
-          position: fixed;
-          bottom: 24px;
-          left: 24px;
-          width: ${width}px;
-          height: ${height}px;
-          z-index: 2147483648;
+          position: absolute;
+          inset: 0;
           cursor: pointer;
           background: transparent;
-          border-radius: 24px;
+          border-radius: 12px;
           pointer-events: auto;
+          z-index: 1;
         `;
         
         this.clickableOverlay.addEventListener('click', () => {
-          this.iframe.contentWindow.postMessage({
-            type: 'maximize-request'
-          }, '*');
+          if (this.iframe && this.iframe.contentWindow) {
+            this.iframe.contentWindow.postMessage({
+              type: 'maximize-request',
+              widgetId: this.widgetId
+            }, INFLATEMATE_API);
+          }
         });
         
-        document.body.appendChild(this.clickableOverlay);
+        // Append to the container instead of body for proper scoping
+        if (this.container) {
+          this.container.appendChild(this.clickableOverlay);
+        }
       }
       
       removeClickableOverlay() {
@@ -353,6 +401,10 @@
       destroy() {
         if (this.iframe) this.iframe.remove();
         if (this.placeholder) this.placeholder.remove();
+        // no container for sales-funnel
+        if (this.container && this.config.type !== 'sales-funnel') {
+          this.container.remove();
+        }
         this.removeClickableOverlay();
         this.cleanup?.();
       }
@@ -360,6 +412,9 @@
     
     // Initialize widgets and prevent duplicates
     function initializeWidgets() {
+      // Prevent multiple initializations
+      if (window.__InflateMateLoaded) return;
+      
       document.querySelectorAll('[data-inflatemate-widget]').forEach(el => {
         // Skip if already initialized
         if (initializedWidgets.has(el)) return;
@@ -386,6 +441,8 @@
         const widget = new InflateMateWidget(config);
         initializedWidgets.set(el, widget);
       });
+      
+      window.__InflateMateLoaded = true;
     }
     
     // Global API
@@ -395,6 +452,7 @@
       
       // New method to reinitialize (useful for SPA navigation)
       reinit: () => {
+        window.__InflateMateLoaded = false;
         initializeWidgets();
       }
     };
@@ -408,18 +466,24 @@
     
     // IMPORTANT: Re-initialize on popstate (browser back/forward)
     window.addEventListener('popstate', () => {
-      setTimeout(initializeWidgets, 100);
+      setTimeout(() => {
+        window.__InflateMateLoaded = false;
+        initializeWidgets();
+      }, 100);
     });
     
-    // IMPORTANT: Listen for Next.js route changes
-    // This handles client-side navigation
+    // IMPORTANT: Listen for Next.js route changes with throttling
     let lastUrl = location.href;
+    let routeChangeTimeout;
     new MutationObserver(() => {
       const url = location.href;
       if (url !== lastUrl) {
         lastUrl = url;
-        // Wait for DOM to update, then reinitialize
-        setTimeout(initializeWidgets, 100);
+        clearTimeout(routeChangeTimeout);
+        routeChangeTimeout = setTimeout(() => {
+          window.__InflateMateLoaded = false;
+          initializeWidgets();
+        }, 100);
       }
     }).observe(document, { subtree: true, childList: true });
     

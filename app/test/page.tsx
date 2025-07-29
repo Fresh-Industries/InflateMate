@@ -129,22 +129,44 @@ export default function EmbedTestPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const response = await fetch(`/api/embed/${TEST_BUSINESS_ID}`);
+      // Use the new simplified API endpoint for business configuration
+      const response = await fetch(`/api/businesses/${TEST_BUSINESS_ID}`);
       if (!response.ok) {
-        throw new Error(`Failed to fetch config: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to fetch business config: ${response.status} ${response.statusText}`);
       }
-      const config = await response.json();
+      const businessData = await response.json();
+      
+      // Transform business data into embed config format
+      const config: EmbedConfig = {
+        businessId: businessData.id,
+        businessName: businessData.name,
+        availableWidgets: ['booking', 'inventory', 'popular-rentals', 'sales-funnel'],
+        theme: businessData.siteConfig?.themeName?.name || 'modern',
+        colors: {
+          primary: businessData.siteConfig?.colors?.primary || '#4f46e5',
+          accent: businessData.siteConfig?.colors?.accent || '#f97316',
+          secondary: businessData.siteConfig?.colors?.secondary || '#06b6d4',
+          background: businessData.siteConfig?.colors?.background || '#ffffff',
+          text: businessData.siteConfig?.colors?.text || '#333333',
+        },
+        embedUrls: {
+          booking: `/embed/${businessData.id}/booking`,
+          inventory: `/embed/${businessData.id}/inventory`,
+          popularRentals: `/embed/${businessData.id}/popular-rentals`,
+        }
+      };
+      
       setEmbedConfig(config);
       
       // Update widget config with business defaults
       setWidgetConfig(prev => ({
         ...prev,
-        theme: config.theme || 'modern',
-        primaryColor: config.colors?.primary || '#4f46e5',
-        accentColor: config.colors?.accent || '#f97316',
-        secondaryColor: config.colors?.secondary || '#06b6d4',
-        backgroundColor: config.colors?.background || '#ffffff',
-        textColor: config.colors?.text || '#333333',
+        theme: config.theme,
+        primaryColor: config.colors.primary,
+        accentColor: config.colors.accent,
+        secondaryColor: config.colors.secondary,
+        backgroundColor: config.colors.background,
+        textColor: config.colors.text,
       }));
       
       console.log('📋 Embed Configuration loaded:', config);
@@ -220,7 +242,7 @@ export default function EmbedTestPage() {
         const widgetDiv = document.createElement('div');
         container.appendChild(widgetDiv);
 
-        // Create widget instance
+        // Create widget instance with secure configuration
         const widget = w.InflateMate.create({
           element: widgetDiv,
           businessId: widgetConfig.businessId,
@@ -238,9 +260,12 @@ export default function EmbedTestPage() {
           redirectUrl: widgetConfig.redirectUrl,
           productId: widgetConfig.productId,
           funnelId: widgetConfig.funnelId,
-          onSuccess: (data: { successMessage?: string }) => {
+          onSuccess: (data: { successMessage?: string; widgetId?: string }) => {
             console.log('🎉 Widget success:', data);
-            alert(`Success: ${data.successMessage || 'Widget completed successfully!'}`);
+            // Show success notification that includes widgetId for debugging
+            const message = data.successMessage || 'Widget completed successfully!';
+            const widgetInfo = data.widgetId ? ` (Widget ID: ${data.widgetId})` : '';
+            alert(`Success: ${message}${widgetInfo}`);
           },
           onError: (error: string) => {
             console.error('❌ Widget error:', error);
@@ -250,6 +275,33 @@ export default function EmbedTestPage() {
         
         setWidgetInstances(prev => [...prev, widget]);
         console.log('🔄 Dynamic widget created:', widgetConfig);
+        
+        // Set up message listener for debugging (test page only)
+        if (debugMode) {
+          const messageHandler = (event: MessageEvent) => {
+            // Log all messages for debugging
+            if (event.data && typeof event.data === 'object') {
+              console.log('📨 Received message:', {
+                type: event.data.type,
+                origin: event.origin,
+                widgetId: event.data.widgetId,
+                data: event.data
+              });
+            }
+          };
+          
+          window.addEventListener('message', messageHandler);
+          
+          // Clean up listener when widget is destroyed
+          const originalDestroy = widget.destroy;
+          if (originalDestroy) {
+            widget.destroy = () => {
+              window.removeEventListener('message', messageHandler);
+              originalDestroy.call(widget);
+            };
+          }
+        }
+        
       } catch (error) {
         console.error('❌ Failed to create widget:', error);
         container.innerHTML = `
@@ -303,11 +355,46 @@ export default function EmbedTestPage() {
       <div className="mb-8">
         <h1 className="text-4xl font-bold mb-2 flex items-center gap-3">
           🎪 InflateMate Embed Test Suite
-          <Badge variant="secondary">v3.0.0 - Simplified</Badge>
+          <Badge variant="secondary">v3.5.0 - Ghost Box Fixed</Badge>
         </h1>
         <p className="text-gray-600 text-lg">
-          Testing environment for the new simplified embed widget system
+          Complete widget compatibility with ghost box elimination and surgical container synchronization
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <Badge variant="outline" className="text-green-700 border-green-700">
+            ✅ Secure postMessage
+          </Badge>
+          <Badge variant="outline" className="text-green-700 border-green-700">
+            ✅ Origin Validation
+          </Badge>
+          <Badge variant="outline" className="text-green-700 border-green-700">
+            ✅ Widget ID Auth
+          </Badge>
+          <Badge variant="outline" className="text-green-700 border-green-700">
+            ✅ Container Scoped
+          </Badge>
+          <Badge variant="outline" className="text-green-700 border-green-700">
+            ✅ Responsive CSS
+          </Badge>
+          <Badge variant="outline" className="text-green-700 border-green-700">
+            ✅ Frame Embedding Fixed
+          </Badge>
+          <Badge variant="outline" className="text-blue-700 border-blue-700">
+            🔐 Universal Storage Access
+          </Badge>
+          <Badge variant="outline" className="text-blue-700 border-blue-700">
+            💳 Stripe Universal
+          </Badge>
+          <Badge variant="outline" className="text-blue-700 border-blue-700">
+            🔑 Clerk Universal
+          </Badge>
+          <Badge variant="outline" className="text-purple-700 border-purple-700">
+            📐 Cropping Fixed
+          </Badge>
+          <Badge variant="outline" className="text-purple-700 border-purple-700">
+            👻 Ghost Box Fixed
+          </Badge>
+        </div>
       </div>
 
       {/* Load embed script */}
@@ -813,6 +900,7 @@ export default function EmbedTestPage() {
                   <h4 className="font-semibold mb-2">2. Include the embed script:</h4>
                   <p className="text-sm text-gray-600">
                     The loader script will automatically initialize any widgets with the data-inflatemate-widget attribute.
+                    Each widget gets a unique ID and validates message origins for security.
                   </p>
                 </div>
                 <div>
@@ -825,6 +913,27 @@ export default function EmbedTestPage() {
   theme: 'modern'
 });`}
                   </pre>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">🔒 Security Features:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• Origin validation prevents cross-site attacks</li>
+                    <li>• Unique widget IDs prevent message collisions</li>
+                    <li>• Scoped CSS prevents style leakage</li>
+                    <li>• Responsive design with proper iframe sandboxing</li>
+                    <li>• Universal storage access for all widgets needing Clerk/Stripe</li>
+                  </ul>
+                </div>
+                <div>
+                  <h4 className="font-semibold mb-2">🔐 Universal Widget Support:</h4>
+                  <ul className="text-sm text-gray-600 space-y-1">
+                    <li>• <strong>All widgets:</strong> allow-same-origin for Clerk auth & Stripe payments</li>
+                    <li>• <strong>Payment attribute:</strong> allow=&quot;payment *&quot; for Stripe Elements</li>
+                    <li>• <strong>Navigation support:</strong> allow-top-navigation for redirects</li>
+                    <li>• <strong>Enhanced domains:</strong> m.stripe.com and m.stripe.network support</li>
+                    <li>• <strong>Cropping fixed:</strong> scrollHeight prevents iframe clipping</li>
+                    <li>• <strong>Ghost box eliminated:</strong> Container synchronization prevents visual artifacts</li>
+                  </ul>
                 </div>
               </div>
             </CardContent>

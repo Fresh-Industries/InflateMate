@@ -17,16 +17,38 @@ export function BookingSuccessWrapper({ businessId, colors }: BookingSuccessWrap
   const [error, setError] = useState<string | null>(null);
   
   const bookingId = searchParams.get('bookingId');
+  const widgetId = searchParams.get('widgetId');
+  
+  // Get parent origin for security
+  const getParentOrigin = () => {
+    try {
+      const referrer = document.referrer;
+      if (referrer) {
+        return new URL(referrer).origin;
+      }
+      return window.location.origin;
+    } catch {
+      return window.location.origin;
+    }
+  };
   
   useEffect(() => {
-    // Send loaded message to parent
-    window.parent.postMessage({
+    // Send loaded message to parent with proper origin and widgetId
+    const message = {
       type: 'loaded',
       businessId,
       widgetType: 'booking-success',
-      bookingId
-    }, '*');
-  }, [businessId, bookingId]);
+      bookingId,
+      ...(widgetId && { widgetId })
+    };
+    
+    try {
+      const parentOrigin = getParentOrigin();
+      window.parent.postMessage(message, parentOrigin);
+    } catch (error) {
+      console.warn('Could not send loaded message to parent:', error);
+    }
+  }, [businessId, bookingId, widgetId]);
   
   useEffect(() => {
     async function fetchBookingDetails() {
@@ -56,22 +78,28 @@ export function BookingSuccessWrapper({ businessId, colors }: BookingSuccessWrap
     fetchBookingDetails();
   }, [bookingId, businessId]);
   
-  const handleReturnHome = () => {
-    // Send relative path info instead of full URL
-    window.parent.postMessage({
-      type: 'navigation',
-      action: 'return-home',
-      path: '/'
-    }, '*');
-  };
-
+  if (loading) {
+    return (
+      <div className="p-6 text-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto"></div>
+        <p className="mt-2 text-gray-600">Loading booking details...</p>
+      </div>
+    );
+  }
+  
+  if (error) {
+    return (
+      <div className="p-6 text-center">
+        <div className="text-red-600 mb-2">❌</div>
+        <p className="text-red-600">{error}</p>
+      </div>
+    );
+  }
+  
   return (
-    <BookingSuccessDisplay
+    <BookingSuccessDisplay 
       bookingDetails={bookingDetails}
-      loading={loading}
-      error={error}
       colors={colors}
-      onReturnHome={handleReturnHome}
     />
   );
 } 

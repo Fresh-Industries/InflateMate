@@ -4,7 +4,6 @@ import { prisma } from '@/lib/prisma';
 import { SalesFunnelWrapper } from './_components/SalesFunnelWrapper';
 import { makeScale } from '@/app/[domain]/_themes/utils';
 import { notFound } from 'next/navigation';
-import Script from 'next/script';
 
 interface PageProps {
   params: Promise<{ businessId: string; funnelId: string }>;
@@ -49,39 +48,30 @@ export default async function EmbedSalesFunnelPage({ params, searchParams }: Pag
     };
 
     return (
-      <>
-        <div style={{ 
-          background: 'transparent',
-          width: '100%',
-          height: '100%',
-          minHeight: '100vh',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
-          <SalesFunnelWrapper
-            businessId={business.id}
-            funnel={{
-              id: funnel.id,
-              name: funnel.name,
-              popupTitle: funnel.popupTitle,
-              popupText: funnel.popupText,
-              popupImage: funnel.popupImage,
-              formTitle: funnel.formTitle,
-              thankYouMessage: funnel.thankYouMessage,
-              couponId: funnel.couponId,
-              isActive: funnel.isActive,
-            }}
-            colors={colors}
-            themeName={themeName}
-          />
-        </div>
-        
-        {/* Add the embed-resize script */}
-        <Script 
-          src="/embed-resize.js"
-          strategy="afterInteractive"
+      <div style={{ 
+        background: 'transparent',
+        width: '100%',
+        height: '100%',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <SalesFunnelWrapper
+          businessId={business.id}
+          funnel={{
+            id: funnel.id,
+            name: funnel.name,
+            popupTitle: funnel.popupTitle,
+            popupText: funnel.popupText,
+            popupImage: funnel.popupImage,
+            formTitle: funnel.formTitle,
+            thankYouMessage: funnel.thankYouMessage,
+            couponId: funnel.couponId,
+            isActive: funnel.isActive,
+          }}
+          colors={colors}
+          themeName={themeName}
         />
-      </>
+      </div>
     );
   } catch (error) {
     console.error('Error loading embed sales funnel page:', error);

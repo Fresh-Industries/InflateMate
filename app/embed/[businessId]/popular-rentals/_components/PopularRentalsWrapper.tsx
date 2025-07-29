@@ -26,8 +26,11 @@ export function PopularRentalsWrapper({
   
   // Send loaded message to parent
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const widgetId = params.get('widgetId');
     window.parent.postMessage({
       type: 'loaded',
+      widgetId,
       businessId,
       widgetType: 'popular-rentals',
       itemCount: items.length

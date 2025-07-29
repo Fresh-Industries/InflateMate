@@ -12,8 +12,11 @@ export function ProductDetailWrapper({ businessId, productId, children }: Produc
   
   // Send loaded message to parent
   useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const widgetId = params.get('widgetId');
     window.parent.postMessage({
       type: 'loaded',
+      widgetId,
       businessId,
       productId,
       widgetType: 'product'

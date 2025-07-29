@@ -8,7 +8,10 @@
 // Strict origin validation - exact match allow-list
 const PRODUCTION_ORIGINS = [
   'https://inflatemate.co',
-  'https://www.inflatemate.co'
+  'https://www.inflatemate.co',
+  "https://staging.inflatemate.co",
+  "https://www.staging.inflatemate.co"
+
 ];
 
 const DEVELOPMENT_ORIGINS = [
@@ -82,7 +85,7 @@ export const EMBED_SECURITY_HEADERS = {
   
   // Comprehensive permissions policy (restrictive by default)
   'Permissions-Policy': [
-    'payment=(self)',        // Allow payment for booking widgets
+    'payment=*',             // Allow payment for booking widgets in sandboxed contexts
     'microphone=()',         // Block microphone access
     'camera=()',             // Block camera access
     'geolocation=()',        // Block geolocation
@@ -99,11 +102,11 @@ export const EMBED_SECURITY_HEADERS = {
   // Enhanced Content Security Policy
   'Content-Security-Policy': [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' https://js.stripe.com",
-    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "script-src 'self' https://js.stripe.com",
+    "style-src 'self' 'unsafe-hashes' https://fonts.googleapis.com",
     "img-src 'self' data: https: blob:",
     "font-src 'self' data: https://fonts.gstatic.com",
-    "connect-src 'self' https://api.stripe.com https://checkout.stripe.com",
+    "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://m.stripe.com https://m.stripe.network",
     "frame-src 'self' https://js.stripe.com https://checkout.stripe.com",
     "worker-src 'self'",
     "object-src 'none'",
@@ -119,7 +122,7 @@ export const EMBED_SECURITY_HEADERS = {
   
   // Additional security headers
   'X-Robots-Tag': 'noindex, nofollow, nosnippet, noarchive, noimageindex',
-  'Cross-Origin-Embedder-Policy': 'unsafe-none', // Allow embedding
+  'Cross-Origin-Embedder-Policy': 'credentialless', // Better isolation than unsafe-none
   'Cross-Origin-Opener-Policy': 'same-origin-allow-popups', // Allow payment popups
   'Cross-Origin-Resource-Policy': 'cross-origin' // Allow cross-origin embedding
 };
@@ -132,7 +135,7 @@ export const EMBED_ENDPOINT_HEADERS = {
   script: {
     ...EMBED_SECURITY_HEADERS,
     'Content-Type': 'application/javascript',
-    'X-Frame-Options': 'DENY', // Scripts shouldn't be in frames
+    // Scripts are never rendered in a <frame>, header not needed
     'Cache-Control': process.env.NODE_ENV === 'development' 
       ? 'no-cache, no-store, must-revalidate' 
       : 'public, max-age=3600, s-maxage=86400, immutable',
@@ -143,7 +146,7 @@ export const EMBED_ENDPOINT_HEADERS = {
   config: {
     ...EMBED_SECURITY_HEADERS,
     'Content-Type': 'application/json',
-    'X-Frame-Options': 'SAMEORIGIN',
+    // JSON is fetched by JS, not framed; header removed
     'Cache-Control': 'public, max-age=300, s-maxage=600',
     'Cross-Origin-Resource-Policy': 'cross-origin'
   },
@@ -152,17 +155,17 @@ export const EMBED_ENDPOINT_HEADERS = {
   widget: {
     ...EMBED_SECURITY_HEADERS,
     'Content-Type': 'text/html; charset=utf-8',
-    'X-Frame-Options': 'ALLOWALL', // Widgets are meant to be embedded
+    // Remove X-Frame-Options to avoid conflict with CSP frame-ancestors
     'Cache-Control': 'private, no-cache, no-store, must-revalidate',
     'Cross-Origin-Resource-Policy': 'cross-origin',
     // Enhanced CSP for widget pages with frame-ancestors
     'Content-Security-Policy': [
       "default-src 'self'",
-      "script-src 'self' 'unsafe-inline' https://js.stripe.com",
-      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "script-src 'self' https://js.stripe.com",
+      "style-src 'self' 'unsafe-hashes' https://fonts.googleapis.com",
       "img-src 'self' data: https: blob:",
       "font-src 'self' data: https://fonts.gstatic.com",
-      "connect-src 'self' https://api.stripe.com https://checkout.stripe.com",
+      "connect-src 'self' https://api.stripe.com https://checkout.stripe.com https://m.stripe.com https://m.stripe.network",
       "frame-src 'self' https://js.stripe.com https://checkout.stripe.com",
       "frame-ancestors *", // Allow embedding from any origin
       "worker-src 'self'",

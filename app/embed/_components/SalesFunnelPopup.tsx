@@ -31,6 +31,31 @@ export interface SalesFunnelPopupProps {
   isEmbed?: boolean;
 }
 
+// Helper function to get widgetId from URL params
+const getWidgetId = () => {
+  if (typeof window !== 'undefined') {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.get('widgetId');
+  }
+  return null;
+};
+
+// Helper function to send secure postMessage
+const sendSecureMessage = (message: Record<string, unknown>) => {
+  try {
+    const widgetId = getWidgetId();
+    const secureMessage = {
+      ...message,
+      ...(widgetId && { widgetId })
+    };
+    // Send to '*' - parent validates event.origin + widgetId for security
+    // This avoids issues with strict referrer policies that block document.referrer
+    window.parent.postMessage(secureMessage, '*');
+  } catch (error) {
+    console.warn('Could not send message to parent:', error);
+  }
+};
+
 const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'primary' | 'secondary' = 'primary'): React.CSSProperties => {
   const baseStyles = theme.buttonStyles;
   const secondaryStyles = theme.secondaryButtonStyles;
@@ -55,63 +80,40 @@ const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'prim
     boxShadow: styles?.boxShadow?.(colors) ?? fallbackStyles.boxShadow?.(colors) ?? 'none',
     borderRadius: styles?.borderRadius ?? fallbackStyles.borderRadius ?? '12px',
     transition: styles?.transition ?? fallbackStyles.transition ?? 'all 0.3s ease',
-    color: styles.textColor(colors) ?? fallbackStyles.textColor(colors),
+    color: styles?.textColor?.(colors) ?? fallbackStyles.textColor?.(colors) ?? getContrastColor(colors.primary[500]),
   };
 };
 
-
-export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = false }: SalesFunnelPopupProps) {
+export function SalesFunnelPopup({ 
+  businessId, 
+  funnel, 
+  colors,
+  theme,
+  isEmbed = false 
+}: SalesFunnelPopupProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [showForm, setShowForm] = useState(false);
   const [showThankYou, setShowThankYou] = useState(false);
   const [couponCode, setCouponCode] = useState<string | null>(null);
   const popupRef = useRef<HTMLDivElement>(null);
-  
-  // Handle click outside to minimize popup
+
+  // Load minimized state from localStorage on component mount
   useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (popupRef.current && !popupRef.current.contains(event.target as Node) && isVisible && !isMinimized) {
-        setIsMinimized(true);
-      }
-    };
-    
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [isVisible, isMinimized]);
-  
-  // Send loaded message to parent window for embed communication
-  useEffect(() => {
-    if (isEmbed && window.parent) {
-      window.parent.postMessage({
-        type: 'sales-funnel:loaded',
-        businessId,
-        funnelId: funnel.id
-      }, '*');
-    }
-  }, [businessId, funnel.id, isEmbed]);
-  
-  // Check for previously minimized state
-  useEffect(() => {
-    setIsVisible(true);
-    
-    const wasMinimized = localStorage.getItem(`funnel-${funnel.id}-minimized`);
-    if (wasMinimized === 'true') {
+    const savedMinimizedState = localStorage.getItem(`funnel-${funnel.id}-minimized`);
+    if (savedMinimizedState === 'true') {
       setIsMinimized(true);
     }
   }, [funnel.id]);
-  
-  // Listen for external maximize requests
+
+  // Listen for maximize requests from parent window
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
       if (event.data.type === 'maximize-request') {
-        setIsMinimized(false);
-        localStorage.removeItem(`funnel-${funnel.id}-minimized`);
+        handleMaximize();
       }
     };
-    
+
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [funnel.id]);
@@ -121,7 +123,20 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
     // Small delay to ensure DOM has updated
     const timer = setTimeout(() => {
       if (isEmbed && window.parent) {
-        window.parent.postMessage({ type: 'resize-request' }, '*');
+        sendSecureMessage({ type: 'resize-request' });
+        
+        // Debug logging to verify sizing
+        const popup = document.querySelector('[data-popup="true"]');
+        if (popup) {
+          const rect = popup.getBoundingClientRect();
+          console.log('SalesFunnel size debug:', {
+            minimized: isMinimized,
+            boundingWidth: rect.width,
+            boundingHeight: rect.height,
+            scrollWidth: popup.scrollWidth,
+            scrollHeight: popup.scrollHeight
+          });
+        }
       }
     }, 100);
     
@@ -130,34 +145,23 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
   
   const handleClose = () => {
     setIsVisible(false);
-    localStorage.setItem(`funnel-${funnel.id}-closed`, 'true');
-    localStorage.removeItem(`funnel-${funnel.id}-minimized`);
-    
-    // Notify parent window if in embed mode
-    if (isEmbed && window.parent) {
-      window.parent.postMessage({
-        type: 'sales-funnel:closed',
-        businessId,
-        funnelId: funnel.id
-      }, '*');
-    }
   };
-  
+
   const handleMinimize = () => {
     setIsMinimized(true);
     localStorage.setItem(`funnel-${funnel.id}-minimized`, 'true');
     
     // Notify parent window if in embed mode
     if (isEmbed && window.parent) {
-      window.parent.postMessage({
+      sendSecureMessage({
         type: 'sales-funnel:minimize',
         businessId,
         funnelId: funnel.id
-      }, '*');
+      });
       
       // Trigger resize after a brief delay to allow DOM update
       setTimeout(() => {
-        window.parent.postMessage({ type: 'resize-request' }, '*');
+        sendSecureMessage({ type: 'resize-request' });
       }, 100);
     }
   };
@@ -168,15 +172,15 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
     
     // Notify parent window if in embed mode
     if (isEmbed && window.parent) {
-      window.parent.postMessage({
+      sendSecureMessage({
         type: 'sales-funnel:maximize',
         businessId,
         funnelId: funnel.id
-      }, '*');
+      });
       
       // Trigger resize after a brief delay to allow DOM update
       setTimeout(() => {
-        window.parent.postMessage({ type: 'resize-request' }, '*');
+        sendSecureMessage({ type: 'resize-request' });
       }, 100);
     }
   };
@@ -188,15 +192,15 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
     
     // Notify parent window if in embed mode
     if (isEmbed && window.parent) {
-      window.parent.postMessage({
+      sendSecureMessage({
         type: 'sales-funnel:form:opened',
         businessId,
         funnelId: funnel.id
-      }, '*');
+      });
       
       // Trigger resize after a brief delay to allow DOM update
       setTimeout(() => {
-        window.parent.postMessage({ type: 'resize-request' }, '*');
+        sendSecureMessage({ type: 'resize-request' });
       }, 100);
     }
   };
@@ -208,16 +212,16 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
     
     // Notify parent window if in embed mode
     if (isEmbed && window.parent) {
-      window.parent.postMessage({
+      sendSecureMessage({
         type: 'sales-funnel:lead:captured',
         businessId,
         funnelId: funnel.id,
         couponCode: code
-      }, '*');
+      });
       
       // Trigger resize after a brief delay to allow DOM update
       setTimeout(() => {
-        window.parent.postMessage({ type: 'resize-request' }, '*');
+        sendSecureMessage({ type: 'resize-request' });
       }, 100);
     }
   };
@@ -253,7 +257,13 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
   };
 
   return (
-    <div className="fixed bottom-0 left-0 z-50 pointer-events-none" data-popup="true" data-widget-type="sales-funnel" data-minimized={isMinimized ? "true" : "false"}>
+    <div 
+      className="fixed bottom-0 left-0 z-50 pointer-events-none" 
+      data-popup="true" 
+      data-widget-type="sales-funnel" 
+      data-minimized={isMinimized ? "true" : "false"}
+      style={{ display: 'inline-block' }}
+    >
       <AnimatePresence>
         {isMinimized ? (
           <motion.div
@@ -267,7 +277,11 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
             <button
               onClick={handleMaximize}
               className="flex items-center gap-3 pl-4 pr-5 py-3 rounded-full shadow-xl"
-              style={primaryButtonStyle}
+              style={{
+                ...primaryButtonStyle,
+                minWidth: '200px',
+                width: 'auto'
+              }}
             >
               <div className="flex items-center justify-center w-8 h-8 bg-white bg-opacity-20 rounded-full">
                 <Gift className="h-4 w-4" style={{ color: primaryButtonTextColor }} />
@@ -286,7 +300,14 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
             data-minimized="false"
             style={{ filter: "drop-shadow(0 20px 50px rgba(0, 0, 0, 0.15))" }}
           >
-            <div className="w-[600px] max-w-[95vw] overflow-hidden" style={cardStyle}>
+            <div 
+              className="overflow-hidden" 
+              style={{ 
+                ...cardStyle, 
+                width: '600px', 
+                maxWidth: '95vw' 
+              }}
+            >
               {/* Header */}
               <div 
                 className="h-14 flex items-center justify-between px-6"
@@ -333,7 +354,15 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = 
                               fill
                               sizes="(max-width: 768px) 100vw, 240px"
                               priority
-                              style={imageStyles}
+                              style={{
+                                ...imageStyles,
+                                // Remove position-related properties that conflict with fill
+                                position: undefined,
+                                top: undefined,
+                                left: undefined,
+                                right: undefined,
+                                bottom: undefined
+                              }}
                               className="transition-transform duration-700"
                             />
                           </div>

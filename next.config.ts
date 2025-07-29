@@ -42,7 +42,27 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
-        source: '/(.*)',
+        // Everything under /embed/** can be framed
+        source: '/embed/:path*',
+        headers: [
+          // Remove X-Frame-Options to allow embedding
+          {
+            key: 'Content-Security-Policy',
+            value: 'frame-ancestors *', // Modern way to allow embedding
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        // All other routes remain protected from clickjacking
+        source: '/((?!embed).*)',
         headers: [
           {
             key: 'X-Frame-Options',

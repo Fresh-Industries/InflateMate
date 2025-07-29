@@ -191,13 +191,13 @@ export function getSecurityHeaders(assetType: AssetType): Record<string, string>
       return {
         ...baseHeaders,
         'Content-Type': 'application/json',
-        'X-Frame-Options': 'SAMEORIGIN'
+        // JSON responses are fetched by JS, not framed; no X-Frame-Options needed
       };
     
     case AssetTypes.EMBED_WIDGET:
       return {
         ...baseHeaders,
-        'X-Frame-Options': 'ALLOWALL', // Widgets are meant to be embedded
+        // Use modern CSP instead of legacy X-Frame-Options for embedding
         'Content-Security-Policy': "frame-ancestors *;" // Allow embedding
       };
     

@@ -1,6 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
+import { 
+  embedRateLimiter, 
+  getClientIP, 
+  getEmbedSecurityHeaders, 
+  getEmbedCorsHeaders 
+} from '@/lib/security/embed-security';
 
 interface SiteConfig {
   themeName?: {
@@ -20,11 +26,19 @@ export async function GET(
   { params }: { params: Promise<{ businessId: string }> }
 ) {
   try {
+    // Rate limiting check
+    const clientIP = getClientIP(req);
+    if (!embedRateLimiter.isAllowed(clientIP)) {
+      return NextResponse.json(
+        { error: 'Rate limit exceeded' },
+        { status: 429, headers: { 'Retry-After': '60' } }
+      );
+    }
+
     const { searchParams } = new URL(req.url);
     const type = searchParams.get('type');
     const funnelId = searchParams.get('funnelId');
     const { businessId } = await params;
-
 
     if (type === 'sales-funnel' && funnelId) {
       // Fetch the sales funnel data
@@ -102,7 +116,7 @@ export async function GET(
         },
       };
 
-      return NextResponse.json({
+      const responseData = {
         funnel: {
           id: funnel.id,
           name: funnel.name,
@@ -118,7 +132,20 @@ export async function GET(
         business: {
           name: business.name,
         },
+      };
+
+      // Merge security headers and CORS headers
+      const securityHeaders = getEmbedSecurityHeaders('config');
+      const corsHeaders = getEmbedCorsHeaders(req.headers.get('origin'), 'config');
+      
+      const response = NextResponse.json(responseData);
+      
+      // Apply all headers
+      Object.entries({ ...securityHeaders, ...corsHeaders }).forEach(([key, value]) => {
+        response.headers.set(key, value);
       });
+      
+      return response;
     }
 
     return NextResponse.json(
@@ -132,13 +159,26 @@ export async function GET(
       { status: 500 }
     );
   }
-}export async function OPTIONS() {
+}
+
+export async function OPTIONS(req: NextRequest) {
+  // Rate limiting for OPTIONS requests too
+  const clientIP = getClientIP(req);
+  if (!embedRateLimiter.isAllowed(clientIP)) {
+    return new NextResponse(null, {
+      status: 429,
+      headers: { 'Retry-After': '60' }
+    });
+  }
+
+  const corsHeaders = getEmbedCorsHeaders(req.headers.get('origin'), 'config');
+  
   return new NextResponse(null, {
     status: 200,
     headers: {
-      'Access-Control-Allow-Origin': '*',
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type'
+      ...corsHeaders,
+      // Add Access-Control-Max-Age for preflight caching (browsers use this, not Cache-Control)
+      'Access-Control-Max-Age': '86400' // 24 hours for preflight cache
     }
   });
 } 

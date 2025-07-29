@@ -15,10 +15,18 @@ interface BookingWrapperProps {
 
 export function BookingWrapper({ businessId, redirectUrl, themeName, colors }: BookingWrapperProps) {
   
+  // Get widgetId for secure messaging
+  const getWidgetId = () => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('widgetId');
+  };
+  
   // Send loaded message to parent
   useEffect(() => {
+    const widgetId = getWidgetId();
     window.parent.postMessage({
       type: 'loaded',
+      widgetId,
       businessId,
       widgetType: 'booking'
     }, '*');
@@ -26,8 +34,10 @@ export function BookingWrapper({ businessId, redirectUrl, themeName, colors }: B
   
   const handleSuccess = (bookingId?: string) => {
     // Send success message to parent
+    const widgetId = getWidgetId();
     window.parent.postMessage({
       type: 'booking:success',
+      widgetId,
       businessId,
       redirectUrl,
       bookingId
@@ -36,8 +46,10 @@ export function BookingWrapper({ businessId, redirectUrl, themeName, colors }: B
 
   const handleError = (error: string) => {
     // Send error message to parent
+    const widgetId = getWidgetId();
     window.parent.postMessage({
       type: 'booking:error',
+      widgetId,
       error
     }, '*');
   };

@@ -7,6 +7,9 @@ import DOMPurify from 'dompurify';
  * Centralizes all content sanitization across the embed system
  */
 
+// Module-level flag to prevent re-initialization
+let domPurifyInitialized = false;
+
 // Safe HTML sanitization config for different content types
 const SANITIZE_CONFIGS = {
   // For display content (descriptions, messages, etc.)
@@ -47,8 +50,14 @@ const SANITIZE_CONFIGS = {
 
 /**
  * Initialize DOMPurify with security-focused configuration
+ * Guard with module-level boolean to avoid re-adding hooks
  */
 function initializeDOMPurify() {
+  // Guard against multiple initializations
+  if (domPurifyInitialized) {
+    return;
+  }
+  
   // Add custom hooks for additional security
   DOMPurify.addHook('beforeSanitizeElements', (node) => {
     // Remove any script elements that might have been missed
@@ -100,6 +109,9 @@ function initializeDOMPurify() {
       }
     }
   });
+  
+  // Mark as initialized
+  domPurifyInitialized = true;
 }
 
 /**

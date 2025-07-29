@@ -32,8 +32,11 @@ export function SalesFunnelWrapper({ businessId, funnel, colors, themeName }: Sa
   useEffect(() => {
     const timer = setTimeout(() => {
       if (window.parent) {
+        const params = new URLSearchParams(window.location.search);
+        const widgetId = params.get('widgetId');
         window.parent.postMessage({
           type: 'sales-funnel:loaded',
+          widgetId,
           businessId,
           funnelId: funnel.id,
           widgetType: 'sales-funnel'

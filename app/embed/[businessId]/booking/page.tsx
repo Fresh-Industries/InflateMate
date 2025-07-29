@@ -45,7 +45,6 @@ export default async function EmbedBookingPage({ params, searchParams }: PagePro
 
     return (
       <div style={{
-        minHeight: '100vh',
         backgroundColor: '#ffffff',
         padding: '1rem',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
