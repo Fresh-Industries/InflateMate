@@ -125,6 +125,10 @@
   gap: 1.5rem 1rem;
 }
 
+.im-embed .booking-form {
+  overflow-y: auto;                /* was overflow-hidden */
+}
+
 .im-embed .form-grid {
   display: grid;
   grid-template-columns: 1fr;
@@ -254,6 +258,16 @@
   position: fixed;
   bottom: calc(env(safe-area-inset-bottom, 24px) + 24px);
   left: calc(env(safe-area-inset-left, 24px) + 24px);
+}
+
+/* 600 px wide card is still < 768 so add a sm-variant */
+@media (min-width: 480px) {
+  .im-embed [data-popup="true"].sales-funnel {       /* wrapper */
+    display: flex;
+    flex-direction: row;
+    max-height: 80vh;           /* never fill the whole screen */
+  }
+  .im-embed .sales-funnel .flex-col { flex-direction: row; }
 }
 
 /* Smooth motion with prefers-reduced-motion respect */

@@ -239,7 +239,7 @@
           iframe.style.cssText = `
             width: 100%;
             max-width: 100%;
-            height: ${this.config.height === 'auto' ? '400px' : this.config.height};
+            height: ${this.config.height === 'auto' ? 'auto' : this.config.height};
             border: none;
             border-radius: 8px;
             background: #fff;

@@ -76,23 +76,22 @@
     if (window.ResizeObserver) {
       resizeObserver = new ResizeObserver(debouncedSendDimensions);
       
-      // Observer the popup element specifically when it appears
-      const observePopup = () => {
+      // 1️⃣ always observe the whole page (covers Booking, Inventory, etc.)
+      resizeObserver.observe(document.documentElement);
+      
+      // 2️⃣ if a popup later appears, observe it as well (covers Sales-Funnel)
+      const waitForPopup = new MutationObserver(() => {
         const popup = document.querySelector('[data-popup="true"]');
         if (popup && !popup.__resizeObserved) {
           resizeObserver.observe(popup);
           popup.__resizeObserved = true;
+          waitForPopup.disconnect();          // we're done
         }
-      };
-      
-      // Initial observation
-      observePopup();
-      
-      // Only observe popup element, not document.body to prevent loops
-      const popup = document.querySelector('[data-popup="true"]');
-      if (popup) {
-        resizeObserver.observe(popup);
-      }
+      });
+      waitForPopup.observe(document.body, {
+        childList: true,
+        subtree: true
+      });
     }
     
     // Event listeners
