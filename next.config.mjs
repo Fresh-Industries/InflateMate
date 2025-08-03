@@ -1,6 +1,4 @@
 // next.config.mjs
-import { withSentryConfig } from "@sentry/nextjs";
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: process.env.BUILD_STATIC ? "export" : undefined,
@@ -42,13 +40,4 @@ const nextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
-  org: "freshdigitalsolutions",
-  project: "javascript-nextjs",
-  silent: !process.env.CI,
-  widenClientFileUpload: true,
-  reactComponentAnnotation: { enabled: true },
-  sourcemaps: { disable: true },
-  disableLogger: true,
-  automaticVercelMonitors: true,
-}); 
+export default nextConfig; 
