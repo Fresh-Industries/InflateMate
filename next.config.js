@@ -42,7 +42,7 @@ const nextConfig = {
   },
 };
 
-module.exports = withSentryConfig(nextConfig, {
+export default withSentryConfig(nextConfig, {
   org: "freshdigitalsolutions",
   project: "javascript-nextjs",
   silent: !process.env.CI,
