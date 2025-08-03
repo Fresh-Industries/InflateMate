@@ -2,7 +2,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   output: process.env.BUILD_STATIC ? "export" : undefined,
-  trailingSlash: true,
   images: {
     unoptimized: !!process.env.BUILD_STATIC,
     remotePatterns: [
