@@ -1,8 +1,8 @@
-// next.config.ts  (ESM)
-import type { NextConfig } from "next";
+// next.config.js
 import { withSentryConfig } from "@sentry/nextjs";
 
-const nextConfig: NextConfig = {
+/** @type {import('next').NextConfig} */
+const nextConfig = {
   output: process.env.BUILD_STATIC ? "export" : undefined,
   trailingSlash: true,
   images: {
@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withSentryConfig(nextConfig, {
+module.exports = withSentryConfig(nextConfig, {
   org: "freshdigitalsolutions",
   project: "javascript-nextjs",
   silent: !process.env.CI,
@@ -51,4 +51,4 @@ export default withSentryConfig(nextConfig, {
   sourcemaps: { disable: true },
   disableLogger: true,
   automaticVercelMonitors: true,
-});
+}); 
