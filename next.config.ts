@@ -1,81 +1,41 @@
+// next.config.ts  (ESM)
 import type { NextConfig } from "next";
 import { withSentryConfig } from "@sentry/nextjs";
 
 const nextConfig: NextConfig = {
-  // Add static export option for Lighthouse testing
-  output: process.env.BUILD_STATIC ? 'export' : undefined,
+  output: process.env.BUILD_STATIC ? "export" : undefined,
   trailingSlash: true,
-  
   images: {
-    unoptimized: process.env.BUILD_STATIC ? true : false,
+    unoptimized: !!process.env.BUILD_STATIC,
     remotePatterns: [
-      {
-        hostname: 'uploadthing.com',
-      },
-      {
-        hostname: 'utfs.io',
-      },
-      {
-        hostname: '2c2xgszlh6.ufs.sh',
-      },
+      { hostname: "uploadthing.com" },
+      { hostname: "utfs.io" },
+      { hostname: "2c2xgszlh6.ufs.sh" },
     ],
   },
-  
   webpack: (config, { isServer }) => {
     if (!isServer) {
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-      };
+      config.resolve.fallback = { ...config.resolve.fallback, fs: false, net: false, tls: false };
     }
-    
-    config.module.rules.push({
-      test: /\.svg$/,
-      use: ["@svgr/webpack"],
-    });
-    
+    config.module.rules.push({ test: /\.svg$/, use: ["@svgr/webpack"] });
     return config;
   },
-  
   async headers() {
     return [
       {
-        // Everything under /embed/** can be framed
-        source: '/embed/:path*',
+        source: "/embed/:path*",
         headers: [
-          // Remove X-Frame-Options to allow embedding
-          {
-            key: 'Content-Security-Policy',
-            value: 'frame-ancestors *', // Modern way to allow embedding
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
+          { key: "Content-Security-Policy", value: "frame-ancestors *" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "origin-when-cross-origin" },
         ],
       },
       {
-        // All other routes remain protected from clickjacking
-        source: '/((?!embed).*)',
+        source: "/((?!embed).*)",
         headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'origin-when-cross-origin',
-          },
+          { key: "X-Frame-Options", value: "DENY" },
+          { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "Referrer-Policy", value: "origin-when-cross-origin" },
         ],
       },
     ];
@@ -87,12 +47,8 @@ export default withSentryConfig(nextConfig, {
   project: "javascript-nextjs",
   silent: !process.env.CI,
   widenClientFileUpload: true,
-  reactComponentAnnotation: {
-    enabled: true,
-  },
-  sourcemaps: {
-    disable: true,
-  },
+  reactComponentAnnotation: { enabled: true },
+  sourcemaps: { disable: true },
   disableLogger: true,
   automaticVercelMonitors: true,
 });
