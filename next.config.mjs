@@ -1,5 +1,5 @@
-// next.config.js
-const { withSentryConfig } = require("@sentry/nextjs");
+// next.config.mjs
+import { withSentryConfig } from "@sentry/nextjs";
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -42,7 +42,7 @@ const nextConfig = {
   },
 };
 
-module.exports = withSentryConfig(nextConfig, {
+export default withSentryConfig(nextConfig, {
   org: "freshdigitalsolutions",
   project: "javascript-nextjs",
   silent: !process.env.CI,
