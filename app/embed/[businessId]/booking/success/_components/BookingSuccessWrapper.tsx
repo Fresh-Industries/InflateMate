@@ -96,10 +96,22 @@ export function BookingSuccessWrapper({ businessId, colors }: BookingSuccessWrap
     );
   }
   
+  const handleReturnHome = () => {
+    try {
+      const parentOrigin = getParentOrigin();
+      window.parent.postMessage({ type: 'return-home' }, parentOrigin);
+    } catch (error) {
+      console.warn('Could not send return-home message to parent:', error);
+    }
+  };
+
   return (
     <BookingSuccessDisplay 
       bookingDetails={bookingDetails}
+      loading={loading}
+      error={error}
       colors={colors}
+      onReturnHome={handleReturnHome}
     />
   );
 } 
