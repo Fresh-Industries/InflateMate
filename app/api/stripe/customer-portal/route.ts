@@ -13,7 +13,7 @@ export async function POST() {
 
   try {
     const organization = await prisma.organization.findUnique({
-      where: { clerkOrgId: user.memberships[0]?.organizationId },
+      where: { id: user.memberships[0]?.organizationId },
       select: {
         id: true,
         business: { // Include business to get its ID for the return URL
@@ -26,6 +26,8 @@ export async function POST() {
         },
       },
     });
+
+    console.log("organization", organization?.business?.id);
 
     if (!organization || !organization.business?.id || !organization.subscription?.stripeCustomerId) {
       console.warn(`Customer Portal request for user ${user.id} in org ${user.memberships[0]?.organizationId}: No organization, business, or linked Stripe customer found.`);

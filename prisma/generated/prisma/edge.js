@@ -508,7 +508,7 @@ const config = {
       "value": "prisma-client-js"
     },
     "output": {
-      "value": "/Users/nikolasmanuel/inflatemate/prisma/generated/prisma",
+      "value": "C:\\Users\\Nik\\InflateMate\\prisma\\generated\\prisma",
       "fromEnvVar": null
     },
     "config": {
@@ -517,12 +517,12 @@ const config = {
     "binaryTargets": [
       {
         "fromEnvVar": null,
-        "value": "darwin",
+        "value": "windows",
         "native": true
       }
     ],
     "previewFeatures": [],
-    "sourceFilePath": "/Users/nikolasmanuel/inflatemate/prisma/schema.prisma",
+    "sourceFilePath": "C:\\Users\\Nik\\InflateMate\\prisma\\schema.prisma",
     "isCustomOutput": true
   },
   "relativeEnvPaths": {

@@ -1,6 +1,7 @@
 // next.config.mjs
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  trailingSlash: false,
   output: process.env.BUILD_STATIC ? "export" : undefined,
   images: {
     unoptimized: !!process.env.BUILD_STATIC,
