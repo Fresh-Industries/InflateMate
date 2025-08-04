@@ -47,7 +47,22 @@ const businessSchema = z.object({
   businessZip: z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code"),
   businessPhone: z.string().regex(/^\+?1?\d{9,15}$/, "Invalid phone number"),
   businessEmail: z.string().email("Invalid email address"),
-});
+  websiteType: z.enum(["template", "embedded"]),
+  customDomain: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.websiteType === "embedded" && !data.customDomain) {
+      return false;
+    }
+    if (data.customDomain && !data.customDomain.match(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/)) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Custom domain is required for embedded components and must be a valid domain",
+  }
+);
 
 export async function POST(req: NextRequest) {
   try {
@@ -148,32 +163,35 @@ export async function POST(req: NextRequest) {
       let onboardingErrorMessage: string | null = null;
       let finalSubdomain = "";
 
-      try {
-        const baseSlug = generateSlug(validatedData.businessName);
-        finalSubdomain = await generateUniqueSubdomain(baseSlug);
-        const fullDomain = `${finalSubdomain}.${rootDomain}`;
+      // Only setup subdomain for template websites without custom domain
+      if (validatedData.websiteType === "template" && !validatedData.customDomain) {
+        try {
+          const baseSlug = generateSlug(validatedData.businessName);
+          finalSubdomain = await generateUniqueSubdomain(baseSlug);
+          const fullDomain = `${finalSubdomain}.${rootDomain}`;
 
-        const isProduction = process.env.NODE_ENV === 'production';
-        const isValidDomain = !rootDomain.includes('localhost') && !rootDomain.includes('127.0.0.1');
+          const isProduction = process.env.NODE_ENV === 'production';
+          const isValidDomain = !rootDomain.includes('localhost') && !rootDomain.includes('127.0.0.1');
 
-        if (isProduction && isValidDomain) {
-          try {
-            await addDomainToVercel(fullDomain);
-          } catch (vercelError) {
-            onboardingErrorMessage = `Failed to configure subdomain on Vercel: ${(vercelError as Error).message}`;
-          }
+          if (isProduction && isValidDomain) {
+            try {
+              await addDomainToVercel(fullDomain);
+            } catch (vercelError) {
+              onboardingErrorMessage = `Failed to configure subdomain on Vercel: ${(vercelError as Error).message}`;
+            }
 
-          try {
-            await createCnameInCloudflare(finalSubdomain);
-          } catch (cloudflareError) {
-            if (!onboardingErrorMessage) {
-              onboardingErrorMessage = `Failed to configure subdomain DNS: ${(cloudflareError as Error).message}`;
+            try {
+              await createCnameInCloudflare(finalSubdomain);
+            } catch (cloudflareError) {
+              if (!onboardingErrorMessage) {
+                onboardingErrorMessage = `Failed to configure subdomain DNS: ${(cloudflareError as Error).message}`;
+              }
             }
           }
+        } catch (subdomainSetupError) {
+          onboardingErrorMessage = `Failed during internal subdomain setup: ${(subdomainSetupError as Error).message}`;
+          finalSubdomain = `error-${generateSlug(validatedData.businessName)}`;
         }
-      } catch (subdomainSetupError) {
-        onboardingErrorMessage = `Failed during internal subdomain setup: ${(subdomainSetupError as Error).message}`;
-        finalSubdomain = `error-${generateSlug(validatedData.businessName)}`;
       }
 
       // 6. Create Business
@@ -188,7 +206,9 @@ export async function POST(req: NextRequest) {
           email: validatedData.businessEmail,
           onboarded: true,
           stripeAccountId: account.id,
-          subdomain: finalSubdomain,
+          subdomain: finalSubdomain || null,
+          customDomain: validatedData.customDomain || null,
+          embeddedComponents: validatedData.websiteType === "embedded",
           onboardingError: onboardingErrorMessage,
           minNoticeHours: 24,
           maxNoticeHours: 2160, // 90 days * 24 hours

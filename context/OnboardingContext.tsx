@@ -17,6 +17,8 @@ export interface OnboardingFormData {
   businessZip: string;
   businessPhone: string;
   businessEmail: string;
+  websiteType?: string;
+  customDomain?: string;
 }
 
 interface OnboardingState {
@@ -54,6 +56,8 @@ const initialFormData: OnboardingFormData = {
   businessZip: '',
   businessPhone: '',
   businessEmail: '',
+  websiteType: '',
+  customDomain: '',
 };
 
 const initialState: OnboardingState = {
@@ -152,7 +156,7 @@ export function OnboardingProvider({ children }: { children: ReactNode }) {
       error: false,
       isCreatingAccountLink: false,
       // Clear data that comes after the target step
-      ...(step < 3 && {
+      ...(step < 4 && {
         connectedAccountId: null,
         businessId: null,
         newlyCreatedOrg: null,

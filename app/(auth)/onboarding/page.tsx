@@ -24,6 +24,9 @@ import {
   Info,
   CheckCircle,
   ExternalLink,
+  Globe,
+  Code,
+  Monitor,
 } from "lucide-react";
 import {
   Tooltip,
@@ -31,7 +34,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { useOnboarding } from "@/context/OnboardingContext";
+import { useOnboarding, OnboardingFormData } from "@/context/OnboardingContext";
 
 const step1Schema = z.object({
   businessName: z
@@ -52,6 +55,27 @@ const step2Schema = z.object({
     }),
   businessEmail: z.string().email("Invalid email address"),
 });
+
+const step3Schema = z.object({
+  websiteType: z.enum(["template", "embedded"], {
+    required_error: "Please select a website type",
+  }),
+  customDomain: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.websiteType === "embedded" && !data.customDomain) {
+      return false;
+    }
+    if (data.customDomain && !data.customDomain.match(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/)) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Custom domain is required for embedded components and must be a valid domain",
+    path: ["customDomain"],
+  }
+);
 
 const stepInfoContent = [
   {
@@ -80,6 +104,18 @@ const stepInfoContent = [
   },
   {
     id: 3,
+    title: "Website & Integration",
+    description:
+      "Choose how you want to showcase your business online. Get a ready-made template website or integrate booking components into your existing site.",
+    icon: <Globe className="h-10 w-10 text-violet-600" />,
+    features: [
+      "Template website with subdomain",
+      "Custom domain support", 
+      "Embedded booking components",
+    ],
+  },
+  {
+    id: 4,
     title: "Secure Payment Setup",
     description:
       "We've created your business profile. Now, let's connect with Stripe to securely process payments and manage your earnings from rentals.",
@@ -351,7 +387,154 @@ const Step2 = memo(
     </div>
   )
 );
-Step2.displayName = "Step2";export default function OnboardingPage() {  const { toast } = useToast();  const router = useRouter();  const { userId, isLoaded: isAuthLoaded } = useAuth();  const {    state,    setCurrentStep,    updateFormData,    setConnectedAccountId,    setBusinessId,    setNewlyCreatedOrg,    setIsLoading,    setError,    setIsCreatingAccountLink,    resetToStep,  } = useOnboarding();  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
+Step2.displayName = "Step2";
+
+const Step3 = memo(
+  ({
+    formData,
+    onFieldChange,
+  }: {
+    formData: Pick<OnboardingFormData, 'websiteType' | 'customDomain'>;
+    onFieldChange: (field: string, value: string) => void;
+  }) => (
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <Label className="text-sm font-semibold text-gray-700">
+          Choose your website option
+        </Label>
+        
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          {/* Template Website Option */}
+          <motion.div
+            whileHover={{ y: -2 }}
+            className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all duration-200 ${
+              formData.websiteType === "template"
+                ? "border-violet-500 bg-violet-50/50 ring-2 ring-violet-200"
+                : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
+            }`}
+            onClick={() => onFieldChange("websiteType", "template")}
+          >
+            <div className="flex items-start space-x-4">
+              <div className={`rounded-lg p-2 ${
+                formData.websiteType === "template" 
+                  ? "bg-violet-100" 
+                  : "bg-gray-100"
+              }`}>
+                <Monitor className={`h-6 w-6 ${
+                  formData.websiteType === "template" 
+                    ? "text-violet-600" 
+                    : "text-gray-600"
+                }`} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">Template Website</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Get a complete website with booking system, ready to go
+                </p>
+                <ul className="mt-3 space-y-1 text-xs text-gray-500">
+                  <li>• Professional design templates</li>
+                  <li>• Built-in booking system</li>
+                  <li>• *.inflatemate.co subdomain included</li>
+                  <li>• Optional custom domain</li>
+                </ul>
+              </div>
+            </div>
+            {formData.websiteType === "template" && (
+              <div className="absolute top-3 right-3">
+                <CheckCircle className="h-5 w-5 text-violet-600" />
+              </div>
+            )}
+          </motion.div>
+
+          {/* Embedded Components Option */}
+          <motion.div
+            whileHover={{ y: -2 }}
+            className={`relative cursor-pointer rounded-xl border-2 p-6 transition-all duration-200 ${
+              formData.websiteType === "embedded"
+                ? "border-violet-500 bg-violet-50/50 ring-2 ring-violet-200"
+                : "border-gray-200 bg-white hover:border-gray-300 hover:shadow-md"
+            }`}
+            onClick={() => onFieldChange("websiteType", "embedded")}
+          >
+            <div className="flex items-start space-x-4">
+              <div className={`rounded-lg p-2 ${
+                formData.websiteType === "embedded" 
+                  ? "bg-violet-100" 
+                  : "bg-gray-100"
+              }`}>
+                <Code className={`h-6 w-6 ${
+                  formData.websiteType === "embedded" 
+                    ? "text-violet-600" 
+                    : "text-gray-600"
+                }`} />
+              </div>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">Embedded Components</h3>
+                <p className="text-sm text-gray-600 mt-1">
+                  Add booking widgets to your existing website
+                </p>
+                <ul className="mt-3 space-y-1 text-xs text-gray-500">
+                  <li>• Keep your current website</li>
+                  <li>• Add booking widgets anywhere</li>
+                  <li>• Requires your own domain</li>
+                  <li>• Full customization control</li>
+                </ul>
+              </div>
+            </div>
+            {formData.websiteType === "embedded" && (
+              <div className="absolute top-3 right-3">
+                <CheckCircle className="h-5 w-5 text-violet-600" />
+              </div>
+            )}
+          </motion.div>
+        </div>
+      </div>
+
+      {/* Custom Domain Input */}
+      {(formData.websiteType === "template" || formData.websiteType === "embedded") && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <FormInput
+            id="customDomain"
+            label={
+              formData.websiteType === "embedded" 
+                ? "Your Domain (Required)" 
+                : "Custom Domain (Optional)"
+            }
+            value={formData.customDomain || ""}
+            onChange={(e) => onFieldChange("customDomain", e.target.value)}
+            placeholder="yourdomain.com"
+            tooltipContent={
+              formData.websiteType === "embedded"
+                ? "Enter the domain where you want to embed the booking components"
+                : "Enter your custom domain or leave empty to use the provided subdomain"
+            }
+          />
+          {formData.websiteType === "template" && !formData.customDomain && (
+            <p className="text-sm text-gray-500 mt-2">
+              <strong>Don&apos;t have a domain?</strong> No worries! We&apos;ll provide you with a free subdomain like{" "}
+              <code className="bg-gray-100 px-1 py-0.5 rounded text-xs">
+                yourbusiness.inflatemate.co
+              </code>
+            </p>
+          )}
+        </motion.div>
+      )}
+    </div>
+  )
+);
+Step3.displayName = "Step3";
+
+export default function OnboardingPage() {  
+  const { toast } = useToast();  
+  const router = useRouter();  
+  const { userId, isLoaded: isAuthLoaded } = useAuth();  
+  const { state, setCurrentStep, updateFormData, setConnectedAccountId, setBusinessId, setNewlyCreatedOrg, setIsLoading, setError, setIsCreatingAccountLink, resetToStep } = useOnboarding();
+  const [isCheckingStatus, setIsCheckingStatus] = useState(true);
 
   // Check if user already has a business on component mount
   useEffect(() => {
@@ -365,7 +548,7 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
         console.log(data);
         
         if (response.ok && data.business) {
-          setCurrentStep(3);
+          setCurrentStep(4);
           setConnectedAccountId(data.stripeAccountId);
           setNewlyCreatedOrg(data.orgId);
           setBusinessId(data.business.id);
@@ -394,6 +577,8 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
         step1Schema.parse({ businessName: state.formData.businessName });
       } else if (state.currentStep === 2) {
         step2Schema.parse(state.formData);
+      } else if (state.currentStep === 3) {
+        step3Schema.parse(state.formData);
       }
       setCurrentStep(state.currentStep + 1);
     } catch (err) {
@@ -412,7 +597,7 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      step2Schema.parse(state.formData);
+      step3Schema.parse(state.formData);
       setIsLoading(true);
       setError(false);
 
@@ -440,7 +625,7 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
       setConnectedAccountId(data.stripeAccountId);
       setNewlyCreatedOrg(data.orgId);
       setBusinessId(data.business.id);
-      setCurrentStep(3);
+      setCurrentStep(4);
       toast({
         title: "Success!",
         description: "Business created. Let's complete your payment setup.",
@@ -506,6 +691,10 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
         <Step2 formData={state.formData} onFieldChange={handleFieldChange} />
       );
     if (state.currentStep === 3)
+      return (
+        <Step3 formData={state.formData} onFieldChange={handleFieldChange} />
+      );
+    if (state.currentStep === 4)
       return (
         <div>
           {state.connectedAccountId ? (
@@ -672,7 +861,7 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
 
               <form
                 onSubmit={
-                  state.currentStep === 2
+                  state.currentStep === 3
                     ? handleSubmit
                     : (e) => e.preventDefault()
                 }
@@ -695,8 +884,14 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
                 >
                   {renderStepContent()}
                 </AnimatedContainer>
+                <AnimatedContainer
+                  currentStep={state.currentStep}
+                  targetStep={4}
+                >
+                  {renderStepContent()}
+                </AnimatedContainer>
 
-                {state.currentStep < 3 && (
+                {state.currentStep < 4 && (
                   <div className="mt-8 flex justify-between border-t border-gray-100 pt-8">
                     {state.currentStep > 1 ? (
                       <Button
@@ -708,7 +903,7 @@ Step2.displayName = "Step2";export default function OnboardingPage() {  const { 
                     ) : (
                       <div />
                     )}
-                    {state.currentStep === 1 ? (
+                    {state.currentStep === 1 || state.currentStep === 2 ? (
                       <Button onClick={handleNext}>
                         Continue →
                       </Button>
