@@ -40,6 +40,12 @@ const initialBooking: NewBookingState = {
   eventTimeZone: Intl.DateTimeFormat().resolvedOptions().timeZone || "America/Chicago",
 };
 
+type HoldState = {
+  id: string | null;
+  expiresAt: string | null;
+  timer: number;
+}
+
 interface NewBookingFormProps {
   businessId: string;
 }
@@ -65,13 +71,15 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
     participantAge: "",
   }));
 
-  const [holdId, setHoldId] = useState<string | null>(null);
-  const [holdExpiresAt, setHoldExpiresAt] = useState<string | null>(null);
+  const [holdState, setHoldState] = useState<HoldState>({
+    id: null,
+    expiresAt: null,
+    timer: 0,
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isProcessingQuote, setIsProcessingQuote] = useState(false);
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
-  const [timer, setTimer] = useState<number>(0);
   const [bookingId, setBookingId] = useState<string | null>(null);
 
   const { selectedItems, selectInventoryItem, updateQuantity, clearSelection } = useSelectedItems();
@@ -102,15 +110,14 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!holdExpiresAt) return;
+    if (!holdState.expiresAt) return;
     const interval = setInterval(() => {
-      const end = new Date(holdExpiresAt).getTime();
+      const end = new Date(holdState.expiresAt!).getTime();
       const seconds = Math.max(0, Math.floor((end - Date.now()) / 1000));
-      setTimer(seconds);
+      setHoldState((prev) => ({ ...prev, timer: seconds }));
       if (seconds <= 0) {
         clearInterval(interval);
-        setHoldId(null);
-        setHoldExpiresAt(null);
+        setHoldState({ id: null, expiresAt: null, timer: 0 });
         toast({
           title: "Reservation Expired",
           description: "Your item reservation has expired. Please start over.",
@@ -119,15 +126,14 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
       }
     }, 1000);
     return () => clearInterval(interval);
-  }, [holdExpiresAt, toast]);
+  }, [holdState.expiresAt, toast]);
 
   const handleSetHold = (id: string | null, expiresAt: string | null) => {
-    setHoldId(id);
-    setHoldExpiresAt(expiresAt);
-    if (expiresAt) {
-      const end = new Date(expiresAt).getTime();
-      setTimer(Math.max(0, Math.floor((end - Date.now()) / 1000)));
-    }
+    const timer = expiresAt
+      ? Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000))
+      : 0;
+  
+    setHoldState({ id, expiresAt, timer });
   };
 
   const validateEventDetails = () => {
@@ -189,13 +195,13 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
     if (isSubmitting) return;
     setIsSubmitting(true);
     try {
-      if (!holdId) {
+      if (!holdState.id) {
         throw new Error("No hold in place. Please start your booking again.");
       }
       const amountCents = Math.round(total * 100);
       const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const payload = {
-        holdId,
+        holdId: holdState.id,
         customerName: newBooking.customerName,
         customerEmail: newBooking.customerEmail,
         customerPhone: newBooking.customerPhone,
@@ -275,7 +281,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
         taxRate: taxRate || 0,
         totalAmount: total,
         businessId: businessId,
-        holdId: holdId,
+        holdId: holdState.id,
       };
       const response = await fetch(`/api/businesses/${businessId}/quotes`, {
         method: "POST",
@@ -307,12 +313,12 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
     <div className="space-y-8">
       <Header currentStep={currentStep} bookingId={null} />
       {/* Global Reservation Timer */}
-      {holdId && holdExpiresAt && (
+      {holdState.id && holdState.expiresAt && (
         <div className="flex justify-center mb-4">
           <div className="flex items-center gap-3 px-6 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 shadow-lg text-white">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white/80" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
             <span>Reservation expires in:</span>
-            <span className="ml-2 font-mono font-bold">{Math.floor(timer / 60)}:{(timer % 60).toString().padStart(2, "0")}</span>
+            <span className="ml-2 font-mono font-bold">{Math.floor(holdState.timer / 60)}:{(holdState.timer % 60).toString().padStart(2, "0")}</span>
           </div>
         </div>
       )}
@@ -350,8 +356,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
             onSuccess={async () => {
               setShowPaymentForm(false);
               setClientSecret(null);
-              setHoldId(null);
-              setHoldExpiresAt(null);
+              setHoldState({ id: null, expiresAt: null, timer: 0 });
               setCurrentStep(1);
               setNewBooking(initialBooking);
               setCouponCode("");
@@ -378,7 +383,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
               selectInventoryItem={selectInventoryItem}
               updateQuantity={updateQuantity}
               setHoldId={handleSetHold}
-              holdId={holdId}
+              holdId={holdState.id}
             />
           )}
           {currentStep === 2 && (
