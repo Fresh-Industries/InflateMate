@@ -70,7 +70,7 @@ export async function updateBookingSafely(
         // Fetch the booking with a lock for update
         const booking = await tx.booking.findFirst({
           where: { id: bookingId, businessId },
-          include: { inventoryItems: true, customer: true, invoice: true, quote: true },
+          include: { inventoryItems: true, customer: true, invoices: true, quotes: true },
         });
 
         if (!booking) {
@@ -120,10 +120,10 @@ export async function updateBookingSafely(
         }
 
         // 3. Void/Cancel Stripe Entities if they exist
-        if (booking.invoice && booking.invoice.stripeInvoiceId) {
+        if (booking.invoices && booking.invoices.stripeInvoiceId) {
           // Define active statuses for an invoice that can be voided
           const activeInvoiceStatuses: InvoiceStatus[] = [InvoiceStatus.OPEN, InvoiceStatus.DRAFT]; 
-          if (activeInvoiceStatuses.includes(booking.invoice.status)) {
+          if (activeInvoiceStatuses.includes(booking.invoices.status)) {
             console.log(`[updateBookingSafely] Existing Stripe Invoice ${booking.invoice.stripeInvoiceId} for booking ${bookingId} needs to be voided.`);
             // TODO: Implement actual Stripe API call
             // await stripe.invoices.voidInvoice(booking.invoice.stripeInvoiceId);
