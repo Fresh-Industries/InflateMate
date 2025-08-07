@@ -168,8 +168,6 @@ export async function POST(
         specialInstructions: holdData.specialInstructions, // Use parsed instructions (can be null)
         business: { connect: { id: businessId } }, // Connect to the business
         coupon: undefined, // Coupon applied later
-        invoice: undefined, // Invoice created later
-        quote: undefined, // Quote created later
     };
     console.log("[POST /holds] Prepared bookingCreationData for HOLD:", bookingCreationData);
 
