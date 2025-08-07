@@ -120,35 +120,31 @@ export async function updateBookingSafely(
         }
 
         // 3. Void/Cancel Stripe Entities if they exist
-        if (booking.invoices && booking.invoices.stripeInvoiceId) {
-          // Define active statuses for an invoice that can be voided
+        if (booking.invoices && booking.invoices.length > 0) {
           const activeInvoiceStatuses: InvoiceStatus[] = [InvoiceStatus.OPEN, InvoiceStatus.DRAFT]; 
-          if (activeInvoiceStatuses.includes(booking.invoices.status)) {
-            console.log(`[updateBookingSafely] Existing Stripe Invoice ${booking.invoice.stripeInvoiceId} for booking ${bookingId} needs to be voided.`);
-            // TODO: Implement actual Stripe API call
-            // await stripe.invoices.voidInvoice(booking.invoice.stripeInvoiceId);
-            console.log(`[updateBookingSafely] Placeholder for Stripe API: Voiding invoice ${booking.invoice.stripeInvoiceId}`);
-            await tx.invoice.update({
-              where: { id: booking.invoice.id },
-              data: { status: InvoiceStatus.VOID, updatedAt: new Date() }, // Or your equivalent VOID status
-            });
-            console.log(`[updateBookingSafely] Local invoice ${booking.invoice.id} status updated to VOID.`);
+          for (const invoice of booking.invoices) {
+            if (invoice.stripeInvoiceId && activeInvoiceStatuses.includes(invoice.status)) {
+              console.log(`[updateBookingSafely] Existing Stripe Invoice ${invoice.stripeInvoiceId} for booking ${bookingId} needs to be voided.`);
+              await tx.invoice.update({
+                where: { id: invoice.id },
+                data: { status: InvoiceStatus.VOID, updatedAt: new Date() },
+              });
+              console.log(`[updateBookingSafely] Local invoice ${invoice.id} status updated to VOID.`);
+            }
           }
         }
 
-        if (booking.quote && booking.quote.stripeQuoteId) {
-          // Define active statuses for a quote that can be canceled
+        if (booking.quotes && booking.quotes.length > 0) {
           const activeQuoteStatuses: QuoteStatus[] = [QuoteStatus.OPEN, QuoteStatus.DRAFT];
-          if (activeQuoteStatuses.includes(booking.quote.status)) {
-            console.log(`[updateBookingSafely] Existing Stripe Quote ${booking.quote.stripeQuoteId} for booking ${bookingId} needs to be canceled.`);
-            // TODO: Implement actual Stripe API call
-            // await stripe.quotes.cancel(booking.quote.stripeQuoteId);
-            console.log(`[updateBookingSafely] Placeholder for Stripe API: Canceling quote ${booking.quote.stripeQuoteId}`);
-            await tx.quote.update({
-              where: { id: booking.quote.id },
-              data: { status: QuoteStatus.CANCELED, updatedAt: new Date() }, // Or your equivalent CANCELED status
-            });
-            console.log(`[updateBookingSafely] Local quote ${booking.quote.id} status updated to CANCELED.`);
+          for (const quote of booking.quotes) {
+            if (quote.stripeQuoteId && activeQuoteStatuses.includes(quote.status)) {
+              console.log(`[updateBookingSafely] Existing Stripe Quote ${quote.stripeQuoteId} for booking ${bookingId} needs to be canceled.`);
+              await tx.quote.update({
+                where: { id: quote.id },
+                data: { status: QuoteStatus.CANCELED, updatedAt: new Date() },
+              });
+              console.log(`[updateBookingSafely] Local quote ${quote.id} status updated to CANCELED.`);
+            }
           }
         }
 
@@ -494,10 +490,7 @@ export async function updateBookingSafely(
           }),
           // Include customer updates
           ...customerUpdateData,
-          // Disconnect relations by using the relation field name with { disconnect: true }
-          // Only disconnect if not reconnecting
-          ...(booking.invoice && !intent && { invoice: { disconnect: true } }),
-          ...(booking.quote && !intent && { quote: { disconnect: true } }),
+          // Note: invoices and quotes are now arrays, so no disconnect needed
         };
         
         // Remove undefined direct fields from payload to avoid Prisma errors if not all fields are provided
