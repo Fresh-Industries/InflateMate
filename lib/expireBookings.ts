@@ -1,7 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // lib/expireBookings.ts
 import { prisma } from "@/lib/prisma";
-import { BookingStatus, Prisma } from "@/prisma/generated/prisma";
 
 export async function expireOverdueBookings() {
   const now = new Date();
