@@ -14,6 +14,19 @@ export function formatCurrency(amount: number) {
   }).format(amount);
 }
 
+export class FileEsque extends Blob {
+  name: string;
+  lastModified: number;
+  customId?: string | null;
+
+  constructor(parts: BlobPart[], filename: string, options?: BlobPropertyBag) {
+    super(parts, options);
+    this.name = filename;
+    this.lastModified = Date.now();
+    this.customId = null; // optional, if needed
+  }
+}
+
 export const dateOnlyUTC = (d:string)=> new Date(`${d}T00:00:00Z`);
 export const localToUTC  = (d:string,t:string,tz:string)=> fromZonedTime(`${d}T${t}:00`, tz);
 export const utcToLocal  = (dt:Date,tz:string,f='Pp')=> format(toZonedTime(dt,tz),f);
