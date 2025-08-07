@@ -478,8 +478,8 @@ export async function DELETE(
       include: {
         payments: true,
         waivers: true,
-        invoice: true,
-        quote: true,
+        invoices: true,
+        quotes: true,
         inventoryItems: true,
       },
     });
@@ -497,9 +497,9 @@ export async function DELETE(
     }
 
     // Check if there are any completed payments
-    const hasCompletedPayments = booking.payments.some(
-      (payment) => payment.status === "COMPLETED"
-    );
+    const hasCompletedPayments = booking.payments?.some(
+      (payment: any) => payment.status === "COMPLETED"
+    ) || false;
     if (hasCompletedPayments) {
       return NextResponse.json(
         { error: "Cannot delete booking with completed payments" },
@@ -510,15 +510,15 @@ export async function DELETE(
     // Delete the booking and all related records in a transaction
     await prisma.$transaction(async (tx) => {
       // Delete related records first
-      if (booking.invoice) {
-        await tx.invoice.delete({
-          where: { id: booking.invoice.id },
+      if (booking.invoices && booking.invoices.length > 0) {
+        await tx.invoice.deleteMany({
+          where: { bookingId },
         });
       }
 
-      if (booking.quote) {
-        await tx.quote.delete({
-          where: { id: booking.quote.id },
+      if (booking.quotes && booking.quotes.length > 0) {
+        await tx.quote.deleteMany({
+          where: { bookingId },
         });
       }
 
