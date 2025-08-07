@@ -185,13 +185,15 @@ model Booking {
   eventTimeZone       String        @default("America/Chicago")
   couponId            String?
   expiresAt           DateTime?
+  currentQuoteId      String?
   business            Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   coupon              Coupon?       @relation(fields: [couponId], references: [id])
   customer            Customer?     @relation(fields: [customerId], references: [id])
   inventoryItems      BookingItem[]
-  invoice             Invoice?
+  invoices            Invoice[]
   payments            Payment[]
-  quote               Quote?
+  quotes              Quote[]
+  currentQuote        Quote?        @relation("CurrentQuote", fields: [currentQuoteId], references: [id])
   waivers             Waiver[]
 
   @@index([businessId])
@@ -347,7 +349,7 @@ model Invoice {
   updatedAt        DateTime      @updatedAt
   businessId       String
   customerId       String
-  bookingId        String        @unique
+  bookingId        String
   booking          Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
   business         Business      @relation(fields: [businessId], references: [id], onDelete: Cascade)
   customer         Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
@@ -361,25 +363,29 @@ model Invoice {
 }
 
 model Quote {
-  id             String      @id @default(cuid())
-  stripeQuoteId  String      @unique
-  status         QuoteStatus
-  amountTotal    Float
-  amountSubtotal Float
-  amountTax      Float
-  currency       String
-  hostedQuoteUrl String?
-  pdfUrl         String?
-  expiresAt      DateTime?
-  metadata       Json?
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  businessId     String
-  customerId     String
-  bookingId      String      @unique
-  booking        Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  business       Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer       Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  id              String      @id @default(cuid())
+  stripeQuoteId   String      @unique
+  status          QuoteStatus
+  amountTotal     Float
+  amountSubtotal  Float
+  amountTax       Float
+  currency        String
+  appQuoteUrl     String?
+  stripeHostedUrl String?
+  pdfUrl          String?
+  expiresAt       DateTime?
+  metadata        Json?
+  version         Int         @default(1)
+  replacesQuoteId String?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+  businessId      String
+  customerId      String
+  bookingId       String
+  booking         Booking     @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  business        Business    @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer        Customer    @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  currentBookings Booking[]   @relation("CurrentQuote")
 
   @@index([businessId])
   @@index([customerId])
@@ -416,7 +422,6 @@ enum SubscriptionType {
 enum QuoteStatus {
   DRAFT
   OPEN
-  SENT
   ACCEPTED
   CANCELED
   EXPIRED

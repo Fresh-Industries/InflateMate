@@ -1,3 +1,5 @@
+// app/api/businesses/[businessId]/quotes/route.ts
+
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma"; // Assuming prisma client is initialized here
 import { stripe } from "@/lib/stripe-server"; // Make sure stripe client is initialized
@@ -6,10 +8,10 @@ import Stripe from "stripe";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
 import { QuoteStatus, BookingStatus } from "@/prisma/generated/prisma";
-import { UTApi } from 'uploadthing/server'
-import { FileEsque } from '@/lib/utils'
+import { uploadStreamToUploadThing } from '@/lib/uploadthing-server'
+import { sendSignatureEmail } from "@/lib/sendEmail";
+import { dateOnlyUTC, localToUTC } from '@/lib/utils';
 
-const utapi = new UTApi()
 // Define a schema for validation for the Quote request body
 const quoteSchema = z.object({
   customerName: z.string().min(1, "Customer name is required"),
@@ -119,7 +121,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
               }
             },
             customer: true,
-            quote: true
+            currentQuote: true // Use the new currentQuote relation
           }
         });
 
@@ -137,16 +139,16 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         }
 
         // Cancel existing Stripe quote if needed
-        if (existingBooking.quote && existingBooking.quote.stripeQuoteId) {
+        if (existingBooking.currentQuote && existingBooking.currentQuote.stripeQuoteId) {
           const activeQuoteStatuses: QuoteStatus[] = [QuoteStatus.OPEN, QuoteStatus.DRAFT];
-          if (activeQuoteStatuses.includes(existingBooking.quote.status)) {
-            console.log(`Canceling existing Stripe Quote ${existingBooking.quote.stripeQuoteId} for booking ${bookingId}`);
+          if (activeQuoteStatuses.includes(existingBooking.currentQuote.status)) {
+            console.log(`Canceling existing Stripe Quote ${existingBooking.currentQuote.stripeQuoteId} for booking ${bookingId}`);
             try {
-              await stripe.quotes.cancel(existingBooking.quote.stripeQuoteId, {}, 
+              await stripe.quotes.cancel(existingBooking.currentQuote.stripeQuoteId, {}, 
                 { stripeAccount: stripeConnectedAccountId });
-              console.log(`Existing Stripe Quote ${existingBooking.quote.stripeQuoteId} canceled.`);
+              console.log(`Existing Stripe Quote ${existingBooking.currentQuote.stripeQuoteId} canceled.`);
             } catch (err) {
-              console.error(`Error canceling Stripe Quote ${existingBooking.quote.stripeQuoteId}:`, err);
+              console.error(`Error canceling Stripe Quote ${existingBooking.currentQuote.stripeQuoteId}:`, err);
               // Continue anyway, as we'll create a new quote
             }
           }
@@ -257,9 +259,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         }));
       }
 
-      // 5. Create Stripe Quote (Draft)
+      // 5. Create Stripe Quote (Draft) with idempotency
       const targetBookingId = bookingId || holdId;
-      console.log(`Creating Stripe quote draft for booking ID: ${targetBookingId}`);
+      const version = 1; // Start at version 1
+      const idempotencyKey = `quote:${businessId}:${targetBookingId}:${version}`;
+      
+      console.log(`Creating Stripe quote draft for booking ID: ${targetBookingId} with idempotency key: ${idempotencyKey}`);
+      
       const stripeQuoteDraft = await stripe.quotes.create({
         customer: stripeCustomerId,
         line_items: lineItems as unknown as Stripe.QuoteCreateParams.LineItem[],
@@ -273,92 +279,49 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           prismaBookingId: targetBookingId || null,
           prismaBusinessId: businessId,
           prismaCustomerId: customer.id,
-          prismaQuoteId: targetBookingId || null, // Add this to help with tracking
         },
         description: `Quote for event on ${eventDate}`,
-      }, { stripeAccount: stripeConnectedAccountId });
+      }, { 
+        stripeAccount: stripeConnectedAccountId,
+        idempotencyKey: idempotencyKey
+      });
       console.log(`Created Stripe quote draft: ${stripeQuoteDraft.id}`);
 
+      // 6. Finalize the Quote and expect status === 'open'
+      console.log(`Finalizing Stripe quote: ${stripeQuoteDraft.id}`);
+      const finalized = await stripe.quotes.finalizeQuote(
+        stripeQuoteDraft.id,
+        {},
+        { 
+          stripeAccount: stripeConnectedAccountId, 
+          idempotencyKey: `${idempotencyKey}:finalize`
+        }
+      );
+      
+      console.log(`Stripe quote finalized: ${finalized.id}, Status: ${finalized.status}`);
 
-      // 6. Send the Quote using the correct method
-      console.log(`Sending Stripe quote: ${stripeQuoteDraft.id}`);
-      // Cast the result to Stripe.Quote to resolve type issues with hosted_quote_url, pdf_url, currency
-      const sentQuote = await stripe.quotes.finalizeQuote(stripeQuoteDraft.id, {
-        // No parameters needed for the send action itself, options are for the request
-      }, { stripeAccount: stripeConnectedAccountId }) as Stripe.Quote; // Cast to Stripe.Quote
-
-
-      console.log(`Stripe quote sent: ${sentQuote.id}, Status: ${sentQuote.status}`);
-
-      // Now compare against the actual Stripe status value (lowercase 'sent')
-      // --- FIX IS HERE: Split the condition ---
-      if (!sentQuote || !sentQuote.id) {
-        console.error("Stripe Quote sending failed or returned null/missing ID:", sentQuote);
-        throw new Error("Failed to confirm Stripe quote sending."); // More accurate error message
+      // Validate the finalized quote status
+      if (!finalized || !finalized.id) {
+        console.error("Stripe Quote finalization failed or returned null/missing ID:", finalized);
+        throw new Error("Failed to finalize Stripe quote");
       }
-      // Now check the status separately
-      // Use lowercase 'sent' as per Stripe API documentation
-      if (sentQuote.status as string !== 'open') {
-        console.error(`Stripe Quote sending returned unexpected status: ${sentQuote.status}`, sentQuote);
-        throw new Error(`Failed to confirm Stripe quote sending with expected status 'sent'. Actual status: ${sentQuote.status}`); // More informative error
+      
+      if (finalized.status !== 'open') {
+        console.error(`Stripe Quote finalization returned unexpected status: ${finalized.status}`, finalized);
+        throw new Error(`Expected 'open' status, got ${finalized.status}`);
       }
-      // --- END FIX ---
 
-      // Prepare dates
-      const startDateTime = new Date(`${eventDate}T${startTime}`);
-      const endDateTime = new Date(`${eventDate}T${endTime}`);
+      // 7. Download PDF and upload to UploadThing
+      console.log(`Downloading PDF for quote: ${finalized.id}`);
+      const pdfStream = await stripe.quotes.pdf(finalized.id, { stripeAccount: stripeConnectedAccountId });
+      const pdfUrl = await uploadStreamToUploadThing(pdfStream, `Quote-${customer.name}-${targetBookingId}.pdf`);
 
-      // --- Start: Handle PDF Stream from Stripe ---
-      const pdfStream = await stripe.quotes.pdf(sentQuote.id, { stripeAccount: stripeConnectedAccountId }); // Added stripeAccount here for consistency
+      // 8. Prepare dates for booking update with timezone awareness
+      const tz = eventTimeZone || business.timeZone || 'America/Chicago';
+      const startDateTime = localToUTC(eventDate, startTime, tz);
+      const endDateTime = localToUTC(eventDate, endTime, tz);
 
-      const chunks: Uint8Array[] = [];
-      let ufsUrl: string | undefined;
-
-      // Create a promise to handle the stream processing
-      await new Promise<void>((resolve, reject) => {
-        pdfStream.on('data', (chunk) => {
-          chunks.push(chunk);
-        });
-        pdfStream.on('error', (err) => {
-          console.error("Error reading PDF stream from Stripe:", err);
-          reject(new Error("Failed to read PDF stream from Stripe."));
-        });
-        pdfStream.on('end', async () => {
-          try {
-            const pdfBuffer = Buffer.concat(chunks);
-            const arrayBuffer = pdfBuffer.buffer.slice(pdfBuffer.byteOffset, pdfBuffer.byteOffset + pdfBuffer.byteLength);
-
-            const fileName = `Quote-${customer.name}-${targetBookingId}.pdf`;
-            console.log(`Uploading PDF to UploadThing: ${fileName}`);
-            const upRes = await utapi.uploadFiles(new FileEsque([arrayBuffer], fileName, { type: 'application/pdf' }));
-
-            if (upRes.error) {
-              console.error("UploadThing API Error:", upRes.error);
-              throw new Error(`UploadThing upload failed: ${upRes.error.message}`);
-            }
-            if (!upRes.data || !upRes.data.url) { // Assuming 'url' is the correct field from UploadThing response
-              console.error("UploadThing response missing URL:", upRes.data);
-              throw new Error('UploadThing failed to return a URL.');
-            }
-            ufsUrl = upRes.data.url; // Store the URL
-            console.log(`PDF uploaded successfully to UploadThing: ${ufsUrl}`);
-            resolve();
-          } catch (uploadError) {
-            console.error("Error during PDF upload or processing:", uploadError);
-            reject(uploadError);
-          }
-        });
-      });
-
-      if (!ufsUrl) {
-        // This case should ideally be caught by the promise rejection, but as a safeguard:
-        console.error("UploadThing URL was not set after stream processing.");
-        throw new Error('UploadThing URL was not obtained.');
-      }
-      // --- End: Handle PDF Stream from Stripe ---
-
-
-      // 7. Update existing Booking and Create Quote in DB Transaction
+      // 9. Update existing Booking and Create Quote in DB Transaction
       console.log(`Starting database transaction for updating Booking ${targetBookingId} and creating Quote...`);
       const [updatedBooking, createdQuote] = await prisma.$transaction(async (tx) => {
         let booking;
@@ -368,10 +331,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           booking = await tx.booking.update({
             where: { id: existingBooking.id },
             data: {
-              eventDate: new Date(eventDate),
+              eventDate: dateOnlyUTC(eventDate),
               startTime: startDateTime,
               endTime: endDateTime,
-              eventTimeZone: eventTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+              eventTimeZone: tz,
               status: "PENDING" as BookingStatus,
               totalAmount: totalAmount,
               subtotalAmount: subtotalAmount,
@@ -386,7 +349,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
               participantAge: participantAge ? parseInt(participantAge, 10) : null,
               specialInstructions: specialInstructions,
               customer: { connect: { id: customer.id } },
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours for quote
+              expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours for quote
             }
           });
           console.log(` - Existing booking updated to PENDING: ${booking.id}`);
@@ -405,10 +368,10 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           booking = await tx.booking.update({
             where: { id: holdId },
             data: {
-              eventDate: new Date(eventDate),
+              eventDate: dateOnlyUTC(eventDate),
               startTime: startDateTime,
               endTime: endDateTime,
-              eventTimeZone: eventTimeZone || Intl.DateTimeFormat().resolvedOptions().timeZone,
+              eventTimeZone: tz,
               status: "PENDING" as BookingStatus,
               totalAmount: totalAmount,
               subtotalAmount: subtotalAmount,
@@ -423,7 +386,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
               participantAge: participantAge ? parseInt(participantAge, 10) : null,
               specialInstructions: specialInstructions,
               customer: { connect: { id: customer.id } },
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours for quote
+              expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours for quote
             }
           });
           console.log(` - Booking updated from HOLD to PENDING: ${booking.id}`);
@@ -432,76 +395,89 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           throw new Error("Neither bookingId nor holdId was provided");
         }
 
-        // Check for and handle existing quote if exists
-        let createdQuote;
-        if (booking.id && existingBooking?.quote) {
-          // Update the existing quote instead of creating a new one
-          createdQuote = await tx.quote.update({
-            where: { id: existingBooking.quote.id },
-            data: {
-              stripeQuoteId: sentQuote.id,
-              status: QuoteStatus.DRAFT,
-              amountTotal: totalAmount,
-              amountSubtotal: subtotalAmount,
-              amountTax: taxAmount,
-              currency: sentQuote.currency!.toUpperCase(),
-              hostedQuoteUrl: sentQuote.invoice?.toString(),
-              pdfUrl: ufsUrl,
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-              metadata: {
-                prismaBookingId: booking.id,
-                prismaBusinessId: businessId,
-                prismaCustomerId: customer.id,
-              },
-              businessId: businessId,
-              customerId: customer.id,
-              bookingId: booking.id,
-            }
-          });
-          console.log(` - Existing quote ${existingBooking.quote.id} updated with new data.`);
-        } else {
-          // Create a new Quote record if none exists
-          createdQuote = await tx.quote.create({
-            data: {
-              stripeQuoteId: sentQuote.id,
-              status: QuoteStatus.DRAFT,
-              amountTotal: totalAmount,
-              amountSubtotal: subtotalAmount,
-              amountTax: taxAmount,
-              currency: sentQuote.currency!.toUpperCase(),
-              hostedQuoteUrl: sentQuote.invoice?.toString(),
-              pdfUrl: ufsUrl,
-              expiresAt: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
-              metadata: {
-                prismaBookingId: booking.id,
-                prismaBusinessId: businessId,
-                prismaCustomerId: customer.id,
-              },
-              businessId: businessId,
-              customerId: customer.id,
-              bookingId: booking.id,
-            }
-          });
-          console.log(` - Quote created: ${createdQuote.id}, Stripe ID: ${createdQuote.stripeQuoteId}`);
-        }
+        // Mark previous OPEN quotes as EXPIRED for this booking
+        console.log(`Expiring previous OPEN quotes for booking: ${booking.id}`);
+        const expiredQuotes = await tx.quote.updateMany({
+          where: { bookingId: booking.id, status: 'OPEN' },
+          data: { status: 'EXPIRED' },
+        });
+        console.log(` - Expired ${expiredQuotes.count} previous OPEN quotes`);
+
+        // Create Quote with proper status and URLs (no appQuoteUrl)
+        const createdQuote = await tx.quote.create({
+          data: {
+            stripeQuoteId: finalized.id,
+            status: QuoteStatus.OPEN, // Store as OPEN status
+            amountTotal: totalAmount,
+            amountSubtotal: subtotalAmount,
+            amountTax: taxAmount,
+            currency: (finalized.currency ?? 'usd').toUpperCase(),
+            appQuoteUrl: null, // No app URL needed
+            stripeHostedUrl: null, // Not using Stripe's hosted view
+            pdfUrl: pdfUrl,
+            expiresAt: new Date(finalized.expires_at! * 1000), // Use Stripe's expiration
+            version: version,
+            businessId: businessId,
+            customerId: customer.id,
+            bookingId: booking.id,
+            metadata: {
+              prismaBookingId: booking.id,
+              prismaBusinessId: businessId,
+              prismaCustomerId: customer.id,
+            },
+          }
+        });
+        console.log(` - Quote created: ${createdQuote.id}, Stripe ID: ${createdQuote.stripeQuoteId}`);
+
+        // Update booking with current quote reference
+        await tx.booking.update({
+          where: { id: booking.id },
+          data: {
+            currentQuoteId: createdQuote.id,
+          }
+        });
 
         return [booking, createdQuote];
       });
       console.log("Database transaction completed.");
 
+      // 10. Update Stripe quote metadata with Prisma IDs
+      console.log(`Updating Stripe quote metadata with Prisma IDs: ${finalized.id}`);
+      await stripe.quotes.update(finalized.id, {
+        metadata: {
+          prismaBusinessId: businessId,
+          prismaBookingId: updatedBooking.id,
+          prismaCustomerId: customer.id,
+          prismaQuoteId: createdQuote.id
+        }
+      }, { stripeAccount: stripeConnectedAccountId });
+
+      // 11. Send quote email with PDF link via Resend
+      console.log(`Sending quote email to ${customerEmail}`);
+      await sendSignatureEmail({
+        from: `${business.name} <quotes@mail.inflatemate.co>`,
+        to: customerEmail,
+        subject: `Your Quote from ${business.name}`,
+        html: `
+          <p>Hi ${customerName},</p>
+          <p>Here's your quote for ${eventDate}.</p>
+          <p><strong>Total:</strong> $${totalAmount.toFixed(2)} (Subtotal $${subtotalAmount.toFixed(2)} + Tax $${taxAmount.toFixed(2)})</p>
+          <p>This quote expires on ${new Date(finalized.expires_at! * 1000).toLocaleString()}.</p>
+          <p><a href="${pdfUrl}">Download the quote PDF</a></p>
+          <p>When you're ready, we'll email your invoice to pay.</p>
+        `,
+      });
+      console.log(`Quote email sent successfully to ${customerEmail}`);
+
       // --- End: Database and Stripe Operations ---
 
-      return NextResponse.json(
-        {
-          message: "Quote sent successfully via Stripe",
-          bookingId: updatedBooking.id, // Return the booking ID
-          quoteId: createdQuote.id,
-          stripeQuoteId: createdQuote.stripeQuoteId,
-          hostedQuoteUrl: createdQuote.hostedQuoteUrl,
-          pdfUrl: createdQuote.pdfUrl, // Also return the new PDF URL
-        },
-        { status: 200 } // 200 OK
-      );
+      return NextResponse.json({
+        message: "Quote created",
+        bookingId: updatedBooking.id,
+        quoteId: createdQuote.id,
+        stripeQuoteId: createdQuote.stripeQuoteId,
+        pdfUrl: createdQuote.pdfUrl
+      }, { status: 200 });
 
     } catch (error) {
       // Enhanced Error Handling (similar to Invoice API)
@@ -523,11 +499,6 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       }
       if (error instanceof PrismaClientKnownRequestError) {
         console.error("Prisma Database Error:", { code: error.code, meta: error.meta });
-        // Handle unique constraint violation if trying to create a quote for a booking_id that already has one
-        if (error.code === 'P2002' && Array.isArray(error.meta?.target) && error.meta.target.includes('bookingId')) {
-          const targetId = bookingId || holdId;
-          return NextResponse.json({ error: `A quote already exists for this booking ID (${targetId}).`, field: 'bookingId' }, { status: 409 }); // Conflict
-        }
         return NextResponse.json({ error: "A database error occurred.", code: error.code }, { status: 500 });
       }
       if (error instanceof Error) {
@@ -558,6 +529,31 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
   try {
     const quotes = await prisma.quote.findMany({
       where: { businessId: businessId },
+      include: {
+        customer: {
+          select: {
+            name: true,
+            email: true,
+          }
+        },
+        booking: {
+          select: {
+            id: true,
+            eventDate: true,
+            startTime: true,
+            endTime: true,
+            eventAddress: true,
+            eventCity: true,
+            eventState: true,
+            eventZipCode: true,
+            participantCount: true,
+            specialInstructions: true,
+          }
+        }
+      },
+      orderBy: {
+        createdAt: 'desc'
+      }
     });
 
     return NextResponse.json(quotes, { status: 200 });

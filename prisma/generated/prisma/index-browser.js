@@ -255,7 +255,8 @@ exports.Prisma.BookingScalarFieldEnum = {
   isCompleted: 'isCompleted',
   eventTimeZone: 'eventTimeZone',
   couponId: 'couponId',
-  expiresAt: 'expiresAt'
+  expiresAt: 'expiresAt',
+  currentQuoteId: 'currentQuoteId'
 };
 
 exports.Prisma.BookingItemScalarFieldEnum = {
@@ -380,10 +381,13 @@ exports.Prisma.QuoteScalarFieldEnum = {
   amountSubtotal: 'amountSubtotal',
   amountTax: 'amountTax',
   currency: 'currency',
-  hostedQuoteUrl: 'hostedQuoteUrl',
+  appQuoteUrl: 'appQuoteUrl',
+  stripeHostedUrl: 'stripeHostedUrl',
   pdfUrl: 'pdfUrl',
   expiresAt: 'expiresAt',
   metadata: 'metadata',
+  version: 'version',
+  replacesQuoteId: 'replacesQuoteId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   businessId: 'businessId',
@@ -501,7 +505,6 @@ exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
 exports.QuoteStatus = exports.$Enums.QuoteStatus = {
   DRAFT: 'DRAFT',
   OPEN: 'OPEN',
-  SENT: 'SENT',
   ACCEPTED: 'ACCEPTED',
   CANCELED: 'CANCELED',
   EXPIRED: 'EXPIRED'
