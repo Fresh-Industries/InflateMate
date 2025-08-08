@@ -10,7 +10,8 @@ const publicRoute = createRouteMatcher([
   '/api/webhook(.*)',
   '/api/embed/(.*)',          // Embed routes for public access
   '/api/monitoring',          // Monitoring endpoint
-  '/public(.*)'
+  '/public(.*)',
+  '/api/auth(.*)',
 ]);
 
 const internalRoute = createRouteMatcher([
