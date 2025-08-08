@@ -13,7 +13,6 @@ import {
   ArrowRight,
   XCircle
 } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 // --------------------
@@ -125,26 +124,31 @@ export default function PricingGrid() {
   }
 
   return (
-    <div className="grid md:grid-cols-2 gap-6 max-w-5xl mx-auto">
+    <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
       {plans.map((plan) => (
-        <motion.div
+        <div
           key={plan.id}
           onMouseEnter={() => setHoveredPlan(plan.id)}
           onMouseLeave={() => setHoveredPlan(null)}
-          whileHover={{ y: -5, transition: { type: 'spring', stiffness: 300 } }}
           className={cn(
-            'relative rounded-2xl overflow-hidden border group transition-opacity duration-300',
-            plan.recommended ? 'border-primary shadow-lg' : 'border-border',
-            hoveredPlan && hoveredPlan !== plan.id ? 'opacity-60' : 'opacity-100'
+            'group relative overflow-hidden rounded-2xl border transition-all duration-200',
+            plan.recommended ? 'border-[#6366F1] shadow-[0_20px_60px_rgba(2,6,23,0.06)]' : 'border-black/10 shadow-[0_12px_30px_rgba(2,6,23,0.04)]',
+            hoveredPlan && hoveredPlan !== plan.id ? 'opacity-70' : 'opacity-100',
+            'hover:-translate-y-0.5'
           )}
         >
-          {/* gradient overlay */}
-          <div className={`absolute inset-0 bg-gradient-to-b ${plan.gradient} -z-10`} />
+          {/* subtle tinted backdrop per plan */}
+          <div
+            className={cn(
+              'absolute inset-0 -z-10',
+              plan.recommended ? 'bg-[rgba(99,102,241,0.04)]' : 'bg-[rgba(45,212,191,0.03)]'
+            )}
+          />
 
           {/* badge */}
           {plan.recommended && (
-            <div className="absolute top-0 right-0">
-              <div className="bg-primary text-primary-foreground text-xs px-4 py-1 rounded-bl-lg font-semibold">
+            <div className="absolute right-3 top-3">
+              <div className="rounded-full bg-[#6366F1] px-3 py-1 text-xs font-semibold text-white">
                 {plan.callout}
               </div>
             </div>
@@ -152,73 +156,62 @@ export default function PricingGrid() {
 
           <div className="p-8">
             {/* header */}
-            <div className="flex items-start justify-between mb-6">
+            <div className="mb-6 flex items-start justify-between">
               <div>
                 <div
                   className={cn(
-                    'inline-flex items-center justify-center p-2 rounded-lg mb-3',
+                    'mb-3 inline-flex items-center justify-center rounded-lg p-2',
                     plan.recommended
-                      ? 'bg-primary/20 text-primary'
-                      : 'bg-secondary/30 text-secondary-foreground'
+                      ? 'bg-[rgba(99,102,241,0.12)] text-[#6366F1]'
+                      : 'bg-[rgba(45,212,191,0.12)] text-[#0F766E]'
                   )}
                 >
                   {plan.icon}
                 </div>
-                <h3 className="text-xl font-bold text-foreground">{plan.name}</h3>
-                <p className="text-sm text-muted-foreground mt-1">{plan.description}</p>
+                <h3 className="text-xl font-bold text-[#0B1220]" style={{ fontFamily: 'var(--font-heading)' }}>{plan.name}</h3>
+                <p className="mt-1 text-sm text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>{plan.description}</p>
               </div>
-              <div className="text-right text-foreground">
-                <div className="text-3xl font-bold">
-                  <span className="text-xl">$</span>
+              <div className="text-right text-[#0B1220]">
+                <div className="text-3xl font-bold" style={{ fontFamily: 'var(--font-heading)' }}>
+                  <span className="text-xl" style={{ fontFamily: 'var(--font-body)' }}>$</span>
                   {plan.price}
-                  <span className="text-sm font-normal text-muted-foreground">/mo</span>
+                  <span className="text-sm font-normal text-[#64748B]">/mo</span>
                 </div>
               </div>
             </div>
 
             {/* features */}
-            <div className="space-y-3 mb-8">
+            <div className="mb-8 space-y-3">
               {plan.features.map((f, i) => (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: i * 0.05, duration: 0.3 }}
-                  className="flex items-start gap-2 text-foreground"
-                >
+                <div key={i} className="flex items-start gap-2 text-[#0B1220]">
                   <CheckCircle2
                     className={cn(
-                      'h-5 w-5 mt-0.5 flex-shrink-0',
-                      plan.recommended ? 'text-primary' : 'text-accent'
+                      'mt-0.5 h-5 w-5 flex-shrink-0',
+                      plan.recommended ? 'text-[#6366F1]' : 'text-[#2DD4BF]'
                     )}
                   />
                   <span>{f}</span>
-                </motion.div>
+                </div>
               ))}
 
               {plan.limitations.map((lim, i) => (
-                <motion.div
-                  key={`lim-${i}`}
-                  initial={{ opacity: 0, x: -5 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: plan.features.length * 0.05 + i * 0.05, duration: 0.3 }}
-                  className="flex items-start gap-2 text-muted-foreground"
-                >
+                <div key={`lim-${i}`} className="flex items-start gap-2 text-[#64748B]">
                   <XCircle className="h-5 w-5 mt-0.5 flex-shrink-0 text-destructive/80" />
                   <span>{lim}</span>
-                </motion.div>
+                </div>
               ))}
             </div>
 
             {/* CTA */}
-            <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+            <div>
               <Button
                 className={cn(
-                  'w-full gap-2 text-base h-11',
+                  'h-11 w-full gap-2 text-base transition-colors focus-visible:ring-4 focus-visible:ring-[#6366F1]/30',
                   plan.recommended
-                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground shadow-md shadow-primary/20'
-                    : 'bg-secondary hover:bg-secondary/90 text-secondary-foreground shadow-md shadow-secondary/20'
+                    ? 'bg-[#6366F1] text-white hover:bg-[#5458E3]'
+                    : 'border border-black/10 bg-white text-[#0B1220] hover:border-[#2DD4BF] hover:bg-[rgba(45,212,191,0.08)]'
                 )}
+                variant={plan.recommended ? undefined : 'outline'}
                 disabled={isLoading && hoveredPlan === plan.id}
                 onClick={() => handleSubscribe(plan.id)}
               >
@@ -227,11 +220,11 @@ export default function PricingGrid() {
                   : plan.recommended
                   ? 'Get Started Today'
                   : `Choose ${plan.name}`}
-                <ArrowRight className="h-4 w-4 ml-1" />
+                <ArrowRight className="ml-1 h-4 w-4" />
               </Button>
-            </motion.div>
+            </div>
           </div>
-        </motion.div>
+        </div>
       ))}
     </div>
   );

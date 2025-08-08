@@ -6,8 +6,9 @@
 
 
 
+/* Typography base via next/font variables */
 body {
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-inter), system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji", "Segoe UI Emoji";
 }
 
 
@@ -41,6 +42,17 @@ body {
 
 @layer base {
   :root {
+    /* Brand palette */
+    --brand-indigo: #6366F1; /* primary */
+    --brand-coral: #F87171;  /* accent */
+    --brand-teal: #2DD4BF;   /* secondary */
+    --brand-yellow: #FACC15; /* callouts */
+    --brand-slate: #1F2937;  /* primary text */
+    --brand-gray: #F3F4F6;   /* surfaces */
+
+    /* Font utilities */
+    --font-heading: var(--font-poppins), Poppins, ui-sans-serif, system-ui;
+    --font-body: var(--font-inter), Inter, ui-sans-serif, system-ui;
     --background: 210 0% 98%; /* #F9FAFB - light gray/off-white */
     --foreground: 223 47% 11%; /* #111827 - very dark blue/gray */
 
@@ -50,8 +62,9 @@ body {
     --popover: 0 0% 100%; /* Still white, you can adjust if needed */
     --popover-foreground: 223 47% 11%; /* Match foreground */
 
-    --primary: 252 95% 62%; /* #8B5CF6 - Purple core */
-    --primary-foreground: 0 0% 98%; /* Near White (good for text on purple) */
+    /* Primary indigo #6366F1 as HSL */
+    --primary: 239 84% 67%;
+    --primary-foreground: 0 0% 98%;
 
     --secondary: 216 14% 92%; /* #E5E7EB - Muted light gray (using muted as secondary) */
     --secondary-foreground: 223 47% 11%; /* Match foreground */
@@ -59,15 +72,16 @@ body {
     --muted: 216 14% 92%; /* #E5E7EB - Muted light gray */
     --muted-foreground: 220 14% 46%; /* #6B7280 - Medium gray */
 
-    --accent: 239 85% 67%; /* #6366F1 - Indigo accent */
-    --accent-foreground: 0 0% 98%; /* Near White (good for text on indigo) */
+    
+    --accent: 239 85% 67%; 
+    --accent-foreground: 223 47% 11%; /* Near White (good for text on indigo) */
 
     --destructive: 0 84.2% 60.2%; /* Keep default red for destructive actions */
     --destructive-foreground: 0 0% 98%;
 
     --border: 216 14% 92%; /* Use muted for borders */
     --input: 216 14% 92%; /* Use muted for input borders */
-    --ring: 252 95% 62%; /* Use primary for ring focus states */
+    --ring: 239 84% 67%;
 
     /* Chart colors (keep if needed, or adjust based on your chart library) */
     --chart-1: 12 76% 61%;
@@ -111,7 +125,7 @@ body {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply text-foreground;
   }
 }
 

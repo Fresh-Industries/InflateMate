@@ -1,7 +1,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
 import {
   CheckCircle2,
   XCircle,
@@ -307,26 +306,20 @@ export default function ComparisonTable() {
         <TooltipTrigger asChild>
           <div className="cursor-help">
             {value ? (
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="text-primary"
-              >
+              <div className="text-primary transition-transform hover:scale-110">
                 <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="text-destructive/70"
-              >
+              <div className="text-destructive/70 transition-transform hover:scale-110">
                 <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />
-              </motion.div>
+              </div>
             )}
           </div>
         </TooltipTrigger>
         <TooltipContent 
           side={isMobile ? "bottom" : "top"} 
           align={isMobile ? "center" : "center"}
-          className="max-w-xs bg-card p-3 shadow-xl z-50 text-muted-foreground"
+          className="z-50 max-w-xs bg-card p-3 text-muted-foreground shadow-xl"
         >
           <p className="text-sm">{note}</p>
         </TooltipContent>
@@ -335,61 +328,50 @@ export default function ComparisonTable() {
   );
 
   return (
-    <section className="py-12 sm:py-20 bg-gradient-to-b from-background/50 to-background overflow-hidden">
-      <div className="container mx-auto px-4">
+    <section className="relative overflow-hidden py-12 sm:py-20">
+      <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+      <div className="container relative z-10 mx-auto px-4">
         {/* Section Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-12 max-w-3xl mx-auto"
-        >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-            InflateMate vs. The Competition
+        <div className="mx-auto mb-8 max-w-3xl text-center sm:mb-12">
+          <h2 className="mb-3 text-2xl font-bold text-[#1F2937] sm:text-3xl md:text-4xl" style={{ fontFamily: 'var(--font-heading)' }}>
+            InflateMate vs. the competition
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Compare InflateMate&apos;s modern, inflatable-focused features against clunky, generic alternatives.
+          <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-[#6366F1]" />
+          <p className="mx-auto max-w-2xl text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>
+            Compare InflateMate&apos;s modern, inflatable‑focused features against clunky, generic alternatives.
           </p>
-        </motion.div>
+        </div>
 
         {/* Stats Row - Show comparison summary above the table */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-5xl mx-auto">
+        <div className="mx-auto mb-8 grid max-w-5xl grid-cols-2 gap-4 lg:grid-cols-4">
           {companyNames.map(company => (
-            <motion.div 
+            <div 
               key={`stats-${company}`}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
               className={cn(
-                "rounded-xl p-4 text-center border shadow-sm",
+                "rounded-xl border p-4 text-center shadow-sm transition-transform hover:-translate-y-0.5",
                 company === "InflateMate" 
-                  ? "bg-primary/10 border-primary" 
-                  : "bg-card border-border",
-                isMobile && company === activeCompany && "ring-2 ring-primary"
+                  ? "border-[#6366F1] bg-[#6366F1]/10" 
+                  : "border-black/10 bg-white",
+                isMobile && company === activeCompany && "ring-2 ring-[#6366F1]"
               )}
               onClick={() => isMobile && setActiveCompany(company)}
             >
               <h3 className={cn(
-                "font-bold text-base sm:text-lg truncate",
-                company === "InflateMate" ? "text-primary" : "text-foreground"
+                "truncate text-base font-bold sm:text-lg",
+                company === "InflateMate" ? "text-[#6366F1]" : "text-[#0B1220]"
               )}>
                 {company}
               </h3>
-              <p className="text-xs text-muted-foreground mb-2 truncate">
+              <p className="mb-2 truncate text-xs text-[#64748B]">
                 {companyDescriptions[company]}
               </p>
               <div className="flex items-center justify-center gap-1">
-                <span className={cn(
-                  "text-2xl font-bold",
-                  company === "InflateMate" ? "text-primary" : "text-foreground"
-                )}>
+                <span className={cn("text-2xl font-bold", company === "InflateMate" ? "text-[#6366F1]" : "text-[#0B1220]")}>
                   {getYesCount(company)}
                 </span>
-                <span className="text-xs text-muted-foreground">/ {totalFeatures} features</span>
+                <span className="text-xs text-[#64748B]">/ {totalFeatures} features</span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -447,36 +429,34 @@ export default function ComparisonTable() {
         <div className="relative mx-auto max-w-5xl">
           {/* Desktop Header Row (Hidden on Mobile) */}
           {!isMobile && (
-            <div className="hidden lg:grid grid-cols-5 gap-1 sticky top-0 bg-background/90 backdrop-blur-sm z-20 pt-6 -mt-6 rounded-b-lg shadow-sm border-b border-border">
+            <div className="sticky top-0 z-20 -mt-6 hidden gap-1 rounded-b-lg border-b border-black/10 bg-white/90 pt-6 shadow-sm backdrop-blur-sm lg:grid lg:grid-cols-5">
               {/* Empty cell for the first column */}
               <div className="col-span-1"></div>
 
               {/* Company Headers */}
               {companyNames.map((company) => (
-                <motion.div
+                <div
                   key={company}
-                  className={`col-span-1 relative rounded-xl p-4 text-center transition-all duration-300 border ${
+                  className={`col-span-1 relative rounded-xl border p-4 text-center transition-all duration-300 ${
                     company === "InflateMate"
-                      ? "bg-primary/10 border-primary shadow-lg"
-                      : "bg-card border-border opacity-80"
-                  } ${activeCompany === company ? '!opacity-100 !bg-primary/15 !border-primary/70' : ''}`}
-                  whileHover={{ y: -5, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                      ? "bg-[#6366F1]/10 border-[#6366F1] shadow-lg"
+                      : "bg-white border-black/10 opacity-80"
+                  } ${activeCompany === company ? '!opacity-100 !bg-[#6366F1]/15 !border-[#6366F1]/70' : ''} hover:-translate-y-1`}
                   onMouseEnter={() => setActiveCompany(company)}
                   onMouseLeave={() => setActiveCompany("InflateMate")}
                 >
                   {company === "InflateMate" && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground text-xs py-1 px-3 rounded-full font-semibold whitespace-nowrap">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 transform rounded-full bg-[#6366F1] px-3 py-1 text-xs font-semibold text-white whitespace-nowrap">
                       RECOMMENDED
                     </div>
                   )}
-                  <h3 className={`font-bold text-lg ${company === "InflateMate" ? "text-primary" : "text-foreground"}`}>
+                  <h3 className={`text-lg font-bold ${company === "InflateMate" ? "text-[#6366F1]" : "text-[#0B1220]"}`}>
                     {company}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-1 h-8 flex items-center justify-center">
+                  <p className="mt-1 flex h-8 items-center justify-center text-xs text-[#64748B]">
                     {companyDescriptions[company]}
                   </p>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -484,67 +464,54 @@ export default function ComparisonTable() {
           {/* Features */}
           <div className="space-y-4 mt-4 sm:mt-6">
             {features.map((feature) => (
-              <motion.div
+              <div
                 key={feature.id}
-                className="overflow-hidden rounded-xl border border-border"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.4 }}
+                className="overflow-hidden rounded-xl border border-black/10"
               >
                 {/* Category Header (Toggle Button) */}
                 <div
-                  className="flex items-center cursor-pointer p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+                  className="flex cursor-pointer items-center p-4 transition-colors hover:bg-black/[0.04]"
                   onClick={() => toggleFeature(feature.id)}
                 >
                   <div className="flex items-center gap-2 flex-1">
-                    <feature.icon size={18} className="text-primary flex-shrink-0" />
-                    <h3 className="font-semibold text-foreground">{feature.category}</h3>
+                    <feature.icon size={18} className="flex-shrink-0 text-[#6366F1]" />
+                    <h3 className="font-semibold text-[#0B1220]" style={{ fontFamily: 'var(--font-heading)' }}>{feature.category}</h3>
                   </div>
-                  <motion.div
-                    animate={{ rotate: expandedFeatures[feature.id] ? 90 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex-shrink-0"
-                  >
+                  <div className={cn("flex-shrink-0 transition-transform", expandedFeatures[feature.id] && "rotate-90")}> 
                     <ChevronRight size={18} />
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* Feature Items (Collapsible) */}
-                {expandedFeatures[feature.id] && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="border-t border-border"
-                  >
-                    {feature.items.map((item, itemIdx) => (
-                      <motion.div
-                        key={item.name}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: itemIdx * 0.05 }}
-                        className={cn(
-                          "border-b border-border last:border-b-0",
-                          isMobile 
-                            ? "grid grid-cols-1" 
-                            : "grid grid-cols-5 gap-1"
-                        )}
-                      >
+                <div
+                  className={cn(
+                    "border-t border-black/10 overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out",
+                    expandedFeatures[feature.id] ? "max-h-[2000px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-1"
+                  )}
+                >
+                  {feature.items.map((item) => (
+                    <div
+                      key={item.name}
+                      className={cn(
+                        "border-b border-black/10 last:border-b-0",
+                        isMobile 
+                          ? "grid grid-cols-1" 
+                          : "grid grid-cols-5 gap-1"
+                      )}
+                    >
                         {/* Feature Item Name and Tooltip */}
                         <div className={cn(
-                          "p-4 flex items-center gap-2 text-foreground",
-                          isMobile ? "border-b border-border/50" : "col-span-1"
+                          "flex items-center gap-2 p-4 text-[#0B1220]",
+                          isMobile ? "border-b border-black/10" : "col-span-1"
                         )}>
                           <div className="flex items-center gap-1.5 flex-1">
-                            <item.icon size={16} className="text-primary flex-shrink-0" />
-                            <span className="font-medium">{item.name}</span>
+                            <item.icon size={16} className="flex-shrink-0 text-[#6366F1]" />
+                            <span className="font-medium" style={{ fontFamily: 'var(--font-body)' }}>{item.name}</span>
                           </div>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <button className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+                                <button className="flex-shrink-0 transition-colors text-[#64748B] hover:text-[#0B1220]">
                                   <HelpCircle size={14} />
                                 </button>
                               </TooltipTrigger>
@@ -593,25 +560,24 @@ export default function ComparisonTable() {
                           return (
                             <div
                               key={`${item.name}-${company}`}
-                              className={`col-span-1 p-4 flex justify-center items-center transition-all duration-300 ${
-                                company === "InflateMate" ? "bg-primary/5" : ""
-                              } ${isHighlighted ? "ring-2 ring-accent/30 rounded-md scale-105" : ""}`}
+                              className={`col-span-1 flex items-center justify-center p-4 transition-all duration-300 ${
+                                company === "InflateMate" ? "bg-[#6366F1]/5" : ""
+                              } ${isHighlighted ? "scale-105 rounded-md ring-2 ring-[#6366F1]/30" : ""}`}
                             >
                               <FeatureIndicator {...details} />
                             </div>
                           );
                         })}
-                      </motion.div>
+                      </div>
                     ))}
-                  </motion.div>
-                )}
-              </motion.div>
+                </div>
+              </div>
             ))}
           </div>
 
           {/* Mobile company swipe indicator */}
           {isMobile && (
-            <div className="flex justify-center mt-6 mb-3 text-muted-foreground">
+            <div className="mt-6 mb-3 flex justify-center text-[#64748B]">
               <ArrowLeftRight size={16} className="mr-2" />
               <span className="text-sm">Swipe or tap to compare companies</span>
             </div>
