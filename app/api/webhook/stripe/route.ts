@@ -188,14 +188,18 @@ async function handleSubscription(subscription: Stripe.Subscription) {
   console.log(`[WEBHOOK] Subscription event: ${subscription.id}`);
 
   try {
-    const organizationId = subscription.metadata?.organizationId;
-    if (!organizationId) {
-      console.warn(`[WEBHOOK] Subscription ${subscription.id} missing organizationId metadata`);
-      return;
-    }
+    // Derive plan from price ID or metadata; do NOT require organizationId here
+    const priceId = subscription.items?.data?.[0]?.price?.id ?? '';
+    const priceIdMap: Record<string, string> = {
+      [process.env.STRIPE_SOLO_PRICE_ID || '']: 'solo',
+      [process.env.STRIPE_GROWTH_PRICE_ID || '']: 'growth',
+    };
+    const planFromPrice = priceIdMap[priceId];
+    const plan = (subscription.metadata?.plan || planFromPrice || 'growth').toString();
 
-    console.log(`[WEBHOOK] Syncing subscription data to DB for org: ${organizationId}`);
-    await syncStripeDataToDB(organizationId, subscription.customer as string);
+    const customerId = subscription.customer as string;
+    console.log(`[WEBHOOK] Syncing subscription for customer: ${customerId} (plan: ${plan}, priceId: ${priceId})`);
+    await syncStripeDataToDB(customerId, plan);
   } catch (error) {
     console.error(`[WEBHOOK] Error handling subscription ${subscription.id}:`, error);
   }
