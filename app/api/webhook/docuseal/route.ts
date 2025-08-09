@@ -1,9 +1,10 @@
-// /app/api/webhook/docuseal/route.ts  ← Next 14 / App-Router
+// /app/api/webhook/docuseal/route.ts
 
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { UTApi } from 'uploadthing/server'
 import { FileEsque } from '@/lib/utils'
+import * as Sentry from '@sentry/nextjs'
 
 const utapi = new UTApi()
 
@@ -26,7 +27,8 @@ export async function POST(req: NextRequest) {
   const header  = req.headers.get('x-docuseal-signature'); // must be lowercase here
 
   if (header !== secret) {
-    return NextResponse.json({ ok: false }, { status: 400 });
+    // Unauthorized → do NOT trigger DS retries with 5xx
+    return NextResponse.json({ ok: false }, { status: 401 });
   }
 
   /* ---------- 1. Parse & validate payload ---------- */
@@ -54,6 +56,16 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: true })      // ack so DocuSeal stops retrying
   }
 
+  // Idempotency guard: if already processed, acknowledge and exit
+  if (waiver.status === 'SIGNED' && waiver.documentUrl) {
+    console.log('Duplicate webhook: waiver already SIGNED with documentUrl. Skipping.')
+    return NextResponse.json({ ok: true })
+  }
+  if (waiver.status === 'REJECTED') {
+    console.log('Duplicate webhook: waiver already REJECTED. Skipping.')
+    return NextResponse.json({ ok: true })
+  }
+
   /* ---------- 3A. Completed ---------- */
   if (payload.event_type === 'form.completed') {
     const signedPdfUrl = documents[0]?.url
@@ -61,19 +73,51 @@ export async function POST(req: NextRequest) {
       console.error('No signed PDF URL in payload')
       await prisma.waiver.update({
         where: { id: waiver.id },
-        data: { status: 'SIGNED' },
+        data: { status: 'SIGNED', updatedAt: new Date() },
       })
-      return NextResponse.json({ error: 'No PDF URL' }, { status: 400 })
+      // Acknowledge to stop retries; follow-up can be handled out-of-band
+      return NextResponse.json({ ok: true })
     }
 
     try {
-      // download                       // DocuSeal docs show these URLs are public for 24 h :contentReference[oaicite:1]{index=1}
-      const pdfResp = await fetch(signedPdfUrl)
-      if (!pdfResp.ok) throw new Error('PDF download failed')
+      // Gentle retry on transient 429/5xx to avoid hammering DS file host
+      const fetchWithBackoff = async (url: string, maxAttempts = 3): Promise<Response> => {
+        let attempt = 0
+        let lastErr: unknown
+        while (attempt < maxAttempts) {
+          try {
+            const resp = await fetch(url, {
+              headers: {
+                Accept: 'application/pdf',
+                'User-Agent': 'inflatemate-webhook/1.0 (+https://inflatemate.co)'
+              },
+              cache: 'no-store',
+            })
+            if (resp.ok) return resp
+            // Retry on 429/503/504
+            if ([429, 503, 504].includes(resp.status)) {
+              const delayMs = 250 * Math.pow(2, attempt) + Math.floor(Math.random() * 150)
+              await new Promise((r) => setTimeout(r, delayMs))
+              attempt++
+              continue
+            }
+            throw new Error(`Unexpected status ${resp.status}`)
+          } catch (e) {
+            lastErr = e
+            const delayMs = 250 * Math.pow(2, attempt) + Math.floor(Math.random() * 150)
+            await new Promise((r) => setTimeout(r, delayMs))
+            attempt++
+          }
+        }
+        throw lastErr ?? new Error('Download failed')
+      }
+
+      const pdfResp = await fetchWithBackoff(signedPdfUrl)
 
       // upload to UploadThing
       const buf = await pdfResp.arrayBuffer()
-      const fileName = `Waiver-${waiver.customer.name}-${waiver.bookingId}.pdf`
+      const safeName = (waiver.customer?.name || 'Customer').replace(/[^\w\-\s]/g, '').slice(0, 64)
+      const fileName = `Waiver-${safeName}-${waiver.bookingId}.pdf`
       const upRes = await utapi.uploadFiles(new FileEsque([buf], fileName))
       const ufsUrl = upRes.data?.ufsUrl
       if (!ufsUrl) throw new Error('UploadThing failed')
@@ -86,7 +130,9 @@ export async function POST(req: NextRequest) {
       console.log('Waiver', waiver.id, 'marked SIGNED')
     } catch (err) {
       console.error('Processing error:', err)
-      return NextResponse.json({ error: 'Processing failed' }, { status: 500 })
+      Sentry.captureException(err)
+      // Acknowledge to prevent DS retries causing thundering herd; we'll rely on manual/backfill
+      return NextResponse.json({ ok: true })
     }
 
   /* ---------- 3B. Declined ---------- */
