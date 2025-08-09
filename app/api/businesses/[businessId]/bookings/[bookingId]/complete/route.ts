@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { revalidateTag } from "next/cache";
+import { supabaseAdmin } from "@/lib/supabaseClient";
 
 export async function POST(
   req: NextRequest,
@@ -16,8 +17,8 @@ export async function POST(
     const { businessId, bookingId } = await params;
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -41,6 +42,19 @@ export async function POST(
         isCompleted: true,
       },
     });
+
+    // Send real-time update via Supabase for completed booking
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('Booking')
+        .update({
+          status: 'COMPLETED',
+          isCompleted: true,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', bookingId);
+      console.log("Booking completed: real-time update sent via Supabase");
+    }
 
     // Revalidate the bookings tag to update cached lists
     revalidateTag(`bookings-${businessId}`);

@@ -11,7 +11,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { DatePickerWithRange } from "@/components/DatePicker";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 
 const optionalNumber = z.preprocess(
   (val) => (val === "" || val === null ? undefined : Number(val)),
@@ -85,8 +85,6 @@ interface CouponFormProps {
 
 export function CouponForm({ businessId, coupon, onSuccess, onCancel }: CouponFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
-
   // Convert string dates to Date objects for the form
   const defaultValues: Partial<FormValues> = {
     code: coupon?.code || "",
@@ -139,19 +137,12 @@ export function CouponForm({ businessId, coupon, onSuccess, onCancel }: CouponFo
         throw new Error(`Failed to ${coupon ? "update" : "create"} coupon`);
       }
       
-      toast({
-        title: "Success",
-        description: `Coupon ${coupon ? "updated" : "created"} successfully.`,
-      });
+      toast.success(`Coupon ${coupon ? "updated" : "created"} successfully.`);
       
       onSuccess();
     } catch (error) {
       console.error(`Error ${coupon ? "updating" : "creating"} coupon:`, error);
-      toast({
-        title: "Error",
-        description: `Failed to ${coupon ? "update" : "create"} coupon. Please try again.`,
-        variant: "destructive",
-      });
+      toast.error(`Failed to ${coupon ? "update" : "create"} coupon. Please try again.`);
     } finally {
       setIsSubmitting(false);
     }

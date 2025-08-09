@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
+import { supabaseAdmin } from "@/lib/supabaseClient";
 
 // Schema for cancellation request
 const cancelBookingSchema = z.object({
@@ -23,8 +24,8 @@ export async function POST(
     const { businessId, bookingId } = await params;
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "You don't have access to this business" }, { status: 403 });
     }
 
@@ -67,6 +68,19 @@ export async function POST(
           status: "CANCELLED",
         },
       });
+      
+      // Send real-time update via Supabase for cancelled booking
+      if (supabaseAdmin) {
+        await supabaseAdmin
+          .from('Booking')
+          .update({
+            status: 'CANCELLED',
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', bookingId);
+        console.log("Booking cancelled (no refund): real-time update sent via Supabase");
+      }
+      
       return NextResponse.json({ data: updatedBooking, refundAmount: 0 }, { status: 200 });
     }
 
@@ -157,6 +171,18 @@ export async function POST(
         customer: true,
       },
     });
+
+    // Send real-time update via Supabase for cancelled booking
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('Booking')
+        .update({
+          status: 'CANCELLED',
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', bookingId);
+      console.log("Booking cancelled: real-time update sent via Supabase");
+    }
 
     return NextResponse.json({
       data: updatedBooking,

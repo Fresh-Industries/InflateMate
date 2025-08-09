@@ -1,6 +1,6 @@
 // app/api/stripe/customer-portal/route.ts
 import { NextResponse } from 'next/server';
-import { getCurrentUserWithOrgAndBusiness } from '@/lib/auth/clerk-utils';
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from '@/lib/auth/clerk-utils';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
 
@@ -13,7 +13,7 @@ export async function POST() {
 
   try {
     const organization = await prisma.organization.findUnique({
-      where: { clerkOrgId: user.membership?.organizationId },
+      where: { id: user.memberships[0]?.organizationId },
       select: {
         id: true,
         business: { // Include business to get its ID for the return URL
@@ -27,13 +27,22 @@ export async function POST() {
       },
     });
 
+    console.log("organization", organization?.business?.id);
+
     if (!organization || !organization.business?.id || !organization.subscription?.stripeCustomerId) {
-      console.warn(`Customer Portal request for user ${user.id} in org ${user.membership?.organizationId}: No organization, business, or linked Stripe customer found.`);
+      console.warn(`Customer Portal request for user ${user.id} in org ${user.memberships[0]?.organizationId}: No organization, business, or linked Stripe customer found.`);
       return NextResponse.json({ error: 'Subscription or business information not found.' }, { status: 404 });
     }
 
+    const businessId = organization.business.id;
+
+    // Check that the user has access to this business
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
     const customerId = organization.subscription.stripeCustomerId;
-    const businessId = organization.business.id; // Get the business ID
 
     const session = await stripe.billingPortal.sessions.create({
       customer: customerId,

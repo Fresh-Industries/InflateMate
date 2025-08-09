@@ -5,7 +5,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   ResponsiveContainer,
   ComposedChart,
@@ -86,7 +86,6 @@ const periods = [
 ];
 
 export default function PaymentAnalytics({ businessId }: { businessId: string }) {
-  const { toast } = useToast();
   const [analytics, setAnalytics] = useState<Analytics>(defaultAnalytics);
   const [timeframe, setTimeframe] = useState<'day'|'week'|'month'|'year'|'all'|'custom'>('month');
   const [range, setRange] = useState<DateRange>();
@@ -100,7 +99,7 @@ export default function PaymentAnalytics({ businessId }: { businessId: string })
         url += `&startDate=${startOfDay(range.from).toISOString()}`;
         url += `&endDate=${endOfDay(range.to).toISOString()}`;
       } else {
-        toast({ title: 'Custom Range', description: 'Please pick both dates', variant: 'default' });
+        toast.error('Please pick both dates');
         setLoading(false);
         return;
       }
@@ -112,7 +111,7 @@ export default function PaymentAnalytics({ businessId }: { businessId: string })
       data.summary.totalRefunds = Math.abs(data.summary.totalRefunds);
       setAnalytics(data);
     } catch (err) {
-      toast({ title: 'Error', description: (err as Error).message, variant: 'destructive' });
+      toast.error((err as Error).message);
     } finally {
       setLoading(false);
     }

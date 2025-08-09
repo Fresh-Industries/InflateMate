@@ -38,6 +38,25 @@ export async function createBookingSafely(
       const transactionResult = await prisma.$transaction(async tx => {
         console.log("[createBookingSafely] Starting transaction...");
 
+        // Fetch business buffer settings
+        const businessId = typeof bookingData.business === 'object' && 'connect' in bookingData.business 
+          ? bookingData.business.connect?.id 
+          : undefined;
+        
+        if (!businessId) {
+          throw new Error("Business ID is required for buffer calculation");
+        }
+
+        const business = await tx.business.findUnique({
+          where: { id: businessId },
+          select: { bufferBeforeHours: true, bufferAfterHours: true },
+        });
+
+        const bufferBeforeMs = (business?.bufferBeforeHours || 0) * 60 * 60 * 1000;
+        const bufferAfterMs = (business?.bufferAfterHours || 0) * 60 * 60 * 1000;
+
+        console.log(`[createBookingSafely] Buffer settings: ${business?.bufferBeforeHours || 0}h before, ${business?.bufferAfterHours || 0}h after`);
+
         // Create enhanced booking data with expiresAt and default status
         const dataForCreation = {
           ...bookingData,
@@ -49,10 +68,55 @@ export async function createBookingSafely(
         const booking = await tx.booking.create({ data: dataForCreation });
         console.log(`[createBookingSafely] Booking created with ID: ${booking.id}`);
 
-        // Insert BookingItems using raw SQL for each item (required for Unsupported type with generated column)
-        // Make sure to NOT include the 'period' column in the INSERT list or VALUES.
-        // PostgreSQL generates it automatically from startUTC/endUTC.
+        // Check availability and insert BookingItems
         for (const item of items) {
+          // Calculate buffered times for availability checking
+          const desiredStartWithBuffer = new Date(item.startUTC.getTime() - bufferBeforeMs);
+          const desiredEndWithBuffer = new Date(item.endUTC.getTime() + bufferAfterMs);
+
+          console.log(`[createBookingSafely] Checking availability for inventory ${item.inventoryId} with buffer...`);
+
+          // Get inventory details
+          const inventory = await tx.inventory.findUnique({
+            where: { id: item.inventoryId },
+            select: { quantity: true }
+          });
+
+          if (!inventory) {
+            throw new Error(`Inventory item ${item.inventoryId} not found`);
+          }
+
+          // Check for overlapping bookings using buffered times OR exact times if no buffer
+          const checkStartTime = bufferBeforeMs > 0 || bufferAfterMs > 0 
+            ? desiredStartWithBuffer 
+            : item.startUTC;
+          const checkEndTime = bufferBeforeMs > 0 || bufferAfterMs > 0 
+            ? desiredEndWithBuffer 
+            : item.endUTC;
+
+          const overlapCount = await tx.bookingItem.aggregate({
+            _sum: { quantity: true },
+            where: {
+              inventoryId: item.inventoryId,
+              bookingId: { not: booking.id },
+              startUTC: { lte: checkEndTime },
+              endUTC: { gte: checkStartTime },
+              booking: {
+                status: { in: ["CONFIRMED", "HOLD", "PENDING"] }
+              }
+            }
+          });
+
+          const unavailableQuantity = overlapCount._sum?.quantity || 0;
+          const availableQuantity = inventory.quantity - unavailableQuantity;
+
+          console.log(`[createBookingSafely] Inventory ${item.inventoryId}: total=${inventory.quantity}, unavailable=${unavailableQuantity}, available=${availableQuantity}, requested=${item.quantity}`);
+
+          if (availableQuantity < item.quantity) {
+            throw new BookingConflictError(`Item ${item.inventoryId} not available for this timeslot${bufferBeforeMs > 0 || bufferAfterMs > 0 ? ' (including buffer)' : ''}.`);
+          }
+
+          // Insert BookingItem using raw SQL (using original times, not buffered)
           const bookingItemId = createId(); // Generate CUID for BookingItem ID
           console.log(`[createBookingSafely] Inserting BookingItem ${bookingItemId} for inventory ${item.inventoryId}...`);
 
@@ -87,7 +151,7 @@ export async function createBookingSafely(
               )
             )
           `;
-           console.log(`[createBookingSafely] BookingItem ${bookingItemId} inserted.`);
+          console.log(`[createBookingSafely] BookingItem ${bookingItemId} inserted.`);
         }
 
         console.log("[createBookingSafely] Transaction completed.");

@@ -1,6 +1,6 @@
-'use client'
-import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import {
   CheckCircle2,
   XCircle,
@@ -16,17 +16,18 @@ import {
   ArrowRight,
   ArrowLeft,
   ArrowLeftRight
-} from "lucide-react";
+} from 'lucide-react';
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn } from "@/lib/utils";
+  TooltipTrigger
+} from '@/components/ui/tooltip';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { cn } from '@/lib/utils';
 
-type CompanyName = "InflateMate" | "Inflatable Office" | "Event Rental Services" | "Goodshuffle Pro";
+// Updated competitor naming
+type CompanyName = 'InflateMate' | 'Inflatable Office' | 'Event Rental Systems' | 'Goodshuffle Pro';
 
 interface CompanyDetail {
   value: boolean;
@@ -47,251 +48,203 @@ interface FeatureCategory {
   items: FeatureItem[];
 }
 
-const companyNames: CompanyName[] = ["InflateMate", "Inflatable Office", "Event Rental Services", "Goodshuffle Pro"];
+const companyNames: CompanyName[] = ['InflateMate', 'Inflatable Office', 'Event Rental Systems', 'Goodshuffle Pro'];
 
 const companyDescriptions: Record<CompanyName, string> = {
-  "InflateMate": "Purpose-built for bounce houses",
-  "Inflatable Office": "Legacy rental software",
-  "Event Rental Services": "Generic event software",
-  "Goodshuffle Pro": "Broad event platform"
+  InflateMate: 'Purpose‑built for bounce houses',
+  'Inflatable Office': 'Legacy rental software',
+  'Event Rental Systems': 'Generic event software',
+  'Goodshuffle Pro': 'Broad event platform'
 };
+
+// Helper to quickly mark true/false for competitors that clearly offer a capability
+const TRUE_NOTE = 'Offered, but often costs more and lacks inflatable‑specific workflows.';
 
 const features: FeatureCategory[] = [
   {
-    id: "platform",
-    category: "Platform & Design",
+    id: 'platform',
+    category: 'Platform & Design',
     icon: Sparkles,
     items: [
       {
-        name: "Modern, Intuitive UI",
-        tooltip: "Easy-to-use interface designed with the latest UX principles, not stuck in the past.",
+        name: 'Modern, Intuitive UI',
+        tooltip: 'Easy‑to‑use interface designed with the latest UX principles—no dated tables from 2004.',
         icon: Sparkles,
         details: {
           InflateMate: {
             value: true,
-            note: "Clean, modern design inspired by top tech companies like Stripe. Easy to learn and navigate in minutes."
+            note: 'Clean Next.js‑based UI; learn it in minutes.'
           },
-          "Inflatable Office": {
+          'Inflatable Office': {
             value: false,
-            note: "Outdated interface from the early 2000s; clunky, visually unappealing, and requires significant training."
+            note: 'Aging interface and workflow complexity require training.'
           },
-          "Event Rental Services": {
+          'Event Rental Systems': {
             value: false,
-            note: "Generic business software look; not optimized for fast rental workflows."
+            note: 'Generic form‑heavy UI with limited mobile optimisation.'
           },
-          "Goodshuffle Pro": {
-            value: false,
-            note: "Complex and often cluttered interface with a steep learning curve for daily tasks."
+          'Goodshuffle Pro': {
+            value: true,
+            note: 'Polished but complex—built for broad event inventory, not just inflatables.'
           }
         }
       },
       {
-        name: "Built for Bounce Houses",
-        tooltip: "Platform built specifically with the unique needs and workflows of the inflatable rental industry in mind, not generic event rentals.",
+        name: 'Built for Bounce Houses',
+        tooltip: 'Tailored to inflatable rental quirks—drop‑offs, tear‑downs, waiver timing, weight limits.',
         icon: CheckCircle2,
         details: {
           InflateMate: {
             value: true,
-            note: "Designed by a bounce house business owner to solve *your* specific operational pains and workflows."
+            note: 'Founder‑led design from real bounce‑house ops; presets for units, blower counts, etc.'
           },
-          "Inflatable Office": {
-            value: false,
-            note: "General rental software; features apply broadly but lack inflatable-specific optimizations."
+          'Inflatable Office': {
+            value: true,
+            note: 'Originally inflatable‑focused but dated; requires manual tweaks.'
           },
-          "Event Rental Services": {
+          'Event Rental Systems': {
             value: false,
-            note: "Generic event management software; workflows don't align perfectly with inflatable rentals."
+            note: 'Broad rental categories; lacks inflatable‑specific automation.'
           },
-          "Goodshuffle Pro": {
+          'Goodshuffle Pro': {
             value: false,
-            note: "Broad event industry platform; features can feel overcomplicated or missing for dedicated inflatable rentals."
+            note: 'Covers all event rentals; no inflatable‑specific guardrails.'
           }
         }
-      },
+      }
     ]
   },
   {
-    id: "automation",
-    category: "Booking & Automation",
+    id: 'automation',
+    category: 'Booking & Automation',
     icon: Calendar,
     items: [
       {
-        name: "24/7 Online Booking",
-        tooltip: "Customers can view real-time availability and book inflatable units online at any time.",
+        name: '24/7 Online Booking',
+        tooltip: 'Real‑time inventory checkout—no back‑and‑forth phone tags.',
         icon: Calendar,
         details: {
           InflateMate: {
             value: true,
-            note: "Customer-facing portal with live inventory, automated setup/takedown buffer times, and instant booking confirmation."
+            note: 'Live inventory grid with buffer windows & payment capture.'
           },
-          "Inflatable Office": {
-            value: false,
-            note: "Offers online booking, but configuration can be complex and buffer times may be less flexible."
-          },
-          "Event Rental Services": {
-            value: false,
-            note: "Booking functionality may be basic, require manual approval, or not be rental-specific."
-          },
-          "Goodshuffle Pro": {
-            value: false,
-            note: "Offers embeddable booking widgets, but often feels less integrated than a dedicated portal."
-          }
+          'Inflatable Office': { value: true, note: TRUE_NOTE },
+          'Event Rental Systems': { value: true, note: TRUE_NOTE },
+          'Goodshuffle Pro': { value: true, note: TRUE_NOTE }
         }
       },
       {
-        name: "Automated Digital Waivers",
-        tooltip: "System automatically sends e-sign liability waivers to customers upon booking, saving time and ensuring compliance.",
+        name: 'Automated Digital Waivers',
+        tooltip: 'E‑sign contracts triggered automatically after booking.',
         icon: FileText,
         details: {
           InflateMate: {
             value: true,
-            note: "Seamless integration (e.g., via DocuSeal) for automated, legally binding e-signatures sent upon booking."
+            note: 'DocuSeal integration auto‑sends & tracks signatures.'
           },
-          "Inflatable Office": {
+          'Inflatable Office': {
             value: false,
-            note: "Requires manual sending or integrates with paid third-party e-sign services separately."
+            note: 'Manual doc sending or pricey 3rd‑party add‑on.'
           },
-          "Event Rental Services": {
-            value: false,
-            note: "Typically no integrated waiver functionality; requires manual process or external service."
-          },
-          "Goodshuffle Pro": {
-            value: false,
-            note: "May offer limited document features or require a higher, more expensive tier for e-signatures."
-          }
+          'Event Rental Systems': { value: false, note: 'Requires external waiver workflow.' },
+          'Goodshuffle Pro': { value: false, note: 'Document centre in higher tier; extra cost.' }
         }
       },
       {
-        name: "Real-time Inventory Sync",
-        tooltip: "Automatically track the status and availability of every inflatable unit in real-time across all bookings.",
+        name: 'Real‑time Inventory Sync',
+        tooltip: 'Conflict‑free scheduling with hold timers during checkout.',
         icon: Box,
         details: {
-          InflateMate: {
-            value: true,
-            note: "Inventory tracking is automatically tied to bookings, instantly preventing double bookings and conflicts."
-          },
-          "Inflatable Office": {
-            value: false,
-            note: "Inventory tracking available, but real-time accuracy can depend on manual steps or batch updates."
-          },
-          "Event Rental Services": {
-            value: false,
-            note: "Inventory management is often generic and not specifically tailored to individual rental unit tracking."
-          },
-          "Goodshuffle Pro": {
-            value: false,
-            note: "Inventory tracking available, but setup and linking to specific rental unit availability can be complex."
-          }
+          InflateMate: { value: true, note: 'Holds items as cart locked; prevents double‑booking.' },
+          'Inflatable Office': { value: true, note: 'Supports holds but via dated batch runs.' },
+          'Event Rental Systems': { value: false, note: 'Relies on manual checks or nightly syncs.' },
+          'Goodshuffle Pro': { value: true, note: TRUE_NOTE }
         }
-      },
+      }
     ]
   },
   {
-    id: "growth",
-    category: "Growth & Communication",
+    id: 'growth',
+    category: 'Growth & Communication',
     icon: MessageSquare,
     items: [
       {
-        name: "Integrated Website Builder",
-        tooltip: "Easily build a branded, professional website or integrated booking page without needing separate web design tools.",
+        name: 'Integrated Website Builder',
+        tooltip: 'Launch a branded site—no WordPress plugin hunt.',
         icon: Sparkles,
         details: {
           InflateMate: {
             value: true,
-            note: "Simple drag-and-drop builder for a professional mini-site with customizable themes, content sections, and integrated booking."
+            note: 'Drag‑and‑drop themes with live preview; free custom domain automation.'
           },
-          "Inflatable Office": {
-            value: false,
-            note: "Does not offer website building capabilities; focuses only on backend management."
-          },
-          "Event Rental Services": {
-            value: false,
-            note: "May have basic listing capabilities, but not a full, customizable website builder."
-          },
-          "Goodshuffle Pro": {
-            value: false,
-            note: "Only offers embeddable booking widgets for existing sites; no standalone website builder."
-          }
+          'Inflatable Office': { value: false, note: 'No DIY builder; must buy stand‑alone site module.' },
+          'Event Rental Systems': { value: false, note: 'Provides basic listing—not customisable builder.' },
+          'Goodshuffle Pro': { value: false, note: 'Widget only; brings your own CMS.' }
         }
       },
       {
-        name: "Lead Capture & Marketing",
-        tooltip: "Built-in tools like popups and coupons to capture website visitor information and automatically generate leads.",
+        name: 'Lead Capture & Marketing',
+        tooltip: 'Pop‑ups, coupons, & email funnels baked in—no Mailchimp hackery.',
         icon: Zap,
         details: {
           InflateMate: {
             value: true,
-            note: "Create engaging popups to offer discounts/coupons and automatically build your marketing list directly from your site."
+            note: 'Built‑in coupons, pop‑ups, and automated follow‑up emails.'
           },
-          "Inflatable Office": {
-            value: false,
-            note: "No integrated marketing or lead capture tools."
-          },
-          "Event Rental Services": {
-            value: false,
-            note: "No integrated marketing or lead capture tools."
-          },
-          "Goodshuffle Pro": {
-            value: false,
-            note: "Focuses more on quote management; offers limited to no integrated lead capture tools."
-          }
+          'Inflatable Office': { value: false, note: 'Marketing suite sold separately.' },
+          'Event Rental Systems': { value: false, note: 'Limited or no marketing automation.' },
+          'Goodshuffle Pro': { value: false, note: 'Focuses on quotes, not lead funnels.' }
         }
       },
       {
-        name: "Integrated Email & SMS",
-        tooltip: "Automated and integrated communication tools to keep customers informed throughout their booking journey.",
+        name: 'Integrated Email & SMS',
+        tooltip: 'Automatic confirmations and reminder texts (SMS coming Q4 2025—Growth plans get 500 msgs).',
         icon: MessageSquare,
         details: {
           InflateMate: {
             value: true,
-            note: "Automated email confirmations, reminders, and integrated two-way SMS messaging (Twilio integration)."
+            note: 'Email live today; SMS beta launching once 10 paying users—500 msgs free for Growth.'
           },
-          "Inflatable Office": {
+          'Inflatable Office': { value: true, note: TRUE_NOTE },
+          'Event Rental Systems': { value: true, note: TRUE_NOTE },
+          'Goodshuffle Pro': {
             value: false,
-            note: "Primarily email communication; SMS usually requires separate services or limited integrations."
-          },
-          "Event Rental Services": {
-            value: false,
-            note: "Basic email communication only; no integrated SMS capabilities."
-          },
-          "Goodshuffle Pro": {
-            value: false,
-            note: "Email available; SMS is often an extra-cost add-on or requires third-party integration."
+            note: 'SMS requires 3rd‑party or higher tier add‑on.'
           }
         }
-      },
+      }
     ]
   },
   {
-    id: "value",
-    category: "Value & Pricing",
+    id: 'value',
+    category: 'Value & Pricing',
     icon: DollarSign,
     items: [
       {
-        name: "Simple, Flat Pricing",
-        tooltip: "Transparent, predictable monthly cost without hidden fees, tiered usage limits, or feature limitations.",
+        name: 'Simple, Flat Pricing',
+        tooltip: 'Two transparent plans, no per‑module charges.',
         icon: CheckCircle2,
         details: {
           InflateMate: {
             value: true,
-            note: "One clear, flat monthly price includes *all* core features. No surprises or nickel-and-diming as you grow."
+            note: 'Starter $49 (1 seat) | Growth $119 (3 seats + early features). No hidden fees.'
           },
-          "Inflatable Office": {
+          'Inflatable Office': {
             value: false,
-            note: "Complex tiered pricing often based on usage (number of bookings/units) or features; costs increase significantly as you grow."
+            note: 'Website module $39 extra; pricing jumps with inventory.'
           },
-          "Event Rental Services": {
+          'Event Rental Systems': {
             value: false,
-            note: "Can be pay-per-use or have complex pricing models that make budgeting difficult, especially during peak season."
+            note: 'Starts $149.95; SMS & email packs extra.'
           },
-          "Goodshuffle Pro": {
+          'Goodshuffle Pro': {
             value: false,
-            note: "Base subscription fee plus many extra fees for essential features that should be standard."
+            note: 'Base $99 + $49 per seat + $79 site integration.'
           }
         }
-      },
+      }
     ]
-  },
+  }
 ];
 
 export default function ComparisonTable() {
@@ -353,26 +306,20 @@ export default function ComparisonTable() {
         <TooltipTrigger asChild>
           <div className="cursor-help">
             {value ? (
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="text-primary"
-              >
+              <div className="text-primary transition-transform hover:scale-110">
                 <CheckCircle2 className="h-5 w-5 sm:h-6 sm:w-6" />
-              </motion.div>
+              </div>
             ) : (
-              <motion.div
-                whileHover={{ scale: 1.1 }}
-                className="text-destructive/70"
-              >
+              <div className="text-destructive/70 transition-transform hover:scale-110">
                 <XCircle className="h-5 w-5 sm:h-6 sm:w-6" />
-              </motion.div>
+              </div>
             )}
           </div>
         </TooltipTrigger>
         <TooltipContent 
           side={isMobile ? "bottom" : "top"} 
           align={isMobile ? "center" : "center"}
-          className="max-w-xs bg-card p-3 shadow-xl z-50 text-muted-foreground"
+          className="z-50 max-w-xs bg-card p-3 text-muted-foreground shadow-xl"
         >
           <p className="text-sm">{note}</p>
         </TooltipContent>
@@ -381,61 +328,50 @@ export default function ComparisonTable() {
   );
 
   return (
-    <section className="py-12 sm:py-20 bg-gradient-to-b from-background/50 to-background overflow-hidden">
-      <div className="container mx-auto px-4">
+    <section className="relative overflow-hidden py-12 sm:py-20">
+      <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+      <div className="container relative z-10 mx-auto px-4">
         {/* Section Title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-8 sm:mb-12 max-w-3xl mx-auto"
-        >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/70">
-            InflateMate vs. The Competition
+        <div className="mx-auto mb-8 max-w-3xl text-center sm:mb-12">
+          <h2 className="mb-3 text-2xl font-bold text-[#1F2937] sm:text-3xl md:text-4xl" style={{ fontFamily: 'var(--font-heading)' }}>
+            InflateMate vs. the competition
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
-            Compare InflateMate&apos;s modern, inflatable-focused features against clunky, generic alternatives.
+          <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-[#6366F1]" />
+          <p className="mx-auto max-w-2xl text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>
+            Compare InflateMate&apos;s modern, inflatable‑focused features against clunky, generic alternatives.
           </p>
-        </motion.div>
+        </div>
 
         {/* Stats Row - Show comparison summary above the table */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8 max-w-5xl mx-auto">
+        <div className="mx-auto mb-8 grid max-w-5xl grid-cols-2 gap-4 lg:grid-cols-4">
           {companyNames.map(company => (
-            <motion.div 
+            <div 
               key={`stats-${company}`}
-              initial={{ opacity: 0, y: 10 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.4 }}
               className={cn(
-                "rounded-xl p-4 text-center border shadow-sm",
+                "rounded-xl border p-4 text-center shadow-sm transition-transform hover:-translate-y-0.5",
                 company === "InflateMate" 
-                  ? "bg-primary/10 border-primary" 
-                  : "bg-card border-border",
-                isMobile && company === activeCompany && "ring-2 ring-primary"
+                  ? "border-[#6366F1] bg-[#6366F1]/10" 
+                  : "border-black/10 bg-white",
+                isMobile && company === activeCompany && "ring-2 ring-[#6366F1]"
               )}
               onClick={() => isMobile && setActiveCompany(company)}
             >
               <h3 className={cn(
-                "font-bold text-base sm:text-lg truncate",
-                company === "InflateMate" ? "text-primary" : "text-foreground"
+                "truncate text-base font-bold sm:text-lg",
+                company === "InflateMate" ? "text-[#6366F1]" : "text-[#0B1220]"
               )}>
                 {company}
               </h3>
-              <p className="text-xs text-muted-foreground mb-2 truncate">
+              <p className="mb-2 truncate text-xs text-[#64748B]">
                 {companyDescriptions[company]}
               </p>
               <div className="flex items-center justify-center gap-1">
-                <span className={cn(
-                  "text-2xl font-bold",
-                  company === "InflateMate" ? "text-primary" : "text-foreground"
-                )}>
+                <span className={cn("text-2xl font-bold", company === "InflateMate" ? "text-[#6366F1]" : "text-[#0B1220]")}>
                   {getYesCount(company)}
                 </span>
-                <span className="text-xs text-muted-foreground">/ {totalFeatures} features</span>
+                <span className="text-xs text-[#64748B]">/ {totalFeatures} features</span>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
@@ -493,36 +429,34 @@ export default function ComparisonTable() {
         <div className="relative mx-auto max-w-5xl">
           {/* Desktop Header Row (Hidden on Mobile) */}
           {!isMobile && (
-            <div className="hidden lg:grid grid-cols-5 gap-1 sticky top-0 bg-background/90 backdrop-blur-sm z-20 pt-6 -mt-6 rounded-b-lg shadow-sm border-b border-border">
+            <div className="sticky top-0 z-20 -mt-6 hidden gap-1 rounded-b-lg border-b border-black/10 bg-white/90 pt-6 shadow-sm backdrop-blur-sm lg:grid lg:grid-cols-5">
               {/* Empty cell for the first column */}
               <div className="col-span-1"></div>
 
               {/* Company Headers */}
               {companyNames.map((company) => (
-                <motion.div
+                <div
                   key={company}
-                  className={`col-span-1 relative rounded-xl p-4 text-center transition-all duration-300 border ${
+                  className={`col-span-1 relative rounded-xl border p-4 text-center transition-all duration-300 ${
                     company === "InflateMate"
-                      ? "bg-primary/10 border-primary shadow-lg"
-                      : "bg-card border-border opacity-80"
-                  } ${activeCompany === company ? '!opacity-100 !bg-primary/15 !border-primary/70' : ''}`}
-                  whileHover={{ y: -5, opacity: 1 }}
-                  transition={{ type: "spring", stiffness: 300 }}
+                      ? "bg-[#6366F1]/10 border-[#6366F1] shadow-lg"
+                      : "bg-white border-black/10 opacity-80"
+                  } ${activeCompany === company ? '!opacity-100 !bg-[#6366F1]/15 !border-[#6366F1]/70' : ''} hover:-translate-y-1`}
                   onMouseEnter={() => setActiveCompany(company)}
                   onMouseLeave={() => setActiveCompany("InflateMate")}
                 >
                   {company === "InflateMate" && (
-                    <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground text-xs py-1 px-3 rounded-full font-semibold whitespace-nowrap">
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 transform rounded-full bg-[#6366F1] px-3 py-1 text-xs font-semibold text-white whitespace-nowrap">
                       RECOMMENDED
                     </div>
                   )}
-                  <h3 className={`font-bold text-lg ${company === "InflateMate" ? "text-primary" : "text-foreground"}`}>
+                  <h3 className={`text-lg font-bold ${company === "InflateMate" ? "text-[#6366F1]" : "text-[#0B1220]"}`}>
                     {company}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-1 h-8 flex items-center justify-center">
+                  <p className="mt-1 flex h-8 items-center justify-center text-xs text-[#64748B]">
                     {companyDescriptions[company]}
                   </p>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
@@ -530,67 +464,54 @@ export default function ComparisonTable() {
           {/* Features */}
           <div className="space-y-4 mt-4 sm:mt-6">
             {features.map((feature) => (
-              <motion.div
+              <div
                 key={feature.id}
-                className="overflow-hidden rounded-xl border border-border"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-100px" }}
-                transition={{ duration: 0.4 }}
+                className="overflow-hidden rounded-xl border border-black/10"
               >
                 {/* Category Header (Toggle Button) */}
                 <div
-                  className="flex items-center cursor-pointer p-4 bg-muted/30 hover:bg-muted/50 transition-colors"
+                  className="flex cursor-pointer items-center p-4 transition-colors hover:bg-black/[0.04]"
                   onClick={() => toggleFeature(feature.id)}
                 >
                   <div className="flex items-center gap-2 flex-1">
-                    <feature.icon size={18} className="text-primary flex-shrink-0" />
-                    <h3 className="font-semibold text-foreground">{feature.category}</h3>
+                    <feature.icon size={18} className="flex-shrink-0 text-[#6366F1]" />
+                    <h3 className="font-semibold text-[#0B1220]" style={{ fontFamily: 'var(--font-heading)' }}>{feature.category}</h3>
                   </div>
-                  <motion.div
-                    animate={{ rotate: expandedFeatures[feature.id] ? 90 : 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="flex-shrink-0"
-                  >
+                  <div className={cn("flex-shrink-0 transition-transform", expandedFeatures[feature.id] && "rotate-90")}> 
                     <ChevronRight size={18} />
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* Feature Items (Collapsible) */}
-                {expandedFeatures[feature.id] && (
-                  <motion.div
-                    initial={{ opacity: 0, height: 0 }}
-                    animate={{ opacity: 1, height: 'auto' }}
-                    exit={{ opacity: 0, height: 0 }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="border-t border-border"
-                  >
-                    {feature.items.map((item, itemIdx) => (
-                      <motion.div
-                        key={item.name}
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.3, delay: itemIdx * 0.05 }}
-                        className={cn(
-                          "border-b border-border last:border-b-0",
-                          isMobile 
-                            ? "grid grid-cols-1" 
-                            : "grid grid-cols-5 gap-1"
-                        )}
-                      >
+                <div
+                  className={cn(
+                    "border-t border-black/10 overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out",
+                    expandedFeatures[feature.id] ? "max-h-[2000px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-1"
+                  )}
+                >
+                  {feature.items.map((item) => (
+                    <div
+                      key={item.name}
+                      className={cn(
+                        "border-b border-black/10 last:border-b-0",
+                        isMobile 
+                          ? "grid grid-cols-1" 
+                          : "grid grid-cols-5 gap-1"
+                      )}
+                    >
                         {/* Feature Item Name and Tooltip */}
                         <div className={cn(
-                          "p-4 flex items-center gap-2 text-foreground",
-                          isMobile ? "border-b border-border/50" : "col-span-1"
+                          "flex items-center gap-2 p-4 text-[#0B1220]",
+                          isMobile ? "border-b border-black/10" : "col-span-1"
                         )}>
                           <div className="flex items-center gap-1.5 flex-1">
-                            <item.icon size={16} className="text-primary flex-shrink-0" />
-                            <span className="font-medium">{item.name}</span>
+                            <item.icon size={16} className="flex-shrink-0 text-[#6366F1]" />
+                            <span className="font-medium" style={{ fontFamily: 'var(--font-body)' }}>{item.name}</span>
                           </div>
                           <TooltipProvider>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <button className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+                                <button className="flex-shrink-0 transition-colors text-[#64748B] hover:text-[#0B1220]">
                                   <HelpCircle size={14} />
                                 </button>
                               </TooltipTrigger>
@@ -639,50 +560,28 @@ export default function ComparisonTable() {
                           return (
                             <div
                               key={`${item.name}-${company}`}
-                              className={`col-span-1 p-4 flex justify-center items-center transition-all duration-300 ${
-                                company === "InflateMate" ? "bg-primary/5" : ""
-                              } ${isHighlighted ? "ring-2 ring-accent/30 rounded-md scale-105" : ""}`}
+                              className={`col-span-1 flex items-center justify-center p-4 transition-all duration-300 ${
+                                company === "InflateMate" ? "bg-[#6366F1]/5" : ""
+                              } ${isHighlighted ? "scale-105 rounded-md ring-2 ring-[#6366F1]/30" : ""}`}
                             >
                               <FeatureIndicator {...details} />
                             </div>
                           );
                         })}
-                      </motion.div>
+                      </div>
                     ))}
-                  </motion.div>
-                )}
-              </motion.div>
+                </div>
+              </div>
             ))}
           </div>
 
           {/* Mobile company swipe indicator */}
           {isMobile && (
-            <div className="flex justify-center mt-6 mb-3 text-muted-foreground">
+            <div className="mt-6 mb-3 flex justify-center text-[#64748B]">
               <ArrowLeftRight size={16} className="mr-2" />
               <span className="text-sm">Swipe or tap to compare companies</span>
             </div>
           )}
-
-          {/* CTA Section */}
-          <motion.div
-            className="mt-8 sm:mt-12 text-center py-6 sm:py-8 px-4 sm:px-6 rounded-2xl bg-gradient-to-br from-primary/20 via-primary/10 to-transparent border border-primary/30"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.3, duration: 0.6 }}
-          >
-            <h3 className="text-lg sm:text-xl font-semibold mb-4 text-foreground">
-              Ready to experience the most modern platform for bounce house rental businesses?
-            </h3>
-            <motion.button
-              className="inline-flex items-center justify-center bg-primary hover:bg-primary/90 text-primary-foreground font-medium rounded-full px-6 sm:px-8 py-2.5 sm:py-3 shadow-lg shadow-primary/20 transition-colors"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              Start Your Free Trial
-              <ArrowRight className="ml-2 h-4 w-4" />
-            </motion.button>
-          </motion.div>
         </div>
       </div>
     </section>

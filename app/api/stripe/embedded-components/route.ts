@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe-server";
 
@@ -16,13 +16,16 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Business ID is required" }, { status: 400 });
     }
 
-    // Verify that the business exists and is owned by the current user
+    // Check that the user has access to this business
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
+      return NextResponse.json({ error: "Access denied" }, { status: 403 });
+    }
+
+    // Verify that the business exists and has a Stripe account
     const business = await prisma.business.findUnique({
       where: {
         id: businessId,
-        organization: {
-          clerkOrgId: user.membership?.organization?.clerkOrgId,
-        },
       },
     });
     if (!business) {

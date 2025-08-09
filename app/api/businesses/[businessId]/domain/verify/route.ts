@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { addDomainToVercel, removeDomainFromVercel } from "@/lib/vercel";
 import type { Business } from "@/prisma/generated/prisma/client";
@@ -28,8 +28,8 @@ export async function POST(
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
-  if (!userBusinessId || userBusinessId !== businessId) {
+  const membership = getMembershipByBusinessId(user, businessId);
+  if (!membership) {
     return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 

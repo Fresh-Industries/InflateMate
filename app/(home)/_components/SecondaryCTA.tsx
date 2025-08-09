@@ -1,100 +1,75 @@
 'use client'
 import React from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { ArrowRight, Play, CheckCircle } from "lucide-react";
 
 export default function SecondaryCTAStrip() {
   return (
-    <section className="py-16 bg-gradient-to-r from-primary/10 via-primary/20 to-accent/10 relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 bg-grid-white/[0.05] bg-[length:20px_20px]" />
-      <div className="absolute top-0 right-0 w-80 h-80 bg-accent/10 rounded-full blur-[100px] -z-10" />
-      <div className="absolute bottom-0 left-0 w-80 h-80 bg-primary/10 rounded-full blur-[100px] -z-10" />
+    <section className="relative overflow-hidden py-16 bg-white/80">
+      {/* Subtle background only */}
+      <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+      {/* Faint corner accent */}
+      <div className="pointer-events-none absolute -right-8 -top-8 h-48 w-48 rounded-3xl bg-[#6366F1]/[0.06]" aria-hidden />
 
-      <div className="relative container mx-auto px-4 max-w-5xl">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-8 md:gap-12">
-          <div className="text-center md:text-left max-w-xl">
-            <motion.h2
-              className="text-2xl md:text-3xl font-bold mb-3 text-foreground" // Ensure text color
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5 }}
-            >
+      <div className="container relative mx-auto max-w-5xl px-4">
+        <div className="flex flex-col items-center justify-between gap-8 md:flex-row md:gap-12">
+          <div className="max-w-xl text-center md:text-left">
+            <h2 className="mb-3 text-2xl font-bold text-[#1F2937] md:text-3xl" style={{ fontFamily: 'var(--font-heading)' }}>
               Ready to transform your bounce house rental business?
-            </motion.h2>
-            <motion.p
-              className="text-muted-foreground"
-              initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: 0.1 }}
-            >
-              Get started with InflateMate today and streamline your operations. {/* Updated subtitle text */}
-            </motion.p>
+            </h2>
+            <p className="text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>
+              Get started with InflateMate today and streamline your operations.
+            </p>
           </div>
 
-          <motion.div
-            className="flex flex-col sm:flex-row gap-4 w-full md:w-auto"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-          >
+          <div className="flex w-full flex-col gap-4 sm:flex-row md:w-auto">
             <Button
               size="lg"
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-medium gap-2 h-12 px-6 rounded-full shadow-lg shadow-primary/20"
+              className="h-12 rounded-full bg-[#6366F1] px-6 font-medium text-white shadow-[0_10px_30px_rgba(99,102,241,0.18)] transition-colors hover:bg-[#5458E3] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6366F1]/30"
               asChild
             >
-              <Link href="/signup">
+              <Link href="/sign-up">
                 Get Started {/* Updated button text */}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
 
-            {/* Watch Demo button - keeping as is */}
             <Button
               variant="outline"
               size="lg"
-              className="bg-background/80 hover:bg-background border-primary/20 text-foreground gap-2 h-12 px-6 rounded-full backdrop-blur-sm"
+              className="h-12 rounded-full border border-black/10 bg-white px-6 text-[#0B1220] transition-colors hover:border-[#2DD4BF] hover:bg-[rgba(45,212,191,0.08)]"
               asChild
             >
               <Link href="/demo">
-                <Play className="h-4 w-4 text-primary" />
+                <Play className="h-4 w-4 text-[#2DD4BF]" />
                 Watch Demo
               </Link>
             </Button>
-          </motion.div>
+          </div>
         </div>
 
-        {/* Trust indicators - Updated */}
-        <motion.div
-          className="mt-8 pt-6 border-t border-primary/10 flex flex-wrap justify-center md:justify-between items-center gap-6 text-sm text-muted-foreground"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          {/* Keeping "Cancel anytime" assuming monthly billing */}
-          <div className="flex items-center gap-2 text-foreground/80"> {/* Adjusted text color slightly */}
-            <CheckCircle className="h-4 w-4 text-primary" /> {/* Changed icon to CheckCircle for positive framing */}
-            <span>Monthly billing, cancel anytime</span> {/* More explicit */}
+        {/* Trust indicators */}
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-6 border-t border-black/10 pt-6 text-sm text-[#475569] md:justify-between">
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(99,102,241,0.12)]">
+              <CheckCircle className="h-4 w-4 text-[#6366F1]" />
+            </span>
+            <span>Monthly billing, cancel anytime</span>
           </div>
-          {/* Removed: No credit card required */}
-          {/* Removed: Full access to all features */}
-          {/* Removed: Live support during trial */}
-           {/* Optional: Add other general benefits if applicable, e.g., "Secure Payments", "Dedicated Support Team" */}
-          <div className="flex items-center gap-2 text-foreground/80">
-             <CheckCircle className="h-4 w-4 text-primary" />
-             <span>Secure online payments</span>
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(250,204,21,0.18)]">
+              <CheckCircle className="h-4 w-4 text-[#FACC15]" />
+            </span>
+            <span>Secure online payments</span>
           </div>
-           <div className="flex items-center gap-2 text-foreground/80">
-             <CheckCircle className="h-4 w-4 text-primary" />
-             <span>Dedicated support team</span>
+          <div className="flex items-center gap-2">
+            <span className="flex h-6 w-6 items-center justify-center rounded-full bg-[rgba(45,212,191,0.12)]">
+              <CheckCircle className="h-4 w-4 text-[#2DD4BF]" />
+            </span>
+            <span>Dedicated support team</span>
           </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getPrimaryMembership } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { stripe } from "@/lib/stripe-server";
 import { z } from "zod";
@@ -47,7 +47,22 @@ const businessSchema = z.object({
   businessZip: z.string().regex(/^\d{5}(-\d{4})?$/, "Invalid ZIP code"),
   businessPhone: z.string().regex(/^\+?1?\d{9,15}$/, "Invalid phone number"),
   businessEmail: z.string().email("Invalid email address"),
-});
+  websiteType: z.enum(["template", "embedded"]),
+  customDomain: z.string().optional(),
+}).refine(
+  (data) => {
+    if (data.websiteType === "embedded" && !data.customDomain) {
+      return false;
+    }
+    if (data.customDomain && !data.customDomain.match(/^[a-zA-Z0-9][a-zA-Z0-9-]{1,61}[a-zA-Z0-9]\.[a-zA-Z]{2,}$/)) {
+      return false;
+    }
+    return true;
+  },
+  {
+    message: "Custom domain is required for embedded components and must be a valid domain",
+  }
+);
 
 export async function POST(req: NextRequest) {
   try {
@@ -55,16 +70,20 @@ export async function POST(req: NextRequest) {
     if (!user) {
       return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
-    // Ensure clerkUserId exists before proceeding
+
     if (!user.clerkUserId) {
       console.error("User found in DB but missing clerkUserId:", user.id);
       return NextResponse.json({ message: "User identifier mismatch" }, { status: 500 });
     }
 
-     // Prevent re-onboarding if the user is already linked to a business/organization
-     if (user.membership?.organization?.business) {
-        return NextResponse.redirect(`/dashboard/${user.membership?.organization?.business?.id}`)
-     }
+    // Check if user already has a business
+    const membership = getPrimaryMembership(user);
+    if (membership?.organization?.business) {
+      return NextResponse.json({
+        message: "You already have a business",
+        businessId: membership.organization.business.id
+      }, { status: 400 });
+    }
 
     const body = await req.json();
     const validatedData = businessSchema.parse(body);
@@ -73,142 +92,149 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ message: "User email is required" }, { status: 400 });
     }
 
-    let account: Stripe.Account | undefined;
-    try {
-      account = await stripe.accounts.create({
-        type: 'custom',
-        country: "US",
-        email: user.email,
-        capabilities: {
-          card_payments: { requested: true },
-          transfers: { requested: true },
-        },
-        business_profile: {
-          name: validatedData.businessName,
-          support_phone: validatedData.businessPhone,
-          support_address: {
-            line1: validatedData.businessAddress,
-            city: validatedData.businessCity,
-            state: validatedData.businessState,
-            postal_code: validatedData.businessZip,
-            country: "US",
+    // Start a transaction for all database operations
+    return await prisma.$transaction(async (tx) => {
+      // 1. Create Stripe Account
+      let account: Stripe.Account;
+      try {
+        account = await stripe.accounts.create({
+          type: 'custom',
+          country: "US",
+          email: user.email || undefined,
+          capabilities: {
+            card_payments: { requested: true },
+            transfers: { requested: true },
           },
-          product_description: "Managed via InflateMate",
+          business_profile: {
+            name: validatedData.businessName,
+            support_phone: validatedData.businessPhone,
+            support_address: {
+              line1: validatedData.businessAddress,
+              city: validatedData.businessCity,
+              state: validatedData.businessState,
+              postal_code: validatedData.businessZip,
+              country: "US",
+            },
+            product_description: "Managed via InflateMate",
+          },
+        });
+      } catch (stripeError) {
+        if (stripeError instanceof Stripe.errors.StripeError) {
+          console.error("[STRIPE_ACCOUNT_CREATE_ERROR]", {
+            message: stripeError.message,
+            code: stripeError.code,
+            type: stripeError.type,
+          });
+          throw new Error(`Failed to set up payment processing: ${stripeError.message}`);
+        }
+        throw stripeError;
+      }
+
+      // 2. Create Clerk Organization
+      const clerk = await clerkClient();
+      const clerkOrg = await clerk.organizations.createOrganization({
+        name: validatedData.businessName,
+        createdBy: user.clerkUserId as string,
+      });
+
+      // 3. Create Local Organization
+      const localOrg = await tx.organization.create({
+        data: {
+          clerkOrgId: clerkOrg.id,
+          name: validatedData.businessName,
         },
       });
-    } catch (stripeError) {
-      if (stripeError instanceof Stripe.errors.StripeError) {
-        console.error("[STRIPE_ACCOUNT_CREATE_ERROR]", {
-          message: stripeError.message,
-          code: stripeError.code,
-          type: stripeError.type,
-        });
-        return NextResponse.json(
-          { 
-            message: "Failed to set up payment processing.",
-            details: stripeError.message,
-          },
-          { status: 400 }
-        );
-      }
-      throw stripeError; 
-    }
-    
-    const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
-    if (!rootDomain) {
-      console.error("NEXT_PUBLIC_ROOT_DOMAIN is not set. Cannot create subdomain.");
-      return NextResponse.json({ message: "Server configuration error: Root domain not set." }, { status: 500 });
-    }
+      await tx.membership.create({
+        data: {
+          organizationId: localOrg.id,
+          userId: user.id,
+          role: "ADMIN",
+          clerkMembershipId: (await clerkOrg).createdBy || "",
+      },
+    });
 
-    let onboardingErrorMessage: string | null = null;
-    let finalSubdomain = "";
 
-    try {
-      const baseSlug = generateSlug(validatedData.businessName);
-      finalSubdomain = await generateUniqueSubdomain(baseSlug);
-      const fullDomain = `${finalSubdomain}.${rootDomain}`;
-
-      try {
-        console.log(`Adding domain to Vercel: ${fullDomain}`);
-        await addDomainToVercel(fullDomain);
-        console.log(`Successfully added domain to Vercel: ${fullDomain}`);
-      } catch (vercelError) {
-        console.error(`Failed to add domain ${fullDomain} to Vercel:`, vercelError);
-        onboardingErrorMessage = `Failed to configure subdomain on Vercel: ${(vercelError as Error).message}`;
+      // 5. Setup Domain
+      const rootDomain = process.env.NEXT_PUBLIC_ROOT_DOMAIN;
+      if (!rootDomain) {
+        throw new Error("Server configuration error: Root domain not set");
       }
 
-      try {
-        console.log(`Adding CNAME to Cloudflare for: ${finalSubdomain}`);
-        await createCnameInCloudflare(finalSubdomain);
-        console.log(`Successfully added CNAME to Cloudflare for: ${finalSubdomain}`);
-      } catch (cloudflareError) {
-        console.error(`Failed to add CNAME record ${finalSubdomain} to Cloudflare:`, cloudflareError);
-        if (!onboardingErrorMessage) {
-          onboardingErrorMessage = `Failed to configure subdomain DNS: ${(cloudflareError as Error).message}`;
+      let onboardingErrorMessage: string | null = null;
+      let finalSubdomain = "";
+
+      // Only setup subdomain for template websites without custom domain
+      if (validatedData.websiteType === "template" && !validatedData.customDomain) {
+        try {
+          const baseSlug = generateSlug(validatedData.businessName);
+          finalSubdomain = await generateUniqueSubdomain(baseSlug);
+          const fullDomain = `${finalSubdomain}.${rootDomain}`;
+
+          const isProduction = process.env.NODE_ENV === 'production';
+          const isValidDomain = !rootDomain.includes('localhost') && !rootDomain.includes('127.0.0.1');
+
+          if (isProduction && isValidDomain) {
+            try {
+              await addDomainToVercel(fullDomain);
+            } catch (vercelError) {
+              onboardingErrorMessage = `Failed to configure subdomain on Vercel: ${(vercelError as Error).message}`;
+            }
+
+            try {
+              await createCnameInCloudflare(finalSubdomain);
+            } catch (cloudflareError) {
+              if (!onboardingErrorMessage) {
+                onboardingErrorMessage = `Failed to configure subdomain DNS: ${(cloudflareError as Error).message}`;
+              }
+            }
+          }
+        } catch (subdomainSetupError) {
+          onboardingErrorMessage = `Failed during internal subdomain setup: ${(subdomainSetupError as Error).message}`;
+          finalSubdomain = `error-${generateSlug(validatedData.businessName)}`;
         }
       }
 
-    } catch (subdomainSetupError) {
-      console.error("Error during subdomain setup process:", subdomainSetupError);
-      onboardingErrorMessage = `Failed during internal subdomain setup: ${(subdomainSetupError as Error).message}`;
-      finalSubdomain = `error-${generateSlug(validatedData.businessName)}`; 
-    }
-
-    const clerk = await clerkClient();
-    const org = clerk.organizations.createOrganization({
-      name: validatedData.businessName,
-      createdBy: user.clerkUserId,
-    });
-    
-
-   const localOrg = await prisma.organization.create({
-      data: {
-        clerkOrgId: (await org).id,
-        name: validatedData.businessName,
-      },
-    });
-
-    await prisma.membership.create({
-      data: {
-        organizationId: localOrg.id,
-        userId: user.id,
-        role: "ADMIN",
-        clerkMembershipId: (await org).createdBy || "",
-      },
-    });
-
-    const business = await prisma.business.create({
-      data: {
-        name: validatedData.businessName,
-        address: validatedData.businessAddress,
-        city: validatedData.businessCity,
-        state: validatedData.businessState,
-        zipCode: validatedData.businessZip,
-        phone: validatedData.businessPhone.replace(/\D/g, ""),
-        email: validatedData.businessEmail,
-        onboarded: true,
-        stripeAccountId: account.id,
-        subdomain: finalSubdomain,
-        onboardingError: onboardingErrorMessage,
-        minAdvanceBooking: 24,
-        maxAdvanceBooking: 90,
-        minimumPurchase: 100,
-        siteConfig: {},
-        organization: {
-          connect: {
-            id: localOrg.id,
+      // 6. Create Business
+      const business = await tx.business.create({
+        data: {
+          name: validatedData.businessName,
+          address: validatedData.businessAddress,
+          city: validatedData.businessCity,
+          state: validatedData.businessState,
+          zipCode: validatedData.businessZip,
+          phone: validatedData.businessPhone.replace(/\D/g, ""),
+          email: validatedData.businessEmail,
+          onboarded: true,
+          stripeAccountId: account.id,
+          subdomain: finalSubdomain || null,
+          customDomain: validatedData.customDomain || null,
+          embeddedComponents: validatedData.websiteType === "embedded",
+          onboardingError: onboardingErrorMessage,
+          minNoticeHours: 24,
+          maxNoticeHours: 2160, // 90 days * 24 hours
+          minBookingAmount: 100,
+          bufferBeforeHours: 2,
+          bufferAfterHours: 0,
+          siteConfig: {},
+          organization: {
+            connect: {
+              id: localOrg.id,
+            },
           },
         },
-      },
+      });
+
+      return NextResponse.json({
+        orgId: clerkOrg.id,
+        business,
+        stripeAccountId: account.id,
+        subdomain: finalSubdomain,
+      }, { status: 201 });
+
+    }, {
+      maxWait: 10000, // 10s max wait
+      timeout: 15000, // 15s timeout
     });
-
-
-    return NextResponse.json({
-      orgId: (await org).id,
-      business,
-      stripeAccountId: account.id,
-      subdomain: finalSubdomain,
-    }, { status: 201 });
 
   } catch (error) {
     if (error instanceof z.ZodError) {
@@ -220,7 +246,7 @@ export async function POST(req: NextRequest) {
 
     console.error("[BUSINESS_CREATE_ERROR]", error);
     return NextResponse.json(
-      { message: "Something went wrong during onboarding." },
+      { message: error instanceof Error ? error.message : "Something went wrong during onboarding." },
       { status: 500 }
     );
   }

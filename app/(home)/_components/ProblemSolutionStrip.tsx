@@ -1,6 +1,5 @@
 'use client'
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import { XCircle, CheckCircle, ArrowRight, Zap, Shield, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -12,11 +11,13 @@ interface Solution {
   stats: string[];
 }
 
+type Accent = 'teal' | 'coral' | 'yellow';
+
 interface Problem {
   title: string;
   description: string;
   icon: React.ElementType;
-  color: string;
+  accent: Accent;
   solution: Solution;
 }
 
@@ -26,7 +27,7 @@ const problems: Problem[] = [ // Explicitly type the array
     title: "Double‑bookings ruin weekends",
     description: "Overlapping schedules lead to disappointed customers, lost revenue, and weekend stress.",
     icon: Clock,
-    color: "from-red-500/90 to-orange-500/90",
+    accent: 'teal',
     solution: {
       title: "Real-time availability locks prevent overlaps",
       description: "Smart scheduling automatically blocks out **setup and takedown buffer times** and prevents **double-bookings of your units** entirely.", // Refined
@@ -38,7 +39,7 @@ const problems: Problem[] = [ // Explicitly type the array
     title: "Endless phone calls and manual messages", // Slight tweak to title
     description: "Hours wasted on phone tag, answering repetitive questions, and manual follow-ups for **bookings, payments, and waivers**.", // Refined
     icon: XCircle,
-    color: "from-pink-500/90 to-rose-500/90",
+    accent: 'coral',
     solution: {
       title: "Automated communication keeps clients informed", // Slight tweak to solution title
       description: "Automated **booking confirmations, payment reminders, and delivery/pickup notifications** sent via email and (optional) SMS keep customers informed without lifting a finger.", // Refined
@@ -50,7 +51,7 @@ const problems: Problem[] = [ // Explicitly type the array
     title: "Clunky legacy software with hidden fees", // Slight tweak to title
     description: "Complex software with confusing pricing, terrible support, and missing features.", // Kept
     icon: XCircle,
-    color: "from-orange-500/90 to-amber-500/90",
+    accent: 'yellow',
     solution: {
       title: "Flat monthly pricing—every core feature unlocked", // Kept
       description: "One simple price gets you all essential features with no surprise charges or add-ons.", // Kept
@@ -64,29 +65,21 @@ export default function ProblemSolutionStrip() {
   const [expandedIndex, setExpandedIndex] = useState<number | null>(null);
 
   return (
-    <section className="py-24 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-accent/5 via-transparent to-primary/5 pointer-events-none" />
-      <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary/20 to-transparent" />
+    <section className="relative overflow-hidden py-20 md:py-24">
+      <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-[0.02]" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section title */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16 max-w-3xl mx-auto"
-        >
+        <div className="mx-auto mb-14 max-w-3xl text-center">
           {/* Updated Heading */}
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-             Tired of Bounce House Business <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Headaches</span>?
+          <h2 className="mb-3 text-3xl font-bold text-[#1F2937] md:text-4xl" style={{ fontFamily: 'var(--font-heading)' }}>
+            Tired of bounce-house business headaches?
           </h2>
           {/* Updated Subtitle */}
-          <p className="text-muted-foreground text-lg">
-            InflateMate solves the biggest pains of managing your rental operation, so you can focus on what matters – happy customers and growing your business.
+          <p className="text-lg text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>
+            InflateMate solves the biggest pains of managing your rental operation, so you can focus on what matters — happy customers and growing your business.
           </p>
-        </motion.div>
+        </div>
 
         {/* Problem/Solution cards */}
         <div className="max-w-4xl mx-auto space-y-6">
@@ -117,113 +110,93 @@ interface ProblemCardProps { // Used to type ProblemCard component props
 }
 
 function ProblemCard({ problem, index, isExpanded, onToggle }: ProblemCardProps) {
-  const { title, description, icon: Icon, color, solution } = problem;
+  const { title, description, icon: Icon, accent, solution } = problem;
   const SolutionIcon = solution.icon;
 
   // Staggered entrance animation for the problems
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "-100px" }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-      className="relative"
-    >
+    <div className="relative">
       {/* "Journey line" connecting problems to solutions */}
       <div className={cn(
-        "absolute left-8 top-20 bottom-0 w-1 bg-gradient-to-b",
+        "absolute left-8 top-20 bottom-0 w-0.5 transition-opacity",
         isExpanded ? "opacity-100" : "opacity-0",
-        color
+        accent === 'teal' && 'bg-[#2DD4BF]',
+        accent === 'coral' && 'bg-[#F87171]',
+        accent === 'yellow' && 'bg-[#FACC15]'
       )} />
 
       {/* Problem Card */}
-      <motion.div
+      <button
+        type="button"
+        aria-expanded={isExpanded}
+        aria-controls={`solution-${index}`}
         onClick={onToggle}
         className={cn(
-          "relative z-10 rounded-2xl p-1 cursor-pointer transition-all duration-500",
-          "bg-gradient-to-r bg-card shadow-lg hover:shadow-xl", // bg-gradient-to-r here seems unused as bg-card overrides it?
-          isExpanded ? "mb-3 border-secondary" : "border-transparent",
-          isExpanded ? `border-2 shadow-lg shadow-primary/10` : "border-0"
+          "relative z-10 w-full cursor-pointer rounded-2xl border border-black/10 bg-white p-6 text-left transition-colors",
+          "hover:border-black/20 hover:shadow-sm focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6366F1]/25"
         )}
-        whileHover={{ scale: isExpanded ? 1 : 1.01 }}
-        layout
       >
-        <div className="rounded-xl overflow-hidden bg-card"> {/* Inner card content area */}
-          <div className="flex items-start gap-4 p-6">
-            {/* Problem icon with gradient background */}
-            <div className={cn(
-              "flex-shrink-0 p-3 rounded-xl bg-gradient-to-br mt-1",
-              color
-            )}>
-              <Icon className="w-6 h-6 text-white" />
-            </div>
+        <div className="flex items-start gap-4">
+          <div className={cn("mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl", 
+            accent === 'teal' && 'bg-[rgba(45,212,191,0.12)]',
+            accent === 'coral' && 'bg-[rgba(248,113,113,0.12)]',
+            accent === 'yellow' && 'bg-[rgba(250,204,21,0.18)]')
+          }>
+            <Icon className={cn("h-5 w-5",
+              accent === 'teal' && 'text-[#2DD4BF]',
+              accent === 'coral' && 'text-[#F87171]',
+              accent === 'yellow' && 'text-[#92400E]')
+            } />
+          </div>
 
-            <div className="flex-1 min-w-0">
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <h3 className="text-lg font-bold text-foreground">{title}</h3>
-                  <p className="text-muted-foreground mt-1">{description}</p>
-                </div>
-
-                <motion.div
-                  animate={{ rotate: isExpanded ? 90 : 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="flex-shrink-0 mt-1"
-                >
-                  <ArrowRight className="w-5 h-5 text-primary" />
-                </motion.div>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <h3 className="text-lg font-bold text-[#0B1220]" style={{ fontFamily: 'var(--font-heading)' }}>{title}</h3>
+                <p className="mt-1 text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>{description}</p>
+              </div>
+              <div className={cn("mt-1 flex-shrink-0 transition-transform", isExpanded && "rotate-90")}> 
+                <ArrowRight className="h-5 w-5 text-[#6366F1]" />
               </div>
             </div>
           </div>
         </div>
-      </motion.div>
+      </button>
 
       {/* Solution Card - Animated expansion */}
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ opacity: 0, height: 0, y: -20 }}
-            animate={{ opacity: 1, height: 'auto', y: 0 }}
-            exit={{ opacity: 0, height: 0, y: -20 }}
-            transition={{ duration: 0.4, ease: [0.23, 1, 0.32, 1] }}
-            className="ml-16 relative z-10" // Offset to align with the journey line
-          >
-            <div className="bg-gradient-to-r from-primary/5 to-accent/5 rounded-2xl p-6 border border-secondary">
-              <div className="flex items-start gap-4">
-                {/* Solution icon with gradient background */}
-                <div className="flex-shrink-0 p-3 rounded-xl bg-gradient-to-br from-primary to-accent mt-1">
-                  <SolutionIcon className="w-6 h-6 text-white" />
-                </div>
-
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold text-foreground">
-                    {solution.title}
-                  </h3>
-                  <p className="text-muted-foreground mt-1 mb-4">
-                    {solution.description}
-                  </p>
-
-                  {/* Key stats/benefits with animations */}
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
-                    {solution.stats.map((stat: string, i: number) => (
-                      <motion.div
-                        key={i}
-                        initial={{ opacity: 0, x: -10 }}
-                        animate={{ opacity: 1, x: 0 }}
-                        transition={{ delay: 0.2 + (i * 0.1) }} // Stagger animation
-                        className="flex items-center gap-2 bg-card p-3 rounded-lg border border-border"
-                      >
-                        <span className="flex-shrink-0 w-2 h-2 rounded-full bg-primary" />
-                        <span className="text-sm font-medium text-foreground">{stat}</span>
-                      </motion.div>
-                    ))}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </motion.div>
+      <div
+        id={`solution-${index}`}
+        className={cn(
+          "relative z-10 ml-16 overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out",
+          isExpanded ? "max-h-[500px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-2"
         )}
-      </AnimatePresence>
-    </motion.div>
+      >
+        <div className="rounded-2xl border border-black/10 bg-white p-6">
+          <div className="flex items-start gap-4">
+            <div className="mt-1 flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-[rgba(99,102,241,0.12)]">
+              <SolutionIcon className="h-5 w-5 text-[#6366F1]" />
+            </div>
+
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-[#0B1220]" style={{ fontFamily: 'var(--font-heading)' }}>
+                {solution.title}
+              </h3>
+              <p className="mb-4 mt-1 text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>
+                {solution.description}
+              </p>
+
+              <ul className="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+                {solution.stats.map((stat: string, i: number) => (
+                  <li key={i} className="flex items-center gap-2 rounded-lg border border-black/10 bg-white p-3 text-sm text-[#334155]">
+                    <span className="h-2 w-2 flex-shrink-0 rounded-full bg-[#6366F1]" />
+                    <span className="font-medium">{stat}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 }

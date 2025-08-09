@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { InventoryStatus, InventoryType } from "../../../../../prisma/generated/prisma";
@@ -16,7 +16,7 @@ const baseInventorySchema = z.object({
     isPrimary: z.boolean()
   })),
   quantity: z.number().int().min(0).default(1),
-  type: z.enum(["BOUNCE_HOUSE", "INFLATABLE", "GAME", "OTHER"]),
+  type: z.enum(["BOUNCE_HOUSE", "WATER_SLIDE", "GAME", "OTHER"]),
 });
 
 // Type-specific schemas
@@ -43,6 +43,10 @@ const otherSchema = baseInventorySchema.extend({
   dimensions: z.string().optional(),
   setupTime: z.number().min(0).optional(),
   teardownTime: z.number().min(0).optional(),
+  capacity: z.number().min(1).optional(),
+  minimumSpace: z.string().optional(),
+  weightLimit: z.number().min(0).optional(),
+  ageRange: z.string().optional(),
 });
 
 export async function POST(
@@ -60,8 +64,8 @@ export async function POST(
     }
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -73,7 +77,7 @@ export async function POST(
 
     switch (type) {
       case "BOUNCE_HOUSE":
-      case "INFLATABLE":
+      case "WATER_SLIDE":
         validatedData = bounceHouseSchema.parse(body);
         break;
       case "GAME":
@@ -97,7 +101,7 @@ export async function POST(
       description: validatedData.description || "",
       images: imageUrls,
     }, {
-      stripeAccount: user.membership?.organization?.business?.stripeAccountId || undefined,
+      stripeAccount: membership.organization?.business?.stripeAccountId || undefined,
     });
 
     // Create the inventory record
@@ -164,8 +168,8 @@ export async function GET(
     }
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ message: "Access denied" }, { status: 403 });
     }
 

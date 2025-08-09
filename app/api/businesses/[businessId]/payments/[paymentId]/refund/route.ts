@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
@@ -28,8 +28,8 @@ export async function POST(
     const { businessId, paymentId } = params;
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -72,24 +72,20 @@ export async function POST(
 
     // Process the refund through Stripe
     try {
-      // Get the business's Stripe account ID
-      const business = await prisma.business.findUnique({
-        where: { id: businessId },
-        select: { stripeAccountId: true },
-      });
-
-      if (!business?.stripeAccountId) {
+      // Get the Stripe account ID from membership
+      const stripeAccountId = membership.organization?.business?.stripeAccountId;
+      if (!stripeAccountId) {
         return NextResponse.json({ error: "Business Stripe account not found" }, { status: 400 });
       }
 
-      // Create the refund in Stripe
-      const refundResult = await stripe.refunds.create({
-        payment_intent: paymentToRefund.stripePaymentId,
-        amount: Math.round(refundAmount * 100), // Convert to cents
-        reason: 'requested_by_customer',
-      }, {
-        stripeAccount: business.stripeAccountId,
-      });
+       // Create the refund in Stripe
+       const refundResult = await stripe.refunds.create({
+         payment_intent: paymentToRefund.stripePaymentId,
+         amount: Math.round(refundAmount * 100), // Convert to cents
+         reason: 'requested_by_customer',
+       }, {
+        stripeAccount: stripeAccountId,
+       });
 
       // Determine the updates for the original payment record
       const originalAmount = Number(paymentToRefund.amount);

@@ -24,7 +24,6 @@ export default function Footer({ themeName, colors, business }: Props) {
   const theme = themeConfig[themeName];
   const link = theme.linkStyles;
   const footer = theme.footerStyles!;
-  const domainPrefix = business.customDomain || business.id;
   const social = business.socialMedia ?? {};
 
   /* ---------- computed styles ---------- */
@@ -123,10 +122,10 @@ export default function Footer({ themeName, colors, business }: Props) {
           <div>
             <h3 className="text-xl font-bold mb-3" style={sectionTitleStyle}>Quick&nbsp;Links</h3>
             <ul className="space-y-2 text-md font-semibold">
-              <li><Hoverable href={`/${domainPrefix}/inventory`}>Rentals</Hoverable></li>
-              <li><Hoverable href={`/${domainPrefix}/about`}>About&nbsp;Us</Hoverable></li>
-              <li><Hoverable href={`/${domainPrefix}/contact`}>Contact</Hoverable></li>
-              <li><Hoverable href={`/${domainPrefix}/booking`}>Book&nbsp;Now</Hoverable></li>
+              <li><Hoverable href={`/inventory`}>Rentals</Hoverable></li>
+              <li><Hoverable href={`/about`}>About&nbsp;Us</Hoverable></li>
+              <li><Hoverable href={`/contact`}>Contact</Hoverable></li>
+              <li><Hoverable href={`/booking`}>Book&nbsp;Now</Hoverable></li>
             </ul>
           </div>
 

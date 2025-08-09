@@ -51,10 +51,18 @@ export async function POST(
     const holdData = createHoldSchema.parse(body);
     console.log("[POST /holds] Parsed holdData:", holdData);
 
-    // Fetch the business to get timezone
+    // Fetch the business to get timezone and booking settings
     const business = await prisma.business.findUnique({
       where: { id: businessId },
-      select: { id: true, timeZone: true } // Select only necessary fields
+      select: { 
+        id: true, 
+        timeZone: true,
+        minNoticeHours: true,
+        maxNoticeHours: true,
+        minBookingAmount: true,
+        bufferBeforeHours: true,
+        bufferAfterHours: true
+      }
     });
 
     if (!business) {
@@ -72,6 +80,68 @@ export async function POST(
     const endUTC = localToUTC(holdData.eventDate, holdData.endTime, timezone);
     console.log(`[POST /holds] Converted times: Start UTC=${startUTC.toISOString()}, End UTC=${endUTC.toISOString()}`);
 
+    // --- Validation Checks ---
+    // 1. Notice window validation
+    const nowUTC = new Date();
+    const noticeDiffMs = startUTC.getTime() - nowUTC.getTime();
+    const minNoticeMs = business.minNoticeHours * 60 * 60 * 1000;
+    const maxNoticeMs = business.maxNoticeHours * 60 * 60 * 1000;
+
+    if (noticeDiffMs < minNoticeMs) {
+      return NextResponse.json(
+        { error: `Bookings must be made at least ${business.minNoticeHours} hours ahead.` },
+        { status: 400 }
+      );
+    }
+
+    if (noticeDiffMs > maxNoticeMs) {
+      return NextResponse.json(
+        { error: `Bookings cannot be made more than ${business.maxNoticeHours / 24} days ahead.` },
+        { status: 400 }
+      );
+    }
+
+    // 2. Minimum booking amount validation
+    const requestedSubtotal = holdData.selectedItems.reduce((sum, item) => sum + (item.price || 0) * item.quantity, 0);
+    if (requestedSubtotal < business.minBookingAmount) {
+      return NextResponse.json(
+        { error: `Minimum booking total $${business.minBookingAmount.toFixed(2)} required. Your total: $${requestedSubtotal.toFixed(2)}.` },
+        { status: 400 }
+      );
+    }
+
+    // 3. Inventory availability checking (not general time conflicts)
+    const bufferBeforeMs = business.bufferBeforeHours * 60 * 60 * 1000;
+    const bufferAfterMs = business.bufferAfterHours * 60 * 60 * 1000;
+    const desiredStartWithBuffer = new Date(startUTC.getTime() - bufferBeforeMs);
+    const desiredEndWithBuffer = new Date(endUTC.getTime() + bufferAfterMs);
+
+    // Check each requested inventory item for conflicts
+    const requestedInventoryIds = holdData.selectedItems.map(item => item.id);
+    
+    const inventoryConflicts = await prisma.bookingItem.findFirst({
+      where: {
+        inventoryId: { in: requestedInventoryIds },
+        booking: {
+          businessId,
+          status: { in: ["HOLD", "PENDING", "CONFIRMED"] },
+        },
+        // Check for time overlap with buffer
+        startUTC: { lte: desiredEndWithBuffer },
+        endUTC: { gte: desiredStartWithBuffer },
+      },
+      include: {
+        inventory: { select: { name: true } },
+        booking: { select: { id: true, eventDate: true } }
+      }
+    });
+
+    if (inventoryConflicts) {
+      return NextResponse.json(
+        { error: `Item "${inventoryConflicts.inventory.name}" is already booked for this time slot (including buffer time).` },
+        { status: 409 }
+      );
+    }
 
     // --- Prepare Booking Data for createBookingSafely (Minimal) ---
     // Note: We provide initial/placeholder values for required fields that
@@ -98,8 +168,6 @@ export async function POST(
         specialInstructions: holdData.specialInstructions, // Use parsed instructions (can be null)
         business: { connect: { id: businessId } }, // Connect to the business
         coupon: undefined, // Coupon applied later
-        invoice: undefined, // Invoice created later
-        quote: undefined, // Quote created later
     };
     console.log("[POST /holds] Prepared bookingCreationData for HOLD:", bookingCreationData);
 
@@ -138,6 +206,8 @@ export async function POST(
         // Calculate hold expiration time (30 minutes from now)
         const expiresAt = new Date(Date.now() + 30 * 60 * 1000);
         console.log(`[POST /holds] Hold expires at: ${expiresAt.toISOString()}`);
+
+  
 
         // Return success with the booking ID (which represents the hold) and expiration time
         return NextResponse.json({

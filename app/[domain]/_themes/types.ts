@@ -74,7 +74,7 @@ export interface ThemeDefinition {
     };
   
     // Section styles
-    heroBackground?: (colors: ThemeColors) => string;
+    heroBackground?: (colors: ThemeColors) => string | React.CSSProperties;
     heroTitleColor?: (colors: ThemeColors) => string;
     heroTextColor?: (colors: ThemeColors) => string;
     featureSectionStyles?: {
@@ -210,6 +210,7 @@ export interface ThemeDefinition {
         focusBorder: (colors: ThemeColors) => string;
         placeholderColor: (colors: ThemeColors) => string;
         labelColor: (colors: ThemeColors) => string;
+        borderRadius?: (colors: ThemeColors) => string;
       };
       
       // Time slots
@@ -284,6 +285,47 @@ export interface BookingStylesConfig {
     stepTextColor: (colors: ThemeColors, isActive: boolean) => string;
     stepIconColor: (colors: ThemeColors, isActive: boolean) => string;
     
+    // Extended styling for form inputs
+    input: {
+      background: (colors: ThemeColors) => string;
+      border: (colors: ThemeColors) => string;
+      focusBorder: (colors: ThemeColors) => string;
+      placeholderColor: (colors: ThemeColors) => string;
+      labelColor: (colors: ThemeColors) => string;
+      borderRadius?: (colors: ThemeColors) => string;
+    };
+    
+    // Extended styling options for booking form
+    formContainer?: (colors: ThemeColors) => CSSProperties;
+    resultsContainer?: (colors: ThemeColors) => CSSProperties;
+    resultsHeading?: (colors: ThemeColors) => CSSProperties;
+    title?: (colors: ThemeColors) => CSSProperties;
+    subtitle?: (colors: ThemeColors) => CSSProperties;
+    priceTag?: (colors: ThemeColors) => CSSProperties;
+    productName?: (colors: ThemeColors) => CSSProperties;
+    specsContainer?: (colors: ThemeColors) => CSSProperties;
+    selectedFooter?: (colors: ThemeColors) => CSSProperties;
+    controlButton?: (colors: ThemeColors) => CSSProperties;
+    removeButton?: (colors: ThemeColors) => CSSProperties;
+    imageContainer?: (colors: ThemeColors) => CSSProperties;
+    continueSection?: (colors: ThemeColors) => CSSProperties;
+    imageFilter?: (colors: ThemeColors) => string;
+    imageOverlay?: (colors: ThemeColors) => CSSProperties;
+    selectedCardTransform?: (colors: ThemeColors) => string;
+    headingAccent?: (colors: ThemeColors) => CSSProperties;
+    decorativeElements?: {
+      topRight?: CSSProperties;
+      topLeft?: CSSProperties;
+      bottomRight?: CSSProperties;
+      bottomLeft?: CSSProperties;
+    };
+    selectedAccent?: {
+      topRight?: CSSProperties;
+      topLeft?: CSSProperties;
+      bottomRight?: CSSProperties;
+      bottomLeft?: CSSProperties;
+    };
+    
     availabilityCard: {
       background: (colors: ThemeColors) => string;
       border: (colors: ThemeColors, isSelected: boolean) => string;
@@ -307,14 +349,6 @@ export interface BookingStylesConfig {
       shadow: (colors: ThemeColors) => string;
       headerBackground: (colors: ThemeColors) => string;
       rowBackground: (colors: ThemeColors, isAlternate: boolean) => string;
-    };
-    
-    input: {
-      background: (colors: ThemeColors) => string;
-      border: (colors: ThemeColors) => string;
-      focusBorder: (colors: ThemeColors) => string;
-      placeholderColor: (colors: ThemeColors) => string;
-      labelColor: (colors: ThemeColors) => string;
     };
     
     timeSlot: {
@@ -384,5 +418,5 @@ export interface LinkStylesConfig {
 }
 
 export interface GlobalStylesConfig {
-    globalStyles: () => string;
+    globalStyles: (colors: ThemeColors) => string;
 }

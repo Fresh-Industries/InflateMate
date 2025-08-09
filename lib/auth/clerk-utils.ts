@@ -21,7 +21,7 @@ export const getCurrentUserWithOrgAndBusiness = cache(async () => {
         clerkUserId: userId,
       },
       include: {
-        membership: {
+        memberships: {
           include: {
             organization: {
               include: {
@@ -40,3 +40,31 @@ export const getCurrentUserWithOrgAndBusiness = cache(async () => {
     return null;
   }
 });
+
+/**
+ * Helper function to get the primary membership for a user.
+ * For now, returns the first membership, but this can be enhanced
+ * to select based on specific criteria (e.g., active organization).
+ * 
+ * @param user - User object with memberships
+ * @returns The primary membership or null if none exists
+ */
+export function getPrimaryMembership(user: NonNullable<Awaited<ReturnType<typeof getCurrentUserWithOrgAndBusiness>>>) {
+  return user.memberships?.[0] || null;
+}
+
+/**
+ * Helper function to get a specific membership by business ID.
+ * 
+ * @param user - User object with memberships
+ * @param businessId - The business ID to find membership for
+ * @returns The membership for the specific business or null if not found
+ */
+export function getMembershipByBusinessId(
+  user: NonNullable<Awaited<ReturnType<typeof getCurrentUserWithOrgAndBusiness>>>, 
+  businessId: string
+) {
+  return user.memberships?.find(membership => 
+    membership.organization?.business?.id === businessId
+  ) || null;
+}

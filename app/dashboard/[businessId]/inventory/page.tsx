@@ -27,7 +27,7 @@ import {
   Package,
   DollarSign
 } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { InventoryList } from "@/app/dashboard/[businessId]/inventory/_components/InventoryList";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -51,7 +51,7 @@ interface InventoryItem {
   id: string;
   name: string;
   status: "AVAILABLE" | "MAINTENANCE" | "RETIRED";
-  type: "BOUNCE_HOUSE" | "INFLATABLE" | "GAME" | "OTHER";
+  type: "BOUNCE_HOUSE" | "WATER_SLIDE" | "GAME" | "OTHER";
   description: string;
   dimensions: string;
   capacity: number;
@@ -76,7 +76,6 @@ export default function InventoryPage() {
   const params = useParams();
   const router = useRouter();
   const businessId = params?.businessId as string;
-  const { toast } = useToast();
 
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -103,15 +102,11 @@ export default function InventoryPage() {
     } catch (error) {
       console.error("Error fetching inventory:", error);
       setError(error instanceof Error ? error.message : "Failed to fetch inventory");
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to fetch inventory",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to fetch inventory");
     } finally {
       setIsLoading(false);
     }
-  }, [businessId, toast]);
+  }, [businessId]);
 
   useEffect(() => {
     if (businessId) {
@@ -152,7 +147,7 @@ export default function InventoryPage() {
   const getInventoryTypeDisplay = (type: string) => {
     switch (type) {
       case "BOUNCE_HOUSE": return "Bounce House";
-      case "INFLATABLE": return "Inflatable";
+      case "WATER_SLIDE": return "Water Slide";
       case "GAME": return "Game";
       case "OTHER": return "Other";
       default: return type;
@@ -205,22 +200,22 @@ export default function InventoryPage() {
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button className="rounded-full h-11 px-6 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-300 transform hover:scale-105 group">
+            <Button className="rounded-full h-11 px-6 bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-md transition-all duration-300 transform hover:scale-105 group">
               <Plus className="mr-2 h-5 w-5" />
               Add Item
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="rounded-lg shadow-lg border border-blue-200/30 mt-2 w-48">
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=BOUNCE_HOUSE`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=BOUNCE_HOUSE`)}>
               Bounce House
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=INFLATABLE`)}>
-              Inflatable
+              <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=WATER_SLIDE`)}>
+                Water Slide
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=GAME`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=GAME`)}>
               Game
             </DropdownMenuItem>
-            <DropdownMenuItem className="cursor-pointer py-2 px-3 hover:bg-muted/50 focus:bg-muted/50" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=OTHER`)}>
+            <DropdownMenuItem className="cursor-pointer py-2 px-3" onClick={() => router.push(`/dashboard/${businessId}/inventory/create?type=OTHER`)}>
               Other
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -304,13 +299,13 @@ export default function InventoryPage() {
                 <SelectTrigger className="w-full md:w-[160px] h-10 rounded-md shadow-sm border border-blue-200/50 focus:ring-1 focus:ring-primary focus:border-primary transition-colors">
                     <SelectValue placeholder="Type" />
                 </SelectTrigger>
-                <SelectContent className="rounded-lg shadow-lg border border-blue-200/30">
+                                  <SelectContent className="rounded-lg shadow-lg border border-blue-200/30">
                     <SelectItem value="all">All Types</SelectItem>
                     <SelectItem value="BOUNCE_HOUSE">Bounce House</SelectItem>
-                    <SelectItem value="INFLATABLE">Inflatable</SelectItem>
+                    <SelectItem value="WATER_SLIDE">Water Slide</SelectItem>
                     <SelectItem value="GAME">Game</SelectItem>
                     <SelectItem value="OTHER">Other</SelectItem>
-                </SelectContent>
+                  </SelectContent>
                 </Select>
             </div>
         </CardHeader>

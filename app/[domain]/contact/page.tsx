@@ -103,10 +103,24 @@ const colors: ThemeColors = {
   };
 
   // Hero section style
-  const heroStyle = {
-    background: theme.heroBackground ? theme.heroBackground(colors) : `linear-gradient(135deg, ${colors.primary} 0%, ${colors.accent} 100%)`,
-    color: theme.heroTextColor ? theme.heroTextColor(colors) : getContrastColor(colors.primary),
-  };
+  const defaultHeroBackground = `linear-gradient(135deg, ${colors.primary[500]} 0%, ${colors.accent[500]} 100%)`;
+  const defaultHeroColor = getContrastColor(colors.primary[500]);
+
+  const heroStyle: React.CSSProperties = {};
+
+  const themeProvidedBackground = theme.heroBackground
+    ? theme.heroBackground(colors)
+    : defaultHeroBackground;
+
+  if (typeof themeProvidedBackground === 'string') {
+    heroStyle.background = themeProvidedBackground;
+  } else if (themeProvidedBackground && typeof themeProvidedBackground === 'object') {
+    Object.assign(heroStyle, themeProvidedBackground);
+  }
+
+  heroStyle.color = theme.heroTextColor
+    ? theme.heroTextColor(colors)
+    : defaultHeroColor;
 
   // Contact card style
   const contactCardStyle = {
@@ -299,7 +313,7 @@ const colors: ThemeColors = {
             className="text-lg font-bold shadow-lg hover:shadow-xl transition-all hover:scale-105"
             style={buttonStyle}
           >
-            <Link href={`/${domain}/booking`} className="flex items-center gap-2">
+            <Link href={`/booking`} className="flex items-center gap-2">
               <Calendar className="h-5 w-5" />
               Book Now
             </Link>

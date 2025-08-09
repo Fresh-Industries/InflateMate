@@ -7,8 +7,6 @@ import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
 import { prisma } from "@/lib/prisma";
 import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
-// We no longer create bookings here, so createBookingSafely is NOT needed in POST
-// import { createBookingSafely } from "@/lib/createBookingSafely";
 
 import { BookingStatus, Prisma } from "@/prisma/generated/prisma"; // Import necessary types/enums
 import { dateOnlyUTC, localToUTC } from "@/lib/utils";
@@ -326,6 +324,9 @@ export async function POST(
             isolationLevel: Prisma.TransactionIsolationLevel.Serializable // Use Serializable isolation
         });
         console.log(`[POST /bookings] Database transaction for booking update completed.`);
+
+        // Test: Relying on Prisma update to trigger realtime automatically
+        console.log("HOLD->PENDING: Prisma update completed, checking if realtime triggers automatically");
 
 //eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {

@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ThemeDefinition, ThemeColors } from '../types';
-import { transitions } from '../tokens';
+import { transitions, borderWidths } from '../tokens';
 import { retroPatterns } from '../patterns/retro';
+import { getContrastColor } from '../utils';
+import { makeBookingStyles } from '../themeFactories';
 
 // Text styling helpers
 const retroText = {
@@ -223,7 +225,14 @@ export const retroOverrides: Partial<ThemeDefinition> = {
   },
 
   // Hero section - bold, playful style with retro patterns
-  heroBackground: (c: ThemeColors) => retroPatterns.cassetteTape(c.primary[100], c.accent[100]),
+  heroBackground: (c: ThemeColors) => {
+    // Use a separate background object with the pattern and additional properties
+    return {
+      backgroundImage: retroPatterns.cassetteTape(c.primary[100], c.accent[100]),
+      backgroundSize: '60px 60px',
+      backgroundPosition: '0 0, 30px 30px'
+    };
+  },
   heroTitleColor: (c: ThemeColors) => c.primary[900],
   heroTextColor: (c: ThemeColors) => c.text[900],
   
@@ -610,4 +619,183 @@ export const retroOverrides: Partial<ThemeDefinition> = {
     elementEntrance: "popIn 0.3s ease-out",
     pulseGlow: "wiggle 3s infinite ease-in-out",
   },
+
+  // Add to the bookingStyles in the Retro theme
+  bookingStyles: makeBookingStyles({
+    formBackground: (c: ThemeColors) => c.background[100],
+    formBorder: (c: ThemeColors) => `3px solid ${c.primary[500]}`,
+    formShadow: (c: ThemeColors) => `6px 6px 0 ${c.primary[900]}`,
+    formTextColor: (c: ThemeColors) => c.text[900],
+    
+    // Title and subtitle styles
+    title: (c: ThemeColors) => ({
+      color: c.primary[900],
+      fontFamily: '"Rubik", "Inter", sans-serif',
+      fontWeight: '800',
+      letterSpacing: '0.5px',
+      textTransform: 'uppercase',
+    }),
+    
+    subtitle: (c: ThemeColors) => ({
+      color: c.text[500],
+      fontFamily: '"Rubik", "Inter", sans-serif',
+    }),
+    
+    // Form container styles
+    formContainer: (c: ThemeColors) => ({
+      background: c.background[100],
+      border: `2px solid ${c.primary[500]}`,
+      borderRadius: '8px',
+      padding: '16px',
+    }),
+    
+    // Results container styles
+    resultsContainer: (c: ThemeColors) => ({
+      background: c.background[100],
+      border: `3px solid ${c.primary[500]}`,
+      borderRadius: '8px',
+      boxShadow: `6px 6px 0 ${c.primary[900]}`,
+      padding: '20px',
+    }),
+    
+    // Results heading styles
+    resultsHeading: (c: ThemeColors) => ({
+      fontFamily: '"Rubik", "Inter", sans-serif',
+      fontWeight: '800',
+      letterSpacing: '0.5px',
+      color: c.primary[500],
+      textTransform: 'uppercase',
+      position: 'relative',
+      padding: '0 0 8px 0',
+      borderBottom: `2px solid ${c.accent[500]}`,
+    }),
+    
+    // Price tag styles
+    priceTag: (c: ThemeColors) => ({
+      background: c.accent[500],
+      color: '#ffffff',
+      borderRadius: '0',
+      transform: 'rotate(2deg)',
+      boxShadow: `2px 2px 0 ${c.accent[900]}`,
+    }),
+    
+    // Product name styles
+    productName: (c: ThemeColors) => ({
+      fontFamily: '"Rubik", "Inter", sans-serif',
+      textTransform: 'uppercase',
+      letterSpacing: '0.5px',
+      fontWeight: 'bold',
+    }),
+    
+    // Specs container styles
+    specsContainer: (c: ThemeColors) => ({
+      background: c.background[500] + '30',
+      borderRadius: '4px',
+      border: 'none',
+    }),
+    
+    // Selected footer styles
+    selectedFooter: (c: ThemeColors) => ({
+      borderTop: `2px solid ${c.accent[500]}`,
+      paddingTop: '16px',
+      marginTop: '8px',
+    }),
+    
+    // Image container styles
+    imageContainer: (c: ThemeColors) => ({
+      borderBottom: `3px solid ${c.primary[500]}`,
+    }),
+    
+    // Continue section styles
+    continueSection: (c: ThemeColors) => ({
+      borderTop: `2px solid ${c.primary[100]}`,
+      paddingTop: '20px',
+      marginTop: '16px',
+    }),
+    
+    // Image filter and overlay
+    imageFilter: () => 'contrast(1.1)',
+    imageOverlay: (c: ThemeColors) => ({
+      backgroundImage: retroPatterns.scanlines(c.primary[900], 2),
+    }),
+    
+    // Heading accent
+    headingAccent: (c: ThemeColors) => ({
+      background: c.accent[500],
+    }),
+    
+    // Selected card accents
+    selectedAccent: {
+      topLeft: {
+        borderTop: `20px solid #f97316`,
+        borderRight: '20px solid transparent',
+      },
+      topRight: {
+        borderTop: `20px solid #f97316`,
+        borderLeft: '20px solid transparent',
+      },
+    },
+    
+    // Decorative elements
+    decorativeElements: {
+      topRight: {
+        background: '#fdba74',
+        opacity: 0.6,
+        zIndex: -1,
+        borderRadius: '0',
+      },
+      bottomLeft: {
+        background: '#4f46e5',
+        opacity: 0.2,
+        zIndex: -1,
+        borderRadius: '0',
+        transform: 'rotate(45deg)',
+      },
+    },
+    
+    stepBackground: (c: ThemeColors, active: boolean) => (active ? c.primary[500] : 'transparent'),
+    stepBorder: (c: ThemeColors, active: boolean) => `${borderWidths.medium} solid ${active ? c.primary[500] : c.primary[100]}40`,
+    stepTextColor: (c: ThemeColors, active: boolean) => (active ? getContrastColor(c.primary[500]) : c.text[900]),
+    stepIconColor: (c: ThemeColors, active: boolean) => (active ? c.primary[900] : c.text[900]),
+    
+    availabilityCard: {
+      background: (c: ThemeColors) => c.background[100],
+      border: (c: ThemeColors, sel: boolean) => `3px solid ${sel ? c.accent[500] : c.primary[900]}`,
+      shadow: (c: ThemeColors) => `4px 4px 0 ${c.primary[900]}`,
+      hoverShadow: (c: ThemeColors) => `6px 6px 0 ${c.primary[900]}`,
+      selectedBackground: (c: ThemeColors) => retroPatterns.pixelGrid(c.primary[500], 0.05, 10),
+      imageContainer: (c: ThemeColors) => c.primary[100],
+      priceTag: {
+        background: (c: ThemeColors) => c.accent[500],
+        color: (c: ThemeColors) => '#ffffff',
+      },
+      specContainer: {
+        background: (c: ThemeColors) => `${c.primary[100]}20`,
+        border: (c: ThemeColors) => `2px solid ${c.primary[500]}`,
+      },
+    },
+    
+    summaryCard: {
+      background: (c: ThemeColors) => c.background[100],
+      border: (c: ThemeColors) => `3px solid ${c.primary[900]}`,
+      shadow: (c: ThemeColors) => `6px 6px 0 ${c.primary[900]}`,
+      headerBackground: (c: ThemeColors) => c.primary[500],
+      rowBackground: (c: ThemeColors, alt: boolean) => (alt ? `${c.primary[100]}20` : c.background[100]),
+    },
+    
+    input: {
+      background: (c: ThemeColors) => c.background[100],
+      border: (c: ThemeColors) => c.primary[500],
+      focusBorder: (c: ThemeColors) => c.accent[500],
+      placeholderColor: (c: ThemeColors) => c.text[500],
+      labelColor: (c: ThemeColors) => c.text[900],
+      borderRadius: (_: ThemeColors) => '6px',
+    },
+    
+    timeSlot: {
+      background: (c: ThemeColors, avail: boolean) => (avail ? c.background[100] : c.primary[100]),
+      border: (c: ThemeColors, avail: boolean) => `2px solid ${avail ? c.primary[500] : c.primary[900]}`,
+      textColor: (c: ThemeColors, avail: boolean) => (avail ? c.text[900] : c.text[500]),
+    },
+  }),
 };

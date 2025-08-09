@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { MoreHorizontal, Pencil, Trash, Copy, Calendar } from "lucide-react";
 import {
   AlertDialog,
@@ -58,8 +58,6 @@ export default function CouponsList({ businessId }: CouponsListProps) {
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
-  const { toast } = useToast();
-  
   // Fetch coupons
   const fetchCoupons = async () => {
     setIsLoading(true);
@@ -74,11 +72,7 @@ export default function CouponsList({ businessId }: CouponsListProps) {
       setCoupons(data);
     } catch (error) {
       console.error("Error fetching coupons:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch coupons. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to fetch coupons. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -104,17 +98,10 @@ export default function CouponsList({ businessId }: CouponsListProps) {
         coupon.id === couponId ? { ...coupon, isActive } : coupon
       ));
       
-      toast({
-        title: "Success",
-        description: `Coupon ${isActive ? "activated" : "deactivated"} successfully.`,
-      });
+      toast.success(`Coupon ${isActive ? "activated" : "deactivated"} successfully.`);
     } catch (error) {
       console.error("Error updating coupon status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update coupon status. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to update coupon status. Please try again.");
     }
   };
   
@@ -134,17 +121,10 @@ export default function CouponsList({ businessId }: CouponsListProps) {
       // Update local state
       setCoupons(coupons.filter(coupon => coupon.id !== deletingId));
       
-      toast({
-        title: "Success",
-        description: "Coupon deleted successfully.",
-      });
+      toast.success("Coupon deleted successfully.");
     } catch (error) {
       console.error("Error deleting coupon:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete coupon. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete coupon. Please try again.");
     } finally {
       setDeletingId(null);
       setIsDeleteModalOpen(false);
@@ -160,10 +140,7 @@ export default function CouponsList({ businessId }: CouponsListProps) {
   // Copy coupon code to clipboard
   const copyToClipboard = (code: string) => {
     navigator.clipboard.writeText(code);
-    toast({
-      title: "Copied!",
-      description: "Coupon code copied to clipboard",
-    });
+    toast.success("Coupon code copied to clipboard");
   };
   
   // Load coupons on component mount

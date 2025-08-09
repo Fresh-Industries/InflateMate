@@ -144,8 +144,8 @@ export const retroPatterns: RetroPatterns = {
     background-size: ${size}px ${size}px;
   `,
 
-  cassetteTape: (color1, color2) => `
-    linear-gradient(
+  cassetteTape: (color1, color2) => 
+    `linear-gradient(
       45deg,
       ${color1} 25%,
       transparent 25%,
@@ -160,10 +160,7 @@ export const retroPatterns: RetroPatterns = {
       transparent 75%,
       ${color2} 75%,
       ${color2}
-    );
-    background-size: 60px 60px;
-    background-position: 0 0, 30px 30px;
-  `,
+    )`,
 
   scanlines: (color = 'rgba(0, 0, 0, 0.1)', size = 2) => 
     `linear-gradient(to bottom, transparent, transparent ${size-1}px, ${color} ${size-1}px, ${color} ${size}px)`,

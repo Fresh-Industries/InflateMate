@@ -4,6 +4,7 @@ import { ArrowRight } from 'lucide-react';
 import { ThemeColors } from '@/app/[domain]/_themes/types';
 import { Button } from '@/components/ui/button';
 import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
+
 /**
  * Shape of a rental coming from Prisma.
  */
@@ -20,9 +21,6 @@ interface Props {
   items: RentalItem[];
   colors: ThemeColors;
   themeName: keyof typeof themeConfig;
-  /**
-   * `fallbackEmoji` enables graceful degradation when no image is present & the type is unknown.
-   */
   fallbackEmoji?: string;
 }
 
@@ -122,7 +120,14 @@ export default function PopularRentalsGrid({ items, colors, themeName, fallbackE
                 </div>
 
                 <div className="p-8">
-                  <h3 className="text-2xl font-bold mb-3" style={{ color: baseCard.color }}>{item.name}</h3>
+                  <Link href={`/inventory/${item.id}`}>
+                    <h3 
+                      className="text-2xl font-bold mb-3 cursor-pointer hover:opacity-80" 
+                      style={{ color: baseCard.color }}
+                    >
+                      {item.name}
+                    </h3>
+                  </Link>
                   <p className="mb-6 text-lg" style={{ color: baseCard.color }}>
                     {item.description ?? 'Perfect for any event or party!'}
                   </p>

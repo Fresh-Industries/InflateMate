@@ -20,12 +20,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.7.0
- * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
+ * Prisma Client JS version: 6.12.0
+ * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
  */
 Prisma.prismaVersion = {
-  client: "6.7.0",
-  engine: "3cff47a7f5d65c3ea74883f1d736e41d68ce91ed"
+  client: "6.12.0",
+  engine: "8047c96bbd92db98a2abc7c9323ce77c02c89dbc"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -124,10 +124,10 @@ exports.Prisma.UserScalarFieldEnum = {
   id: 'id',
   email: 'email',
   name: 'name',
-  image: 'image',
-  clerkUserId: 'clerkUserId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  image: 'image',
+  updatedAt: 'updatedAt',
+  clerkUserId: 'clerkUserId'
 };
 
 exports.Prisma.BusinessScalarFieldEnum = {
@@ -140,22 +140,26 @@ exports.Prisma.BusinessScalarFieldEnum = {
   zipCode: 'zipCode',
   phone: 'phone',
   email: 'email',
-  serviceArea: 'serviceArea',
-  onboarded: 'onboarded',
   logo: 'logo',
-  minAdvanceBooking: 'minAdvanceBooking',
-  maxAdvanceBooking: 'maxAdvanceBooking',
-  minimumPurchase: 'minimumPurchase',
-  timeZone: 'timeZone',
-  stripeAccountId: 'stripeAccountId',
-  socialMedia: 'socialMedia',
-  customDomain: 'customDomain',
-  subdomain: 'subdomain',
-  siteConfig: 'siteConfig',
-  onboardingError: 'onboardingError',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  organizationId: 'organizationId'
+  stripeAccountId: 'stripeAccountId',
+  customDomain: 'customDomain',
+  siteConfig: 'siteConfig',
+  serviceArea: 'serviceArea',
+  subdomain: 'subdomain',
+  onboardingError: 'onboardingError',
+  timeZone: 'timeZone',
+  socialMedia: 'socialMedia',
+  onboarded: 'onboarded',
+  organizationId: 'organizationId',
+  bufferAfterHours: 'bufferAfterHours',
+  bufferBeforeHours: 'bufferBeforeHours',
+  maxNoticeHours: 'maxNoticeHours',
+  minBookingAmount: 'minBookingAmount',
+  minNoticeHours: 'minNoticeHours',
+  embeddedComponents: 'embeddedComponents',
+  embedConfig: 'embedConfig'
 };
 
 exports.Prisma.OrganizationScalarFieldEnum = {
@@ -168,12 +172,12 @@ exports.Prisma.OrganizationScalarFieldEnum = {
 
 exports.Prisma.MembershipScalarFieldEnum = {
   id: 'id',
-  role: 'role',
+  userId: 'userId',
+  organizationId: 'organizationId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  clerkMembershipId: 'clerkMembershipId',
-  userId: 'userId',
-  organizationId: 'organizationId'
+  role: 'role',
+  clerkMembershipId: 'clerkMembershipId'
 };
 
 exports.Prisma.InventoryScalarFieldEnum = {
@@ -188,18 +192,18 @@ exports.Prisma.InventoryScalarFieldEnum = {
   teardownTime: 'teardownTime',
   images: 'images',
   primaryImage: 'primaryImage',
-  stripeProductId: 'stripeProductId',
-  stripePriceId: 'stripePriceId',
   status: 'status',
   minimumSpace: 'minimumSpace',
   weightLimit: 'weightLimit',
   ageRange: 'ageRange',
   weatherRestrictions: 'weatherRestrictions',
-  quantity: 'quantity',
+  businessId: 'businessId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  version: 'version',
-  businessId: 'businessId'
+  quantity: 'quantity',
+  stripePriceId: 'stripePriceId',
+  stripeProductId: 'stripeProductId',
+  version: 'version'
 };
 
 exports.Prisma.CustomerScalarFieldEnum = {
@@ -217,10 +221,10 @@ exports.Prisma.CustomerScalarFieldEnum = {
   lastBooking: 'lastBooking',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
+  businessId: 'businessId',
   isLead: 'isLead',
   status: 'status',
-  type: 'type',
-  businessId: 'businessId'
+  type: 'type'
 };
 
 exports.Prisma.BookingScalarFieldEnum = {
@@ -237,34 +241,35 @@ exports.Prisma.BookingScalarFieldEnum = {
   eventCity: 'eventCity',
   eventState: 'eventState',
   eventZipCode: 'eventZipCode',
-  eventTimeZone: 'eventTimeZone',
   participantAge: 'participantAge',
   participantCount: 'participantCount',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  specialInstructions: 'specialInstructions',
   subtotalAmount: 'subtotalAmount',
   taxAmount: 'taxAmount',
   taxRate: 'taxRate',
-  isCompleted: 'isCompleted',
   isCancelled: 'isCancelled',
-  specialInstructions: 'specialInstructions',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
-  expiresAt: 'expiresAt',
+  isCompleted: 'isCompleted',
+  eventTimeZone: 'eventTimeZone',
   couponId: 'couponId',
-  businessId: 'businessId',
-  customerId: 'customerId'
+  expiresAt: 'expiresAt',
+  currentQuoteId: 'currentQuoteId'
 };
 
 exports.Prisma.BookingItemScalarFieldEnum = {
   id: 'id',
+  bookingId: 'bookingId',
+  inventoryId: 'inventoryId',
   quantity: 'quantity',
   price: 'price',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  startUTC: 'startUTC',
-  endUTC: 'endUTC',
-  bookingId: 'bookingId',
   status: 'status',
-  inventoryId: 'inventoryId'
+  endUTC: 'endUTC',
+  startUTC: 'startUTC'
 };
 
 exports.Prisma.PaymentScalarFieldEnum = {
@@ -272,15 +277,15 @@ exports.Prisma.PaymentScalarFieldEnum = {
   amount: 'amount',
   type: 'type',
   status: 'status',
+  createdAt: 'createdAt',
+  bookingId: 'bookingId',
+  businessId: 'businessId',
   currency: 'currency',
   metadata: 'metadata',
   stripeClientSecret: 'stripeClientSecret',
   stripePaymentId: 'stripePaymentId',
-  createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  paidAt: 'paidAt',
-  bookingId: 'bookingId',
-  businessId: 'businessId'
+  paidAt: 'paidAt'
 };
 
 exports.Prisma.CouponScalarFieldEnum = {
@@ -296,10 +301,10 @@ exports.Prisma.CouponScalarFieldEnum = {
   isActive: 'isActive',
   minimumAmount: 'minimumAmount',
   businessId: 'businessId',
-  stripeCouponId: 'stripeCouponId',
-  stripePromotionId: 'stripePromotionId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  stripeCouponId: 'stripeCouponId',
+  stripePromotionId: 'stripePromotionId'
 };
 
 exports.Prisma.SalesFunnelScalarFieldEnum = {
@@ -311,23 +316,23 @@ exports.Prisma.SalesFunnelScalarFieldEnum = {
   popupImage: 'popupImage',
   formTitle: 'formTitle',
   thankYouMessage: 'thankYouMessage',
-  couponId: 'couponId',
   businessId: 'businessId',
   createdAt: 'createdAt',
-  updatedAt: 'updatedAt'
+  updatedAt: 'updatedAt',
+  couponId: 'couponId'
 };
 
 exports.Prisma.WaiverScalarFieldEnum = {
   id: 'id',
+  businessId: 'businessId',
+  customerId: 'customerId',
+  bookingId: 'bookingId',
   status: 'status',
   templateVersion: 'templateVersion',
   documentUrl: 'documentUrl',
-  docuSealDocumentId: 'docuSealDocumentId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
-  businessId: 'businessId',
-  customerId: 'customerId',
-  bookingId: 'bookingId'
+  docuSealDocumentId: 'docuSealDocumentId'
 };
 
 exports.Prisma.SubscriptionScalarFieldEnum = {
@@ -376,10 +381,13 @@ exports.Prisma.QuoteScalarFieldEnum = {
   amountSubtotal: 'amountSubtotal',
   amountTax: 'amountTax',
   currency: 'currency',
-  hostedQuoteUrl: 'hostedQuoteUrl',
+  appQuoteUrl: 'appQuoteUrl',
+  stripeHostedUrl: 'stripeHostedUrl',
   pdfUrl: 'pdfUrl',
   expiresAt: 'expiresAt',
   metadata: 'metadata',
+  version: 'version',
+  replacesQuoteId: 'replacesQuoteId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   businessId: 'businessId',
@@ -401,12 +409,12 @@ exports.Prisma.SortOrder = {
   desc: 'desc'
 };
 
-exports.Prisma.NullableJsonNullValueInput = {
-  DbNull: Prisma.DbNull,
+exports.Prisma.JsonNullValueInput = {
   JsonNull: Prisma.JsonNull
 };
 
-exports.Prisma.JsonNullValueInput = {
+exports.Prisma.NullableJsonNullValueInput = {
+  DbNull: Prisma.DbNull,
   JsonNull: Prisma.JsonNull
 };
 
@@ -432,17 +440,17 @@ exports.Role = exports.$Enums.Role = {
 
 exports.InventoryType = exports.$Enums.InventoryType = {
   BOUNCE_HOUSE: 'BOUNCE_HOUSE',
-  INFLATABLE: 'INFLATABLE',
+  WATER_SLIDE: 'WATER_SLIDE',
   GAME: 'GAME',
   OTHER: 'OTHER'
 };
 
 exports.InventoryStatus = exports.$Enums.InventoryStatus = {
   AVAILABLE: 'AVAILABLE',
-  PENDING: 'PENDING',
   BOOKED: 'BOOKED',
   MAINTENANCE: 'MAINTENANCE',
-  RETIRED: 'RETIRED'
+  RETIRED: 'RETIRED',
+  PENDING: 'PENDING'
 };
 
 exports.BookingStatus = exports.$Enums.BookingStatus = {
@@ -457,8 +465,8 @@ exports.BookingStatus = exports.$Enums.BookingStatus = {
 exports.PaymentType = exports.$Enums.PaymentType = {
   DEPOSIT: 'DEPOSIT',
   FULL_PAYMENT: 'FULL_PAYMENT',
-  CASH: 'CASH',
-  REFUND: 'REFUND'
+  REFUND: 'REFUND',
+  CASH: 'CASH'
 };
 
 exports.PaymentStatus = exports.$Enums.PaymentStatus = {
@@ -497,7 +505,6 @@ exports.InvoiceStatus = exports.$Enums.InvoiceStatus = {
 exports.QuoteStatus = exports.$Enums.QuoteStatus = {
   DRAFT: 'DRAFT',
   OPEN: 'OPEN',
-  SENT: 'SENT',
   ACCEPTED: 'ACCEPTED',
   CANCELED: 'CANCELED',
   EXPIRED: 'EXPIRED'

@@ -1,6 +1,5 @@
 'use client'
 import React, { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronDown,
   CreditCard,
@@ -334,22 +333,17 @@ export default function FAQSection() {
 
 
   return (
-    <section className="py-20 bg-gradient-to-b from-background to-muted/20">
-      <div className="container mx-auto px-4 max-w-5xl">
-        <motion.div
-           initial={{ opacity: 0, y: 20 }}
-           whileInView={{ opacity: 1, y: 0 }}
-           viewport={{ once: true }}
-           transition={{ duration: 0.6 }}
-           className="text-center mb-12 max-w-3xl mx-auto"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-3 bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">
+    <section className="relative overflow-hidden py-20">
+      <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-[0.02]" />
+      <div className="container relative z-10 mx-auto max-w-5xl px-4">
+        <div className="mx-auto mb-12 max-w-3xl text-center">
+          <h2 className="mb-3 text-3xl font-bold text-[#1F2937] md:text-4xl" style={{ fontFamily: 'var(--font-heading)' }}>
             Frequently Asked Questions
           </h2>
-          <p className="text-muted-foreground max-w-2xl mx-auto">
+          <p className="mx-auto max-w-2xl text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>
             Find quick answers to the most common questions about InflateMate.
-          </p> {/* Simplified subtitle */}
-        </motion.div>
+          </p>
+        </div>
 
         {/* Category tabs */}
         <div className="flex flex-wrap gap-2 mb-8 justify-center">
@@ -370,88 +364,65 @@ export default function FAQSection() {
           ))}
         </div>
 
-        <div className="bg-card rounded-xl border border-border overflow-hidden shadow-sm">
+        <div className="overflow-hidden rounded-xl border border-black/10 bg-white shadow-sm">
           {/* Filter and map categories - should only be one active category */}
           {faqCategories
             .filter((category) => category.id === activeCategory)
             .map((category) => (
-              <motion.div
-                 key={category.id}
-                 initial={{ opacity: 0, y: 10 }} // Animation for category content appearing
-                 animate={{ opacity: 1, y: 0 }}
-                 exit={{ opacity: 0, y: -10 }} // Assuming AnimatePresence wraps this block if needed for exit animation
-                 transition={{ duration: 0.3 }}
-                 className="divide-y divide-border/60"
-              >
+              <div key={category.id} className="divide-y divide-black/10">
                 {category.questions.map((faq) => (
                   <div key={faq.id} className="border-border">
                     <button
                       onClick={() => toggleQuestion(faq.id)}
-                      className="w-full text-left p-5 flex items-center justify-between gap-2 hover:bg-muted/30 transition-colors text-foreground" // Ensured text color
+                      aria-expanded={openQuestion === faq.id}
+                      aria-controls={`faq-${faq.id}`}
+                      className="flex w-full items-center justify-between gap-2 p-5 text-left text-[#0B1220] transition-colors hover:bg-black/[0.04]"
                     >
-                      <h3 className="font-medium text-lg flex-1">{faq.question}</h3>
-                      <motion.div
-                        animate={{
-                          rotate: openQuestion === faq.id ? 180 : 0,
-                        }}
-                        transition={{ duration: 0.2 }}
+                      <h3 className="flex-1 text-lg font-medium" style={{ fontFamily: 'var(--font-body)' }}>{faq.question}</h3>
+                      <div
                         className={cn(
-                          "h-6 w-6 rounded-full flex items-center justify-center flex-shrink-0",
+                          "flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full transition-transform",
+                          openQuestion === faq.id && "rotate-180",
                           openQuestion === faq.id
-                            ? "bg-primary text-primary-foreground"
-                            : "bg-muted text-muted-foreground"
+                            ? "bg-[#6366F1] text-white"
+                            : "bg-black/[0.06] text-[#475569]"
                         )}
                       >
                         <ChevronDown className="h-4 w-4" />
-                      </motion.div>
+                      </div>
                     </button>
 
-                    {/* Use AnimatePresence around the collapsible answer */}
-                    <AnimatePresence initial={false}> {/* initial={false} prevents exit animation on mount */}
-                      {openQuestion === faq.id && (
-                        <motion.div
-                           key="answer" // Key required for AnimatePresence
-                          initial={{ height: 0, opacity: 0 }}
-                          animate={{ height: "auto", opacity: 1 }}
-                          exit={{ height: 0, opacity: 0 }}
-                          transition={{ duration: 0.3 }}
-                          className="overflow-hidden"
-                        >
-                          <div className="p-5 pt-0 bg-muted/10">
-                            {/* Content within the answer */}
-                            <div className="text-foreground"> {/* Use text-foreground for content */}
-                              {faq.answer}
-                            </div>
-                          </div>
-                        </motion.div>
+                    <div
+                      id={`faq-${faq.id}`}
+                      className={cn(
+                        "overflow-hidden transition-[max-height,opacity,transform] duration-300 ease-out",
+                        openQuestion === faq.id ? "max-h-[1200px] opacity-100 translate-y-0" : "max-h-0 opacity-0 -translate-y-1"
                       )}
-                    </AnimatePresence>
+                    >
+                      <div className="bg-black/[0.02] p-5 pt-0">
+                        <div className="text-[#0B1220]">{faq.answer}</div>
+                      </div>
+                    </div>
                   </div>
                 ))}
-              </motion.div>
+              </div>
             ))}
         </div>
 
         {/* Contact Support */}
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, delay: 0.3 }}
-            className="mt-10 text-center"
-        >
-          <p className="text-muted-foreground mb-4">
+        <div className="mt-10 text-center">
+          <p className="mb-4 text-[#64748B]">
             Still have questions about getting started, features, or anything else?
           </p> {/* More inviting prompt */}
           {/* Link or Button to Contact */}
           {/* Assuming this links to a contact page or opens a support widget */}
           <Link href="/contact" passHref>
-             <button className="bg-muted hover:bg-muted/70 text-foreground font-medium rounded-full px-6 py-2.5 inline-flex items-center gap-2 transition-colors border border-border"> {/* Added border */}
+             <button className="inline-flex items-center gap-2 rounded-full border border-black/10 bg-black/[0.04] px-6 py-2.5 font-medium text-[#0B1220] transition-colors hover:bg-black/[0.06]">
                 <HelpCircle className="h-4 w-4" />
                 Contact Support
               </button>
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   );

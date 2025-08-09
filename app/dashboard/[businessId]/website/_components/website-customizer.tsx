@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { SiteConfig, BusinessWithSiteConfig, Theme, DynamicSection } from "@/lib/business/domain-utils";
@@ -21,14 +21,25 @@ import ColorSettings from "./color-settings";
 import LandingSettings from "./landing-settings";
 import ThemeSelector from "./ThemeSelector";
 import AddSectionForm from "./AddSectionForm";
+import EmbeddedComponents from "./EmbeddedComponents";
 import { modern } from "@/lib/config/themes";
+
+interface EmbedConfig {
+  pageRoutes?: {
+    booking?: string;
+    inventory?: string;
+    product?: string;
+  };
+  popularRentalsCount?: number;
+  redirectUrl?: string;
+}
 
 interface WebsiteCustomizerProps {
   businessId: string;
   initialData: Record<string, unknown>;
 }
 
-type PageSectionKey = 'landing' | 'about';
+type PageSectionKey = 'landing' | 'about' 
 type PageConfig = {
   sections?: DynamicSection[];
   dynamicSections?: DynamicSection[];
@@ -43,15 +54,21 @@ const getSectionArrayKey = (page: PageSectionKey): 'sections' | 'dynamicSections
 
 export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCustomizerProps) {
   const router = useRouter();
-  const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
   const updateTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
   const [isSectionFormOpen, setIsSectionFormOpen] = useState(false);
   const [editingSection, setEditingSection] = useState<DynamicSection | null>(null);
-  const [activeTab, setActiveTab] = useState<PageSectionKey>('landing');
+  const [activeTab, setActiveTab] = useState<string>(
+    (initialData.embeddedComponents as boolean) ? 'embedded' : 'landing'
+  );
 
   const defaultTheme: Theme = { id: modern.id, name: modern.themeName };
+
+  // Add embedConfig state
+  const [embedConfig, setEmbedConfig] = useState<EmbedConfig>(() => {
+    return (initialData.embedConfig as EmbedConfig) || {};
+  });
 
   const [siteConfig, setSiteConfig] = useState<SiteConfig>(() => {
     const initialSiteConfig = (initialData.siteConfig as SiteConfig | undefined);
@@ -108,31 +125,32 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
     setIsLoading(true);
     
     try {
+      // Save both siteConfig and embedConfig
+      const payload: { siteConfig: SiteConfig; embedConfig?: EmbedConfig } = { siteConfig };
+      
+      // Only include embedConfig if embedded components are enabled
+      if (initialData.embeddedComponents) {
+        payload.embedConfig = embedConfig;
+      }
+      
       const response = await fetch(`/api/businesses/${businessId}/website`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ siteConfig }), // Saves the entire siteConfig including sections
+        body: JSON.stringify(payload),
       });
       
       if (!response.ok) {
         throw new Error("Failed to save website configuration");
       }
       
-      toast({
-        title: "Website updated",
-        description: "Your website configuration has been saved successfully.",
-      });
+      toast.success("Website updated");
       
       router.refresh();
     } catch (error) {
       console.error("Error saving website configuration:", error);
-      toast({
-        title: "Error",
-        description: "There was a problem saving your website configuration.",
-        variant: "destructive",
-      });
+      toast.error("There was a problem saving your website configuration.");
     } finally {
       setIsLoading(false);
     }
@@ -206,9 +224,19 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
     }));
   };
 
+  // Handle embed config updates
+  const handleEmbedConfigUpdate = useCallback((data: EmbedConfig) => {
+    if (updateTimeoutRef.current) {
+      clearTimeout(updateTimeoutRef.current);
+    }
+    updateTimeoutRef.current = setTimeout(() => {
+      setEmbedConfig(prev => ({ ...prev, ...data }));
+    }, 100);
+  }, []);
+
   const handleTabChange = (value: string) => {
-    if (value === 'landing' || value === 'about' || value === 'contact' || value === 'colors' || value === 'themeSettings') {
-      setActiveTab(value as PageSectionKey);
+    if (value === 'landing' || value === 'about' || value === 'contact' || value === 'colors' || value === 'themeSettings' || value === 'embedded') {
+      setActiveTab(value);
     }
   };
 
@@ -236,11 +264,11 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
          };
        });
        // --- END TEMPORARY ---
-       toast({ title: "Section Deleted", description: "Remember to save your changes.", variant: "destructive" });
+       toast.error("Remember to save your changes.");
        // If using server action: await deleteSection(businessId, sectionId); router.refresh();
     } catch (error) { 
         console.error("Error deleting section:", error); 
-        toast({ title: "Error", description: "Could not delete section.", variant: "destructive", });
+        toast.error("Could not delete section.");
     } finally { 
         setIsLoading(false); 
     }
@@ -249,7 +277,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
   const handleOpenAddSection = (page: PageSectionKey) => {
     setEditingSection(null);
     if (page !== activeTab) {
-      setActiveTab(page); 
+      setActiveTab(page as string); 
     }
     setIsSectionFormOpen(true);
   };
@@ -284,7 +312,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       };
     });
     handleCloseSectionForm();
-    toast({ title: "Section Added", description: "Remember to save your changes." });
+    toast.success("Section Added");
   };
 
   const handleEditSection = (updatedSectionData: DynamicSection) => {
@@ -305,7 +333,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
       };
     });
     handleCloseSectionForm();
-    toast({ title: "Section Updated", description: "Remember to save your changes." });
+    toast.success("Section Updated");
   };
 
   const renderSections = (page: PageSectionKey) => {
@@ -368,38 +396,63 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
           </Button>
         </div>
       
-        <Tabs defaultValue="landing" className="w-full" value={activeTab} onValueChange={handleTabChange}>
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 h-auto border-b rounded-none p-0">
-            <TabsTrigger
-              value="landing"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Landing Page
-            </TabsTrigger>
-            <TabsTrigger
-              value="about"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              About Page
-            </TabsTrigger>
-            <TabsTrigger
-              value="contact"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Contact Page
-            </TabsTrigger>
-            <TabsTrigger
-              value="colors"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Colors
-            </TabsTrigger>
-            <TabsTrigger
-              value="themeSettings"
-              className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
-            >
-              Theme Settings
-            </TabsTrigger>
+        <Tabs defaultValue={initialData.embeddedComponents ? "embedded" : "landing"} className="w-full" value={activeTab} onValueChange={handleTabChange}>
+          <TabsList className={`grid w-full ${initialData.embeddedComponents ? 'grid-cols-3' : 'grid-cols-2 sm:grid-cols-5'} h-auto border-b rounded-none p-0`}>
+            {initialData.embeddedComponents ? (
+              <>
+                <TabsTrigger
+                  value="embedded"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Embedded
+                </TabsTrigger>
+                <TabsTrigger
+                  value="colors"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Colors
+                </TabsTrigger>
+                <TabsTrigger
+                  value="themeSettings"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Theme Settings
+                </TabsTrigger>
+              </>
+            ) : (
+              <>
+                <TabsTrigger
+                  value="landing"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Landing Page
+                </TabsTrigger>
+                <TabsTrigger
+                  value="about"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  About Page
+                </TabsTrigger>
+                <TabsTrigger
+                  value="contact"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Contact Page
+                </TabsTrigger>
+                <TabsTrigger
+                  value="colors"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Colors
+                </TabsTrigger>
+                <TabsTrigger
+                  value="themeSettings"
+                  className="py-3 text-sm font-medium rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:shadow-none data-[state=active]:bg-transparent"
+                >
+                  Theme Settings
+                </TabsTrigger>
+              </>
+            )}
           </TabsList>
           
           <div className="mt-8">
@@ -492,6 +545,18 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
               </Card>
             </TabsContent>
 
+            <TabsContent value="embedded" className="m-0">
+              <EmbeddedComponents 
+                businessId={businessId}
+                embeddedComponents={initialData.embeddedComponents as boolean || false}
+                currentDomain={initialData.customDomain as string}
+                embedConfig={embedConfig}
+                colors={siteConfig.colors}
+                theme={siteConfig.themeName?.name || 'modern'}
+                onUpdateEmbedConfig={handleEmbedConfigUpdate}
+              />
+            </TabsContent>
+
           </div>
         </Tabs>
     </div>
@@ -510,7 +575,7 @@ export default function WebsiteCustomizer({ businessId, initialData }: WebsiteCu
             onAddSection={handleAddSection} 
             onEditSection={handleEditSection} 
             onCancel={handleCloseSectionForm}
-            page={editingSection ? editingSection.page as PageSectionKey : activeTab}
+            page={editingSection ? editingSection.page as PageSectionKey : (activeTab as PageSectionKey || 'landing')}
             presetColors={{
               primary: siteConfig.colors?.primary,
               secondary: siteConfig.colors?.secondary,

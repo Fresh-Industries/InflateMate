@@ -96,8 +96,6 @@ Customize or extend your components by editing them in the @/components/ui folde
   Offer examples and guidelines for error messages, tooltips, button labels, and call-to-action text that align with the brand.
 
 ## 8. Interaction & Micro-Interactions
-- **Animation Guidelines:**  
-  Outline recommended durations, easing curves, and the use of subtle animations (e.g., scale, fade, or slide effects).
 - **Feedback Mechanisms:**  
   Specify how the UI should provide instant feedback on actions (e.g., loading states, button presses, form submissions).
 - **Transitions:**  

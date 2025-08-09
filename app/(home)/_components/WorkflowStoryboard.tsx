@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useCallback } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import Image from "next/image";
 import { Calendar, FileText, BarChart2, ArrowRight, ArrowLeft, CheckCircle, MessageSquare, Clock } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -123,47 +123,38 @@ export default function WorkflowStoryboard() {
   }, [activeStep, changeStep]);
 
   const ActiveIcon = steps[activeStep].icon;
+  const ACCENTS = [
+    { hex: '#2DD4BF', rgba: 'rgba(45,212,191,0.12)' }, // teal
+    { hex: '#FACC15', rgba: 'rgba(250,204,21,0.18)' }, // yellow
+    { hex: '#F87171', rgba: 'rgba(248,113,113,0.12)' }, // coral
+  ] as const;
+  const currentAccent = ACCENTS[activeStep % ACCENTS.length];
 
   return (
     <section className="py-24 relative overflow-hidden">
-      {/* Background elements */}
-      <div className="absolute inset-0 bg-gradient-to-b from-background to-secondary" />
-      <div className="absolute inset-0 bg-grid-pattern opacity-[0.03]" />
-
-      {/* Decorative elements */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 left-0 w-64 h-64 bg-blue-500/5 rounded-full blur-3xl" />
+      {/* Subtle grid only */}
+      <div className="absolute inset-0 bg-grid-pattern opacity-[0.02]" />
 
       <div className="container mx-auto px-4 relative z-10">
         {/* Section heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="text-center mb-16 max-w-3xl mx-auto"
-        >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">
-            See How InflateMate <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-accent">Automates Your Rentals</span>
+        <div className="text-center mb-16 max-w-3xl mx-auto">
+          <h2 className="text-3xl md:text-4xl font-bold mb-3 text-[#1F2937]" style={{ fontFamily: 'var(--font-heading)' }}>
+            See how InflateMate automates your rentals
           </h2>
-          <p className="text-muted-foreground text-lg">
-            Watch the journey of a typical rental, showing how InflateMate streamlines everything from online booking to getting paid.
+          <p className="text-lg text-[#475569]" style={{ fontFamily: 'var(--font-body)' }}>
+            Follow a typical rental from online booking to getting paid.
           </p>
-        </motion.div>
+        </div>
 
         {/* Main workflow container */}
         <div className="max-w-6xl mx-auto">
           {/* Improved Step Indicator */}
           <div className="mb-16 relative">
             {/* Progress Track */}
-            <div className="absolute top-1/2 left-0 right-0 h-1 bg-muted rounded-full transform -translate-y-1/2">
-              {/* Animated Progress */}
-              <motion.div
-                className="h-full bg-gradient-to-r from-primary to-accent rounded-full"
-                style={{
-                  width: `${((activeStep) / (steps.length - 1)) * 100}%`,
-                }}
-                transition={{ duration: 0.5 }}
+            <div className="absolute top-1/2 left-0 right-0 h-1 bg-black/10 rounded-full transform -translate-y-1/2">
+              <div
+                className="h-full rounded-full transition-[width] duration-300"
+                style={{ width: `${((activeStep) / (steps.length - 1)) * 100}%`, backgroundColor: currentAccent.hex }}
               />
             </div>
             
@@ -205,49 +196,32 @@ export default function WorkflowStoryboard() {
 
           {/* Active step card */}
           <div className="relative">
-            <AnimatePresence mode="wait">
-              <motion.div
-                key={activeStep}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -20 }}
-                transition={{ duration: 0.4 }}
-                className="rounded-2xl overflow-hidden shadow-2xl border border-border bg-card"
-              >
+              <div className="rounded-2xl overflow-hidden shadow-[0_20px_60px_rgba(2,6,23,0.06)] border border-black/10 bg-white">
                 <div className="flex flex-col lg:flex-row">
                   {/* Content side */}
                   <div className="p-8 lg:p-10 lg:w-1/2">
                     <div className="flex items-center gap-4 mb-6">
-                      <div className={cn(
-                        "flex-shrink-0 p-3 rounded-xl bg-gradient-to-br text-white",
-                        steps[activeStep].color
-                      )}>
-                        <ActiveIcon className="w-6 h-6" />
+                      <div className="flex-shrink-0 p-3 rounded-xl" style={{ backgroundColor: currentAccent.rgba }}>
+                        <ActiveIcon className="w-6 h-6" style={{ color: currentAccent.hex }} />
                       </div>
-                      <h3 className="text-2xl font-bold text-foreground">
+                      <h3 className="text-2xl font-bold text-[#0B1220]">
                         {steps[activeStep].title}
                       </h3>
                     </div>
 
-                    <p className="text-muted-foreground mb-8 text-lg">
+                    <p className="text-[#475569] mb-8 text-lg">
                       {steps[activeStep].description}
                     </p>
 
                     {/* Step details */}
                     <div className="space-y-4">
                       {steps[activeStep].details.map((detail, idx) => (
-                        <motion.div
-                          key={idx}
-                          initial={{ opacity: 0, x: -10 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ duration: 0.3, delay: 0.1 + (idx * 0.05) }}
-                          className="flex items-center gap-3"
-                        >
-                          <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+                        <div key={idx} className="flex items-center gap-3">
+                          <div className="flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center" style={{ backgroundColor: currentAccent.rgba, color: currentAccent.hex }}>
                             <detail.icon className="w-4 h-4" />
                           </div>
-                          <span className="text-foreground">{detail.text}</span>
-                        </motion.div>
+                          <span className="text-[#0B1220]">{detail.text}</span>
+                        </div>
                       ))}
                     </div>
 
@@ -281,18 +255,20 @@ export default function WorkflowStoryboard() {
                   </div>
 
                   {/* Image side */}
-                  <div className="relative lg:w-1/2 min-h-[300px] lg:min-h-0 bg-muted/30">
-                    <img
+                  <div className="relative lg:w-1/2 min-h-[300px] lg:min-h-0 bg-white">
+                    <Image
                       src={steps[activeStep].image || '/placeholder.png'}
                       alt={`Illustration for ${steps[activeStep].title}`}
-                      className="absolute inset-0 w-full h-full object-cover z-0"
+                      fill
+                      className="object-cover"
+                      sizes="(max-width: 1024px) 100vw, 50vw"
                     />
-                    {/* Gradient overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-r opacity-20 from-transparent to-primary z-10" />
+                    {/* Neutral frame */}
+                    <div className="absolute inset-0 ring-1 ring-black/5 z-10 pointer-events-none" />
 
                     {/* Process flow indicators */}
                     <div className="absolute bottom-4 left-0 right-0 flex items-center justify-center z-20">
-                      <div className="flex items-center space-x-3 bg-background/80 backdrop-blur-sm px-4 py-2 rounded-full">
+                      <div className="flex items-center space-x-3 bg-white/85 backdrop-blur-sm px-4 py-2 rounded-full">
                         {steps.map((_, idx) => (
                           <button
                             key={idx}
@@ -300,11 +276,10 @@ export default function WorkflowStoryboard() {
                             disabled={isAnimating}
                             className={cn(
                               "w-2 h-2 rounded-full transition-all focus:outline-none",
-                              idx === activeStep
-                                ? "bg-primary w-6"
-                                : "bg-muted-foreground/30 hover:bg-muted-foreground/50",
+                              idx === activeStep ? "w-6" : "bg-black/30 hover:bg-black/50",
                               isAnimating && "pointer-events-none opacity-70"
                             )}
+                            style={idx === activeStep ? { backgroundColor: currentAccent.hex } : undefined}
                             aria-label={`Go to step ${idx + 1}`}
                           />
                         ))}
@@ -312,8 +287,7 @@ export default function WorkflowStoryboard() {
                     </div>
                   </div>
                 </div>
-              </motion.div>
-            </AnimatePresence>
+              </div>
 
             {/* Side navigation buttons (desktop) */}
             <div className="hidden lg:block">
@@ -349,17 +323,12 @@ export default function WorkflowStoryboard() {
           </div>
 
           {/* Caption */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex items-center justify-center gap-2 mt-8 text-center text-muted-foreground"
-          >
-            <span className="inline-flex items-center gap-2 bg-muted/50 px-3 py-1 rounded-full text-sm">
-              <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <div className="flex items-center justify-center gap-2 mt-8 text-center text-[#64748B]">
+            <span className="inline-flex items-center gap-2 bg-black/[0.04] px-3 py-1 rounded-full text-sm">
+              <span className="w-2 h-2 rounded-full bg-[#6366F1] animate-pulse" />
               Say goodbye to manual spreadsheets. All booking, customer, and payment data is automatically synced.
             </span>
-          </motion.div>
+          </div>
         </div>
       </div>
     </section>

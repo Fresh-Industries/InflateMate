@@ -19,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Switch } from "@/components/ui/switch";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 import {
   AlertDialog,
@@ -62,7 +62,6 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   
   const router = useRouter();
-  const { toast } = useToast();
   
   // Fetch sales funnels
   const fetchFunnels = async () => {
@@ -78,11 +77,7 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
       setFunnels(data);
     } catch (error) {
       console.error("Error fetching sales funnels:", error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch sales funnels. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to fetch sales funnels. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -108,17 +103,10 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
         funnel.id === funnelId ? { ...funnel, isActive } : funnel
       ));
       
-      toast({
-        title: "Success",
-        description: `Sales funnel ${isActive ? "activated" : "deactivated"} successfully.`,
-      });
+      toast.success(`Sales funnel ${isActive ? "activated" : "deactivated"} successfully.`);
     } catch (error) {
       console.error("Error updating funnel status:", error);
-      toast({
-        title: "Error",
-        description: "Failed to update funnel status. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to update funnel status. Please try again.");
     }
   };
   
@@ -138,17 +126,10 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
       // Update local state
       setFunnels(funnels.filter(funnel => funnel.id !== deletingId));
       
-      toast({
-        title: "Success",
-        description: "Sales funnel deleted successfully.",
-      });
+      toast.success("Sales funnel deleted successfully.");
     } catch (error) {
       console.error("Error deleting sales funnel:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete sales funnel. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete sales funnel. Please try again.");
     } finally {
       setDeletingId(null);
       setIsDeleteModalOpen(false);
@@ -211,8 +192,12 @@ export default function SalesFunnelList({ businessId }: SalesFunnelsListProps) {
                 <div className="flex justify-between items-start">
                   <div>
                     <CardTitle>{funnel.name}</CardTitle>
+
                     <CardDescription className="mt-1">
                       {funnel.popupTitle}
+                    </CardDescription>
+                    <CardDescription className="mt-1">
+                      {funnel.id}
                     </CardDescription>
                   </div>
                   <DropdownMenu>

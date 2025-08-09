@@ -13,6 +13,7 @@ export function formatCurrency(amount: number) {
     currency: 'USD',
   }).format(amount);
 }
+
 export class FileEsque extends Blob {
   name: string;
   lastModified: number;

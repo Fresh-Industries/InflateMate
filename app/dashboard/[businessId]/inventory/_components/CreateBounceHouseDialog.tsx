@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
 import { CreateBounceHouseForm } from "./CreateBounceHouseForm";
 import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
 export interface CreateBounceHouseFormData {
@@ -40,7 +40,6 @@ interface CreateBounceHouseDialogProps {
 export function CreateBounceHouseDialog({ onBounceHouseCreated, businessId }: CreateBounceHouseDialogProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { toast } = useToast();
   const router = useRouter();
 
   const handleSubmit = async (data: CreateBounceHouseFormData) => {
@@ -64,20 +63,13 @@ export function CreateBounceHouseDialog({ onBounceHouseCreated, businessId }: Cr
         throw new Error(errorData.error || "Failed to create bounce house");
       }
 
-      toast({
-        title: "Success",
-        description: "Bounce house created successfully",
-      });
+      toast.success("Bounce house created successfully");
       
       setIsOpen(false);
       onBounceHouseCreated?.();
       router.refresh();
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to create bounce house",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to create bounce house");
     } finally {
       setIsSubmitting(false);
     }

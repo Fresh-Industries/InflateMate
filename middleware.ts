@@ -8,47 +8,51 @@ const publicRoute = createRouteMatcher([
   '/sign-up(.*)',
   '/:domain(.*)',
   '/api/webhook(.*)',
-  '/api(.*)',
-  '/public(.*)'
+  '/api/embed/(.*)',          // Embed routes for public access
+  '/api/monitoring',          // Monitoring endpoint
+  '/public(.*)',
+  '/api/auth(.*)',
 ]);
 
 const internalRoute = createRouteMatcher([
   '/dashboard(.*)',           // keep dashboard on the root app
-  '/api(.*)',                 // your API
+  '/api(.*)',                 // your API (now protected by default)
 ]);
 
-const isStaticAsset = (domain: string) =>
-  domain.endsWith('.svg') ||
-  domain.endsWith('.png') ||
-  domain.endsWith('.jpg') ||
-  domain.endsWith('.ico') ||
-  domain.endsWith('.webmanifest') ||
-  domain.endsWith('.css') ||
-  domain.endsWith('.js') ||
-  domain.startsWith('_next/') ||
-  domain === 'favicon.ico';
+// Enhanced pathname-based asset detection
+import { 
+  isStaticAsset as detectStaticAsset, 
+  isEmbedRoute,
+  validateAssetPath
+} from '@/lib/security/embed-asset-detection';
+
+const isStaticAsset = (pathname: string) => detectStaticAsset(pathname);
 
 
 export default clerkMiddleware(async (auth, req) => {
   const url = new URL(req.url);
   const host = (req.headers.get('host') ?? '').toLowerCase().replace(/^www\./, '');
 
- 
+  /* ── FIRST: Skip embed routes completely ─────────────────────── */
+  if (url.pathname.startsWith('/embed/')) {
+    return NextResponse.next();
+  }
 
   /* ── A. skip Next.js internals & static assets ─────────────────────── */
-  if (
-    url.pathname.startsWith('/_next/') || 
-    url.pathname === '/favicon.ico' ||
-    url.pathname.match(/\.(ico|png|jpg|jpeg|svg|gif|webp|css|js)$/)
-  ) {
+  if (isStaticAsset(url.pathname)) {
     return NextResponse.next();
   }
 
-  if (url.pathname.startsWith('/api')) {
-    return NextResponse.next();
+  /* ── Enhanced security validation for embed routes ─────────────────── */
+  if (isEmbedRoute(url.pathname)) {
+    // Validate asset path for security (prevent directory traversal, etc.)
+    if (!validateAssetPath(url.pathname)) {
+      return new NextResponse('Invalid path', { status: 400 });
+    }
   }
 
-  if (isStaticAsset(host)) {
+  // Skip Next.js development error overlay domains
+  if (host.includes('__nextjs_original-stack-frame') || host.startsWith('__nextjs')) {
     return NextResponse.next();
   }
 
@@ -77,11 +81,12 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
+     * - embed (embed routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!embed|_next/static|_next/image|favicon.ico).*)',
   ],
 };

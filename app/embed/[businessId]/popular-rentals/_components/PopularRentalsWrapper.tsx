@@ -1,0 +1,49 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+"use client";
+
+import PopularRentals from '@/app/embed/_components/PopularRentals';
+import { ThemeColors } from '@/app/[domain]/_themes/types';
+import { themeConfig } from '@/app/[domain]/_themes/themeConfig';
+import { useEffect } from 'react';
+
+interface PopularRentalsWrapperProps {
+  businessId: string;
+  items: any[];
+  colors: ThemeColors;
+  themeName: keyof typeof themeConfig;
+  businessDomain: string | null;
+  embedConfig: any;
+}
+
+export function PopularRentalsWrapper({ 
+  businessId, 
+  items, 
+  colors, 
+  themeName, 
+  businessDomain, 
+  embedConfig 
+}: PopularRentalsWrapperProps) {
+  
+  // Send loaded message to parent
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const widgetId = params.get('widgetId');
+    window.parent.postMessage({
+      type: 'loaded',
+      widgetId,
+      businessId,
+      widgetType: 'popular-rentals',
+      itemCount: items.length
+    }, '*');
+  }, [businessId, items.length]);
+  
+  return (
+    <PopularRentals 
+      items={items}
+      colors={colors}
+      themeName={themeName}
+      businessDomain={businessDomain}
+      embedConfig={embedConfig}
+    />
+  );
+} 

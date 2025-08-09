@@ -2,17 +2,23 @@
 import { NextResponse } from 'next/server';
 import { stripe } from '@/lib/stripe-server';
 import { prisma } from '@/lib/prisma';
-import { getCurrentUserWithOrgAndBusiness } from '@/lib/auth/clerk-utils';
+import { getCurrentUserWithOrgAndBusiness, getPrimaryMembership } from '@/lib/auth/clerk-utils';
 
 export async function POST(req: Request) {
   // 1️⃣ Load user + org + business + subscription
   const userWithOrg = await getCurrentUserWithOrgAndBusiness();
-  if (!userWithOrg || !userWithOrg.membership) {
-    return NextResponse.json({ error: 'Unauthorized or no organization found' }, { status: 401 });
+  if (!userWithOrg) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+  
+  const membership = getPrimaryMembership(userWithOrg);
+  if (!membership) {
+    return NextResponse.json({ error: 'No organization found' }, { status: 401 });
+  }
+  
   console.log(userWithOrg)
 
-  const { organization } = userWithOrg.membership;
+  const { organization } = membership;
   const { business, subscription } = organization;
 
   if (!organization) {
@@ -46,7 +52,7 @@ export async function POST(req: Request) {
   // 4️⃣ Find or create Stripe Customer
   let customerId = subscription?.stripeCustomerId;
   if (!customerId) {
-    // Use the user’s email/name from prisma record
+    // Use the user's email/name from prisma record
     const customer = await stripe.customers.create({
       email: userWithOrg.email ?? undefined,
       name: userWithOrg.name ?? undefined,

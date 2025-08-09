@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   Card,
   CardContent,
@@ -16,7 +16,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { toast } = useToast();
 
   const [isPortalLoading, setIsPortalLoading] = useState(false);
   const [subscriptionStatus, setSubscriptionStatus] = useState<string | null>(
@@ -45,12 +44,7 @@ export default function SettingsPage() {
       } catch (error) {
         console.error("Error fetching subscription status:", error);
         setSubscriptionStatus("unknown");
-        toast({
-          title: "Subscription Status Error",
-          description:
-            "An unexpected error occurred while fetching subscription status.",
-          variant: "destructive",
-        });
+        toast.error("An unexpected error occurred while fetching subscription status.");
       } finally {
         setIsSubscriptionLoading(false);
       }
@@ -74,21 +68,11 @@ export default function SettingsPage() {
       if (res.ok && data.url) {
         window.location.href = data.url;
       } else {
-        toast({
-          title: "Subscription Error",
-          description:
-            data.error || "Failed to access subscription portal.",
-          variant: "destructive",
-        });
+        toast.error(data.error || "Failed to access subscription portal.");
       }
     } catch (error) {
       console.error("Error fetching subscription portal:", error);
-      toast({
-        title: "Subscription Error",
-        description:
-          "An unexpected error occurred while accessing the subscription portal.",
-        variant: "destructive",
-      });
+      toast.error("An unexpected error occurred while accessing the subscription portal.");
     } finally {
       setIsPortalLoading(false);
     }

@@ -20,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useUploadThing } from '@/lib/uploadthing';
 import { useState, useRef } from "react";
 import { useParams } from "next/navigation";
@@ -56,7 +56,6 @@ export function EditBounceHouseDialog({
   onSuccess 
 }: EditBounceHouseDialogProps) {
   const params = useParams();
-  const { toast } = useToast();
   const { startUpload } = useUploadThing("imageUploader");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -98,11 +97,7 @@ export function EditBounceHouseDialog({
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       if (file.size > maxSize) {
-        toast({
-          title: "File too large",
-          description: `${file.name} is larger than 4MB`,
-          variant: "destructive",
-        });
+        toast.error(`${file.name} is larger than 4MB`);
         continue;
       }
 
@@ -204,19 +199,12 @@ export function EditBounceHouseDialog({
         throw new Error("Failed to update bounce house");
       }
 
-      toast({
-        title: "Success",
-        description: "Bounce house updated successfully",
-      });
+      toast.success("Bounce house updated successfully");
 
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to update bounce house",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to update bounce house");
     } finally {
       setIsLoading(false);
     }
@@ -233,19 +221,12 @@ export function EditBounceHouseDialog({
         throw new Error("Failed to delete bounce house");
       }
 
-      toast({
-        title: "Success",
-        description: "Bounce house deleted successfully",
-      });
+      toast.success("Bounce house deleted successfully");
 
       onSuccess?.();
       onOpenChange(false);
     } catch (error) {
-      toast({
-        title: "Error",
-        description: error instanceof Error ? error.message : "Failed to delete bounce house",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to delete bounce house");
     } finally {
       setIsLoading(false);
       setIsDeleteDialogOpen(false);

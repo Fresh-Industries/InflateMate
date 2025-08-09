@@ -28,6 +28,7 @@ export interface SalesFunnelPopupProps {
   funnel: SalesFunnel;
   colors: ThemeColors;
   theme: ThemeDefinition;
+  isEmbed?: boolean;
 }
 
 const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'primary' | 'secondary' = 'primary'): React.CSSProperties => {
@@ -59,7 +60,7 @@ const getButtonStyle = (theme: ThemeDefinition, colors: ThemeColors, type: 'prim
 };
 
 
-export function SalesFunnelPopup({ businessId, funnel, colors, theme }: SalesFunnelPopupProps) {
+export function SalesFunnelPopup({ businessId, funnel, colors, theme, isEmbed = false }: SalesFunnelPopupProps) {
   const [isVisible, setIsVisible] = useState(true);
   const [isMinimized, setIsMinimized] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -81,6 +82,17 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme }: SalesFun
     };
   }, [isVisible, isMinimized]);
   
+  // Send loaded message to parent window for embed communication
+  useEffect(() => {
+    if (isEmbed && window.parent) {
+      window.parent.postMessage({
+        type: 'sales-funnel:loaded',
+        businessId,
+        funnelId: funnel.id
+      }, '*');
+    }
+  }, [businessId, funnel.id, isEmbed]);
+  
   // Check for previously minimized state
   useEffect(() => {
     setIsVisible(true);
@@ -95,6 +107,15 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme }: SalesFun
     setIsVisible(false);
     localStorage.setItem(`funnel-${funnel.id}-closed`, 'true');
     localStorage.removeItem(`funnel-${funnel.id}-minimized`);
+    
+    // Notify parent window if in embed mode
+    if (isEmbed && window.parent) {
+      window.parent.postMessage({
+        type: 'sales-funnel:closed',
+        businessId,
+        funnelId: funnel.id
+      }, '*');
+    }
   };
   
   const handleMinimize = () => {
@@ -117,6 +138,16 @@ export function SalesFunnelPopup({ businessId, funnel, colors, theme }: SalesFun
     setShowForm(false);
     setShowThankYou(true);
     setCouponCode(code);
+    
+    // Notify parent window if in embed mode
+    if (isEmbed && window.parent) {
+      window.parent.postMessage({
+        type: 'sales-funnel:lead:captured',
+        businessId,
+        funnelId: funnel.id,
+        couponCode: code
+      }, '*');
+    }
   };
   
   if (!isVisible) return null;

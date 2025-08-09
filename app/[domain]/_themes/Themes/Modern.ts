@@ -1,7 +1,7 @@
 // Modern Theme
 
 import { ThemeDefinition, ThemeColors } from '../types';
-import { makeButtonStyles, makeLinkStyles } from '../themeFactories';
+import { makeButtonStyles, makeLinkStyles, makeBookingStyles } from '../themeFactories';
 import { radii, shadows, borderWidths } from '../tokens';
 import { getContrastColor } from '../utils';
 
@@ -15,13 +15,13 @@ export const modernOverrides: Partial<ThemeDefinition> = {
 
   // Buttons
   buttonStyles: makeButtonStyles({
-    background: (c: ThemeColors) => c.primary[500],
+    background: (c: ThemeColors) => c.primary[900],
     textColor: () => '#ffffff',
-    hoverBackground: (c: ThemeColors) => c.accent[500]
+    hoverBackground: (c: ThemeColors) => c.primary[100]
   }, { role: 'primary', size: 'lg' }),
   secondaryButtonStyles: makeButtonStyles({
-    background: () => 'transparent',
-    textColor: (c: ThemeColors) => c.secondary[900],
+    background: (c: ThemeColors) => c.secondary[900],
+    textColor: () => '#ffffff',
     border: (c: ThemeColors) => `${borderWidths.thin} solid ${c.secondary[500]}`,
     hoverBackground: (c: ThemeColors) => c.secondary[100]
   }, { role: 'secondary', size: 'md' }),
@@ -37,6 +37,96 @@ export const modernOverrides: Partial<ThemeDefinition> = {
     textColor: (c) => c.text[900],
     borderRadius: radii.large,
   },
+
+  // Booking styles
+  bookingStyles: makeBookingStyles({
+    // Extended Modern theme booking styles
+    title: (c: ThemeColors) => ({
+      color: c.primary[900],
+      fontWeight: 'bold',
+    }),
+    
+    subtitle: (c: ThemeColors) => ({
+      color: c.text[500],
+    }),
+    
+    formContainer: (c: ThemeColors) => ({
+      background: c.background[100],
+      border: `${borderWidths.thin} solid ${c.primary[100]}33`,
+      borderRadius: radii.medium,
+      padding: '16px',
+    }),
+    
+    resultsContainer: (c: ThemeColors) => ({
+      background: c.background[100],
+      borderRadius: radii.medium,
+      boxShadow: shadows.light,
+      border: `${borderWidths.thin} solid ${c.primary[100]}33`,
+      padding: '24px',
+    }),
+    
+    resultsHeading: (c: ThemeColors) => ({
+      color: c.primary[500],
+      fontWeight: 'bold',
+    }),
+    
+    priceTag: (c: ThemeColors) => ({
+      background: c.primary[500],
+      color: '#ffffff',
+      borderRadius: radii.pill,
+      boxShadow: shadows.light,
+      padding: '4px 12px',
+    }),
+    
+    productName: (c: ThemeColors) => ({
+      fontWeight: 'bold',
+      color: c.text[900],
+    }),
+    
+    specsContainer: (c: ThemeColors) => ({
+      background: c.background[100],
+      borderRadius: radii.small,
+      border: `${borderWidths.thin} solid ${c.primary[100]}33`,
+    }),
+    
+    selectedFooter: (c: ThemeColors) => ({
+      borderTop: `${borderWidths.thin} solid ${c.primary[100]}33`,
+      paddingTop: '16px',
+      marginTop: '8px',
+    }),
+    
+    imageContainer: () => ({
+      borderRadius: `${radii.medium} ${radii.medium} 0 0`,
+      overflow: 'hidden',
+    }),
+    
+    continueSection: (c: ThemeColors) => ({
+      borderTop: `${borderWidths.thin} solid ${c.primary[100]}33`,
+      paddingTop: '20px',
+      marginTop: '20px',
+    }),
+    
+    decorativeElements: {
+      topRight: {
+        background: '#f0f0f0',
+        opacity: 0.4,
+        zIndex: -1,
+        borderRadius: '50%',
+      },
+      bottomLeft: {
+        display: 'none', // Modern theme is more minimal
+      }
+    },
+    
+    input: {
+      background: (c: ThemeColors) => c.background[100],
+      border: (c: ThemeColors) => c.primary[100],
+      focusBorder: (c: ThemeColors) => c.primary[500],
+      placeholderColor: (c: ThemeColors) => c.text[500],
+      labelColor: (c: ThemeColors) => c.text[900],
+      borderRadius: () => radii.small,
+    },
+  }),
 
   // Hero
   heroBackground: (c) => c.primary[100],
@@ -140,9 +230,6 @@ export const modernOverrides: Partial<ThemeDefinition> = {
     }),
   },
 
-  // Inherit bookingStyles from base or factories
-  bookingStyles: undefined,
-
   // ImageTextSection
   imageTextStyles: {
     containerBackground: (c) => c.background[100],
@@ -153,4 +240,11 @@ export const modernOverrides: Partial<ThemeDefinition> = {
 
   // Images
   imageStyles: () => ({ borderRadius: radii.medium, boxShadow: shadows.medium }),
+  
+  // Animations
+  animations: {
+    pageTransition: "fadeIn 0.3s ease-out",
+    sectionTransition: "fadeIn 0.3s ease-out",
+    elementEntrance: "fadeIn 0.3s ease-out",
+  },
 };

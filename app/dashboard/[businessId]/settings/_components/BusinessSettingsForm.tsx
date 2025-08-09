@@ -11,8 +11,9 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, Upload, X, UploadCloud, Facebook, Instagram, Twitter, Mail, Phone, MapPin, Clock, DollarSign, Settings, Home, PlusCircle, Save, Info, CreditCard, CircleCheck } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Separator } from "@/components/ui/separator";
 import { useUploadThing } from "@/lib/uploadthing";
 import StripeSettingsForm from "./StripeSettingsForm";
@@ -28,9 +29,11 @@ interface BusinessSettings {
   state?: string | null;
   zipCode?: string | null;
   logo?: string | null;
-  minAdvanceBooking: number;
-  maxAdvanceBooking: number;
-  minimumPurchase: number;
+  minNoticeHours: number;
+  maxNoticeHours: number;
+  minBookingAmount: number;
+  bufferBeforeHours: number;
+  bufferAfterHours: number;
   serviceArea?: string[];
   socialMedia?: {
     facebook?: string;
@@ -38,6 +41,7 @@ interface BusinessSettings {
     twitter?: string;
     tiktok?: string;
   };
+  embeddedComponents?: boolean;
   [key: string]: unknown;
 }
 
@@ -57,11 +61,11 @@ const TikTokIcon = () => (
 
 export default function BusinessSettingsForm({ business }: { business: BusinessSettings }) {
   const router = useRouter();
-  const { toast } = useToast();
 
   const [isLoading, setIsLoading] = useState(false);
   const [logoUrl, setLogoUrl] = useState<string | null>(business.logo || null);
   const [isUploading, setIsUploading] = useState(false);
+  const [embeddedComponents, setEmbeddedComponents] = useState<boolean>(business.embeddedComponents || false);
 
   const { startUpload } = useUploadThing("logoUploader");
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -132,11 +136,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
 
     // Max 2MB
     if (files[0].size > 2 * 1024 * 1024) {
-      toast({
-        title: "Error",
-        description: "Logo image must be less than 2MB",
-        variant: "destructive",
-      });
+      toast.error("Logo image must be less than 2MB");
       return;
     }
 
@@ -146,19 +146,11 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       const uploadedFiles = await startUpload(files);
       if (uploadedFiles && uploadedFiles.length > 0) {
         setLogoUrl(uploadedFiles[0].url);
-        toast({
-          title: "Success",
-          description: "Logo uploaded successfully",
-          variant: "default",
-        });
+        toast.success("Logo uploaded successfully");
       }
     } catch (error) {
       console.error("Upload error:", error);
-      toast({
-        title: "Error",
-        description: "Failed to upload logo",
-        variant: "destructive",
-      });
+      toast.error("Failed to upload logo");
     } finally {
       setIsUploading(false);
     }
@@ -199,6 +191,9 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       formData.append("state", addressData.state);
       formData.append("zipCode", addressData.zipCode);
 
+      // Add embedded components setting
+      formData.append("embeddedComponents", embeddedComponents.toString());
+
       console.log("Form data keys:", [...formData.keys()]);
 
       const response = await fetch(`/api/businesses/${business.id}`, {
@@ -207,27 +202,15 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       });
 
       if (response.ok) {
-        toast({
-          title: "Success",
-          description: "Business settings updated",
-          variant: "default",
-        });
+        toast.success("Business settings updated");
         router.refresh();
       } else {
         console.error("Failed to update settings");
-        toast({
-          title: "Error",
-          description: "Failed to update settings",
-          variant: "destructive",
-        });
+        toast.error("Failed to update settings");
       }
     } catch (error) {
       console.error("Error updating settings:", error);
-      toast({
-        title: "Error",
-        description: "Error updating settings",
-        variant: "destructive",
-      });
+      toast.error("Error updating settings");
     } finally {
       setIsLoading(false);
     }
@@ -389,6 +372,41 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                     placeholder="Describe your business, services, and what makes you special"
                     className="resize-none"
                   />
+                </div>
+
+                <Separator />
+
+                {/* Embedded Components Toggle */}
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-1">
+                      <Label className="text-base">Embedded Components</Label>
+                      <p className="text-sm text-muted-foreground">
+                        Enable embeddable widgets that customers can integrate into their websites
+                      </p>
+                    </div>
+                    <Switch
+                      checked={embeddedComponents}
+                      onCheckedChange={setEmbeddedComponents}
+                    />
+                  </div>
+                  
+                  {embeddedComponents && (
+                    <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                      <div className="flex gap-2">
+                        <div className="text-blue-500 shrink-0">
+                          <Info className="h-5 w-5" />
+                        </div>
+                        <div>
+                          <h4 className="text-sm font-medium text-blue-700">Embedded Components Enabled</h4>
+                          <p className="text-xs text-blue-600 mt-1">
+                            You can now create embeddable widgets in the Website section. 
+                            These widgets allow you to embed booking forms, inventory listings, and more into external websites.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -659,14 +677,14 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
               <CardContent>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <div className="space-y-2">
-                    <Label htmlFor="minAdvanceBooking">Minimum Advance Booking</Label>
+                    <Label htmlFor="minNoticeHours">Minimum Notice Hours</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="minAdvanceBooking" 
-                        name="minAdvanceBooking" 
+                        id="minNoticeHours" 
+                        name="minNoticeHours" 
                         type="number" 
-                        defaultValue={business.minAdvanceBooking || 24}
+                        defaultValue={business.minNoticeHours || 24}
                         className="pl-9"
                       />
                     </div>
@@ -676,14 +694,14 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                   </div>
                   
                   <div className="space-y-2">
-                    <Label htmlFor="maxAdvanceBooking">Maximum Advance Booking</Label>
+                    <Label htmlFor="maxNoticeHours">Maximum Notice Hours</Label>
                     <div className="relative">
                       <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="maxAdvanceBooking" 
-                        name="maxAdvanceBooking" 
+                        id="maxNoticeHours" 
+                        name="maxNoticeHours" 
                         type="number" 
-                        defaultValue={business.maxAdvanceBooking || 90}
+                        defaultValue={business.maxNoticeHours || 90}
                         className="pl-9"
                       />
                     </div>
@@ -693,20 +711,54 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
                   </div>
 
                   <div className="space-y-2 md:col-span-2">
-                    <Label htmlFor="minimumPurchase">Minimum Purchase Amount</Label>
+                    <Label htmlFor="minBookingAmount">Minimum Booking Amount</Label>
                     <div className="relative">
                       <DollarSign className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                       <Input 
-                        id="minimumPurchase" 
-                        name="minimumPurchase" 
+                        id="minBookingAmount" 
+                        name="minBookingAmount" 
                         type="number" 
                         step="0.01"
-                        defaultValue={business.minimumPurchase || 0}
+                        defaultValue={business.minBookingAmount || 0}
                         className="pl-9"
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
                       Minimum amount in dollars required for a booking
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="bufferBeforeHours">Buffer Before Hours</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="bufferBeforeHours" 
+                        name="bufferBeforeHours" 
+                        type="number" 
+                        defaultValue={business.bufferBeforeHours || 0}
+                        className="pl-9"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Hours before the booking time to start buffer
+                    </p>
+                  </div>
+
+                  <div className="space-y-2 md:col-span-2">
+                    <Label htmlFor="bufferAfterHours">Buffer After Hours</Label>
+                    <div className="relative">
+                      <Clock className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+                      <Input 
+                        id="bufferAfterHours" 
+                        name="bufferAfterHours" 
+                        type="number" 
+                        defaultValue={business.bufferAfterHours || 0}
+                        className="pl-9"
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Hours after the booking time to end buffer
                     </p>
                   </div>
                 </div>

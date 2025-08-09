@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import { Metadata } from "next";
 import { Button } from "@/components/ui/button";
 import { Plus, ArrowLeft } from "lucide-react";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import CouponsList from "../_components/CouponsList";
 import Link from "next/link";
 
@@ -24,8 +24,8 @@ export default async function CouponsPage(
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
-  if (!userBusinessId || userBusinessId !== params.businessId) {
+  const membership = getMembershipByBusinessId(user, params.businessId);
+  if (!membership) {
     redirect("/");
   }
 

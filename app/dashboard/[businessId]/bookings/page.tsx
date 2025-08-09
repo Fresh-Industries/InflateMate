@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import BookingsList from "./_components/bookings-list";
+import BookingsList from './_components/booking-list'
 import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";

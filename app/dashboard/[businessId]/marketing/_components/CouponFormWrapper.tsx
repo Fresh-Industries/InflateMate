@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { CouponForm } from "./CouponForm";
 
 interface CouponFormWrapperProps {
@@ -28,13 +28,9 @@ export function CouponFormWrapper({
   coupon 
 }: CouponFormWrapperProps) {
   const router = useRouter();
-  const { toast } = useToast();
   
   const handleSuccess = () => {
-    toast({
-      title: "Success",
-      description: `Coupon ${mode === "create" ? "created" : "updated"} successfully.`,
-    });
+    toast.success(`Coupon ${mode === "create" ? "created" : "updated"} successfully.`);
     router.push(`/dashboard/${businessId}/marketing/coupons`);
   };
   

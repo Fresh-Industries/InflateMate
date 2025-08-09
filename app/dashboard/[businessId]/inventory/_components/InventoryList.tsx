@@ -18,7 +18,7 @@ interface InventoryItem {
   id: string;
   name: string;
   status: "AVAILABLE" | "MAINTENANCE" | "RETIRED";
-  type: "BOUNCE_HOUSE" | "INFLATABLE" | "GAME" | "OTHER";
+  type: "BOUNCE_HOUSE" | "WATER_SLIDE" | "GAME" | "OTHER";
   description?: string;
   dimensions: string;
   capacity: number;
@@ -64,7 +64,7 @@ const statusLabels = {
 
 const typeLabels = {
   BOUNCE_HOUSE: "Bounce House",
-  INFLATABLE: "Inflatable",
+  WATER_SLIDE: "Water Slide",
   GAME: "Game",
   OTHER: "Other",
 };

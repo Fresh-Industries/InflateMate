@@ -117,7 +117,6 @@ export type SubscriptionType = (typeof SubscriptionType)[keyof typeof Subscripti
 export const QuoteStatus: {
   DRAFT: 'DRAFT',
   OPEN: 'OPEN',
-  SENT: 'SENT',
   ACCEPTED: 'ACCEPTED',
   CANCELED: 'CANCELED',
   EXPIRED: 'EXPIRED'
@@ -128,7 +127,7 @@ export type QuoteStatus = (typeof QuoteStatus)[keyof typeof QuoteStatus]
 
 export const InventoryType: {
   BOUNCE_HOUSE: 'BOUNCE_HOUSE',
-  INFLATABLE: 'INFLATABLE',
+  WATER_SLIDE: 'WATER_SLIDE',
   GAME: 'GAME',
   OTHER: 'OTHER'
 };
@@ -138,10 +137,10 @@ export type InventoryType = (typeof InventoryType)[keyof typeof InventoryType]
 
 export const InventoryStatus: {
   AVAILABLE: 'AVAILABLE',
-  PENDING: 'PENDING',
   BOOKED: 'BOOKED',
   MAINTENANCE: 'MAINTENANCE',
-  RETIRED: 'RETIRED'
+  RETIRED: 'RETIRED',
+  PENDING: 'PENDING'
 };
 
 export type InventoryStatus = (typeof InventoryStatus)[keyof typeof InventoryStatus]
@@ -162,8 +161,8 @@ export type BookingStatus = (typeof BookingStatus)[keyof typeof BookingStatus]
 export const PaymentType: {
   DEPOSIT: 'DEPOSIT',
   FULL_PAYMENT: 'FULL_PAYMENT',
-  CASH: 'CASH',
-  REFUND: 'REFUND'
+  REFUND: 'REFUND',
+  CASH: 'CASH'
 };
 
 export type PaymentType = (typeof PaymentType)[keyof typeof PaymentType]
@@ -596,8 +595,8 @@ export namespace Prisma {
   export import Exact = $Public.Exact
 
   /**
-   * Prisma Client JS version: 6.7.0
-   * Query Engine version: 3cff47a7f5d65c3ea74883f1d736e41d68ce91ed
+   * Prisma Client JS version: 6.12.0
+   * Query Engine version: 8047c96bbd92db98a2abc7c9323ce77c02c89dbc
    */
   export type PrismaVersion = {
     client: string
@@ -2374,33 +2373,64 @@ export namespace Prisma {
 
 
   /**
+   * Count Type UserCountOutputType
+   */
+
+  export type UserCountOutputType = {
+    memberships: number
+  }
+
+  export type UserCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    memberships?: boolean | UserCountOutputTypeCountMembershipsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the UserCountOutputType
+     */
+    select?: UserCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * UserCountOutputType without action
+   */
+  export type UserCountOutputTypeCountMembershipsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: MembershipWhereInput
+  }
+
+
+  /**
    * Count Type BusinessCountOutputType
    */
 
   export type BusinessCountOutputType = {
-    inventory: number
-    customers: number
     bookings: number
-    payments: number
     coupons: number
+    customers: number
+    customerStripeAccounts: number
+    inventory: number
+    invoices: number
+    payments: number
+    quotes: number
     salesFunnels: number
     waivers: number
-    invoices: number
-    quotes: number
-    customerStripeAccounts: number
   }
 
   export type BusinessCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    inventory?: boolean | BusinessCountOutputTypeCountInventoryArgs
-    customers?: boolean | BusinessCountOutputTypeCountCustomersArgs
     bookings?: boolean | BusinessCountOutputTypeCountBookingsArgs
-    payments?: boolean | BusinessCountOutputTypeCountPaymentsArgs
     coupons?: boolean | BusinessCountOutputTypeCountCouponsArgs
+    customers?: boolean | BusinessCountOutputTypeCountCustomersArgs
+    customerStripeAccounts?: boolean | BusinessCountOutputTypeCountCustomerStripeAccountsArgs
+    inventory?: boolean | BusinessCountOutputTypeCountInventoryArgs
+    invoices?: boolean | BusinessCountOutputTypeCountInvoicesArgs
+    payments?: boolean | BusinessCountOutputTypeCountPaymentsArgs
+    quotes?: boolean | BusinessCountOutputTypeCountQuotesArgs
     salesFunnels?: boolean | BusinessCountOutputTypeCountSalesFunnelsArgs
     waivers?: boolean | BusinessCountOutputTypeCountWaiversArgs
-    invoices?: boolean | BusinessCountOutputTypeCountInvoicesArgs
-    quotes?: boolean | BusinessCountOutputTypeCountQuotesArgs
-    customerStripeAccounts?: boolean | BusinessCountOutputTypeCountCustomerStripeAccountsArgs
   }
 
   // Custom InputTypes
@@ -2417,8 +2447,15 @@ export namespace Prisma {
   /**
    * BusinessCountOutputType without action
    */
-  export type BusinessCountOutputTypeCountInventoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: InventoryWhereInput
+  export type BusinessCountOutputTypeCountBookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BookingWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountCouponsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CouponWhereInput
   }
 
   /**
@@ -2431,8 +2468,22 @@ export namespace Prisma {
   /**
    * BusinessCountOutputType without action
    */
-  export type BusinessCountOutputTypeCountBookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: BookingWhereInput
+  export type BusinessCountOutputTypeCountCustomerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerStripeAccountWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountInventoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InventoryWhereInput
+  }
+
+  /**
+   * BusinessCountOutputType without action
+   */
+  export type BusinessCountOutputTypeCountInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
   }
 
   /**
@@ -2445,8 +2496,8 @@ export namespace Prisma {
   /**
    * BusinessCountOutputType without action
    */
-  export type BusinessCountOutputTypeCountCouponsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CouponWhereInput
+  export type BusinessCountOutputTypeCountQuotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteWhereInput
   }
 
   /**
@@ -2461,27 +2512,6 @@ export namespace Prisma {
    */
   export type BusinessCountOutputTypeCountWaiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: WaiverWhereInput
-  }
-
-  /**
-   * BusinessCountOutputType without action
-   */
-  export type BusinessCountOutputTypeCountInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: InvoiceWhereInput
-  }
-
-  /**
-   * BusinessCountOutputType without action
-   */
-  export type BusinessCountOutputTypeCountQuotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: QuoteWhereInput
-  }
-
-  /**
-   * BusinessCountOutputType without action
-   */
-  export type BusinessCountOutputTypeCountCustomerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerStripeAccountWhereInput
   }
 
 
@@ -2553,18 +2583,18 @@ export namespace Prisma {
 
   export type CustomerCountOutputType = {
     bookings: number
-    waivers: number
+    customerStripeAccounts: number
     invoices: number
     quotes: number
-    customerStripeAccounts: number
+    waivers: number
   }
 
   export type CustomerCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     bookings?: boolean | CustomerCountOutputTypeCountBookingsArgs
-    waivers?: boolean | CustomerCountOutputTypeCountWaiversArgs
+    customerStripeAccounts?: boolean | CustomerCountOutputTypeCountCustomerStripeAccountsArgs
     invoices?: boolean | CustomerCountOutputTypeCountInvoicesArgs
     quotes?: boolean | CustomerCountOutputTypeCountQuotesArgs
-    customerStripeAccounts?: boolean | CustomerCountOutputTypeCountCustomerStripeAccountsArgs
+    waivers?: boolean | CustomerCountOutputTypeCountWaiversArgs
   }
 
   // Custom InputTypes
@@ -2588,8 +2618,8 @@ export namespace Prisma {
   /**
    * CustomerCountOutputType without action
    */
-  export type CustomerCountOutputTypeCountWaiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: WaiverWhereInput
+  export type CustomerCountOutputTypeCountCustomerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: CustomerStripeAccountWhereInput
   }
 
   /**
@@ -2609,8 +2639,8 @@ export namespace Prisma {
   /**
    * CustomerCountOutputType without action
    */
-  export type CustomerCountOutputTypeCountCustomerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    where?: CustomerStripeAccountWhereInput
+  export type CustomerCountOutputTypeCountWaiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: WaiverWhereInput
   }
 
 
@@ -2620,13 +2650,17 @@ export namespace Prisma {
 
   export type BookingCountOutputType = {
     inventoryItems: number
+    invoices: number
     payments: number
+    quotes: number
     waivers: number
   }
 
   export type BookingCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     inventoryItems?: boolean | BookingCountOutputTypeCountInventoryItemsArgs
+    invoices?: boolean | BookingCountOutputTypeCountInvoicesArgs
     payments?: boolean | BookingCountOutputTypeCountPaymentsArgs
+    quotes?: boolean | BookingCountOutputTypeCountQuotesArgs
     waivers?: boolean | BookingCountOutputTypeCountWaiversArgs
   }
 
@@ -2651,8 +2685,22 @@ export namespace Prisma {
   /**
    * BookingCountOutputType without action
    */
+  export type BookingCountOutputTypeCountInvoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: InvoiceWhereInput
+  }
+
+  /**
+   * BookingCountOutputType without action
+   */
   export type BookingCountOutputTypeCountPaymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: PaymentWhereInput
+  }
+
+  /**
+   * BookingCountOutputType without action
+   */
+  export type BookingCountOutputTypeCountQuotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: QuoteWhereInput
   }
 
   /**
@@ -2669,10 +2717,12 @@ export namespace Prisma {
 
   export type CouponCountOutputType = {
     booking: number
+    salesFunnels: number
   }
 
   export type CouponCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     booking?: boolean | CouponCountOutputTypeCountBookingArgs
+    salesFunnels?: boolean | CouponCountOutputTypeCountSalesFunnelsArgs
   }
 
   // Custom InputTypes
@@ -2690,6 +2740,44 @@ export namespace Prisma {
    * CouponCountOutputType without action
    */
   export type CouponCountOutputTypeCountBookingArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: BookingWhereInput
+  }
+
+  /**
+   * CouponCountOutputType without action
+   */
+  export type CouponCountOutputTypeCountSalesFunnelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    where?: SalesFunnelWhereInput
+  }
+
+
+  /**
+   * Count Type QuoteCountOutputType
+   */
+
+  export type QuoteCountOutputType = {
+    currentBookings: number
+  }
+
+  export type QuoteCountOutputTypeSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    currentBookings?: boolean | QuoteCountOutputTypeCountCurrentBookingsArgs
+  }
+
+  // Custom InputTypes
+  /**
+   * QuoteCountOutputType without action
+   */
+  export type QuoteCountOutputTypeDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the QuoteCountOutputType
+     */
+    select?: QuoteCountOutputTypeSelect<ExtArgs> | null
+  }
+
+  /**
+   * QuoteCountOutputType without action
+   */
+  export type QuoteCountOutputTypeCountCurrentBookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     where?: BookingWhereInput
   }
 
@@ -2712,30 +2800,30 @@ export namespace Prisma {
     id: string | null
     email: string | null
     name: string | null
-    image: string | null
-    clerkUserId: string | null
     createdAt: Date | null
+    image: string | null
     updatedAt: Date | null
+    clerkUserId: string | null
   }
 
   export type UserMaxAggregateOutputType = {
     id: string | null
     email: string | null
     name: string | null
-    image: string | null
-    clerkUserId: string | null
     createdAt: Date | null
+    image: string | null
     updatedAt: Date | null
+    clerkUserId: string | null
   }
 
   export type UserCountAggregateOutputType = {
     id: number
     email: number
     name: number
-    image: number
-    clerkUserId: number
     createdAt: number
+    image: number
     updatedAt: number
+    clerkUserId: number
     _all: number
   }
 
@@ -2744,30 +2832,30 @@ export namespace Prisma {
     id?: true
     email?: true
     name?: true
-    image?: true
-    clerkUserId?: true
     createdAt?: true
+    image?: true
     updatedAt?: true
+    clerkUserId?: true
   }
 
   export type UserMaxAggregateInputType = {
     id?: true
     email?: true
     name?: true
-    image?: true
-    clerkUserId?: true
     createdAt?: true
+    image?: true
     updatedAt?: true
+    clerkUserId?: true
   }
 
   export type UserCountAggregateInputType = {
     id?: true
     email?: true
     name?: true
-    image?: true
-    clerkUserId?: true
     createdAt?: true
+    image?: true
     updatedAt?: true
+    clerkUserId?: true
     _all?: true
   }
 
@@ -2847,10 +2935,10 @@ export namespace Prisma {
     id: string
     email: string | null
     name: string | null
-    image: string | null
-    clerkUserId: string | null
     createdAt: Date
+    image: string | null
     updatedAt: Date
+    clerkUserId: string | null
     _count: UserCountAggregateOutputType | null
     _min: UserMinAggregateOutputType | null
     _max: UserMaxAggregateOutputType | null
@@ -2874,46 +2962,48 @@ export namespace Prisma {
     id?: boolean
     email?: boolean
     name?: boolean
-    image?: boolean
-    clerkUserId?: boolean
     createdAt?: boolean
+    image?: boolean
     updatedAt?: boolean
-    membership?: boolean | User$membershipArgs<ExtArgs>
+    clerkUserId?: boolean
+    memberships?: boolean | User$membershipsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
     name?: boolean
-    image?: boolean
-    clerkUserId?: boolean
     createdAt?: boolean
+    image?: boolean
     updatedAt?: boolean
+    clerkUserId?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
     email?: boolean
     name?: boolean
-    image?: boolean
-    clerkUserId?: boolean
     createdAt?: boolean
+    image?: boolean
     updatedAt?: boolean
+    clerkUserId?: boolean
   }, ExtArgs["result"]["user"]>
 
   export type UserSelectScalar = {
     id?: boolean
     email?: boolean
     name?: boolean
-    image?: boolean
-    clerkUserId?: boolean
     createdAt?: boolean
+    image?: boolean
     updatedAt?: boolean
+    clerkUserId?: boolean
   }
 
-  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "image" | "clerkUserId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+  export type UserOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "email" | "name" | "createdAt" | "image" | "updatedAt" | "clerkUserId", ExtArgs["result"]["user"]>
   export type UserInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    membership?: boolean | User$membershipArgs<ExtArgs>
+    memberships?: boolean | User$membershipsArgs<ExtArgs>
+    _count?: boolean | UserCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type UserIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
   export type UserIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {}
@@ -2921,16 +3011,16 @@ export namespace Prisma {
   export type $UserPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "User"
     objects: {
-      membership: Prisma.$MembershipPayload<ExtArgs> | null
+      memberships: Prisma.$MembershipPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
       email: string | null
       name: string | null
-      image: string | null
-      clerkUserId: string | null
       createdAt: Date
+      image: string | null
       updatedAt: Date
+      clerkUserId: string | null
     }, ExtArgs["result"]["user"]>
     composites: {}
   }
@@ -3325,7 +3415,7 @@ export namespace Prisma {
    */
   export interface Prisma__UserClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    membership<T extends User$membershipArgs<ExtArgs> = {}>(args?: Subset<T, User$membershipArgs<ExtArgs>>): Prisma__MembershipClient<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+    memberships<T extends User$membershipsArgs<ExtArgs> = {}>(args?: Subset<T, User$membershipsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$MembershipPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -3358,10 +3448,10 @@ export namespace Prisma {
     readonly id: FieldRef<"User", 'String'>
     readonly email: FieldRef<"User", 'String'>
     readonly name: FieldRef<"User", 'String'>
-    readonly image: FieldRef<"User", 'String'>
-    readonly clerkUserId: FieldRef<"User", 'String'>
     readonly createdAt: FieldRef<"User", 'DateTime'>
+    readonly image: FieldRef<"User", 'String'>
     readonly updatedAt: FieldRef<"User", 'DateTime'>
+    readonly clerkUserId: FieldRef<"User", 'String'>
   }
     
 
@@ -3750,9 +3840,9 @@ export namespace Prisma {
   }
 
   /**
-   * User.membership
+   * User.memberships
    */
-  export type User$membershipArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type User$membershipsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
      * Select specific fields to fetch from the Membership
      */
@@ -3766,6 +3856,11 @@ export namespace Prisma {
      */
     include?: MembershipInclude<ExtArgs> | null
     where?: MembershipWhereInput
+    orderBy?: MembershipOrderByWithRelationInput | MembershipOrderByWithRelationInput[]
+    cursor?: MembershipWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: MembershipScalarFieldEnum | MembershipScalarFieldEnum[]
   }
 
   /**
@@ -3800,15 +3895,19 @@ export namespace Prisma {
   }
 
   export type BusinessAvgAggregateOutputType = {
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
+    bufferAfterHours: number | null
+    bufferBeforeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    minNoticeHours: number | null
   }
 
   export type BusinessSumAggregateOutputType = {
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
+    bufferAfterHours: number | null
+    bufferBeforeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    minNoticeHours: number | null
   }
 
   export type BusinessMinAggregateOutputType = {
@@ -3821,19 +3920,22 @@ export namespace Prisma {
     zipCode: string | null
     phone: string | null
     email: string | null
-    onboarded: boolean | null
     logo: string | null
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
-    timeZone: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
     stripeAccountId: string | null
     customDomain: string | null
     subdomain: string | null
     onboardingError: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
+    timeZone: string | null
+    onboarded: boolean | null
     organizationId: string | null
+    bufferAfterHours: number | null
+    bufferBeforeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    minNoticeHours: number | null
+    embeddedComponents: boolean | null
   }
 
   export type BusinessMaxAggregateOutputType = {
@@ -3846,19 +3948,22 @@ export namespace Prisma {
     zipCode: string | null
     phone: string | null
     email: string | null
-    onboarded: boolean | null
     logo: string | null
-    minAdvanceBooking: number | null
-    maxAdvanceBooking: number | null
-    minimumPurchase: number | null
-    timeZone: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
     stripeAccountId: string | null
     customDomain: string | null
     subdomain: string | null
     onboardingError: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
+    timeZone: string | null
+    onboarded: boolean | null
     organizationId: string | null
+    bufferAfterHours: number | null
+    bufferBeforeHours: number | null
+    maxNoticeHours: number | null
+    minBookingAmount: number | null
+    minNoticeHours: number | null
+    embeddedComponents: boolean | null
   }
 
   export type BusinessCountAggregateOutputType = {
@@ -3871,36 +3976,44 @@ export namespace Prisma {
     zipCode: number
     phone: number
     email: number
-    serviceArea: number
-    onboarded: number
     logo: number
-    minAdvanceBooking: number
-    maxAdvanceBooking: number
-    minimumPurchase: number
-    timeZone: number
-    stripeAccountId: number
-    socialMedia: number
-    customDomain: number
-    subdomain: number
-    siteConfig: number
-    onboardingError: number
     createdAt: number
     updatedAt: number
+    stripeAccountId: number
+    customDomain: number
+    siteConfig: number
+    serviceArea: number
+    subdomain: number
+    onboardingError: number
+    timeZone: number
+    socialMedia: number
+    onboarded: number
     organizationId: number
+    bufferAfterHours: number
+    bufferBeforeHours: number
+    maxNoticeHours: number
+    minBookingAmount: number
+    minNoticeHours: number
+    embeddedComponents: number
+    embedConfig: number
     _all: number
   }
 
 
   export type BusinessAvgAggregateInputType = {
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
+    bufferAfterHours?: true
+    bufferBeforeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    minNoticeHours?: true
   }
 
   export type BusinessSumAggregateInputType = {
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
+    bufferAfterHours?: true
+    bufferBeforeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    minNoticeHours?: true
   }
 
   export type BusinessMinAggregateInputType = {
@@ -3913,19 +4026,22 @@ export namespace Prisma {
     zipCode?: true
     phone?: true
     email?: true
-    onboarded?: true
     logo?: true
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
-    timeZone?: true
+    createdAt?: true
+    updatedAt?: true
     stripeAccountId?: true
     customDomain?: true
     subdomain?: true
     onboardingError?: true
-    createdAt?: true
-    updatedAt?: true
+    timeZone?: true
+    onboarded?: true
     organizationId?: true
+    bufferAfterHours?: true
+    bufferBeforeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    minNoticeHours?: true
+    embeddedComponents?: true
   }
 
   export type BusinessMaxAggregateInputType = {
@@ -3938,19 +4054,22 @@ export namespace Prisma {
     zipCode?: true
     phone?: true
     email?: true
-    onboarded?: true
     logo?: true
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
-    timeZone?: true
+    createdAt?: true
+    updatedAt?: true
     stripeAccountId?: true
     customDomain?: true
     subdomain?: true
     onboardingError?: true
-    createdAt?: true
-    updatedAt?: true
+    timeZone?: true
+    onboarded?: true
     organizationId?: true
+    bufferAfterHours?: true
+    bufferBeforeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    minNoticeHours?: true
+    embeddedComponents?: true
   }
 
   export type BusinessCountAggregateInputType = {
@@ -3963,22 +4082,26 @@ export namespace Prisma {
     zipCode?: true
     phone?: true
     email?: true
-    serviceArea?: true
-    onboarded?: true
     logo?: true
-    minAdvanceBooking?: true
-    maxAdvanceBooking?: true
-    minimumPurchase?: true
-    timeZone?: true
-    stripeAccountId?: true
-    socialMedia?: true
-    customDomain?: true
-    subdomain?: true
-    siteConfig?: true
-    onboardingError?: true
     createdAt?: true
     updatedAt?: true
+    stripeAccountId?: true
+    customDomain?: true
+    siteConfig?: true
+    serviceArea?: true
+    subdomain?: true
+    onboardingError?: true
+    timeZone?: true
+    socialMedia?: true
+    onboarded?: true
     organizationId?: true
+    bufferAfterHours?: true
+    bufferBeforeHours?: true
+    maxNoticeHours?: true
+    minBookingAmount?: true
+    minNoticeHours?: true
+    embeddedComponents?: true
+    embedConfig?: true
     _all?: true
   }
 
@@ -4078,22 +4201,26 @@ export namespace Prisma {
     zipCode: string | null
     phone: string | null
     email: string | null
-    serviceArea: string[]
-    onboarded: boolean
     logo: string | null
-    minAdvanceBooking: number
-    maxAdvanceBooking: number
-    minimumPurchase: number
-    timeZone: string
-    stripeAccountId: string | null
-    socialMedia: JsonValue | null
-    customDomain: string | null
-    subdomain: string | null
-    siteConfig: JsonValue
-    onboardingError: string | null
     createdAt: Date
     updatedAt: Date
+    stripeAccountId: string | null
+    customDomain: string | null
+    siteConfig: JsonValue
+    serviceArea: string[]
+    subdomain: string | null
+    onboardingError: string | null
+    timeZone: string
+    socialMedia: JsonValue | null
+    onboarded: boolean
     organizationId: string
+    bufferAfterHours: number
+    bufferBeforeHours: number
+    maxNoticeHours: number
+    minBookingAmount: number
+    minNoticeHours: number
+    embeddedComponents: boolean
+    embedConfig: JsonValue | null
     _count: BusinessCountAggregateOutputType | null
     _avg: BusinessAvgAggregateOutputType | null
     _sum: BusinessSumAggregateOutputType | null
@@ -4125,33 +4252,37 @@ export namespace Prisma {
     zipCode?: boolean
     phone?: boolean
     email?: boolean
-    serviceArea?: boolean
-    onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
-    timeZone?: boolean
-    stripeAccountId?: boolean
-    socialMedia?: boolean
-    customDomain?: boolean
-    subdomain?: boolean
-    siteConfig?: boolean
-    onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    stripeAccountId?: boolean
+    customDomain?: boolean
+    siteConfig?: boolean
+    serviceArea?: boolean
+    subdomain?: boolean
+    onboardingError?: boolean
+    timeZone?: boolean
+    socialMedia?: boolean
+    onboarded?: boolean
     organizationId?: boolean
-    inventory?: boolean | Business$inventoryArgs<ExtArgs>
-    customers?: boolean | Business$customersArgs<ExtArgs>
+    bufferAfterHours?: boolean
+    bufferBeforeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    minNoticeHours?: boolean
+    embeddedComponents?: boolean
+    embedConfig?: boolean
     bookings?: boolean | Business$bookingsArgs<ExtArgs>
-    payments?: boolean | Business$paymentsArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     coupons?: boolean | Business$couponsArgs<ExtArgs>
+    customers?: boolean | Business$customersArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
+    inventory?: boolean | Business$inventoryArgs<ExtArgs>
+    invoices?: boolean | Business$invoicesArgs<ExtArgs>
+    payments?: boolean | Business$paymentsArgs<ExtArgs>
+    quotes?: boolean | Business$quotesArgs<ExtArgs>
     salesFunnels?: boolean | Business$salesFunnelsArgs<ExtArgs>
     waivers?: boolean | Business$waiversArgs<ExtArgs>
-    invoices?: boolean | Business$invoicesArgs<ExtArgs>
-    quotes?: boolean | Business$quotesArgs<ExtArgs>
-    customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
-    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -4165,22 +4296,26 @@ export namespace Prisma {
     zipCode?: boolean
     phone?: boolean
     email?: boolean
-    serviceArea?: boolean
-    onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
-    timeZone?: boolean
-    stripeAccountId?: boolean
-    socialMedia?: boolean
-    customDomain?: boolean
-    subdomain?: boolean
-    siteConfig?: boolean
-    onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    stripeAccountId?: boolean
+    customDomain?: boolean
+    siteConfig?: boolean
+    serviceArea?: boolean
+    subdomain?: boolean
+    onboardingError?: boolean
+    timeZone?: boolean
+    socialMedia?: boolean
+    onboarded?: boolean
     organizationId?: boolean
+    bufferAfterHours?: boolean
+    bufferBeforeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    minNoticeHours?: boolean
+    embeddedComponents?: boolean
+    embedConfig?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -4194,22 +4329,26 @@ export namespace Prisma {
     zipCode?: boolean
     phone?: boolean
     email?: boolean
-    serviceArea?: boolean
-    onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
-    timeZone?: boolean
-    stripeAccountId?: boolean
-    socialMedia?: boolean
-    customDomain?: boolean
-    subdomain?: boolean
-    siteConfig?: boolean
-    onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    stripeAccountId?: boolean
+    customDomain?: boolean
+    siteConfig?: boolean
+    serviceArea?: boolean
+    subdomain?: boolean
+    onboardingError?: boolean
+    timeZone?: boolean
+    socialMedia?: boolean
+    onboarded?: boolean
     organizationId?: boolean
+    bufferAfterHours?: boolean
+    bufferBeforeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    minNoticeHours?: boolean
+    embeddedComponents?: boolean
+    embedConfig?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["business"]>
 
@@ -4223,37 +4362,41 @@ export namespace Prisma {
     zipCode?: boolean
     phone?: boolean
     email?: boolean
-    serviceArea?: boolean
-    onboarded?: boolean
     logo?: boolean
-    minAdvanceBooking?: boolean
-    maxAdvanceBooking?: boolean
-    minimumPurchase?: boolean
-    timeZone?: boolean
-    stripeAccountId?: boolean
-    socialMedia?: boolean
-    customDomain?: boolean
-    subdomain?: boolean
-    siteConfig?: boolean
-    onboardingError?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    stripeAccountId?: boolean
+    customDomain?: boolean
+    siteConfig?: boolean
+    serviceArea?: boolean
+    subdomain?: boolean
+    onboardingError?: boolean
+    timeZone?: boolean
+    socialMedia?: boolean
+    onboarded?: boolean
     organizationId?: boolean
+    bufferAfterHours?: boolean
+    bufferBeforeHours?: boolean
+    maxNoticeHours?: boolean
+    minBookingAmount?: boolean
+    minNoticeHours?: boolean
+    embeddedComponents?: boolean
+    embedConfig?: boolean
   }
 
-  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "serviceArea" | "onboarded" | "logo" | "minAdvanceBooking" | "maxAdvanceBooking" | "minimumPurchase" | "timeZone" | "stripeAccountId" | "socialMedia" | "customDomain" | "subdomain" | "siteConfig" | "onboardingError" | "createdAt" | "updatedAt" | "organizationId", ExtArgs["result"]["business"]>
+  export type BusinessOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "description" | "address" | "city" | "state" | "zipCode" | "phone" | "email" | "logo" | "createdAt" | "updatedAt" | "stripeAccountId" | "customDomain" | "siteConfig" | "serviceArea" | "subdomain" | "onboardingError" | "timeZone" | "socialMedia" | "onboarded" | "organizationId" | "bufferAfterHours" | "bufferBeforeHours" | "maxNoticeHours" | "minBookingAmount" | "minNoticeHours" | "embeddedComponents" | "embedConfig", ExtArgs["result"]["business"]>
   export type BusinessInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    inventory?: boolean | Business$inventoryArgs<ExtArgs>
-    customers?: boolean | Business$customersArgs<ExtArgs>
     bookings?: boolean | Business$bookingsArgs<ExtArgs>
-    payments?: boolean | Business$paymentsArgs<ExtArgs>
+    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     coupons?: boolean | Business$couponsArgs<ExtArgs>
+    customers?: boolean | Business$customersArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
+    inventory?: boolean | Business$inventoryArgs<ExtArgs>
+    invoices?: boolean | Business$invoicesArgs<ExtArgs>
+    payments?: boolean | Business$paymentsArgs<ExtArgs>
+    quotes?: boolean | Business$quotesArgs<ExtArgs>
     salesFunnels?: boolean | Business$salesFunnelsArgs<ExtArgs>
     waivers?: boolean | Business$waiversArgs<ExtArgs>
-    invoices?: boolean | Business$invoicesArgs<ExtArgs>
-    quotes?: boolean | Business$quotesArgs<ExtArgs>
-    customerStripeAccounts?: boolean | Business$customerStripeAccountsArgs<ExtArgs>
-    organization?: boolean | OrganizationDefaultArgs<ExtArgs>
     _count?: boolean | BusinessCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BusinessIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -4266,17 +4409,17 @@ export namespace Prisma {
   export type $BusinessPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Business"
     objects: {
-      inventory: Prisma.$InventoryPayload<ExtArgs>[]
-      customers: Prisma.$CustomerPayload<ExtArgs>[]
       bookings: Prisma.$BookingPayload<ExtArgs>[]
-      payments: Prisma.$PaymentPayload<ExtArgs>[]
+      organization: Prisma.$OrganizationPayload<ExtArgs>
       coupons: Prisma.$CouponPayload<ExtArgs>[]
+      customers: Prisma.$CustomerPayload<ExtArgs>[]
+      customerStripeAccounts: Prisma.$CustomerStripeAccountPayload<ExtArgs>[]
+      inventory: Prisma.$InventoryPayload<ExtArgs>[]
+      invoices: Prisma.$InvoicePayload<ExtArgs>[]
+      payments: Prisma.$PaymentPayload<ExtArgs>[]
+      quotes: Prisma.$QuotePayload<ExtArgs>[]
       salesFunnels: Prisma.$SalesFunnelPayload<ExtArgs>[]
       waivers: Prisma.$WaiverPayload<ExtArgs>[]
-      invoices: Prisma.$InvoicePayload<ExtArgs>[]
-      quotes: Prisma.$QuotePayload<ExtArgs>[]
-      customerStripeAccounts: Prisma.$CustomerStripeAccountPayload<ExtArgs>[]
-      organization: Prisma.$OrganizationPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -4288,22 +4431,26 @@ export namespace Prisma {
       zipCode: string | null
       phone: string | null
       email: string | null
-      serviceArea: string[]
-      onboarded: boolean
       logo: string | null
-      minAdvanceBooking: number
-      maxAdvanceBooking: number
-      minimumPurchase: number
-      timeZone: string
-      stripeAccountId: string | null
-      socialMedia: Prisma.JsonValue | null
-      customDomain: string | null
-      subdomain: string | null
-      siteConfig: Prisma.JsonValue
-      onboardingError: string | null
       createdAt: Date
       updatedAt: Date
+      stripeAccountId: string | null
+      customDomain: string | null
+      siteConfig: Prisma.JsonValue
+      serviceArea: string[]
+      subdomain: string | null
+      onboardingError: string | null
+      timeZone: string
+      socialMedia: Prisma.JsonValue | null
+      onboarded: boolean
       organizationId: string
+      bufferAfterHours: number
+      bufferBeforeHours: number
+      maxNoticeHours: number
+      minBookingAmount: number
+      minNoticeHours: number
+      embeddedComponents: boolean
+      embedConfig: Prisma.JsonValue | null
     }, ExtArgs["result"]["business"]>
     composites: {}
   }
@@ -4698,17 +4845,17 @@ export namespace Prisma {
    */
   export interface Prisma__BusinessClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    inventory<T extends Business$inventoryArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    customers<T extends Business$customersArgs<ExtArgs> = {}>(args?: Subset<T, Business$customersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     bookings<T extends Business$bookingsArgs<ExtArgs> = {}>(args?: Subset<T, Business$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    payments<T extends Business$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Business$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     coupons<T extends Business$couponsArgs<ExtArgs> = {}>(args?: Subset<T, Business$couponsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customers<T extends Business$customersArgs<ExtArgs> = {}>(args?: Subset<T, Business$customersArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    customerStripeAccounts<T extends Business$customerStripeAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Business$customerStripeAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    inventory<T extends Business$inventoryArgs<ExtArgs> = {}>(args?: Subset<T, Business$inventoryArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InventoryPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    invoices<T extends Business$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    payments<T extends Business$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Business$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    quotes<T extends Business$quotesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     salesFunnels<T extends Business$salesFunnelsArgs<ExtArgs> = {}>(args?: Subset<T, Business$salesFunnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SalesFunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     waivers<T extends Business$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Business$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    invoices<T extends Business$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Business$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    quotes<T extends Business$quotesArgs<ExtArgs> = {}>(args?: Subset<T, Business$quotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    customerStripeAccounts<T extends Business$customerStripeAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Business$customerStripeAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4747,22 +4894,26 @@ export namespace Prisma {
     readonly zipCode: FieldRef<"Business", 'String'>
     readonly phone: FieldRef<"Business", 'String'>
     readonly email: FieldRef<"Business", 'String'>
-    readonly serviceArea: FieldRef<"Business", 'String[]'>
-    readonly onboarded: FieldRef<"Business", 'Boolean'>
     readonly logo: FieldRef<"Business", 'String'>
-    readonly minAdvanceBooking: FieldRef<"Business", 'Int'>
-    readonly maxAdvanceBooking: FieldRef<"Business", 'Int'>
-    readonly minimumPurchase: FieldRef<"Business", 'Float'>
-    readonly timeZone: FieldRef<"Business", 'String'>
-    readonly stripeAccountId: FieldRef<"Business", 'String'>
-    readonly socialMedia: FieldRef<"Business", 'Json'>
-    readonly customDomain: FieldRef<"Business", 'String'>
-    readonly subdomain: FieldRef<"Business", 'String'>
-    readonly siteConfig: FieldRef<"Business", 'Json'>
-    readonly onboardingError: FieldRef<"Business", 'String'>
     readonly createdAt: FieldRef<"Business", 'DateTime'>
     readonly updatedAt: FieldRef<"Business", 'DateTime'>
+    readonly stripeAccountId: FieldRef<"Business", 'String'>
+    readonly customDomain: FieldRef<"Business", 'String'>
+    readonly siteConfig: FieldRef<"Business", 'Json'>
+    readonly serviceArea: FieldRef<"Business", 'String[]'>
+    readonly subdomain: FieldRef<"Business", 'String'>
+    readonly onboardingError: FieldRef<"Business", 'String'>
+    readonly timeZone: FieldRef<"Business", 'String'>
+    readonly socialMedia: FieldRef<"Business", 'Json'>
+    readonly onboarded: FieldRef<"Business", 'Boolean'>
     readonly organizationId: FieldRef<"Business", 'String'>
+    readonly bufferAfterHours: FieldRef<"Business", 'Int'>
+    readonly bufferBeforeHours: FieldRef<"Business", 'Int'>
+    readonly maxNoticeHours: FieldRef<"Business", 'Int'>
+    readonly minBookingAmount: FieldRef<"Business", 'Float'>
+    readonly minNoticeHours: FieldRef<"Business", 'Int'>
+    readonly embeddedComponents: FieldRef<"Business", 'Boolean'>
+    readonly embedConfig: FieldRef<"Business", 'Json'>
   }
     
 
@@ -5159,27 +5310,51 @@ export namespace Prisma {
   }
 
   /**
-   * Business.inventory
+   * Business.bookings
    */
-  export type Business$inventoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Business$bookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Inventory
+     * Select specific fields to fetch from the Booking
      */
-    select?: InventorySelect<ExtArgs> | null
+    select?: BookingSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Inventory
+     * Omit specific fields from the Booking
      */
-    omit?: InventoryOmit<ExtArgs> | null
+    omit?: BookingOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: InventoryInclude<ExtArgs> | null
-    where?: InventoryWhereInput
-    orderBy?: InventoryOrderByWithRelationInput | InventoryOrderByWithRelationInput[]
-    cursor?: InventoryWhereUniqueInput
+    include?: BookingInclude<ExtArgs> | null
+    where?: BookingWhereInput
+    orderBy?: BookingOrderByWithRelationInput | BookingOrderByWithRelationInput[]
+    cursor?: BookingWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: InventoryScalarFieldEnum | InventoryScalarFieldEnum[]
+    distinct?: BookingScalarFieldEnum | BookingScalarFieldEnum[]
+  }
+
+  /**
+   * Business.coupons
+   */
+  export type Business$couponsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Coupon
+     */
+    select?: CouponSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Coupon
+     */
+    omit?: CouponOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CouponInclude<ExtArgs> | null
+    where?: CouponWhereInput
+    orderBy?: CouponOrderByWithRelationInput | CouponOrderByWithRelationInput[]
+    cursor?: CouponWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: CouponScalarFieldEnum | CouponScalarFieldEnum[]
   }
 
   /**
@@ -5207,27 +5382,75 @@ export namespace Prisma {
   }
 
   /**
-   * Business.bookings
+   * Business.customerStripeAccounts
    */
-  export type Business$bookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Business$customerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Booking
+     * Select specific fields to fetch from the CustomerStripeAccount
      */
-    select?: BookingSelect<ExtArgs> | null
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Booking
+     * Omit specific fields from the CustomerStripeAccount
      */
-    omit?: BookingOmit<ExtArgs> | null
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: BookingInclude<ExtArgs> | null
-    where?: BookingWhereInput
-    orderBy?: BookingOrderByWithRelationInput | BookingOrderByWithRelationInput[]
-    cursor?: BookingWhereUniqueInput
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    where?: CustomerStripeAccountWhereInput
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    cursor?: CustomerStripeAccountWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: BookingScalarFieldEnum | BookingScalarFieldEnum[]
+    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
+  }
+
+  /**
+   * Business.inventory
+   */
+  export type Business$inventoryArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Inventory
+     */
+    select?: InventorySelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Inventory
+     */
+    omit?: InventoryOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InventoryInclude<ExtArgs> | null
+    where?: InventoryWhereInput
+    orderBy?: InventoryOrderByWithRelationInput | InventoryOrderByWithRelationInput[]
+    cursor?: InventoryWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InventoryScalarFieldEnum | InventoryScalarFieldEnum[]
+  }
+
+  /**
+   * Business.invoices
+   */
+  export type Business$invoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    cursor?: InvoiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
   }
 
   /**
@@ -5255,27 +5478,27 @@ export namespace Prisma {
   }
 
   /**
-   * Business.coupons
+   * Business.quotes
    */
-  export type Business$couponsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Business$quotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Coupon
+     * Select specific fields to fetch from the Quote
      */
-    select?: CouponSelect<ExtArgs> | null
+    select?: QuoteSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Coupon
+     * Omit specific fields from the Quote
      */
-    omit?: CouponOmit<ExtArgs> | null
+    omit?: QuoteOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: CouponInclude<ExtArgs> | null
-    where?: CouponWhereInput
-    orderBy?: CouponOrderByWithRelationInput | CouponOrderByWithRelationInput[]
-    cursor?: CouponWhereUniqueInput
+    include?: QuoteInclude<ExtArgs> | null
+    where?: QuoteWhereInput
+    orderBy?: QuoteOrderByWithRelationInput | QuoteOrderByWithRelationInput[]
+    cursor?: QuoteWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: CouponScalarFieldEnum | CouponScalarFieldEnum[]
+    distinct?: QuoteScalarFieldEnum | QuoteScalarFieldEnum[]
   }
 
   /**
@@ -5324,78 +5547,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: WaiverScalarFieldEnum | WaiverScalarFieldEnum[]
-  }
-
-  /**
-   * Business.invoices
-   */
-  export type Business$invoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Invoice
-     */
-    select?: InvoiceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Invoice
-     */
-    omit?: InvoiceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: InvoiceInclude<ExtArgs> | null
-    where?: InvoiceWhereInput
-    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
-    cursor?: InvoiceWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
-  }
-
-  /**
-   * Business.quotes
-   */
-  export type Business$quotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Quote
-     */
-    select?: QuoteSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Quote
-     */
-    omit?: QuoteOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: QuoteInclude<ExtArgs> | null
-    where?: QuoteWhereInput
-    orderBy?: QuoteOrderByWithRelationInput | QuoteOrderByWithRelationInput[]
-    cursor?: QuoteWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: QuoteScalarFieldEnum | QuoteScalarFieldEnum[]
-  }
-
-  /**
-   * Business.customerStripeAccounts
-   */
-  export type Business$customerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the CustomerStripeAccount
-     */
-    select?: CustomerStripeAccountSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the CustomerStripeAccount
-     */
-    omit?: CustomerStripeAccountOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: CustomerStripeAccountInclude<ExtArgs> | null
-    where?: CustomerStripeAccountWhereInput
-    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
-    cursor?: CustomerStripeAccountWhereUniqueInput
-    take?: number
-    skip?: number
-    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
   }
 
   /**
@@ -6545,64 +6696,64 @@ export namespace Prisma {
 
   export type MembershipMinAggregateOutputType = {
     id: string | null
-    role: $Enums.Role | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    clerkMembershipId: string | null
     userId: string | null
     organizationId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    role: $Enums.Role | null
+    clerkMembershipId: string | null
   }
 
   export type MembershipMaxAggregateOutputType = {
     id: string | null
-    role: $Enums.Role | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    clerkMembershipId: string | null
     userId: string | null
     organizationId: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    role: $Enums.Role | null
+    clerkMembershipId: string | null
   }
 
   export type MembershipCountAggregateOutputType = {
     id: number
-    role: number
-    createdAt: number
-    updatedAt: number
-    clerkMembershipId: number
     userId: number
     organizationId: number
+    createdAt: number
+    updatedAt: number
+    role: number
+    clerkMembershipId: number
     _all: number
   }
 
 
   export type MembershipMinAggregateInputType = {
     id?: true
-    role?: true
-    createdAt?: true
-    updatedAt?: true
-    clerkMembershipId?: true
     userId?: true
     organizationId?: true
+    createdAt?: true
+    updatedAt?: true
+    role?: true
+    clerkMembershipId?: true
   }
 
   export type MembershipMaxAggregateInputType = {
     id?: true
-    role?: true
-    createdAt?: true
-    updatedAt?: true
-    clerkMembershipId?: true
     userId?: true
     organizationId?: true
+    createdAt?: true
+    updatedAt?: true
+    role?: true
+    clerkMembershipId?: true
   }
 
   export type MembershipCountAggregateInputType = {
     id?: true
-    role?: true
-    createdAt?: true
-    updatedAt?: true
-    clerkMembershipId?: true
     userId?: true
     organizationId?: true
+    createdAt?: true
+    updatedAt?: true
+    role?: true
+    clerkMembershipId?: true
     _all?: true
   }
 
@@ -6680,12 +6831,12 @@ export namespace Prisma {
 
   export type MembershipGroupByOutputType = {
     id: string
-    role: $Enums.Role
-    createdAt: Date
-    updatedAt: Date
-    clerkMembershipId: string
     userId: string
     organizationId: string
+    createdAt: Date
+    updatedAt: Date
+    role: $Enums.Role
+    clerkMembershipId: string
     _count: MembershipCountAggregateOutputType | null
     _min: MembershipMinAggregateOutputType | null
     _max: MembershipMaxAggregateOutputType | null
@@ -6707,78 +6858,78 @@ export namespace Prisma {
 
   export type MembershipSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    role?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    clerkMembershipId?: boolean
     userId?: boolean
     organizationId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    createdAt?: boolean
+    updatedAt?: boolean
+    role?: boolean
+    clerkMembershipId?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["membership"]>
 
   export type MembershipSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    role?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    clerkMembershipId?: boolean
     userId?: boolean
     organizationId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    createdAt?: boolean
+    updatedAt?: boolean
+    role?: boolean
+    clerkMembershipId?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["membership"]>
 
   export type MembershipSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    role?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    clerkMembershipId?: boolean
     userId?: boolean
     organizationId?: boolean
-    user?: boolean | UserDefaultArgs<ExtArgs>
+    createdAt?: boolean
+    updatedAt?: boolean
+    role?: boolean
+    clerkMembershipId?: boolean
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["membership"]>
 
   export type MembershipSelectScalar = {
     id?: boolean
-    role?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    clerkMembershipId?: boolean
     userId?: boolean
     organizationId?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    role?: boolean
+    clerkMembershipId?: boolean
   }
 
-  export type MembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "role" | "createdAt" | "updatedAt" | "clerkMembershipId" | "userId" | "organizationId", ExtArgs["result"]["membership"]>
+  export type MembershipOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "userId" | "organizationId" | "createdAt" | "updatedAt" | "role" | "clerkMembershipId", ExtArgs["result"]["membership"]>
   export type MembershipInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type MembershipIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }
   export type MembershipIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    user?: boolean | UserDefaultArgs<ExtArgs>
     organization?: boolean | OrganizationDefaultArgs<ExtArgs>
+    user?: boolean | UserDefaultArgs<ExtArgs>
   }
 
   export type $MembershipPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Membership"
     objects: {
-      user: Prisma.$UserPayload<ExtArgs>
       organization: Prisma.$OrganizationPayload<ExtArgs>
+      user: Prisma.$UserPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      role: $Enums.Role
-      createdAt: Date
-      updatedAt: Date
-      clerkMembershipId: string
       userId: string
       organizationId: string
+      createdAt: Date
+      updatedAt: Date
+      role: $Enums.Role
+      clerkMembershipId: string
     }, ExtArgs["result"]["membership"]>
     composites: {}
   }
@@ -7173,8 +7324,8 @@ export namespace Prisma {
    */
   export interface Prisma__MembershipClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     organization<T extends OrganizationDefaultArgs<ExtArgs> = {}>(args?: Subset<T, OrganizationDefaultArgs<ExtArgs>>): Prisma__OrganizationClient<$Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    user<T extends UserDefaultArgs<ExtArgs> = {}>(args?: Subset<T, UserDefaultArgs<ExtArgs>>): Prisma__UserClient<$Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -7205,12 +7356,12 @@ export namespace Prisma {
    */
   interface MembershipFieldRefs {
     readonly id: FieldRef<"Membership", 'String'>
-    readonly role: FieldRef<"Membership", 'Role'>
-    readonly createdAt: FieldRef<"Membership", 'DateTime'>
-    readonly updatedAt: FieldRef<"Membership", 'DateTime'>
-    readonly clerkMembershipId: FieldRef<"Membership", 'String'>
     readonly userId: FieldRef<"Membership", 'String'>
     readonly organizationId: FieldRef<"Membership", 'String'>
+    readonly createdAt: FieldRef<"Membership", 'DateTime'>
+    readonly updatedAt: FieldRef<"Membership", 'DateTime'>
+    readonly role: FieldRef<"Membership", 'Role'>
+    readonly clerkMembershipId: FieldRef<"Membership", 'String'>
   }
     
 
@@ -7668,17 +7819,17 @@ export namespace Prisma {
     setupTime: number | null
     teardownTime: number | null
     primaryImage: string | null
-    stripeProductId: string | null
-    stripePriceId: string | null
     status: $Enums.InventoryStatus | null
     minimumSpace: string | null
     weightLimit: number | null
     ageRange: string | null
-    quantity: number | null
+    businessId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    quantity: number | null
+    stripePriceId: string | null
+    stripeProductId: string | null
     version: number | null
-    businessId: string | null
   }
 
   export type InventoryMaxAggregateOutputType = {
@@ -7692,17 +7843,17 @@ export namespace Prisma {
     setupTime: number | null
     teardownTime: number | null
     primaryImage: string | null
-    stripeProductId: string | null
-    stripePriceId: string | null
     status: $Enums.InventoryStatus | null
     minimumSpace: string | null
     weightLimit: number | null
     ageRange: string | null
-    quantity: number | null
+    businessId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    quantity: number | null
+    stripePriceId: string | null
+    stripeProductId: string | null
     version: number | null
-    businessId: string | null
   }
 
   export type InventoryCountAggregateOutputType = {
@@ -7717,18 +7868,18 @@ export namespace Prisma {
     teardownTime: number
     images: number
     primaryImage: number
-    stripeProductId: number
-    stripePriceId: number
     status: number
     minimumSpace: number
     weightLimit: number
     ageRange: number
     weatherRestrictions: number
-    quantity: number
+    businessId: number
     createdAt: number
     updatedAt: number
+    quantity: number
+    stripePriceId: number
+    stripeProductId: number
     version: number
-    businessId: number
     _all: number
   }
 
@@ -7764,17 +7915,17 @@ export namespace Prisma {
     setupTime?: true
     teardownTime?: true
     primaryImage?: true
-    stripeProductId?: true
-    stripePriceId?: true
     status?: true
     minimumSpace?: true
     weightLimit?: true
     ageRange?: true
-    quantity?: true
+    businessId?: true
     createdAt?: true
     updatedAt?: true
+    quantity?: true
+    stripePriceId?: true
+    stripeProductId?: true
     version?: true
-    businessId?: true
   }
 
   export type InventoryMaxAggregateInputType = {
@@ -7788,17 +7939,17 @@ export namespace Prisma {
     setupTime?: true
     teardownTime?: true
     primaryImage?: true
-    stripeProductId?: true
-    stripePriceId?: true
     status?: true
     minimumSpace?: true
     weightLimit?: true
     ageRange?: true
-    quantity?: true
+    businessId?: true
     createdAt?: true
     updatedAt?: true
+    quantity?: true
+    stripePriceId?: true
+    stripeProductId?: true
     version?: true
-    businessId?: true
   }
 
   export type InventoryCountAggregateInputType = {
@@ -7813,18 +7964,18 @@ export namespace Prisma {
     teardownTime?: true
     images?: true
     primaryImage?: true
-    stripeProductId?: true
-    stripePriceId?: true
     status?: true
     minimumSpace?: true
     weightLimit?: true
     ageRange?: true
     weatherRestrictions?: true
-    quantity?: true
+    businessId?: true
     createdAt?: true
     updatedAt?: true
+    quantity?: true
+    stripePriceId?: true
+    stripeProductId?: true
     version?: true
-    businessId?: true
     _all?: true
   }
 
@@ -7926,18 +8077,18 @@ export namespace Prisma {
     teardownTime: number
     images: string[]
     primaryImage: string | null
-    stripeProductId: string | null
-    stripePriceId: string | null
     status: $Enums.InventoryStatus
     minimumSpace: string
     weightLimit: number
     ageRange: string
     weatherRestrictions: string[]
-    quantity: number
+    businessId: string
     createdAt: Date
     updatedAt: Date
+    quantity: number
+    stripePriceId: string | null
+    stripeProductId: string | null
     version: number
-    businessId: string
     _count: InventoryCountAggregateOutputType | null
     _avg: InventoryAvgAggregateOutputType | null
     _sum: InventorySumAggregateOutputType | null
@@ -7971,20 +8122,20 @@ export namespace Prisma {
     teardownTime?: boolean
     images?: boolean
     primaryImage?: boolean
-    stripeProductId?: boolean
-    stripePriceId?: boolean
     status?: boolean
     minimumSpace?: boolean
     weightLimit?: boolean
     ageRange?: boolean
     weatherRestrictions?: boolean
-    quantity?: boolean
+    businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    quantity?: boolean
+    stripePriceId?: boolean
+    stripeProductId?: boolean
     version?: boolean
-    businessId?: boolean
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookingItems?: boolean | Inventory$bookingItemsArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
     _count?: boolean | InventoryCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventory"]>
 
@@ -8000,18 +8151,18 @@ export namespace Prisma {
     teardownTime?: boolean
     images?: boolean
     primaryImage?: boolean
-    stripeProductId?: boolean
-    stripePriceId?: boolean
     status?: boolean
     minimumSpace?: boolean
     weightLimit?: boolean
     ageRange?: boolean
     weatherRestrictions?: boolean
-    quantity?: boolean
+    businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    quantity?: boolean
+    stripePriceId?: boolean
+    stripeProductId?: boolean
     version?: boolean
-    businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventory"]>
 
@@ -8027,18 +8178,18 @@ export namespace Prisma {
     teardownTime?: boolean
     images?: boolean
     primaryImage?: boolean
-    stripeProductId?: boolean
-    stripePriceId?: boolean
     status?: boolean
     minimumSpace?: boolean
     weightLimit?: boolean
     ageRange?: boolean
     weatherRestrictions?: boolean
-    quantity?: boolean
+    businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    quantity?: boolean
+    stripePriceId?: boolean
+    stripeProductId?: boolean
     version?: boolean
-    businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["inventory"]>
 
@@ -8054,24 +8205,24 @@ export namespace Prisma {
     teardownTime?: boolean
     images?: boolean
     primaryImage?: boolean
-    stripeProductId?: boolean
-    stripePriceId?: boolean
     status?: boolean
     minimumSpace?: boolean
     weightLimit?: boolean
     ageRange?: boolean
     weatherRestrictions?: boolean
-    quantity?: boolean
+    businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    quantity?: boolean
+    stripePriceId?: boolean
+    stripeProductId?: boolean
     version?: boolean
-    businessId?: boolean
   }
 
-  export type InventoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "name" | "description" | "dimensions" | "capacity" | "price" | "setupTime" | "teardownTime" | "images" | "primaryImage" | "stripeProductId" | "stripePriceId" | "status" | "minimumSpace" | "weightLimit" | "ageRange" | "weatherRestrictions" | "quantity" | "createdAt" | "updatedAt" | "version" | "businessId", ExtArgs["result"]["inventory"]>
+  export type InventoryOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "type" | "name" | "description" | "dimensions" | "capacity" | "price" | "setupTime" | "teardownTime" | "images" | "primaryImage" | "status" | "minimumSpace" | "weightLimit" | "ageRange" | "weatherRestrictions" | "businessId" | "createdAt" | "updatedAt" | "quantity" | "stripePriceId" | "stripeProductId" | "version", ExtArgs["result"]["inventory"]>
   export type InventoryInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookingItems?: boolean | Inventory$bookingItemsArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
     _count?: boolean | InventoryCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type InventoryIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -8084,8 +8235,8 @@ export namespace Prisma {
   export type $InventoryPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Inventory"
     objects: {
-      business: Prisma.$BusinessPayload<ExtArgs>
       bookingItems: Prisma.$BookingItemPayload<ExtArgs>[]
+      business: Prisma.$BusinessPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -8099,18 +8250,18 @@ export namespace Prisma {
       teardownTime: number
       images: string[]
       primaryImage: string | null
-      stripeProductId: string | null
-      stripePriceId: string | null
       status: $Enums.InventoryStatus
       minimumSpace: string
       weightLimit: number
       ageRange: string
       weatherRestrictions: string[]
-      quantity: number
+      businessId: string
       createdAt: Date
       updatedAt: Date
+      quantity: number
+      stripePriceId: string | null
+      stripeProductId: string | null
       version: number
-      businessId: string
     }, ExtArgs["result"]["inventory"]>
     composites: {}
   }
@@ -8505,8 +8656,8 @@ export namespace Prisma {
    */
   export interface Prisma__InventoryClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     bookingItems<T extends Inventory$bookingItemsArgs<ExtArgs> = {}>(args?: Subset<T, Inventory$bookingItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -8547,18 +8698,18 @@ export namespace Prisma {
     readonly teardownTime: FieldRef<"Inventory", 'Int'>
     readonly images: FieldRef<"Inventory", 'String[]'>
     readonly primaryImage: FieldRef<"Inventory", 'String'>
-    readonly stripeProductId: FieldRef<"Inventory", 'String'>
-    readonly stripePriceId: FieldRef<"Inventory", 'String'>
     readonly status: FieldRef<"Inventory", 'InventoryStatus'>
     readonly minimumSpace: FieldRef<"Inventory", 'String'>
     readonly weightLimit: FieldRef<"Inventory", 'Int'>
     readonly ageRange: FieldRef<"Inventory", 'String'>
     readonly weatherRestrictions: FieldRef<"Inventory", 'String[]'>
-    readonly quantity: FieldRef<"Inventory", 'Int'>
+    readonly businessId: FieldRef<"Inventory", 'String'>
     readonly createdAt: FieldRef<"Inventory", 'DateTime'>
     readonly updatedAt: FieldRef<"Inventory", 'DateTime'>
+    readonly quantity: FieldRef<"Inventory", 'Int'>
+    readonly stripePriceId: FieldRef<"Inventory", 'String'>
+    readonly stripeProductId: FieldRef<"Inventory", 'String'>
     readonly version: FieldRef<"Inventory", 'Int'>
-    readonly businessId: FieldRef<"Inventory", 'String'>
   }
     
 
@@ -9034,10 +9185,10 @@ export namespace Prisma {
     lastBooking: Date | null
     createdAt: Date | null
     updatedAt: Date | null
+    businessId: string | null
     isLead: boolean | null
     status: string | null
     type: string | null
-    businessId: string | null
   }
 
   export type CustomerMaxAggregateOutputType = {
@@ -9055,10 +9206,10 @@ export namespace Prisma {
     lastBooking: Date | null
     createdAt: Date | null
     updatedAt: Date | null
+    businessId: string | null
     isLead: boolean | null
     status: string | null
     type: string | null
-    businessId: string | null
   }
 
   export type CustomerCountAggregateOutputType = {
@@ -9076,10 +9227,10 @@ export namespace Prisma {
     lastBooking: number
     createdAt: number
     updatedAt: number
+    businessId: number
     isLead: number
     status: number
     type: number
-    businessId: number
     _all: number
   }
 
@@ -9109,10 +9260,10 @@ export namespace Prisma {
     lastBooking?: true
     createdAt?: true
     updatedAt?: true
+    businessId?: true
     isLead?: true
     status?: true
     type?: true
-    businessId?: true
   }
 
   export type CustomerMaxAggregateInputType = {
@@ -9130,10 +9281,10 @@ export namespace Prisma {
     lastBooking?: true
     createdAt?: true
     updatedAt?: true
+    businessId?: true
     isLead?: true
     status?: true
     type?: true
-    businessId?: true
   }
 
   export type CustomerCountAggregateInputType = {
@@ -9151,10 +9302,10 @@ export namespace Prisma {
     lastBooking?: true
     createdAt?: true
     updatedAt?: true
+    businessId?: true
     isLead?: true
     status?: true
     type?: true
-    businessId?: true
     _all?: true
   }
 
@@ -9259,10 +9410,10 @@ export namespace Prisma {
     lastBooking: Date | null
     createdAt: Date
     updatedAt: Date
+    businessId: string
     isLead: boolean
     status: string
     type: string
-    businessId: string
     _count: CustomerCountAggregateOutputType | null
     _avg: CustomerAvgAggregateOutputType | null
     _sum: CustomerSumAggregateOutputType | null
@@ -9299,16 +9450,16 @@ export namespace Prisma {
     lastBooking?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    businessId?: boolean
     isLead?: boolean
     status?: boolean
     type?: boolean
-    businessId?: boolean
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookings?: boolean | Customer$bookingsArgs<ExtArgs>
-    waivers?: boolean | Customer$waiversArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Customer$customerStripeAccountsArgs<ExtArgs>
     invoices?: boolean | Customer$invoicesArgs<ExtArgs>
     quotes?: boolean | Customer$quotesArgs<ExtArgs>
-    customerStripeAccounts?: boolean | Customer$customerStripeAccountsArgs<ExtArgs>
+    waivers?: boolean | Customer$waiversArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -9327,10 +9478,10 @@ export namespace Prisma {
     lastBooking?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    businessId?: boolean
     isLead?: boolean
     status?: boolean
     type?: boolean
-    businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -9349,10 +9500,10 @@ export namespace Prisma {
     lastBooking?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    businessId?: boolean
     isLead?: boolean
     status?: boolean
     type?: boolean
-    businessId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customer"]>
 
@@ -9371,20 +9522,20 @@ export namespace Prisma {
     lastBooking?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    businessId?: boolean
     isLead?: boolean
     status?: boolean
     type?: boolean
-    businessId?: boolean
   }
 
-  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "address" | "city" | "state" | "zipCode" | "notes" | "bookingCount" | "totalSpent" | "lastBooking" | "createdAt" | "updatedAt" | "isLead" | "status" | "type" | "businessId", ExtArgs["result"]["customer"]>
+  export type CustomerOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "email" | "phone" | "address" | "city" | "state" | "zipCode" | "notes" | "bookingCount" | "totalSpent" | "lastBooking" | "createdAt" | "updatedAt" | "businessId" | "isLead" | "status" | "type", ExtArgs["result"]["customer"]>
   export type CustomerInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
     bookings?: boolean | Customer$bookingsArgs<ExtArgs>
-    waivers?: boolean | Customer$waiversArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customerStripeAccounts?: boolean | Customer$customerStripeAccountsArgs<ExtArgs>
     invoices?: boolean | Customer$invoicesArgs<ExtArgs>
     quotes?: boolean | Customer$quotesArgs<ExtArgs>
-    customerStripeAccounts?: boolean | Customer$customerStripeAccountsArgs<ExtArgs>
+    waivers?: boolean | Customer$waiversArgs<ExtArgs>
     _count?: boolean | CustomerCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CustomerIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -9397,12 +9548,12 @@ export namespace Prisma {
   export type $CustomerPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Customer"
     objects: {
-      business: Prisma.$BusinessPayload<ExtArgs>
       bookings: Prisma.$BookingPayload<ExtArgs>[]
-      waivers: Prisma.$WaiverPayload<ExtArgs>[]
+      business: Prisma.$BusinessPayload<ExtArgs>
+      customerStripeAccounts: Prisma.$CustomerStripeAccountPayload<ExtArgs>[]
       invoices: Prisma.$InvoicePayload<ExtArgs>[]
       quotes: Prisma.$QuotePayload<ExtArgs>[]
-      customerStripeAccounts: Prisma.$CustomerStripeAccountPayload<ExtArgs>[]
+      waivers: Prisma.$WaiverPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -9419,10 +9570,10 @@ export namespace Prisma {
       lastBooking: Date | null
       createdAt: Date
       updatedAt: Date
+      businessId: string
       isLead: boolean
       status: string
       type: string
-      businessId: string
     }, ExtArgs["result"]["customer"]>
     composites: {}
   }
@@ -9817,12 +9968,12 @@ export namespace Prisma {
    */
   export interface Prisma__CustomerClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     bookings<T extends Customer$bookingsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$bookingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    waivers<T extends Customer$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Customer$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customerStripeAccounts<T extends Customer$customerStripeAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$customerStripeAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     invoices<T extends Customer$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     quotes<T extends Customer$quotesArgs<ExtArgs> = {}>(args?: Subset<T, Customer$quotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    customerStripeAccounts<T extends Customer$customerStripeAccountsArgs<ExtArgs> = {}>(args?: Subset<T, Customer$customerStripeAccountsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$CustomerStripeAccountPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    waivers<T extends Customer$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Customer$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -9866,10 +10017,10 @@ export namespace Prisma {
     readonly lastBooking: FieldRef<"Customer", 'DateTime'>
     readonly createdAt: FieldRef<"Customer", 'DateTime'>
     readonly updatedAt: FieldRef<"Customer", 'DateTime'>
+    readonly businessId: FieldRef<"Customer", 'String'>
     readonly isLead: FieldRef<"Customer", 'Boolean'>
     readonly status: FieldRef<"Customer", 'String'>
     readonly type: FieldRef<"Customer", 'String'>
-    readonly businessId: FieldRef<"Customer", 'String'>
   }
     
 
@@ -10290,27 +10441,27 @@ export namespace Prisma {
   }
 
   /**
-   * Customer.waivers
+   * Customer.customerStripeAccounts
    */
-  export type Customer$waiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Customer$customerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the Waiver
+     * Select specific fields to fetch from the CustomerStripeAccount
      */
-    select?: WaiverSelect<ExtArgs> | null
+    select?: CustomerStripeAccountSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the Waiver
+     * Omit specific fields from the CustomerStripeAccount
      */
-    omit?: WaiverOmit<ExtArgs> | null
+    omit?: CustomerStripeAccountOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: WaiverInclude<ExtArgs> | null
-    where?: WaiverWhereInput
-    orderBy?: WaiverOrderByWithRelationInput | WaiverOrderByWithRelationInput[]
-    cursor?: WaiverWhereUniqueInput
+    include?: CustomerStripeAccountInclude<ExtArgs> | null
+    where?: CustomerStripeAccountWhereInput
+    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
+    cursor?: CustomerStripeAccountWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: WaiverScalarFieldEnum | WaiverScalarFieldEnum[]
+    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
   }
 
   /**
@@ -10362,27 +10513,27 @@ export namespace Prisma {
   }
 
   /**
-   * Customer.customerStripeAccounts
+   * Customer.waivers
    */
-  export type Customer$customerStripeAccountsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+  export type Customer$waiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     /**
-     * Select specific fields to fetch from the CustomerStripeAccount
+     * Select specific fields to fetch from the Waiver
      */
-    select?: CustomerStripeAccountSelect<ExtArgs> | null
+    select?: WaiverSelect<ExtArgs> | null
     /**
-     * Omit specific fields from the CustomerStripeAccount
+     * Omit specific fields from the Waiver
      */
-    omit?: CustomerStripeAccountOmit<ExtArgs> | null
+    omit?: WaiverOmit<ExtArgs> | null
     /**
      * Choose, which related nodes to fetch as well
      */
-    include?: CustomerStripeAccountInclude<ExtArgs> | null
-    where?: CustomerStripeAccountWhereInput
-    orderBy?: CustomerStripeAccountOrderByWithRelationInput | CustomerStripeAccountOrderByWithRelationInput[]
-    cursor?: CustomerStripeAccountWhereUniqueInput
+    include?: WaiverInclude<ExtArgs> | null
+    where?: WaiverWhereInput
+    orderBy?: WaiverOrderByWithRelationInput | WaiverOrderByWithRelationInput[]
+    cursor?: WaiverWhereUniqueInput
     take?: number
     skip?: number
-    distinct?: CustomerStripeAccountScalarFieldEnum | CustomerStripeAccountScalarFieldEnum[]
+    distinct?: WaiverScalarFieldEnum | WaiverScalarFieldEnum[]
   }
 
   /**
@@ -10450,21 +10601,22 @@ export namespace Prisma {
     eventCity: string | null
     eventState: string | null
     eventZipCode: string | null
-    eventTimeZone: string | null
     participantAge: number | null
     participantCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    specialInstructions: string | null
     subtotalAmount: number | null
     taxAmount: number | null
     taxRate: number | null
-    isCompleted: boolean | null
     isCancelled: boolean | null
-    specialInstructions: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    expiresAt: Date | null
+    isCompleted: boolean | null
+    eventTimeZone: string | null
     couponId: string | null
-    businessId: string | null
-    customerId: string | null
+    expiresAt: Date | null
+    currentQuoteId: string | null
   }
 
   export type BookingMaxAggregateOutputType = {
@@ -10481,21 +10633,22 @@ export namespace Prisma {
     eventCity: string | null
     eventState: string | null
     eventZipCode: string | null
-    eventTimeZone: string | null
     participantAge: number | null
     participantCount: number | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    businessId: string | null
+    customerId: string | null
+    specialInstructions: string | null
     subtotalAmount: number | null
     taxAmount: number | null
     taxRate: number | null
-    isCompleted: boolean | null
     isCancelled: boolean | null
-    specialInstructions: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
-    expiresAt: Date | null
+    isCompleted: boolean | null
+    eventTimeZone: string | null
     couponId: string | null
-    businessId: string | null
-    customerId: string | null
+    expiresAt: Date | null
+    currentQuoteId: string | null
   }
 
   export type BookingCountAggregateOutputType = {
@@ -10512,21 +10665,22 @@ export namespace Prisma {
     eventCity: number
     eventState: number
     eventZipCode: number
-    eventTimeZone: number
     participantAge: number
     participantCount: number
+    createdAt: number
+    updatedAt: number
+    businessId: number
+    customerId: number
+    specialInstructions: number
     subtotalAmount: number
     taxAmount: number
     taxRate: number
-    isCompleted: number
     isCancelled: number
-    specialInstructions: number
-    createdAt: number
-    updatedAt: number
-    expiresAt: number
+    isCompleted: number
+    eventTimeZone: number
     couponId: number
-    businessId: number
-    customerId: number
+    expiresAt: number
+    currentQuoteId: number
     _all: number
   }
 
@@ -10565,21 +10719,22 @@ export namespace Prisma {
     eventCity?: true
     eventState?: true
     eventZipCode?: true
-    eventTimeZone?: true
     participantAge?: true
     participantCount?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    specialInstructions?: true
     subtotalAmount?: true
     taxAmount?: true
     taxRate?: true
-    isCompleted?: true
     isCancelled?: true
-    specialInstructions?: true
-    createdAt?: true
-    updatedAt?: true
-    expiresAt?: true
+    isCompleted?: true
+    eventTimeZone?: true
     couponId?: true
-    businessId?: true
-    customerId?: true
+    expiresAt?: true
+    currentQuoteId?: true
   }
 
   export type BookingMaxAggregateInputType = {
@@ -10596,21 +10751,22 @@ export namespace Prisma {
     eventCity?: true
     eventState?: true
     eventZipCode?: true
-    eventTimeZone?: true
     participantAge?: true
     participantCount?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    specialInstructions?: true
     subtotalAmount?: true
     taxAmount?: true
     taxRate?: true
-    isCompleted?: true
     isCancelled?: true
-    specialInstructions?: true
-    createdAt?: true
-    updatedAt?: true
-    expiresAt?: true
+    isCompleted?: true
+    eventTimeZone?: true
     couponId?: true
-    businessId?: true
-    customerId?: true
+    expiresAt?: true
+    currentQuoteId?: true
   }
 
   export type BookingCountAggregateInputType = {
@@ -10627,21 +10783,22 @@ export namespace Prisma {
     eventCity?: true
     eventState?: true
     eventZipCode?: true
-    eventTimeZone?: true
     participantAge?: true
     participantCount?: true
+    createdAt?: true
+    updatedAt?: true
+    businessId?: true
+    customerId?: true
+    specialInstructions?: true
     subtotalAmount?: true
     taxAmount?: true
     taxRate?: true
-    isCompleted?: true
     isCancelled?: true
-    specialInstructions?: true
-    createdAt?: true
-    updatedAt?: true
-    expiresAt?: true
+    isCompleted?: true
+    eventTimeZone?: true
     couponId?: true
-    businessId?: true
-    customerId?: true
+    expiresAt?: true
+    currentQuoteId?: true
     _all?: true
   }
 
@@ -10745,21 +10902,22 @@ export namespace Prisma {
     eventCity: string | null
     eventState: string | null
     eventZipCode: string | null
-    eventTimeZone: string
     participantAge: number | null
     participantCount: number | null
+    createdAt: Date
+    updatedAt: Date
+    businessId: string
+    customerId: string | null
+    specialInstructions: string | null
     subtotalAmount: number | null
     taxAmount: number | null
     taxRate: number | null
-    isCompleted: boolean
     isCancelled: boolean
-    specialInstructions: string | null
-    createdAt: Date
-    updatedAt: Date
-    expiresAt: Date | null
+    isCompleted: boolean
+    eventTimeZone: string
     couponId: string | null
-    businessId: string
-    customerId: string | null
+    expiresAt: Date | null
+    currentQuoteId: string | null
     _count: BookingCountAggregateOutputType | null
     _avg: BookingAvgAggregateOutputType | null
     _sum: BookingSumAggregateOutputType | null
@@ -10795,29 +10953,31 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
-    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    specialInstructions?: boolean
     subtotalAmount?: boolean
     taxAmount?: boolean
     taxRate?: boolean
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    expiresAt?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: boolean
     couponId?: boolean
-    businessId?: boolean
-    customerId?: boolean
-    coupon?: boolean | Booking$couponArgs<ExtArgs>
+    expiresAt?: boolean
+    currentQuoteId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | Booking$couponArgs<ExtArgs>
     customer?: boolean | Booking$customerArgs<ExtArgs>
     inventoryItems?: boolean | Booking$inventoryItemsArgs<ExtArgs>
+    invoices?: boolean | Booking$invoicesArgs<ExtArgs>
     payments?: boolean | Booking$paymentsArgs<ExtArgs>
+    quotes?: boolean | Booking$quotesArgs<ExtArgs>
+    currentQuote?: boolean | Booking$currentQuoteArgs<ExtArgs>
     waivers?: boolean | Booking$waiversArgs<ExtArgs>
-    invoice?: boolean | Booking$invoiceArgs<ExtArgs>
-    quote?: boolean | Booking$quoteArgs<ExtArgs>
     _count?: boolean | BookingCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["booking"]>
 
@@ -10835,24 +10995,26 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
-    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    specialInstructions?: boolean
     subtotalAmount?: boolean
     taxAmount?: boolean
     taxRate?: boolean
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    expiresAt?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: boolean
     couponId?: boolean
-    businessId?: boolean
-    customerId?: boolean
-    coupon?: boolean | Booking$couponArgs<ExtArgs>
+    expiresAt?: boolean
+    currentQuoteId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | Booking$couponArgs<ExtArgs>
     customer?: boolean | Booking$customerArgs<ExtArgs>
+    currentQuote?: boolean | Booking$currentQuoteArgs<ExtArgs>
   }, ExtArgs["result"]["booking"]>
 
   export type BookingSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -10869,24 +11031,26 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
-    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    specialInstructions?: boolean
     subtotalAmount?: boolean
     taxAmount?: boolean
     taxRate?: boolean
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    expiresAt?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: boolean
     couponId?: boolean
-    businessId?: boolean
-    customerId?: boolean
-    coupon?: boolean | Booking$couponArgs<ExtArgs>
+    expiresAt?: boolean
+    currentQuoteId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | Booking$couponArgs<ExtArgs>
     customer?: boolean | Booking$customerArgs<ExtArgs>
+    currentQuote?: boolean | Booking$currentQuoteArgs<ExtArgs>
   }, ExtArgs["result"]["booking"]>
 
   export type BookingSelectScalar = {
@@ -10903,57 +11067,62 @@ export namespace Prisma {
     eventCity?: boolean
     eventState?: boolean
     eventZipCode?: boolean
-    eventTimeZone?: boolean
     participantAge?: boolean
     participantCount?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    businessId?: boolean
+    customerId?: boolean
+    specialInstructions?: boolean
     subtotalAmount?: boolean
     taxAmount?: boolean
     taxRate?: boolean
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
-    expiresAt?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: boolean
     couponId?: boolean
-    businessId?: boolean
-    customerId?: boolean
+    expiresAt?: boolean
+    currentQuoteId?: boolean
   }
 
-  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventDate" | "startTime" | "endTime" | "status" | "totalAmount" | "depositAmount" | "depositPaid" | "eventType" | "eventAddress" | "eventCity" | "eventState" | "eventZipCode" | "eventTimeZone" | "participantAge" | "participantCount" | "subtotalAmount" | "taxAmount" | "taxRate" | "isCompleted" | "isCancelled" | "specialInstructions" | "createdAt" | "updatedAt" | "expiresAt" | "couponId" | "businessId" | "customerId", ExtArgs["result"]["booking"]>
+  export type BookingOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "eventDate" | "startTime" | "endTime" | "status" | "totalAmount" | "depositAmount" | "depositPaid" | "eventType" | "eventAddress" | "eventCity" | "eventState" | "eventZipCode" | "participantAge" | "participantCount" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "specialInstructions" | "subtotalAmount" | "taxAmount" | "taxRate" | "isCancelled" | "isCompleted" | "eventTimeZone" | "couponId" | "expiresAt" | "currentQuoteId", ExtArgs["result"]["booking"]>
   export type BookingInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | Booking$couponArgs<ExtArgs>
     customer?: boolean | Booking$customerArgs<ExtArgs>
     inventoryItems?: boolean | Booking$inventoryItemsArgs<ExtArgs>
+    invoices?: boolean | Booking$invoicesArgs<ExtArgs>
     payments?: boolean | Booking$paymentsArgs<ExtArgs>
+    quotes?: boolean | Booking$quotesArgs<ExtArgs>
+    currentQuote?: boolean | Booking$currentQuoteArgs<ExtArgs>
     waivers?: boolean | Booking$waiversArgs<ExtArgs>
-    invoice?: boolean | Booking$invoiceArgs<ExtArgs>
-    quote?: boolean | Booking$quoteArgs<ExtArgs>
     _count?: boolean | BookingCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type BookingIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | Booking$couponArgs<ExtArgs>
     customer?: boolean | Booking$customerArgs<ExtArgs>
+    currentQuote?: boolean | Booking$currentQuoteArgs<ExtArgs>
   }
   export type BookingIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    coupon?: boolean | Booking$couponArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | Booking$couponArgs<ExtArgs>
     customer?: boolean | Booking$customerArgs<ExtArgs>
+    currentQuote?: boolean | Booking$currentQuoteArgs<ExtArgs>
   }
 
   export type $BookingPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Booking"
     objects: {
-      coupon: Prisma.$CouponPayload<ExtArgs> | null
       business: Prisma.$BusinessPayload<ExtArgs>
+      coupon: Prisma.$CouponPayload<ExtArgs> | null
       customer: Prisma.$CustomerPayload<ExtArgs> | null
       inventoryItems: Prisma.$BookingItemPayload<ExtArgs>[]
+      invoices: Prisma.$InvoicePayload<ExtArgs>[]
       payments: Prisma.$PaymentPayload<ExtArgs>[]
+      quotes: Prisma.$QuotePayload<ExtArgs>[]
+      currentQuote: Prisma.$QuotePayload<ExtArgs> | null
       waivers: Prisma.$WaiverPayload<ExtArgs>[]
-      invoice: Prisma.$InvoicePayload<ExtArgs> | null
-      quote: Prisma.$QuotePayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -10969,21 +11138,22 @@ export namespace Prisma {
       eventCity: string | null
       eventState: string | null
       eventZipCode: string | null
-      eventTimeZone: string
       participantAge: number | null
       participantCount: number | null
+      createdAt: Date
+      updatedAt: Date
+      businessId: string
+      customerId: string | null
+      specialInstructions: string | null
       subtotalAmount: number | null
       taxAmount: number | null
       taxRate: number | null
-      isCompleted: boolean
       isCancelled: boolean
-      specialInstructions: string | null
-      createdAt: Date
-      updatedAt: Date
-      expiresAt: Date | null
+      isCompleted: boolean
+      eventTimeZone: string
       couponId: string | null
-      businessId: string
-      customerId: string | null
+      expiresAt: Date | null
+      currentQuoteId: string | null
     }, ExtArgs["result"]["booking"]>
     composites: {}
   }
@@ -11378,14 +11548,15 @@ export namespace Prisma {
    */
   export interface Prisma__BookingClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    coupon<T extends Booking$couponArgs<ExtArgs> = {}>(args?: Subset<T, Booking$couponArgs<ExtArgs>>): Prisma__CouponClient<$Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    coupon<T extends Booking$couponArgs<ExtArgs> = {}>(args?: Subset<T, Booking$couponArgs<ExtArgs>>): Prisma__CouponClient<$Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     customer<T extends Booking$customerArgs<ExtArgs> = {}>(args?: Subset<T, Booking$customerArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     inventoryItems<T extends Booking$inventoryItemsArgs<ExtArgs> = {}>(args?: Subset<T, Booking$inventoryItemsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    invoices<T extends Booking$invoicesArgs<ExtArgs> = {}>(args?: Subset<T, Booking$invoicesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     payments<T extends Booking$paymentsArgs<ExtArgs> = {}>(args?: Subset<T, Booking$paymentsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$PaymentPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    quotes<T extends Booking$quotesArgs<ExtArgs> = {}>(args?: Subset<T, Booking$quotesArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    currentQuote<T extends Booking$currentQuoteArgs<ExtArgs> = {}>(args?: Subset<T, Booking$currentQuoteArgs<ExtArgs>>): Prisma__QuoteClient<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     waivers<T extends Booking$waiversArgs<ExtArgs> = {}>(args?: Subset<T, Booking$waiversArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$WaiverPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
-    invoice<T extends Booking$invoiceArgs<ExtArgs> = {}>(args?: Subset<T, Booking$invoiceArgs<ExtArgs>>): Prisma__InvoiceClient<$Result.GetResult<Prisma.$InvoicePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
-    quote<T extends Booking$quoteArgs<ExtArgs> = {}>(args?: Subset<T, Booking$quoteArgs<ExtArgs>>): Prisma__QuoteClient<$Result.GetResult<Prisma.$QuotePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -11428,21 +11599,22 @@ export namespace Prisma {
     readonly eventCity: FieldRef<"Booking", 'String'>
     readonly eventState: FieldRef<"Booking", 'String'>
     readonly eventZipCode: FieldRef<"Booking", 'String'>
-    readonly eventTimeZone: FieldRef<"Booking", 'String'>
     readonly participantAge: FieldRef<"Booking", 'Int'>
     readonly participantCount: FieldRef<"Booking", 'Int'>
+    readonly createdAt: FieldRef<"Booking", 'DateTime'>
+    readonly updatedAt: FieldRef<"Booking", 'DateTime'>
+    readonly businessId: FieldRef<"Booking", 'String'>
+    readonly customerId: FieldRef<"Booking", 'String'>
+    readonly specialInstructions: FieldRef<"Booking", 'String'>
     readonly subtotalAmount: FieldRef<"Booking", 'Float'>
     readonly taxAmount: FieldRef<"Booking", 'Float'>
     readonly taxRate: FieldRef<"Booking", 'Float'>
-    readonly isCompleted: FieldRef<"Booking", 'Boolean'>
     readonly isCancelled: FieldRef<"Booking", 'Boolean'>
-    readonly specialInstructions: FieldRef<"Booking", 'String'>
-    readonly createdAt: FieldRef<"Booking", 'DateTime'>
-    readonly updatedAt: FieldRef<"Booking", 'DateTime'>
-    readonly expiresAt: FieldRef<"Booking", 'DateTime'>
+    readonly isCompleted: FieldRef<"Booking", 'Boolean'>
+    readonly eventTimeZone: FieldRef<"Booking", 'String'>
     readonly couponId: FieldRef<"Booking", 'String'>
-    readonly businessId: FieldRef<"Booking", 'String'>
-    readonly customerId: FieldRef<"Booking", 'String'>
+    readonly expiresAt: FieldRef<"Booking", 'DateTime'>
+    readonly currentQuoteId: FieldRef<"Booking", 'String'>
   }
     
 
@@ -11901,6 +12073,30 @@ export namespace Prisma {
   }
 
   /**
+   * Booking.invoices
+   */
+  export type Booking$invoicesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Invoice
+     */
+    select?: InvoiceSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Invoice
+     */
+    omit?: InvoiceOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: InvoiceInclude<ExtArgs> | null
+    where?: InvoiceWhereInput
+    orderBy?: InvoiceOrderByWithRelationInput | InvoiceOrderByWithRelationInput[]
+    cursor?: InvoiceWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: InvoiceScalarFieldEnum | InvoiceScalarFieldEnum[]
+  }
+
+  /**
    * Booking.payments
    */
   export type Booking$paymentsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11925,6 +12121,49 @@ export namespace Prisma {
   }
 
   /**
+   * Booking.quotes
+   */
+  export type Booking$quotesArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Quote
+     */
+    select?: QuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Quote
+     */
+    omit?: QuoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteInclude<ExtArgs> | null
+    where?: QuoteWhereInput
+    orderBy?: QuoteOrderByWithRelationInput | QuoteOrderByWithRelationInput[]
+    cursor?: QuoteWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: QuoteScalarFieldEnum | QuoteScalarFieldEnum[]
+  }
+
+  /**
+   * Booking.currentQuote
+   */
+  export type Booking$currentQuoteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Quote
+     */
+    select?: QuoteSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Quote
+     */
+    omit?: QuoteOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: QuoteInclude<ExtArgs> | null
+    where?: QuoteWhereInput
+  }
+
+  /**
    * Booking.waivers
    */
   export type Booking$waiversArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -11946,44 +12185,6 @@ export namespace Prisma {
     take?: number
     skip?: number
     distinct?: WaiverScalarFieldEnum | WaiverScalarFieldEnum[]
-  }
-
-  /**
-   * Booking.invoice
-   */
-  export type Booking$invoiceArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Invoice
-     */
-    select?: InvoiceSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Invoice
-     */
-    omit?: InvoiceOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: InvoiceInclude<ExtArgs> | null
-    where?: InvoiceWhereInput
-  }
-
-  /**
-   * Booking.quote
-   */
-  export type Booking$quoteArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    /**
-     * Select specific fields to fetch from the Quote
-     */
-    select?: QuoteSelect<ExtArgs> | null
-    /**
-     * Omit specific fields from the Quote
-     */
-    omit?: QuoteOmit<ExtArgs> | null
-    /**
-     * Choose, which related nodes to fetch as well
-     */
-    include?: QuoteInclude<ExtArgs> | null
-    where?: QuoteWhereInput
   }
 
   /**
@@ -12029,41 +12230,41 @@ export namespace Prisma {
 
   export type BookingItemMinAggregateOutputType = {
     id: string | null
+    bookingId: string | null
+    inventoryId: string | null
     quantity: number | null
     price: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    startUTC: Date | null
-    endUTC: Date | null
-    bookingId: string | null
     status: string | null
-    inventoryId: string | null
+    endUTC: Date | null
+    startUTC: Date | null
   }
 
   export type BookingItemMaxAggregateOutputType = {
     id: string | null
+    bookingId: string | null
+    inventoryId: string | null
     quantity: number | null
     price: number | null
     createdAt: Date | null
     updatedAt: Date | null
-    startUTC: Date | null
-    endUTC: Date | null
-    bookingId: string | null
     status: string | null
-    inventoryId: string | null
+    endUTC: Date | null
+    startUTC: Date | null
   }
 
   export type BookingItemCountAggregateOutputType = {
     id: number
+    bookingId: number
+    inventoryId: number
     quantity: number
     price: number
     createdAt: number
     updatedAt: number
-    startUTC: number
-    endUTC: number
-    bookingId: number
     status: number
-    inventoryId: number
+    endUTC: number
+    startUTC: number
     _all: number
   }
 
@@ -12080,41 +12281,41 @@ export namespace Prisma {
 
   export type BookingItemMinAggregateInputType = {
     id?: true
+    bookingId?: true
+    inventoryId?: true
     quantity?: true
     price?: true
     createdAt?: true
     updatedAt?: true
-    startUTC?: true
-    endUTC?: true
-    bookingId?: true
     status?: true
-    inventoryId?: true
+    endUTC?: true
+    startUTC?: true
   }
 
   export type BookingItemMaxAggregateInputType = {
     id?: true
+    bookingId?: true
+    inventoryId?: true
     quantity?: true
     price?: true
     createdAt?: true
     updatedAt?: true
-    startUTC?: true
-    endUTC?: true
-    bookingId?: true
     status?: true
-    inventoryId?: true
+    endUTC?: true
+    startUTC?: true
   }
 
   export type BookingItemCountAggregateInputType = {
     id?: true
+    bookingId?: true
+    inventoryId?: true
     quantity?: true
     price?: true
     createdAt?: true
     updatedAt?: true
-    startUTC?: true
-    endUTC?: true
-    bookingId?: true
     status?: true
-    inventoryId?: true
+    endUTC?: true
+    startUTC?: true
     _all?: true
   }
 
@@ -12206,15 +12407,15 @@ export namespace Prisma {
 
   export type BookingItemGroupByOutputType = {
     id: string
+    bookingId: string
+    inventoryId: string
     quantity: number
     price: number
     createdAt: Date
     updatedAt: Date
-    startUTC: Date
-    endUTC: Date
-    bookingId: string
     status: string
-    inventoryId: string
+    endUTC: Date
+    startUTC: Date
     _count: BookingItemCountAggregateOutputType | null
     _avg: BookingItemAvgAggregateOutputType | null
     _sum: BookingItemSumAggregateOutputType | null
@@ -12238,15 +12439,15 @@ export namespace Prisma {
 
   export type BookingItemSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    bookingId?: boolean
+    inventoryId?: boolean
     quantity?: boolean
     price?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    startUTC?: boolean
-    endUTC?: boolean
-    bookingId?: boolean
     status?: boolean
-    inventoryId?: boolean
+    endUTC?: boolean
+    startUTC?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     inventory?: boolean | InventoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["bookingItem"]>
@@ -12254,33 +12455,33 @@ export namespace Prisma {
 
   export type BookingItemSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
+    bookingId?: boolean
+    inventoryId?: boolean
     quantity?: boolean
     price?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    startUTC?: boolean
-    endUTC?: boolean
-    bookingId?: boolean
     status?: boolean
-    inventoryId?: boolean
+    endUTC?: boolean
+    startUTC?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     inventory?: boolean | InventoryDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["bookingItem"]>
 
   export type BookingItemSelectScalar = {
     id?: boolean
+    bookingId?: boolean
+    inventoryId?: boolean
     quantity?: boolean
     price?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    startUTC?: boolean
-    endUTC?: boolean
-    bookingId?: boolean
     status?: boolean
-    inventoryId?: boolean
+    endUTC?: boolean
+    startUTC?: boolean
   }
 
-  export type BookingItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "quantity" | "price" | "createdAt" | "updatedAt" | "startUTC" | "endUTC" | "bookingId" | "status" | "inventoryId", ExtArgs["result"]["bookingItem"]>
+  export type BookingItemOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "bookingId" | "inventoryId" | "quantity" | "price" | "createdAt" | "updatedAt" | "status" | "endUTC" | "startUTC", ExtArgs["result"]["bookingItem"]>
   export type BookingItemInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     inventory?: boolean | InventoryDefaultArgs<ExtArgs>
@@ -12298,15 +12499,15 @@ export namespace Prisma {
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
+      bookingId: string
+      inventoryId: string
       quantity: number
       price: number
       createdAt: Date
       updatedAt: Date
-      startUTC: Date
-      endUTC: Date
-      bookingId: string
       status: string
-      inventoryId: string
+      endUTC: Date
+      startUTC: Date
     }, ExtArgs["result"]["bookingItem"]>
     composites: {}
   }
@@ -12662,15 +12863,15 @@ export namespace Prisma {
    */
   interface BookingItemFieldRefs {
     readonly id: FieldRef<"BookingItem", 'String'>
+    readonly bookingId: FieldRef<"BookingItem", 'String'>
+    readonly inventoryId: FieldRef<"BookingItem", 'String'>
     readonly quantity: FieldRef<"BookingItem", 'Int'>
     readonly price: FieldRef<"BookingItem", 'Float'>
     readonly createdAt: FieldRef<"BookingItem", 'DateTime'>
     readonly updatedAt: FieldRef<"BookingItem", 'DateTime'>
-    readonly startUTC: FieldRef<"BookingItem", 'DateTime'>
-    readonly endUTC: FieldRef<"BookingItem", 'DateTime'>
-    readonly bookingId: FieldRef<"BookingItem", 'String'>
     readonly status: FieldRef<"BookingItem", 'String'>
-    readonly inventoryId: FieldRef<"BookingItem", 'String'>
+    readonly endUTC: FieldRef<"BookingItem", 'DateTime'>
+    readonly startUTC: FieldRef<"BookingItem", 'DateTime'>
   }
     
 
@@ -13024,14 +13225,14 @@ export namespace Prisma {
     amount: Decimal | null
     type: $Enums.PaymentType | null
     status: $Enums.PaymentStatus | null
+    createdAt: Date | null
+    bookingId: string | null
+    businessId: string | null
     currency: string | null
     stripeClientSecret: string | null
     stripePaymentId: string | null
-    createdAt: Date | null
     updatedAt: Date | null
     paidAt: Date | null
-    bookingId: string | null
-    businessId: string | null
   }
 
   export type PaymentMaxAggregateOutputType = {
@@ -13039,14 +13240,14 @@ export namespace Prisma {
     amount: Decimal | null
     type: $Enums.PaymentType | null
     status: $Enums.PaymentStatus | null
+    createdAt: Date | null
+    bookingId: string | null
+    businessId: string | null
     currency: string | null
     stripeClientSecret: string | null
     stripePaymentId: string | null
-    createdAt: Date | null
     updatedAt: Date | null
     paidAt: Date | null
-    bookingId: string | null
-    businessId: string | null
   }
 
   export type PaymentCountAggregateOutputType = {
@@ -13054,15 +13255,15 @@ export namespace Prisma {
     amount: number
     type: number
     status: number
+    createdAt: number
+    bookingId: number
+    businessId: number
     currency: number
     metadata: number
     stripeClientSecret: number
     stripePaymentId: number
-    createdAt: number
     updatedAt: number
     paidAt: number
-    bookingId: number
-    businessId: number
     _all: number
   }
 
@@ -13080,14 +13281,14 @@ export namespace Prisma {
     amount?: true
     type?: true
     status?: true
+    createdAt?: true
+    bookingId?: true
+    businessId?: true
     currency?: true
     stripeClientSecret?: true
     stripePaymentId?: true
-    createdAt?: true
     updatedAt?: true
     paidAt?: true
-    bookingId?: true
-    businessId?: true
   }
 
   export type PaymentMaxAggregateInputType = {
@@ -13095,14 +13296,14 @@ export namespace Prisma {
     amount?: true
     type?: true
     status?: true
+    createdAt?: true
+    bookingId?: true
+    businessId?: true
     currency?: true
     stripeClientSecret?: true
     stripePaymentId?: true
-    createdAt?: true
     updatedAt?: true
     paidAt?: true
-    bookingId?: true
-    businessId?: true
   }
 
   export type PaymentCountAggregateInputType = {
@@ -13110,15 +13311,15 @@ export namespace Prisma {
     amount?: true
     type?: true
     status?: true
+    createdAt?: true
+    bookingId?: true
+    businessId?: true
     currency?: true
     metadata?: true
     stripeClientSecret?: true
     stripePaymentId?: true
-    createdAt?: true
     updatedAt?: true
     paidAt?: true
-    bookingId?: true
-    businessId?: true
     _all?: true
   }
 
@@ -13213,15 +13414,15 @@ export namespace Prisma {
     amount: Decimal
     type: $Enums.PaymentType
     status: $Enums.PaymentStatus
+    createdAt: Date
+    bookingId: string
+    businessId: string
     currency: string
     metadata: JsonValue | null
     stripeClientSecret: string | null
     stripePaymentId: string | null
-    createdAt: Date
     updatedAt: Date
     paidAt: Date | null
-    bookingId: string
-    businessId: string
     _count: PaymentCountAggregateOutputType | null
     _avg: PaymentAvgAggregateOutputType | null
     _sum: PaymentSumAggregateOutputType | null
@@ -13248,15 +13449,15 @@ export namespace Prisma {
     amount?: boolean
     type?: boolean
     status?: boolean
+    createdAt?: boolean
+    bookingId?: boolean
+    businessId?: boolean
     currency?: boolean
     metadata?: boolean
     stripeClientSecret?: boolean
     stripePaymentId?: boolean
-    createdAt?: boolean
     updatedAt?: boolean
     paidAt?: boolean
-    bookingId?: boolean
-    businessId?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["payment"]>
@@ -13266,15 +13467,15 @@ export namespace Prisma {
     amount?: boolean
     type?: boolean
     status?: boolean
+    createdAt?: boolean
+    bookingId?: boolean
+    businessId?: boolean
     currency?: boolean
     metadata?: boolean
     stripeClientSecret?: boolean
     stripePaymentId?: boolean
-    createdAt?: boolean
     updatedAt?: boolean
     paidAt?: boolean
-    bookingId?: boolean
-    businessId?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["payment"]>
@@ -13284,15 +13485,15 @@ export namespace Prisma {
     amount?: boolean
     type?: boolean
     status?: boolean
+    createdAt?: boolean
+    bookingId?: boolean
+    businessId?: boolean
     currency?: boolean
     metadata?: boolean
     stripeClientSecret?: boolean
     stripePaymentId?: boolean
-    createdAt?: boolean
     updatedAt?: boolean
     paidAt?: boolean
-    bookingId?: boolean
-    businessId?: boolean
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["payment"]>
@@ -13302,18 +13503,18 @@ export namespace Prisma {
     amount?: boolean
     type?: boolean
     status?: boolean
+    createdAt?: boolean
+    bookingId?: boolean
+    businessId?: boolean
     currency?: boolean
     metadata?: boolean
     stripeClientSecret?: boolean
     stripePaymentId?: boolean
-    createdAt?: boolean
     updatedAt?: boolean
     paidAt?: boolean
-    bookingId?: boolean
-    businessId?: boolean
   }
 
-  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "type" | "status" | "currency" | "metadata" | "stripeClientSecret" | "stripePaymentId" | "createdAt" | "updatedAt" | "paidAt" | "bookingId" | "businessId", ExtArgs["result"]["payment"]>
+  export type PaymentOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "amount" | "type" | "status" | "createdAt" | "bookingId" | "businessId" | "currency" | "metadata" | "stripeClientSecret" | "stripePaymentId" | "updatedAt" | "paidAt", ExtArgs["result"]["payment"]>
   export type PaymentInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
@@ -13338,15 +13539,15 @@ export namespace Prisma {
       amount: Prisma.Decimal
       type: $Enums.PaymentType
       status: $Enums.PaymentStatus
+      createdAt: Date
+      bookingId: string
+      businessId: string
       currency: string
       metadata: Prisma.JsonValue | null
       stripeClientSecret: string | null
       stripePaymentId: string | null
-      createdAt: Date
       updatedAt: Date
       paidAt: Date | null
-      bookingId: string
-      businessId: string
     }, ExtArgs["result"]["payment"]>
     composites: {}
   }
@@ -13776,15 +13977,15 @@ export namespace Prisma {
     readonly amount: FieldRef<"Payment", 'Decimal'>
     readonly type: FieldRef<"Payment", 'PaymentType'>
     readonly status: FieldRef<"Payment", 'PaymentStatus'>
+    readonly createdAt: FieldRef<"Payment", 'DateTime'>
+    readonly bookingId: FieldRef<"Payment", 'String'>
+    readonly businessId: FieldRef<"Payment", 'String'>
     readonly currency: FieldRef<"Payment", 'String'>
     readonly metadata: FieldRef<"Payment", 'Json'>
     readonly stripeClientSecret: FieldRef<"Payment", 'String'>
     readonly stripePaymentId: FieldRef<"Payment", 'String'>
-    readonly createdAt: FieldRef<"Payment", 'DateTime'>
     readonly updatedAt: FieldRef<"Payment", 'DateTime'>
     readonly paidAt: FieldRef<"Payment", 'DateTime'>
-    readonly bookingId: FieldRef<"Payment", 'String'>
-    readonly businessId: FieldRef<"Payment", 'String'>
   }
     
 
@@ -14238,10 +14439,10 @@ export namespace Prisma {
     isActive: boolean | null
     minimumAmount: number | null
     businessId: string | null
-    stripeCouponId: string | null
-    stripePromotionId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    stripeCouponId: string | null
+    stripePromotionId: string | null
   }
 
   export type CouponMaxAggregateOutputType = {
@@ -14257,10 +14458,10 @@ export namespace Prisma {
     isActive: boolean | null
     minimumAmount: number | null
     businessId: string | null
-    stripeCouponId: string | null
-    stripePromotionId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    stripeCouponId: string | null
+    stripePromotionId: string | null
   }
 
   export type CouponCountAggregateOutputType = {
@@ -14276,10 +14477,10 @@ export namespace Prisma {
     isActive: number
     minimumAmount: number
     businessId: number
-    stripeCouponId: number
-    stripePromotionId: number
     createdAt: number
     updatedAt: number
+    stripeCouponId: number
+    stripePromotionId: number
     _all: number
   }
 
@@ -14311,10 +14512,10 @@ export namespace Prisma {
     isActive?: true
     minimumAmount?: true
     businessId?: true
-    stripeCouponId?: true
-    stripePromotionId?: true
     createdAt?: true
     updatedAt?: true
+    stripeCouponId?: true
+    stripePromotionId?: true
   }
 
   export type CouponMaxAggregateInputType = {
@@ -14330,10 +14531,10 @@ export namespace Prisma {
     isActive?: true
     minimumAmount?: true
     businessId?: true
-    stripeCouponId?: true
-    stripePromotionId?: true
     createdAt?: true
     updatedAt?: true
+    stripeCouponId?: true
+    stripePromotionId?: true
   }
 
   export type CouponCountAggregateInputType = {
@@ -14349,10 +14550,10 @@ export namespace Prisma {
     isActive?: true
     minimumAmount?: true
     businessId?: true
-    stripeCouponId?: true
-    stripePromotionId?: true
     createdAt?: true
     updatedAt?: true
+    stripeCouponId?: true
+    stripePromotionId?: true
     _all?: true
   }
 
@@ -14455,10 +14656,10 @@ export namespace Prisma {
     isActive: boolean
     minimumAmount: number | null
     businessId: string
-    stripeCouponId: string | null
-    stripePromotionId: string | null
     createdAt: Date
     updatedAt: Date
+    stripeCouponId: string | null
+    stripePromotionId: string | null
     _count: CouponCountAggregateOutputType | null
     _avg: CouponAvgAggregateOutputType | null
     _sum: CouponSumAggregateOutputType | null
@@ -14493,12 +14694,13 @@ export namespace Prisma {
     isActive?: boolean
     minimumAmount?: boolean
     businessId?: boolean
-    stripeCouponId?: boolean
-    stripePromotionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    stripeCouponId?: boolean
+    stripePromotionId?: boolean
     booking?: boolean | Coupon$bookingArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    salesFunnels?: boolean | Coupon$salesFunnelsArgs<ExtArgs>
     _count?: boolean | CouponCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["coupon"]>
 
@@ -14515,10 +14717,10 @@ export namespace Prisma {
     isActive?: boolean
     minimumAmount?: boolean
     businessId?: boolean
-    stripeCouponId?: boolean
-    stripePromotionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    stripeCouponId?: boolean
+    stripePromotionId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["coupon"]>
 
@@ -14535,10 +14737,10 @@ export namespace Prisma {
     isActive?: boolean
     minimumAmount?: boolean
     businessId?: boolean
-    stripeCouponId?: boolean
-    stripePromotionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    stripeCouponId?: boolean
+    stripePromotionId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["coupon"]>
 
@@ -14555,16 +14757,17 @@ export namespace Prisma {
     isActive?: boolean
     minimumAmount?: boolean
     businessId?: boolean
-    stripeCouponId?: boolean
-    stripePromotionId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    stripeCouponId?: boolean
+    stripePromotionId?: boolean
   }
 
-  export type CouponOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "description" | "discountType" | "discountAmount" | "maxUses" | "usedCount" | "startDate" | "endDate" | "isActive" | "minimumAmount" | "businessId" | "stripeCouponId" | "stripePromotionId" | "createdAt" | "updatedAt", ExtArgs["result"]["coupon"]>
+  export type CouponOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "code" | "description" | "discountType" | "discountAmount" | "maxUses" | "usedCount" | "startDate" | "endDate" | "isActive" | "minimumAmount" | "businessId" | "createdAt" | "updatedAt" | "stripeCouponId" | "stripePromotionId", ExtArgs["result"]["coupon"]>
   export type CouponInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    business?: boolean | BusinessDefaultArgs<ExtArgs>
     booking?: boolean | Coupon$bookingArgs<ExtArgs>
+    business?: boolean | BusinessDefaultArgs<ExtArgs>
+    salesFunnels?: boolean | Coupon$salesFunnelsArgs<ExtArgs>
     _count?: boolean | CouponCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type CouponIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -14577,8 +14780,9 @@ export namespace Prisma {
   export type $CouponPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Coupon"
     objects: {
-      business: Prisma.$BusinessPayload<ExtArgs>
       booking: Prisma.$BookingPayload<ExtArgs>[]
+      business: Prisma.$BusinessPayload<ExtArgs>
+      salesFunnels: Prisma.$SalesFunnelPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -14593,10 +14797,10 @@ export namespace Prisma {
       isActive: boolean
       minimumAmount: number | null
       businessId: string
-      stripeCouponId: string | null
-      stripePromotionId: string | null
       createdAt: Date
       updatedAt: Date
+      stripeCouponId: string | null
+      stripePromotionId: string | null
     }, ExtArgs["result"]["coupon"]>
     composites: {}
   }
@@ -14991,8 +15195,9 @@ export namespace Prisma {
    */
   export interface Prisma__CouponClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     booking<T extends Coupon$bookingArgs<ExtArgs> = {}>(args?: Subset<T, Coupon$bookingArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+    business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    salesFunnels<T extends Coupon$salesFunnelsArgs<ExtArgs> = {}>(args?: Subset<T, Coupon$salesFunnelsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$SalesFunnelPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -15034,10 +15239,10 @@ export namespace Prisma {
     readonly isActive: FieldRef<"Coupon", 'Boolean'>
     readonly minimumAmount: FieldRef<"Coupon", 'Float'>
     readonly businessId: FieldRef<"Coupon", 'String'>
-    readonly stripeCouponId: FieldRef<"Coupon", 'String'>
-    readonly stripePromotionId: FieldRef<"Coupon", 'String'>
     readonly createdAt: FieldRef<"Coupon", 'DateTime'>
     readonly updatedAt: FieldRef<"Coupon", 'DateTime'>
+    readonly stripeCouponId: FieldRef<"Coupon", 'String'>
+    readonly stripePromotionId: FieldRef<"Coupon", 'String'>
   }
     
 
@@ -15458,6 +15663,30 @@ export namespace Prisma {
   }
 
   /**
+   * Coupon.salesFunnels
+   */
+  export type Coupon$salesFunnelsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the SalesFunnel
+     */
+    select?: SalesFunnelSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the SalesFunnel
+     */
+    omit?: SalesFunnelOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: SalesFunnelInclude<ExtArgs> | null
+    where?: SalesFunnelWhereInput
+    orderBy?: SalesFunnelOrderByWithRelationInput | SalesFunnelOrderByWithRelationInput[]
+    cursor?: SalesFunnelWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: SalesFunnelScalarFieldEnum | SalesFunnelScalarFieldEnum[]
+  }
+
+  /**
    * Coupon without action
    */
   export type CouponDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -15495,10 +15724,10 @@ export namespace Prisma {
     popupImage: string | null
     formTitle: string | null
     thankYouMessage: string | null
-    couponId: string | null
     businessId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    couponId: string | null
   }
 
   export type SalesFunnelMaxAggregateOutputType = {
@@ -15510,10 +15739,10 @@ export namespace Prisma {
     popupImage: string | null
     formTitle: string | null
     thankYouMessage: string | null
-    couponId: string | null
     businessId: string | null
     createdAt: Date | null
     updatedAt: Date | null
+    couponId: string | null
   }
 
   export type SalesFunnelCountAggregateOutputType = {
@@ -15525,10 +15754,10 @@ export namespace Prisma {
     popupImage: number
     formTitle: number
     thankYouMessage: number
-    couponId: number
     businessId: number
     createdAt: number
     updatedAt: number
+    couponId: number
     _all: number
   }
 
@@ -15542,10 +15771,10 @@ export namespace Prisma {
     popupImage?: true
     formTitle?: true
     thankYouMessage?: true
-    couponId?: true
     businessId?: true
     createdAt?: true
     updatedAt?: true
+    couponId?: true
   }
 
   export type SalesFunnelMaxAggregateInputType = {
@@ -15557,10 +15786,10 @@ export namespace Prisma {
     popupImage?: true
     formTitle?: true
     thankYouMessage?: true
-    couponId?: true
     businessId?: true
     createdAt?: true
     updatedAt?: true
+    couponId?: true
   }
 
   export type SalesFunnelCountAggregateInputType = {
@@ -15572,10 +15801,10 @@ export namespace Prisma {
     popupImage?: true
     formTitle?: true
     thankYouMessage?: true
-    couponId?: true
     businessId?: true
     createdAt?: true
     updatedAt?: true
+    couponId?: true
     _all?: true
   }
 
@@ -15660,10 +15889,10 @@ export namespace Prisma {
     popupImage: string | null
     formTitle: string
     thankYouMessage: string
-    couponId: string | null
     businessId: string
     createdAt: Date
     updatedAt: Date
+    couponId: string | null
     _count: SalesFunnelCountAggregateOutputType | null
     _min: SalesFunnelMinAggregateOutputType | null
     _max: SalesFunnelMaxAggregateOutputType | null
@@ -15692,11 +15921,12 @@ export namespace Prisma {
     popupImage?: boolean
     formTitle?: boolean
     thankYouMessage?: boolean
-    couponId?: boolean
     businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    couponId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }, ExtArgs["result"]["salesFunnel"]>
 
   export type SalesFunnelSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15708,11 +15938,12 @@ export namespace Prisma {
     popupImage?: boolean
     formTitle?: boolean
     thankYouMessage?: boolean
-    couponId?: boolean
     businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    couponId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }, ExtArgs["result"]["salesFunnel"]>
 
   export type SalesFunnelSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -15724,11 +15955,12 @@ export namespace Prisma {
     popupImage?: boolean
     formTitle?: boolean
     thankYouMessage?: boolean
-    couponId?: boolean
     businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    couponId?: boolean
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }, ExtArgs["result"]["salesFunnel"]>
 
   export type SalesFunnelSelectScalar = {
@@ -15740,27 +15972,31 @@ export namespace Prisma {
     popupImage?: boolean
     formTitle?: boolean
     thankYouMessage?: boolean
-    couponId?: boolean
     businessId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
+    couponId?: boolean
   }
 
-  export type SalesFunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "isActive" | "popupTitle" | "popupText" | "popupImage" | "formTitle" | "thankYouMessage" | "couponId" | "businessId" | "createdAt" | "updatedAt", ExtArgs["result"]["salesFunnel"]>
+  export type SalesFunnelOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "name" | "isActive" | "popupTitle" | "popupText" | "popupImage" | "formTitle" | "thankYouMessage" | "businessId" | "createdAt" | "updatedAt" | "couponId", ExtArgs["result"]["salesFunnel"]>
   export type SalesFunnelInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }
   export type SalesFunnelIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }
   export type SalesFunnelIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    coupon?: boolean | SalesFunnel$couponArgs<ExtArgs>
   }
 
   export type $SalesFunnelPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "SalesFunnel"
     objects: {
       business: Prisma.$BusinessPayload<ExtArgs>
+      coupon: Prisma.$CouponPayload<ExtArgs> | null
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -15771,10 +16007,10 @@ export namespace Prisma {
       popupImage: string | null
       formTitle: string
       thankYouMessage: string
-      couponId: string | null
       businessId: string
       createdAt: Date
       updatedAt: Date
+      couponId: string | null
     }, ExtArgs["result"]["salesFunnel"]>
     composites: {}
   }
@@ -16170,6 +16406,7 @@ export namespace Prisma {
   export interface Prisma__SalesFunnelClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    coupon<T extends SalesFunnel$couponArgs<ExtArgs> = {}>(args?: Subset<T, SalesFunnel$couponArgs<ExtArgs>>): Prisma__CouponClient<$Result.GetResult<Prisma.$CouponPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -16207,10 +16444,10 @@ export namespace Prisma {
     readonly popupImage: FieldRef<"SalesFunnel", 'String'>
     readonly formTitle: FieldRef<"SalesFunnel", 'String'>
     readonly thankYouMessage: FieldRef<"SalesFunnel", 'String'>
-    readonly couponId: FieldRef<"SalesFunnel", 'String'>
     readonly businessId: FieldRef<"SalesFunnel", 'String'>
     readonly createdAt: FieldRef<"SalesFunnel", 'DateTime'>
     readonly updatedAt: FieldRef<"SalesFunnel", 'DateTime'>
+    readonly couponId: FieldRef<"SalesFunnel", 'String'>
   }
     
 
@@ -16607,6 +16844,25 @@ export namespace Prisma {
   }
 
   /**
+   * SalesFunnel.coupon
+   */
+  export type SalesFunnel$couponArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Coupon
+     */
+    select?: CouponSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Coupon
+     */
+    omit?: CouponOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: CouponInclude<ExtArgs> | null
+    where?: CouponWhereInput
+  }
+
+  /**
    * SalesFunnel without action
    */
   export type SalesFunnelDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -16637,82 +16893,82 @@ export namespace Prisma {
 
   export type WaiverMinAggregateOutputType = {
     id: string | null
-    status: $Enums.WaiverStatus | null
-    templateVersion: string | null
-    documentUrl: string | null
-    docuSealDocumentId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
     businessId: string | null
     customerId: string | null
     bookingId: string | null
+    status: $Enums.WaiverStatus | null
+    templateVersion: string | null
+    documentUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    docuSealDocumentId: string | null
   }
 
   export type WaiverMaxAggregateOutputType = {
     id: string | null
-    status: $Enums.WaiverStatus | null
-    templateVersion: string | null
-    documentUrl: string | null
-    docuSealDocumentId: string | null
-    createdAt: Date | null
-    updatedAt: Date | null
     businessId: string | null
     customerId: string | null
     bookingId: string | null
+    status: $Enums.WaiverStatus | null
+    templateVersion: string | null
+    documentUrl: string | null
+    createdAt: Date | null
+    updatedAt: Date | null
+    docuSealDocumentId: string | null
   }
 
   export type WaiverCountAggregateOutputType = {
     id: number
-    status: number
-    templateVersion: number
-    documentUrl: number
-    docuSealDocumentId: number
-    createdAt: number
-    updatedAt: number
     businessId: number
     customerId: number
     bookingId: number
+    status: number
+    templateVersion: number
+    documentUrl: number
+    createdAt: number
+    updatedAt: number
+    docuSealDocumentId: number
     _all: number
   }
 
 
   export type WaiverMinAggregateInputType = {
     id?: true
-    status?: true
-    templateVersion?: true
-    documentUrl?: true
-    docuSealDocumentId?: true
-    createdAt?: true
-    updatedAt?: true
     businessId?: true
     customerId?: true
     bookingId?: true
+    status?: true
+    templateVersion?: true
+    documentUrl?: true
+    createdAt?: true
+    updatedAt?: true
+    docuSealDocumentId?: true
   }
 
   export type WaiverMaxAggregateInputType = {
     id?: true
-    status?: true
-    templateVersion?: true
-    documentUrl?: true
-    docuSealDocumentId?: true
-    createdAt?: true
-    updatedAt?: true
     businessId?: true
     customerId?: true
     bookingId?: true
+    status?: true
+    templateVersion?: true
+    documentUrl?: true
+    createdAt?: true
+    updatedAt?: true
+    docuSealDocumentId?: true
   }
 
   export type WaiverCountAggregateInputType = {
     id?: true
-    status?: true
-    templateVersion?: true
-    documentUrl?: true
-    docuSealDocumentId?: true
-    createdAt?: true
-    updatedAt?: true
     businessId?: true
     customerId?: true
     bookingId?: true
+    status?: true
+    templateVersion?: true
+    documentUrl?: true
+    createdAt?: true
+    updatedAt?: true
+    docuSealDocumentId?: true
     _all?: true
   }
 
@@ -16790,15 +17046,15 @@ export namespace Prisma {
 
   export type WaiverGroupByOutputType = {
     id: string
-    status: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
-    createdAt: Date
-    updatedAt: Date
     businessId: string
     customerId: string
     bookingId: string
+    status: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt: Date
+    updatedAt: Date
+    docuSealDocumentId: string
     _count: WaiverCountAggregateOutputType | null
     _min: WaiverMinAggregateOutputType | null
     _max: WaiverMaxAggregateOutputType | null
@@ -16820,100 +17076,100 @@ export namespace Prisma {
 
   export type WaiverSelect<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    status?: boolean
-    templateVersion?: boolean
-    documentUrl?: boolean
-    docuSealDocumentId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    status?: boolean
+    templateVersion?: boolean
+    documentUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    docuSealDocumentId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["waiver"]>
 
   export type WaiverSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    status?: boolean
-    templateVersion?: boolean
-    documentUrl?: boolean
-    docuSealDocumentId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    status?: boolean
+    templateVersion?: boolean
+    documentUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    docuSealDocumentId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["waiver"]>
 
   export type WaiverSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
     id?: boolean
-    status?: boolean
-    templateVersion?: boolean
-    documentUrl?: boolean
-    docuSealDocumentId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    status?: boolean
+    templateVersion?: boolean
+    documentUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    docuSealDocumentId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["waiver"]>
 
   export type WaiverSelectScalar = {
     id?: boolean
-    status?: boolean
-    templateVersion?: boolean
-    documentUrl?: boolean
-    docuSealDocumentId?: boolean
-    createdAt?: boolean
-    updatedAt?: boolean
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    status?: boolean
+    templateVersion?: boolean
+    documentUrl?: boolean
+    createdAt?: boolean
+    updatedAt?: boolean
+    docuSealDocumentId?: boolean
   }
 
-  export type WaiverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "status" | "templateVersion" | "documentUrl" | "docuSealDocumentId" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "bookingId", ExtArgs["result"]["waiver"]>
+  export type WaiverOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "businessId" | "customerId" | "bookingId" | "status" | "templateVersion" | "documentUrl" | "createdAt" | "updatedAt" | "docuSealDocumentId", ExtArgs["result"]["waiver"]>
   export type WaiverInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
   export type WaiverIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
   export type WaiverIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
 
   export type $WaiverPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Waiver"
     objects: {
+      booking: Prisma.$BookingPayload<ExtArgs>
       business: Prisma.$BusinessPayload<ExtArgs>
       customer: Prisma.$CustomerPayload<ExtArgs>
-      booking: Prisma.$BookingPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
-      status: $Enums.WaiverStatus
-      templateVersion: string
-      documentUrl: string
-      docuSealDocumentId: string
-      createdAt: Date
-      updatedAt: Date
       businessId: string
       customerId: string
       bookingId: string
+      status: $Enums.WaiverStatus
+      templateVersion: string
+      documentUrl: string
+      createdAt: Date
+      updatedAt: Date
+      docuSealDocumentId: string
     }, ExtArgs["result"]["waiver"]>
     composites: {}
   }
@@ -17308,9 +17564,9 @@ export namespace Prisma {
    */
   export interface Prisma__WaiverClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    booking<T extends BookingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BookingDefaultArgs<ExtArgs>>): Prisma__BookingClient<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    booking<T extends BookingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BookingDefaultArgs<ExtArgs>>): Prisma__BookingClient<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -17341,15 +17597,15 @@ export namespace Prisma {
    */
   interface WaiverFieldRefs {
     readonly id: FieldRef<"Waiver", 'String'>
-    readonly status: FieldRef<"Waiver", 'WaiverStatus'>
-    readonly templateVersion: FieldRef<"Waiver", 'String'>
-    readonly documentUrl: FieldRef<"Waiver", 'String'>
-    readonly docuSealDocumentId: FieldRef<"Waiver", 'String'>
-    readonly createdAt: FieldRef<"Waiver", 'DateTime'>
-    readonly updatedAt: FieldRef<"Waiver", 'DateTime'>
     readonly businessId: FieldRef<"Waiver", 'String'>
     readonly customerId: FieldRef<"Waiver", 'String'>
     readonly bookingId: FieldRef<"Waiver", 'String'>
+    readonly status: FieldRef<"Waiver", 'WaiverStatus'>
+    readonly templateVersion: FieldRef<"Waiver", 'String'>
+    readonly documentUrl: FieldRef<"Waiver", 'String'>
+    readonly createdAt: FieldRef<"Waiver", 'DateTime'>
+    readonly updatedAt: FieldRef<"Waiver", 'DateTime'>
+    readonly docuSealDocumentId: FieldRef<"Waiver", 'String'>
   }
     
 
@@ -19235,9 +19491,9 @@ export namespace Prisma {
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["invoice"]>
 
   export type InvoiceSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -19261,9 +19517,9 @@ export namespace Prisma {
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["invoice"]>
 
   export type InvoiceSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -19287,9 +19543,9 @@ export namespace Prisma {
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["invoice"]>
 
   export type InvoiceSelectScalar = {
@@ -19317,27 +19573,27 @@ export namespace Prisma {
 
   export type InvoiceOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeInvoiceId" | "status" | "amountDue" | "amountPaid" | "amountRemaining" | "currency" | "invoicePdfUrl" | "hostedInvoiceUrl" | "issuedAt" | "paidAt" | "voidedAt" | "dueAt" | "expiresAt" | "metadata" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "bookingId", ExtArgs["result"]["invoice"]>
   export type InvoiceInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
   export type InvoiceIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
   export type InvoiceIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
 
   export type $InvoicePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Invoice"
     objects: {
+      booking: Prisma.$BookingPayload<ExtArgs>
       business: Prisma.$BusinessPayload<ExtArgs>
       customer: Prisma.$CustomerPayload<ExtArgs>
-      booking: Prisma.$BookingPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -19754,9 +20010,9 @@ export namespace Prisma {
    */
   export interface Prisma__InvoiceClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    booking<T extends BookingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BookingDefaultArgs<ExtArgs>>): Prisma__BookingClient<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    booking<T extends BookingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BookingDefaultArgs<ExtArgs>>): Prisma__BookingClient<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -20236,12 +20492,14 @@ export namespace Prisma {
     amountTotal: number | null
     amountSubtotal: number | null
     amountTax: number | null
+    version: number | null
   }
 
   export type QuoteSumAggregateOutputType = {
     amountTotal: number | null
     amountSubtotal: number | null
     amountTax: number | null
+    version: number | null
   }
 
   export type QuoteMinAggregateOutputType = {
@@ -20252,9 +20510,12 @@ export namespace Prisma {
     amountSubtotal: number | null
     amountTax: number | null
     currency: string | null
-    hostedQuoteUrl: string | null
+    appQuoteUrl: string | null
+    stripeHostedUrl: string | null
     pdfUrl: string | null
     expiresAt: Date | null
+    version: number | null
+    replacesQuoteId: string | null
     createdAt: Date | null
     updatedAt: Date | null
     businessId: string | null
@@ -20270,9 +20531,12 @@ export namespace Prisma {
     amountSubtotal: number | null
     amountTax: number | null
     currency: string | null
-    hostedQuoteUrl: string | null
+    appQuoteUrl: string | null
+    stripeHostedUrl: string | null
     pdfUrl: string | null
     expiresAt: Date | null
+    version: number | null
+    replacesQuoteId: string | null
     createdAt: Date | null
     updatedAt: Date | null
     businessId: string | null
@@ -20288,10 +20552,13 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: number
-    hostedQuoteUrl: number
+    appQuoteUrl: number
+    stripeHostedUrl: number
     pdfUrl: number
     expiresAt: number
     metadata: number
+    version: number
+    replacesQuoteId: number
     createdAt: number
     updatedAt: number
     businessId: number
@@ -20305,12 +20572,14 @@ export namespace Prisma {
     amountTotal?: true
     amountSubtotal?: true
     amountTax?: true
+    version?: true
   }
 
   export type QuoteSumAggregateInputType = {
     amountTotal?: true
     amountSubtotal?: true
     amountTax?: true
+    version?: true
   }
 
   export type QuoteMinAggregateInputType = {
@@ -20321,9 +20590,12 @@ export namespace Prisma {
     amountSubtotal?: true
     amountTax?: true
     currency?: true
-    hostedQuoteUrl?: true
+    appQuoteUrl?: true
+    stripeHostedUrl?: true
     pdfUrl?: true
     expiresAt?: true
+    version?: true
+    replacesQuoteId?: true
     createdAt?: true
     updatedAt?: true
     businessId?: true
@@ -20339,9 +20611,12 @@ export namespace Prisma {
     amountSubtotal?: true
     amountTax?: true
     currency?: true
-    hostedQuoteUrl?: true
+    appQuoteUrl?: true
+    stripeHostedUrl?: true
     pdfUrl?: true
     expiresAt?: true
+    version?: true
+    replacesQuoteId?: true
     createdAt?: true
     updatedAt?: true
     businessId?: true
@@ -20357,10 +20632,13 @@ export namespace Prisma {
     amountSubtotal?: true
     amountTax?: true
     currency?: true
-    hostedQuoteUrl?: true
+    appQuoteUrl?: true
+    stripeHostedUrl?: true
     pdfUrl?: true
     expiresAt?: true
     metadata?: true
+    version?: true
+    replacesQuoteId?: true
     createdAt?: true
     updatedAt?: true
     businessId?: true
@@ -20463,10 +20741,13 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl: string | null
+    appQuoteUrl: string | null
+    stripeHostedUrl: string | null
     pdfUrl: string | null
     expiresAt: Date | null
     metadata: JsonValue | null
+    version: number
+    replacesQuoteId: string | null
     createdAt: Date
     updatedAt: Date
     businessId: string
@@ -20501,18 +20782,23 @@ export namespace Prisma {
     amountSubtotal?: boolean
     amountTax?: boolean
     currency?: boolean
-    hostedQuoteUrl?: boolean
+    appQuoteUrl?: boolean
+    stripeHostedUrl?: boolean
     pdfUrl?: boolean
     expiresAt?: boolean
     metadata?: boolean
+    version?: boolean
+    replacesQuoteId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
+    currentBookings?: boolean | Quote$currentBookingsArgs<ExtArgs>
+    _count?: boolean | QuoteCountOutputTypeDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["quote"]>
 
   export type QuoteSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -20523,18 +20809,21 @@ export namespace Prisma {
     amountSubtotal?: boolean
     amountTax?: boolean
     currency?: boolean
-    hostedQuoteUrl?: boolean
+    appQuoteUrl?: boolean
+    stripeHostedUrl?: boolean
     pdfUrl?: boolean
     expiresAt?: boolean
     metadata?: boolean
+    version?: boolean
+    replacesQuoteId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["quote"]>
 
   export type QuoteSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -20545,18 +20834,21 @@ export namespace Prisma {
     amountSubtotal?: boolean
     amountTax?: boolean
     currency?: boolean
-    hostedQuoteUrl?: boolean
+    appQuoteUrl?: boolean
+    stripeHostedUrl?: boolean
     pdfUrl?: boolean
     expiresAt?: boolean
     metadata?: boolean
+    version?: boolean
+    replacesQuoteId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     businessId?: boolean
     customerId?: boolean
     bookingId?: boolean
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["quote"]>
 
   export type QuoteSelectScalar = {
@@ -20567,10 +20859,13 @@ export namespace Prisma {
     amountSubtotal?: boolean
     amountTax?: boolean
     currency?: boolean
-    hostedQuoteUrl?: boolean
+    appQuoteUrl?: boolean
+    stripeHostedUrl?: boolean
     pdfUrl?: boolean
     expiresAt?: boolean
     metadata?: boolean
+    version?: boolean
+    replacesQuoteId?: boolean
     createdAt?: boolean
     updatedAt?: boolean
     businessId?: boolean
@@ -20578,29 +20873,32 @@ export namespace Prisma {
     bookingId?: boolean
   }
 
-  export type QuoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeQuoteId" | "status" | "amountTotal" | "amountSubtotal" | "amountTax" | "currency" | "hostedQuoteUrl" | "pdfUrl" | "expiresAt" | "metadata" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "bookingId", ExtArgs["result"]["quote"]>
+  export type QuoteOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeQuoteId" | "status" | "amountTotal" | "amountSubtotal" | "amountTax" | "currency" | "appQuoteUrl" | "stripeHostedUrl" | "pdfUrl" | "expiresAt" | "metadata" | "version" | "replacesQuoteId" | "createdAt" | "updatedAt" | "businessId" | "customerId" | "bookingId", ExtArgs["result"]["quote"]>
   export type QuoteInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
+    currentBookings?: boolean | Quote$currentBookingsArgs<ExtArgs>
+    _count?: boolean | QuoteCountOutputTypeDefaultArgs<ExtArgs>
   }
   export type QuoteIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
   export type QuoteIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    booking?: boolean | BookingDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
     customer?: boolean | CustomerDefaultArgs<ExtArgs>
-    booking?: boolean | BookingDefaultArgs<ExtArgs>
   }
 
   export type $QuotePayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "Quote"
     objects: {
+      booking: Prisma.$BookingPayload<ExtArgs>
       business: Prisma.$BusinessPayload<ExtArgs>
       customer: Prisma.$CustomerPayload<ExtArgs>
-      booking: Prisma.$BookingPayload<ExtArgs>
+      currentBookings: Prisma.$BookingPayload<ExtArgs>[]
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -20610,10 +20908,13 @@ export namespace Prisma {
       amountSubtotal: number
       amountTax: number
       currency: string
-      hostedQuoteUrl: string | null
+      appQuoteUrl: string | null
+      stripeHostedUrl: string | null
       pdfUrl: string | null
       expiresAt: Date | null
       metadata: Prisma.JsonValue | null
+      version: number
+      replacesQuoteId: string | null
       createdAt: Date
       updatedAt: Date
       businessId: string
@@ -21013,9 +21314,10 @@ export namespace Prisma {
    */
   export interface Prisma__QuoteClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
+    booking<T extends BookingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BookingDefaultArgs<ExtArgs>>): Prisma__BookingClient<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
-    booking<T extends BookingDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BookingDefaultArgs<ExtArgs>>): Prisma__BookingClient<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    currentBookings<T extends Quote$currentBookingsArgs<ExtArgs> = {}>(args?: Subset<T, Quote$currentBookingsArgs<ExtArgs>>): Prisma.PrismaPromise<$Result.GetResult<Prisma.$BookingPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -21052,10 +21354,13 @@ export namespace Prisma {
     readonly amountSubtotal: FieldRef<"Quote", 'Float'>
     readonly amountTax: FieldRef<"Quote", 'Float'>
     readonly currency: FieldRef<"Quote", 'String'>
-    readonly hostedQuoteUrl: FieldRef<"Quote", 'String'>
+    readonly appQuoteUrl: FieldRef<"Quote", 'String'>
+    readonly stripeHostedUrl: FieldRef<"Quote", 'String'>
     readonly pdfUrl: FieldRef<"Quote", 'String'>
     readonly expiresAt: FieldRef<"Quote", 'DateTime'>
     readonly metadata: FieldRef<"Quote", 'Json'>
+    readonly version: FieldRef<"Quote", 'Int'>
+    readonly replacesQuoteId: FieldRef<"Quote", 'String'>
     readonly createdAt: FieldRef<"Quote", 'DateTime'>
     readonly updatedAt: FieldRef<"Quote", 'DateTime'>
     readonly businessId: FieldRef<"Quote", 'String'>
@@ -21457,6 +21762,30 @@ export namespace Prisma {
   }
 
   /**
+   * Quote.currentBookings
+   */
+  export type Quote$currentBookingsArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
+    /**
+     * Select specific fields to fetch from the Booking
+     */
+    select?: BookingSelect<ExtArgs> | null
+    /**
+     * Omit specific fields from the Booking
+     */
+    omit?: BookingOmit<ExtArgs> | null
+    /**
+     * Choose, which related nodes to fetch as well
+     */
+    include?: BookingInclude<ExtArgs> | null
+    where?: BookingWhereInput
+    orderBy?: BookingOrderByWithRelationInput | BookingOrderByWithRelationInput[]
+    cursor?: BookingWhereUniqueInput
+    take?: number
+    skip?: number
+    distinct?: BookingScalarFieldEnum | BookingScalarFieldEnum[]
+  }
+
+  /**
    * Quote without action
    */
   export type QuoteDefaultArgs<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
@@ -21647,8 +21976,8 @@ export namespace Prisma {
     updatedAt?: boolean
     customerId?: boolean
     businessId?: boolean
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customerStripeAccount"]>
 
   export type CustomerStripeAccountSelectCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -21658,8 +21987,8 @@ export namespace Prisma {
     updatedAt?: boolean
     customerId?: boolean
     businessId?: boolean
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customerStripeAccount"]>
 
   export type CustomerStripeAccountSelectUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetSelect<{
@@ -21669,8 +21998,8 @@ export namespace Prisma {
     updatedAt?: boolean
     customerId?: boolean
     businessId?: boolean
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
   }, ExtArgs["result"]["customerStripeAccount"]>
 
   export type CustomerStripeAccountSelectScalar = {
@@ -21684,23 +22013,23 @@ export namespace Prisma {
 
   export type CustomerStripeAccountOmit<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = $Extensions.GetOmit<"id" | "stripeCustomerId" | "createdAt" | "updatedAt" | "customerId" | "businessId", ExtArgs["result"]["customerStripeAccount"]>
   export type CustomerStripeAccountInclude<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
   }
   export type CustomerStripeAccountIncludeCreateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
   }
   export type CustomerStripeAccountIncludeUpdateManyAndReturn<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
-    customer?: boolean | CustomerDefaultArgs<ExtArgs>
     business?: boolean | BusinessDefaultArgs<ExtArgs>
+    customer?: boolean | CustomerDefaultArgs<ExtArgs>
   }
 
   export type $CustomerStripeAccountPayload<ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs> = {
     name: "CustomerStripeAccount"
     objects: {
-      customer: Prisma.$CustomerPayload<ExtArgs>
       business: Prisma.$BusinessPayload<ExtArgs>
+      customer: Prisma.$CustomerPayload<ExtArgs>
     }
     scalars: $Extensions.GetPayloadResult<{
       id: string
@@ -22103,8 +22432,8 @@ export namespace Prisma {
    */
   export interface Prisma__CustomerStripeAccountClient<T, Null = never, ExtArgs extends $Extensions.InternalArgs = $Extensions.DefaultArgs, GlobalOmitOptions = {}> extends Prisma.PrismaPromise<T> {
     readonly [Symbol.toStringTag]: "PrismaPromise"
-    customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     business<T extends BusinessDefaultArgs<ExtArgs> = {}>(args?: Subset<T, BusinessDefaultArgs<ExtArgs>>): Prisma__BusinessClient<$Result.GetResult<Prisma.$BusinessPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
+    customer<T extends CustomerDefaultArgs<ExtArgs> = {}>(args?: Subset<T, CustomerDefaultArgs<ExtArgs>>): Prisma__CustomerClient<$Result.GetResult<Prisma.$CustomerPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
     /**
      * Attaches callbacks for the resolution and/or rejection of the Promise.
      * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -22572,10 +22901,10 @@ export namespace Prisma {
     id: 'id',
     email: 'email',
     name: 'name',
-    image: 'image',
-    clerkUserId: 'clerkUserId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    image: 'image',
+    updatedAt: 'updatedAt',
+    clerkUserId: 'clerkUserId'
   };
 
   export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
@@ -22591,22 +22920,26 @@ export namespace Prisma {
     zipCode: 'zipCode',
     phone: 'phone',
     email: 'email',
-    serviceArea: 'serviceArea',
-    onboarded: 'onboarded',
     logo: 'logo',
-    minAdvanceBooking: 'minAdvanceBooking',
-    maxAdvanceBooking: 'maxAdvanceBooking',
-    minimumPurchase: 'minimumPurchase',
-    timeZone: 'timeZone',
-    stripeAccountId: 'stripeAccountId',
-    socialMedia: 'socialMedia',
-    customDomain: 'customDomain',
-    subdomain: 'subdomain',
-    siteConfig: 'siteConfig',
-    onboardingError: 'onboardingError',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    organizationId: 'organizationId'
+    stripeAccountId: 'stripeAccountId',
+    customDomain: 'customDomain',
+    siteConfig: 'siteConfig',
+    serviceArea: 'serviceArea',
+    subdomain: 'subdomain',
+    onboardingError: 'onboardingError',
+    timeZone: 'timeZone',
+    socialMedia: 'socialMedia',
+    onboarded: 'onboarded',
+    organizationId: 'organizationId',
+    bufferAfterHours: 'bufferAfterHours',
+    bufferBeforeHours: 'bufferBeforeHours',
+    maxNoticeHours: 'maxNoticeHours',
+    minBookingAmount: 'minBookingAmount',
+    minNoticeHours: 'minNoticeHours',
+    embeddedComponents: 'embeddedComponents',
+    embedConfig: 'embedConfig'
   };
 
   export type BusinessScalarFieldEnum = (typeof BusinessScalarFieldEnum)[keyof typeof BusinessScalarFieldEnum]
@@ -22625,12 +22958,12 @@ export namespace Prisma {
 
   export const MembershipScalarFieldEnum: {
     id: 'id',
-    role: 'role',
+    userId: 'userId',
+    organizationId: 'organizationId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    clerkMembershipId: 'clerkMembershipId',
-    userId: 'userId',
-    organizationId: 'organizationId'
+    role: 'role',
+    clerkMembershipId: 'clerkMembershipId'
   };
 
   export type MembershipScalarFieldEnum = (typeof MembershipScalarFieldEnum)[keyof typeof MembershipScalarFieldEnum]
@@ -22648,18 +22981,18 @@ export namespace Prisma {
     teardownTime: 'teardownTime',
     images: 'images',
     primaryImage: 'primaryImage',
-    stripeProductId: 'stripeProductId',
-    stripePriceId: 'stripePriceId',
     status: 'status',
     minimumSpace: 'minimumSpace',
     weightLimit: 'weightLimit',
     ageRange: 'ageRange',
     weatherRestrictions: 'weatherRestrictions',
-    quantity: 'quantity',
+    businessId: 'businessId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    version: 'version',
-    businessId: 'businessId'
+    quantity: 'quantity',
+    stripePriceId: 'stripePriceId',
+    stripeProductId: 'stripeProductId',
+    version: 'version'
   };
 
   export type InventoryScalarFieldEnum = (typeof InventoryScalarFieldEnum)[keyof typeof InventoryScalarFieldEnum]
@@ -22680,10 +23013,10 @@ export namespace Prisma {
     lastBooking: 'lastBooking',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
+    businessId: 'businessId',
     isLead: 'isLead',
     status: 'status',
-    type: 'type',
-    businessId: 'businessId'
+    type: 'type'
   };
 
   export type CustomerScalarFieldEnum = (typeof CustomerScalarFieldEnum)[keyof typeof CustomerScalarFieldEnum]
@@ -22703,21 +23036,22 @@ export namespace Prisma {
     eventCity: 'eventCity',
     eventState: 'eventState',
     eventZipCode: 'eventZipCode',
-    eventTimeZone: 'eventTimeZone',
     participantAge: 'participantAge',
     participantCount: 'participantCount',
+    createdAt: 'createdAt',
+    updatedAt: 'updatedAt',
+    businessId: 'businessId',
+    customerId: 'customerId',
+    specialInstructions: 'specialInstructions',
     subtotalAmount: 'subtotalAmount',
     taxAmount: 'taxAmount',
     taxRate: 'taxRate',
-    isCompleted: 'isCompleted',
     isCancelled: 'isCancelled',
-    specialInstructions: 'specialInstructions',
-    createdAt: 'createdAt',
-    updatedAt: 'updatedAt',
-    expiresAt: 'expiresAt',
+    isCompleted: 'isCompleted',
+    eventTimeZone: 'eventTimeZone',
     couponId: 'couponId',
-    businessId: 'businessId',
-    customerId: 'customerId'
+    expiresAt: 'expiresAt',
+    currentQuoteId: 'currentQuoteId'
   };
 
   export type BookingScalarFieldEnum = (typeof BookingScalarFieldEnum)[keyof typeof BookingScalarFieldEnum]
@@ -22725,15 +23059,15 @@ export namespace Prisma {
 
   export const BookingItemScalarFieldEnum: {
     id: 'id',
+    bookingId: 'bookingId',
+    inventoryId: 'inventoryId',
     quantity: 'quantity',
     price: 'price',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    startUTC: 'startUTC',
-    endUTC: 'endUTC',
-    bookingId: 'bookingId',
     status: 'status',
-    inventoryId: 'inventoryId'
+    endUTC: 'endUTC',
+    startUTC: 'startUTC'
   };
 
   export type BookingItemScalarFieldEnum = (typeof BookingItemScalarFieldEnum)[keyof typeof BookingItemScalarFieldEnum]
@@ -22744,15 +23078,15 @@ export namespace Prisma {
     amount: 'amount',
     type: 'type',
     status: 'status',
+    createdAt: 'createdAt',
+    bookingId: 'bookingId',
+    businessId: 'businessId',
     currency: 'currency',
     metadata: 'metadata',
     stripeClientSecret: 'stripeClientSecret',
     stripePaymentId: 'stripePaymentId',
-    createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    paidAt: 'paidAt',
-    bookingId: 'bookingId',
-    businessId: 'businessId'
+    paidAt: 'paidAt'
   };
 
   export type PaymentScalarFieldEnum = (typeof PaymentScalarFieldEnum)[keyof typeof PaymentScalarFieldEnum]
@@ -22771,10 +23105,10 @@ export namespace Prisma {
     isActive: 'isActive',
     minimumAmount: 'minimumAmount',
     businessId: 'businessId',
-    stripeCouponId: 'stripeCouponId',
-    stripePromotionId: 'stripePromotionId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    stripeCouponId: 'stripeCouponId',
+    stripePromotionId: 'stripePromotionId'
   };
 
   export type CouponScalarFieldEnum = (typeof CouponScalarFieldEnum)[keyof typeof CouponScalarFieldEnum]
@@ -22789,10 +23123,10 @@ export namespace Prisma {
     popupImage: 'popupImage',
     formTitle: 'formTitle',
     thankYouMessage: 'thankYouMessage',
-    couponId: 'couponId',
     businessId: 'businessId',
     createdAt: 'createdAt',
-    updatedAt: 'updatedAt'
+    updatedAt: 'updatedAt',
+    couponId: 'couponId'
   };
 
   export type SalesFunnelScalarFieldEnum = (typeof SalesFunnelScalarFieldEnum)[keyof typeof SalesFunnelScalarFieldEnum]
@@ -22800,15 +23134,15 @@ export namespace Prisma {
 
   export const WaiverScalarFieldEnum: {
     id: 'id',
+    businessId: 'businessId',
+    customerId: 'customerId',
+    bookingId: 'bookingId',
     status: 'status',
     templateVersion: 'templateVersion',
     documentUrl: 'documentUrl',
-    docuSealDocumentId: 'docuSealDocumentId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
-    businessId: 'businessId',
-    customerId: 'customerId',
-    bookingId: 'bookingId'
+    docuSealDocumentId: 'docuSealDocumentId'
   };
 
   export type WaiverScalarFieldEnum = (typeof WaiverScalarFieldEnum)[keyof typeof WaiverScalarFieldEnum]
@@ -22866,10 +23200,13 @@ export namespace Prisma {
     amountSubtotal: 'amountSubtotal',
     amountTax: 'amountTax',
     currency: 'currency',
-    hostedQuoteUrl: 'hostedQuoteUrl',
+    appQuoteUrl: 'appQuoteUrl',
+    stripeHostedUrl: 'stripeHostedUrl',
     pdfUrl: 'pdfUrl',
     expiresAt: 'expiresAt',
     metadata: 'metadata',
+    version: 'version',
+    replacesQuoteId: 'replacesQuoteId',
     createdAt: 'createdAt',
     updatedAt: 'updatedAt',
     businessId: 'businessId',
@@ -22900,19 +23237,19 @@ export namespace Prisma {
   export type SortOrder = (typeof SortOrder)[keyof typeof SortOrder]
 
 
+  export const JsonNullValueInput: {
+    JsonNull: typeof JsonNull
+  };
+
+  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
+
+
   export const NullableJsonNullValueInput: {
     DbNull: typeof DbNull,
     JsonNull: typeof JsonNull
   };
 
   export type NullableJsonNullValueInput = (typeof NullableJsonNullValueInput)[keyof typeof NullableJsonNullValueInput]
-
-
-  export const JsonNullValueInput: {
-    JsonNull: typeof JsonNull
-  };
-
-  export type JsonNullValueInput = (typeof JsonNullValueInput)[keyof typeof JsonNullValueInput]
 
 
   export const QueryMode: {
@@ -22974,6 +23311,20 @@ export namespace Prisma {
 
 
   /**
+   * Reference to a field of type 'Json'
+   */
+  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
+    
+
+
+  /**
+   * Reference to a field of type 'QueryMode'
+   */
+  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
+    
+
+
+  /**
    * Reference to a field of type 'Boolean'
    */
   export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
@@ -23005,20 +23356,6 @@ export namespace Prisma {
    * Reference to a field of type 'Float[]'
    */
   export type ListFloatFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Float[]'>
-    
-
-
-  /**
-   * Reference to a field of type 'Json'
-   */
-  export type JsonFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Json'>
-    
-
-
-  /**
-   * Reference to a field of type 'QueryMode'
-   */
-  export type EnumQueryModeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'QueryMode'>
     
 
 
@@ -23200,22 +23537,22 @@ export namespace Prisma {
     id?: StringFilter<"User"> | string
     email?: StringNullableFilter<"User"> | string | null
     name?: StringNullableFilter<"User"> | string | null
-    image?: StringNullableFilter<"User"> | string | null
-    clerkUserId?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
+    image?: StringNullableFilter<"User"> | string | null
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    membership?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
+    clerkUserId?: StringNullableFilter<"User"> | string | null
+    memberships?: MembershipListRelationFilter
   }
 
   export type UserOrderByWithRelationInput = {
     id?: SortOrder
     email?: SortOrderInput | SortOrder
     name?: SortOrderInput | SortOrder
-    image?: SortOrderInput | SortOrder
-    clerkUserId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    image?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
-    membership?: MembershipOrderByWithRelationInput
+    clerkUserId?: SortOrderInput | SortOrder
+    memberships?: MembershipOrderByRelationAggregateInput
   }
 
   export type UserWhereUniqueInput = Prisma.AtLeast<{
@@ -23226,20 +23563,20 @@ export namespace Prisma {
     OR?: UserWhereInput[]
     NOT?: UserWhereInput | UserWhereInput[]
     name?: StringNullableFilter<"User"> | string | null
-    image?: StringNullableFilter<"User"> | string | null
     createdAt?: DateTimeFilter<"User"> | Date | string
+    image?: StringNullableFilter<"User"> | string | null
     updatedAt?: DateTimeFilter<"User"> | Date | string
-    membership?: XOR<MembershipNullableScalarRelationFilter, MembershipWhereInput> | null
+    memberships?: MembershipListRelationFilter
   }, "id" | "email" | "clerkUserId">
 
   export type UserOrderByWithAggregationInput = {
     id?: SortOrder
     email?: SortOrderInput | SortOrder
     name?: SortOrderInput | SortOrder
-    image?: SortOrderInput | SortOrder
-    clerkUserId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
+    image?: SortOrderInput | SortOrder
     updatedAt?: SortOrder
+    clerkUserId?: SortOrderInput | SortOrder
     _count?: UserCountOrderByAggregateInput
     _max?: UserMaxOrderByAggregateInput
     _min?: UserMinOrderByAggregateInput
@@ -23252,10 +23589,10 @@ export namespace Prisma {
     id?: StringWithAggregatesFilter<"User"> | string
     email?: StringNullableWithAggregatesFilter<"User"> | string | null
     name?: StringNullableWithAggregatesFilter<"User"> | string | null
-    image?: StringNullableWithAggregatesFilter<"User"> | string | null
-    clerkUserId?: StringNullableWithAggregatesFilter<"User"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    image?: StringNullableWithAggregatesFilter<"User"> | string | null
     updatedAt?: DateTimeWithAggregatesFilter<"User"> | Date | string
+    clerkUserId?: StringNullableWithAggregatesFilter<"User"> | string | null
   }
 
   export type BusinessWhereInput = {
@@ -23271,33 +23608,37 @@ export namespace Prisma {
     zipCode?: StringNullableFilter<"Business"> | string | null
     phone?: StringNullableFilter<"Business"> | string | null
     email?: StringNullableFilter<"Business"> | string | null
-    serviceArea?: StringNullableListFilter<"Business">
-    onboarded?: BoolFilter<"Business"> | boolean
     logo?: StringNullableFilter<"Business"> | string | null
-    minAdvanceBooking?: IntFilter<"Business"> | number
-    maxAdvanceBooking?: IntFilter<"Business"> | number
-    minimumPurchase?: FloatFilter<"Business"> | number
-    timeZone?: StringFilter<"Business"> | string
-    stripeAccountId?: StringNullableFilter<"Business"> | string | null
-    socialMedia?: JsonNullableFilter<"Business">
-    customDomain?: StringNullableFilter<"Business"> | string | null
-    subdomain?: StringNullableFilter<"Business"> | string | null
-    siteConfig?: JsonFilter<"Business">
-    onboardingError?: StringNullableFilter<"Business"> | string | null
     createdAt?: DateTimeFilter<"Business"> | Date | string
     updatedAt?: DateTimeFilter<"Business"> | Date | string
+    stripeAccountId?: StringNullableFilter<"Business"> | string | null
+    customDomain?: StringNullableFilter<"Business"> | string | null
+    siteConfig?: JsonFilter<"Business">
+    serviceArea?: StringNullableListFilter<"Business">
+    subdomain?: StringNullableFilter<"Business"> | string | null
+    onboardingError?: StringNullableFilter<"Business"> | string | null
+    timeZone?: StringFilter<"Business"> | string
+    socialMedia?: JsonNullableFilter<"Business">
+    onboarded?: BoolFilter<"Business"> | boolean
     organizationId?: StringFilter<"Business"> | string
-    inventory?: InventoryListRelationFilter
-    customers?: CustomerListRelationFilter
+    bufferAfterHours?: IntFilter<"Business"> | number
+    bufferBeforeHours?: IntFilter<"Business"> | number
+    maxNoticeHours?: IntFilter<"Business"> | number
+    minBookingAmount?: FloatFilter<"Business"> | number
+    minNoticeHours?: IntFilter<"Business"> | number
+    embeddedComponents?: BoolFilter<"Business"> | boolean
+    embedConfig?: JsonNullableFilter<"Business">
     bookings?: BookingListRelationFilter
-    payments?: PaymentListRelationFilter
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
     coupons?: CouponListRelationFilter
+    customers?: CustomerListRelationFilter
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
+    inventory?: InventoryListRelationFilter
+    invoices?: InvoiceListRelationFilter
+    payments?: PaymentListRelationFilter
+    quotes?: QuoteListRelationFilter
     salesFunnels?: SalesFunnelListRelationFilter
     waivers?: WaiverListRelationFilter
-    invoices?: InvoiceListRelationFilter
-    quotes?: QuoteListRelationFilter
-    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
-    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
   }
 
   export type BusinessOrderByWithRelationInput = {
@@ -23310,33 +23651,37 @@ export namespace Prisma {
     zipCode?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
     email?: SortOrderInput | SortOrder
-    serviceArea?: SortOrder
-    onboarded?: SortOrder
     logo?: SortOrderInput | SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
-    timeZone?: SortOrder
-    stripeAccountId?: SortOrderInput | SortOrder
-    socialMedia?: SortOrderInput | SortOrder
-    customDomain?: SortOrderInput | SortOrder
-    subdomain?: SortOrderInput | SortOrder
-    siteConfig?: SortOrder
-    onboardingError?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    stripeAccountId?: SortOrderInput | SortOrder
+    customDomain?: SortOrderInput | SortOrder
+    siteConfig?: SortOrder
+    serviceArea?: SortOrder
+    subdomain?: SortOrderInput | SortOrder
+    onboardingError?: SortOrderInput | SortOrder
+    timeZone?: SortOrder
+    socialMedia?: SortOrderInput | SortOrder
+    onboarded?: SortOrder
     organizationId?: SortOrder
-    inventory?: InventoryOrderByRelationAggregateInput
-    customers?: CustomerOrderByRelationAggregateInput
+    bufferAfterHours?: SortOrder
+    bufferBeforeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    minNoticeHours?: SortOrder
+    embeddedComponents?: SortOrder
+    embedConfig?: SortOrderInput | SortOrder
     bookings?: BookingOrderByRelationAggregateInput
-    payments?: PaymentOrderByRelationAggregateInput
+    organization?: OrganizationOrderByWithRelationInput
     coupons?: CouponOrderByRelationAggregateInput
+    customers?: CustomerOrderByRelationAggregateInput
+    customerStripeAccounts?: CustomerStripeAccountOrderByRelationAggregateInput
+    inventory?: InventoryOrderByRelationAggregateInput
+    invoices?: InvoiceOrderByRelationAggregateInput
+    payments?: PaymentOrderByRelationAggregateInput
+    quotes?: QuoteOrderByRelationAggregateInput
     salesFunnels?: SalesFunnelOrderByRelationAggregateInput
     waivers?: WaiverOrderByRelationAggregateInput
-    invoices?: InvoiceOrderByRelationAggregateInput
-    quotes?: QuoteOrderByRelationAggregateInput
-    customerStripeAccounts?: CustomerStripeAccountOrderByRelationAggregateInput
-    organization?: OrganizationOrderByWithRelationInput
   }
 
   export type BusinessWhereUniqueInput = Prisma.AtLeast<{
@@ -23354,31 +23699,35 @@ export namespace Prisma {
     zipCode?: StringNullableFilter<"Business"> | string | null
     phone?: StringNullableFilter<"Business"> | string | null
     email?: StringNullableFilter<"Business"> | string | null
-    serviceArea?: StringNullableListFilter<"Business">
-    onboarded?: BoolFilter<"Business"> | boolean
     logo?: StringNullableFilter<"Business"> | string | null
-    minAdvanceBooking?: IntFilter<"Business"> | number
-    maxAdvanceBooking?: IntFilter<"Business"> | number
-    minimumPurchase?: FloatFilter<"Business"> | number
-    timeZone?: StringFilter<"Business"> | string
-    stripeAccountId?: StringNullableFilter<"Business"> | string | null
-    socialMedia?: JsonNullableFilter<"Business">
-    customDomain?: StringNullableFilter<"Business"> | string | null
-    siteConfig?: JsonFilter<"Business">
-    onboardingError?: StringNullableFilter<"Business"> | string | null
     createdAt?: DateTimeFilter<"Business"> | Date | string
     updatedAt?: DateTimeFilter<"Business"> | Date | string
-    inventory?: InventoryListRelationFilter
-    customers?: CustomerListRelationFilter
+    stripeAccountId?: StringNullableFilter<"Business"> | string | null
+    customDomain?: StringNullableFilter<"Business"> | string | null
+    siteConfig?: JsonFilter<"Business">
+    serviceArea?: StringNullableListFilter<"Business">
+    onboardingError?: StringNullableFilter<"Business"> | string | null
+    timeZone?: StringFilter<"Business"> | string
+    socialMedia?: JsonNullableFilter<"Business">
+    onboarded?: BoolFilter<"Business"> | boolean
+    bufferAfterHours?: IntFilter<"Business"> | number
+    bufferBeforeHours?: IntFilter<"Business"> | number
+    maxNoticeHours?: IntFilter<"Business"> | number
+    minBookingAmount?: FloatFilter<"Business"> | number
+    minNoticeHours?: IntFilter<"Business"> | number
+    embeddedComponents?: BoolFilter<"Business"> | boolean
+    embedConfig?: JsonNullableFilter<"Business">
     bookings?: BookingListRelationFilter
-    payments?: PaymentListRelationFilter
+    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
     coupons?: CouponListRelationFilter
+    customers?: CustomerListRelationFilter
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
+    inventory?: InventoryListRelationFilter
+    invoices?: InvoiceListRelationFilter
+    payments?: PaymentListRelationFilter
+    quotes?: QuoteListRelationFilter
     salesFunnels?: SalesFunnelListRelationFilter
     waivers?: WaiverListRelationFilter
-    invoices?: InvoiceListRelationFilter
-    quotes?: QuoteListRelationFilter
-    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
-    organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
   }, "id" | "subdomain" | "organizationId">
 
   export type BusinessOrderByWithAggregationInput = {
@@ -23391,22 +23740,26 @@ export namespace Prisma {
     zipCode?: SortOrderInput | SortOrder
     phone?: SortOrderInput | SortOrder
     email?: SortOrderInput | SortOrder
-    serviceArea?: SortOrder
-    onboarded?: SortOrder
     logo?: SortOrderInput | SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
-    timeZone?: SortOrder
-    stripeAccountId?: SortOrderInput | SortOrder
-    socialMedia?: SortOrderInput | SortOrder
-    customDomain?: SortOrderInput | SortOrder
-    subdomain?: SortOrderInput | SortOrder
-    siteConfig?: SortOrder
-    onboardingError?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    stripeAccountId?: SortOrderInput | SortOrder
+    customDomain?: SortOrderInput | SortOrder
+    siteConfig?: SortOrder
+    serviceArea?: SortOrder
+    subdomain?: SortOrderInput | SortOrder
+    onboardingError?: SortOrderInput | SortOrder
+    timeZone?: SortOrder
+    socialMedia?: SortOrderInput | SortOrder
+    onboarded?: SortOrder
     organizationId?: SortOrder
+    bufferAfterHours?: SortOrder
+    bufferBeforeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    minNoticeHours?: SortOrder
+    embeddedComponents?: SortOrder
+    embedConfig?: SortOrderInput | SortOrder
     _count?: BusinessCountOrderByAggregateInput
     _avg?: BusinessAvgOrderByAggregateInput
     _max?: BusinessMaxOrderByAggregateInput
@@ -23427,22 +23780,26 @@ export namespace Prisma {
     zipCode?: StringNullableWithAggregatesFilter<"Business"> | string | null
     phone?: StringNullableWithAggregatesFilter<"Business"> | string | null
     email?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    serviceArea?: StringNullableListFilter<"Business">
-    onboarded?: BoolWithAggregatesFilter<"Business"> | boolean
     logo?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    minAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
-    maxAdvanceBooking?: IntWithAggregatesFilter<"Business"> | number
-    minimumPurchase?: FloatWithAggregatesFilter<"Business"> | number
-    timeZone?: StringWithAggregatesFilter<"Business"> | string
-    stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    socialMedia?: JsonNullableWithAggregatesFilter<"Business">
-    customDomain?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    subdomain?: StringNullableWithAggregatesFilter<"Business"> | string | null
-    siteConfig?: JsonWithAggregatesFilter<"Business">
-    onboardingError?: StringNullableWithAggregatesFilter<"Business"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Business"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Business"> | Date | string
+    stripeAccountId?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    customDomain?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    siteConfig?: JsonWithAggregatesFilter<"Business">
+    serviceArea?: StringNullableListFilter<"Business">
+    subdomain?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    onboardingError?: StringNullableWithAggregatesFilter<"Business"> | string | null
+    timeZone?: StringWithAggregatesFilter<"Business"> | string
+    socialMedia?: JsonNullableWithAggregatesFilter<"Business">
+    onboarded?: BoolWithAggregatesFilter<"Business"> | boolean
     organizationId?: StringWithAggregatesFilter<"Business"> | string
+    bufferAfterHours?: IntWithAggregatesFilter<"Business"> | number
+    bufferBeforeHours?: IntWithAggregatesFilter<"Business"> | number
+    maxNoticeHours?: IntWithAggregatesFilter<"Business"> | number
+    minBookingAmount?: FloatWithAggregatesFilter<"Business"> | number
+    minNoticeHours?: IntWithAggregatesFilter<"Business"> | number
+    embeddedComponents?: BoolWithAggregatesFilter<"Business"> | boolean
+    embedConfig?: JsonNullableWithAggregatesFilter<"Business">
   }
 
   export type OrganizationWhereInput = {
@@ -23511,51 +23868,52 @@ export namespace Prisma {
     OR?: MembershipWhereInput[]
     NOT?: MembershipWhereInput | MembershipWhereInput[]
     id?: StringFilter<"Membership"> | string
-    role?: EnumRoleFilter<"Membership"> | $Enums.Role
-    createdAt?: DateTimeFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeFilter<"Membership"> | Date | string
-    clerkMembershipId?: StringFilter<"Membership"> | string
     userId?: StringFilter<"Membership"> | string
     organizationId?: StringFilter<"Membership"> | string
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    createdAt?: DateTimeFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeFilter<"Membership"> | Date | string
+    role?: EnumRoleFilter<"Membership"> | $Enums.Role
+    clerkMembershipId?: StringFilter<"Membership"> | string
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
   }
 
   export type MembershipOrderByWithRelationInput = {
     id?: SortOrder
-    role?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    clerkMembershipId?: SortOrder
     userId?: SortOrder
     organizationId?: SortOrder
-    user?: UserOrderByWithRelationInput
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    role?: SortOrder
+    clerkMembershipId?: SortOrder
     organization?: OrganizationOrderByWithRelationInput
+    user?: UserOrderByWithRelationInput
   }
 
   export type MembershipWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     clerkMembershipId?: string
-    userId?: string
+    userId_organizationId?: MembershipUserIdOrganizationIdCompoundUniqueInput
     AND?: MembershipWhereInput | MembershipWhereInput[]
     OR?: MembershipWhereInput[]
     NOT?: MembershipWhereInput | MembershipWhereInput[]
-    role?: EnumRoleFilter<"Membership"> | $Enums.Role
+    userId?: StringFilter<"Membership"> | string
+    organizationId?: StringFilter<"Membership"> | string
     createdAt?: DateTimeFilter<"Membership"> | Date | string
     updatedAt?: DateTimeFilter<"Membership"> | Date | string
-    organizationId?: StringFilter<"Membership"> | string
-    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+    role?: EnumRoleFilter<"Membership"> | $Enums.Role
     organization?: XOR<OrganizationScalarRelationFilter, OrganizationWhereInput>
-  }, "id" | "clerkMembershipId" | "userId">
+    user?: XOR<UserScalarRelationFilter, UserWhereInput>
+  }, "id" | "clerkMembershipId" | "userId_organizationId">
 
   export type MembershipOrderByWithAggregationInput = {
     id?: SortOrder
-    role?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    clerkMembershipId?: SortOrder
     userId?: SortOrder
     organizationId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    role?: SortOrder
+    clerkMembershipId?: SortOrder
     _count?: MembershipCountOrderByAggregateInput
     _max?: MembershipMaxOrderByAggregateInput
     _min?: MembershipMinOrderByAggregateInput
@@ -23566,12 +23924,12 @@ export namespace Prisma {
     OR?: MembershipScalarWhereWithAggregatesInput[]
     NOT?: MembershipScalarWhereWithAggregatesInput | MembershipScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Membership"> | string
-    role?: EnumRoleWithAggregatesFilter<"Membership"> | $Enums.Role
-    createdAt?: DateTimeWithAggregatesFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Membership"> | Date | string
-    clerkMembershipId?: StringWithAggregatesFilter<"Membership"> | string
     userId?: StringWithAggregatesFilter<"Membership"> | string
     organizationId?: StringWithAggregatesFilter<"Membership"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Membership"> | Date | string
+    role?: EnumRoleWithAggregatesFilter<"Membership"> | $Enums.Role
+    clerkMembershipId?: StringWithAggregatesFilter<"Membership"> | string
   }
 
   export type InventoryWhereInput = {
@@ -23589,20 +23947,20 @@ export namespace Prisma {
     teardownTime?: IntFilter<"Inventory"> | number
     images?: StringNullableListFilter<"Inventory">
     primaryImage?: StringNullableFilter<"Inventory"> | string | null
-    stripeProductId?: StringNullableFilter<"Inventory"> | string | null
-    stripePriceId?: StringNullableFilter<"Inventory"> | string | null
     status?: EnumInventoryStatusFilter<"Inventory"> | $Enums.InventoryStatus
     minimumSpace?: StringFilter<"Inventory"> | string
     weightLimit?: IntFilter<"Inventory"> | number
     ageRange?: StringFilter<"Inventory"> | string
     weatherRestrictions?: StringNullableListFilter<"Inventory">
-    quantity?: IntFilter<"Inventory"> | number
+    businessId?: StringFilter<"Inventory"> | string
     createdAt?: DateTimeFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    quantity?: IntFilter<"Inventory"> | number
+    stripePriceId?: StringNullableFilter<"Inventory"> | string | null
+    stripeProductId?: StringNullableFilter<"Inventory"> | string | null
     version?: IntFilter<"Inventory"> | number
-    businessId?: StringFilter<"Inventory"> | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookingItems?: BookingItemListRelationFilter
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
 
   export type InventoryOrderByWithRelationInput = {
@@ -23617,20 +23975,20 @@ export namespace Prisma {
     teardownTime?: SortOrder
     images?: SortOrder
     primaryImage?: SortOrderInput | SortOrder
-    stripeProductId?: SortOrderInput | SortOrder
-    stripePriceId?: SortOrderInput | SortOrder
     status?: SortOrder
     minimumSpace?: SortOrder
     weightLimit?: SortOrder
     ageRange?: SortOrder
     weatherRestrictions?: SortOrder
-    quantity?: SortOrder
+    businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    quantity?: SortOrder
+    stripePriceId?: SortOrderInput | SortOrder
+    stripeProductId?: SortOrderInput | SortOrder
     version?: SortOrder
-    businessId?: SortOrder
-    business?: BusinessOrderByWithRelationInput
     bookingItems?: BookingItemOrderByRelationAggregateInput
+    business?: BusinessOrderByWithRelationInput
   }
 
   export type InventoryWhereUniqueInput = Prisma.AtLeast<{
@@ -23649,19 +24007,19 @@ export namespace Prisma {
     teardownTime?: IntFilter<"Inventory"> | number
     images?: StringNullableListFilter<"Inventory">
     primaryImage?: StringNullableFilter<"Inventory"> | string | null
-    stripePriceId?: StringNullableFilter<"Inventory"> | string | null
     status?: EnumInventoryStatusFilter<"Inventory"> | $Enums.InventoryStatus
     minimumSpace?: StringFilter<"Inventory"> | string
     weightLimit?: IntFilter<"Inventory"> | number
     ageRange?: StringFilter<"Inventory"> | string
     weatherRestrictions?: StringNullableListFilter<"Inventory">
-    quantity?: IntFilter<"Inventory"> | number
+    businessId?: StringFilter<"Inventory"> | string
     createdAt?: DateTimeFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    quantity?: IntFilter<"Inventory"> | number
+    stripePriceId?: StringNullableFilter<"Inventory"> | string | null
     version?: IntFilter<"Inventory"> | number
-    businessId?: StringFilter<"Inventory"> | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookingItems?: BookingItemListRelationFilter
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id" | "stripeProductId">
 
   export type InventoryOrderByWithAggregationInput = {
@@ -23676,18 +24034,18 @@ export namespace Prisma {
     teardownTime?: SortOrder
     images?: SortOrder
     primaryImage?: SortOrderInput | SortOrder
-    stripeProductId?: SortOrderInput | SortOrder
-    stripePriceId?: SortOrderInput | SortOrder
     status?: SortOrder
     minimumSpace?: SortOrder
     weightLimit?: SortOrder
     ageRange?: SortOrder
     weatherRestrictions?: SortOrder
-    quantity?: SortOrder
+    businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    quantity?: SortOrder
+    stripePriceId?: SortOrderInput | SortOrder
+    stripeProductId?: SortOrderInput | SortOrder
     version?: SortOrder
-    businessId?: SortOrder
     _count?: InventoryCountOrderByAggregateInput
     _avg?: InventoryAvgOrderByAggregateInput
     _max?: InventoryMaxOrderByAggregateInput
@@ -23710,18 +24068,18 @@ export namespace Prisma {
     teardownTime?: IntWithAggregatesFilter<"Inventory"> | number
     images?: StringNullableListFilter<"Inventory">
     primaryImage?: StringNullableWithAggregatesFilter<"Inventory"> | string | null
-    stripeProductId?: StringNullableWithAggregatesFilter<"Inventory"> | string | null
-    stripePriceId?: StringNullableWithAggregatesFilter<"Inventory"> | string | null
     status?: EnumInventoryStatusWithAggregatesFilter<"Inventory"> | $Enums.InventoryStatus
     minimumSpace?: StringWithAggregatesFilter<"Inventory"> | string
     weightLimit?: IntWithAggregatesFilter<"Inventory"> | number
     ageRange?: StringWithAggregatesFilter<"Inventory"> | string
     weatherRestrictions?: StringNullableListFilter<"Inventory">
-    quantity?: IntWithAggregatesFilter<"Inventory"> | number
+    businessId?: StringWithAggregatesFilter<"Inventory"> | string
     createdAt?: DateTimeWithAggregatesFilter<"Inventory"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Inventory"> | Date | string
+    quantity?: IntWithAggregatesFilter<"Inventory"> | number
+    stripePriceId?: StringNullableWithAggregatesFilter<"Inventory"> | string | null
+    stripeProductId?: StringNullableWithAggregatesFilter<"Inventory"> | string | null
     version?: IntWithAggregatesFilter<"Inventory"> | number
-    businessId?: StringWithAggregatesFilter<"Inventory"> | string
   }
 
   export type CustomerWhereInput = {
@@ -23742,16 +24100,16 @@ export namespace Prisma {
     lastBooking?: DateTimeNullableFilter<"Customer"> | Date | string | null
     createdAt?: DateTimeFilter<"Customer"> | Date | string
     updatedAt?: DateTimeFilter<"Customer"> | Date | string
+    businessId?: StringFilter<"Customer"> | string
     isLead?: BoolFilter<"Customer"> | boolean
     status?: StringFilter<"Customer"> | string
     type?: StringFilter<"Customer"> | string
-    businessId?: StringFilter<"Customer"> | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookings?: BookingListRelationFilter
-    waivers?: WaiverListRelationFilter
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
     invoices?: InvoiceListRelationFilter
     quotes?: QuoteListRelationFilter
-    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
+    waivers?: WaiverListRelationFilter
   }
 
   export type CustomerOrderByWithRelationInput = {
@@ -23769,16 +24127,16 @@ export namespace Prisma {
     lastBooking?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    businessId?: SortOrder
     isLead?: SortOrder
     status?: SortOrder
     type?: SortOrder
-    businessId?: SortOrder
-    business?: BusinessOrderByWithRelationInput
     bookings?: BookingOrderByRelationAggregateInput
-    waivers?: WaiverOrderByRelationAggregateInput
+    business?: BusinessOrderByWithRelationInput
+    customerStripeAccounts?: CustomerStripeAccountOrderByRelationAggregateInput
     invoices?: InvoiceOrderByRelationAggregateInput
     quotes?: QuoteOrderByRelationAggregateInput
-    customerStripeAccounts?: CustomerStripeAccountOrderByRelationAggregateInput
+    waivers?: WaiverOrderByRelationAggregateInput
   }
 
   export type CustomerWhereUniqueInput = Prisma.AtLeast<{
@@ -23800,16 +24158,16 @@ export namespace Prisma {
     lastBooking?: DateTimeNullableFilter<"Customer"> | Date | string | null
     createdAt?: DateTimeFilter<"Customer"> | Date | string
     updatedAt?: DateTimeFilter<"Customer"> | Date | string
+    businessId?: StringFilter<"Customer"> | string
     isLead?: BoolFilter<"Customer"> | boolean
     status?: StringFilter<"Customer"> | string
     type?: StringFilter<"Customer"> | string
-    businessId?: StringFilter<"Customer"> | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     bookings?: BookingListRelationFilter
-    waivers?: WaiverListRelationFilter
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
     invoices?: InvoiceListRelationFilter
     quotes?: QuoteListRelationFilter
-    customerStripeAccounts?: CustomerStripeAccountListRelationFilter
+    waivers?: WaiverListRelationFilter
   }, "id" | "email_businessId">
 
   export type CustomerOrderByWithAggregationInput = {
@@ -23827,10 +24185,10 @@ export namespace Prisma {
     lastBooking?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    businessId?: SortOrder
     isLead?: SortOrder
     status?: SortOrder
     type?: SortOrder
-    businessId?: SortOrder
     _count?: CustomerCountOrderByAggregateInput
     _avg?: CustomerAvgOrderByAggregateInput
     _max?: CustomerMaxOrderByAggregateInput
@@ -23856,10 +24214,10 @@ export namespace Prisma {
     lastBooking?: DateTimeNullableWithAggregatesFilter<"Customer"> | Date | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Customer"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Customer"> | Date | string
+    businessId?: StringWithAggregatesFilter<"Customer"> | string
     isLead?: BoolWithAggregatesFilter<"Customer"> | boolean
     status?: StringWithAggregatesFilter<"Customer"> | string
     type?: StringWithAggregatesFilter<"Customer"> | string
-    businessId?: StringWithAggregatesFilter<"Customer"> | string
   }
 
   export type BookingWhereInput = {
@@ -23879,29 +24237,31 @@ export namespace Prisma {
     eventCity?: StringNullableFilter<"Booking"> | string | null
     eventState?: StringNullableFilter<"Booking"> | string | null
     eventZipCode?: StringNullableFilter<"Booking"> | string | null
-    eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
     participantCount?: IntNullableFilter<"Booking"> | number | null
+    createdAt?: DateTimeFilter<"Booking"> | Date | string
+    updatedAt?: DateTimeFilter<"Booking"> | Date | string
+    businessId?: StringFilter<"Booking"> | string
+    customerId?: StringNullableFilter<"Booking"> | string | null
+    specialInstructions?: StringNullableFilter<"Booking"> | string | null
     subtotalAmount?: FloatNullableFilter<"Booking"> | number | null
     taxAmount?: FloatNullableFilter<"Booking"> | number | null
     taxRate?: FloatNullableFilter<"Booking"> | number | null
-    isCompleted?: BoolFilter<"Booking"> | boolean
     isCancelled?: BoolFilter<"Booking"> | boolean
-    specialInstructions?: StringNullableFilter<"Booking"> | string | null
-    createdAt?: DateTimeFilter<"Booking"> | Date | string
-    updatedAt?: DateTimeFilter<"Booking"> | Date | string
-    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
+    isCompleted?: BoolFilter<"Booking"> | boolean
+    eventTimeZone?: StringFilter<"Booking"> | string
     couponId?: StringNullableFilter<"Booking"> | string | null
-    businessId?: StringFilter<"Booking"> | string
-    customerId?: StringNullableFilter<"Booking"> | string | null
-    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
+    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
+    currentQuoteId?: StringNullableFilter<"Booking"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     inventoryItems?: BookingItemListRelationFilter
+    invoices?: InvoiceListRelationFilter
     payments?: PaymentListRelationFilter
+    quotes?: QuoteListRelationFilter
+    currentQuote?: XOR<QuoteNullableScalarRelationFilter, QuoteWhereInput> | null
     waivers?: WaiverListRelationFilter
-    invoice?: XOR<InvoiceNullableScalarRelationFilter, InvoiceWhereInput> | null
-    quote?: XOR<QuoteNullableScalarRelationFilter, QuoteWhereInput> | null
   }
 
   export type BookingOrderByWithRelationInput = {
@@ -23918,29 +24278,31 @@ export namespace Prisma {
     eventCity?: SortOrderInput | SortOrder
     eventState?: SortOrderInput | SortOrder
     eventZipCode?: SortOrderInput | SortOrder
-    eventTimeZone?: SortOrder
     participantAge?: SortOrderInput | SortOrder
     participantCount?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    specialInstructions?: SortOrderInput | SortOrder
     subtotalAmount?: SortOrderInput | SortOrder
     taxAmount?: SortOrderInput | SortOrder
     taxRate?: SortOrderInput | SortOrder
-    isCompleted?: SortOrder
     isCancelled?: SortOrder
-    specialInstructions?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
+    eventTimeZone?: SortOrder
     couponId?: SortOrderInput | SortOrder
-    businessId?: SortOrder
-    customerId?: SortOrderInput | SortOrder
-    coupon?: CouponOrderByWithRelationInput
+    expiresAt?: SortOrderInput | SortOrder
+    currentQuoteId?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
+    coupon?: CouponOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
     inventoryItems?: BookingItemOrderByRelationAggregateInput
+    invoices?: InvoiceOrderByRelationAggregateInput
     payments?: PaymentOrderByRelationAggregateInput
+    quotes?: QuoteOrderByRelationAggregateInput
+    currentQuote?: QuoteOrderByWithRelationInput
     waivers?: WaiverOrderByRelationAggregateInput
-    invoice?: InvoiceOrderByWithRelationInput
-    quote?: QuoteOrderByWithRelationInput
   }
 
   export type BookingWhereUniqueInput = Prisma.AtLeast<{
@@ -23960,29 +24322,31 @@ export namespace Prisma {
     eventCity?: StringNullableFilter<"Booking"> | string | null
     eventState?: StringNullableFilter<"Booking"> | string | null
     eventZipCode?: StringNullableFilter<"Booking"> | string | null
-    eventTimeZone?: StringFilter<"Booking"> | string
     participantAge?: IntNullableFilter<"Booking"> | number | null
     participantCount?: IntNullableFilter<"Booking"> | number | null
+    createdAt?: DateTimeFilter<"Booking"> | Date | string
+    updatedAt?: DateTimeFilter<"Booking"> | Date | string
+    businessId?: StringFilter<"Booking"> | string
+    customerId?: StringNullableFilter<"Booking"> | string | null
+    specialInstructions?: StringNullableFilter<"Booking"> | string | null
     subtotalAmount?: FloatNullableFilter<"Booking"> | number | null
     taxAmount?: FloatNullableFilter<"Booking"> | number | null
     taxRate?: FloatNullableFilter<"Booking"> | number | null
-    isCompleted?: BoolFilter<"Booking"> | boolean
     isCancelled?: BoolFilter<"Booking"> | boolean
-    specialInstructions?: StringNullableFilter<"Booking"> | string | null
-    createdAt?: DateTimeFilter<"Booking"> | Date | string
-    updatedAt?: DateTimeFilter<"Booking"> | Date | string
-    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
+    isCompleted?: BoolFilter<"Booking"> | boolean
+    eventTimeZone?: StringFilter<"Booking"> | string
     couponId?: StringNullableFilter<"Booking"> | string | null
-    businessId?: StringFilter<"Booking"> | string
-    customerId?: StringNullableFilter<"Booking"> | string | null
-    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
+    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
+    currentQuoteId?: StringNullableFilter<"Booking"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
     customer?: XOR<CustomerNullableScalarRelationFilter, CustomerWhereInput> | null
     inventoryItems?: BookingItemListRelationFilter
+    invoices?: InvoiceListRelationFilter
     payments?: PaymentListRelationFilter
+    quotes?: QuoteListRelationFilter
+    currentQuote?: XOR<QuoteNullableScalarRelationFilter, QuoteWhereInput> | null
     waivers?: WaiverListRelationFilter
-    invoice?: XOR<InvoiceNullableScalarRelationFilter, InvoiceWhereInput> | null
-    quote?: XOR<QuoteNullableScalarRelationFilter, QuoteWhereInput> | null
   }, "id">
 
   export type BookingOrderByWithAggregationInput = {
@@ -23999,21 +24363,22 @@ export namespace Prisma {
     eventCity?: SortOrderInput | SortOrder
     eventState?: SortOrderInput | SortOrder
     eventZipCode?: SortOrderInput | SortOrder
-    eventTimeZone?: SortOrder
     participantAge?: SortOrderInput | SortOrder
     participantCount?: SortOrderInput | SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrderInput | SortOrder
+    specialInstructions?: SortOrderInput | SortOrder
     subtotalAmount?: SortOrderInput | SortOrder
     taxAmount?: SortOrderInput | SortOrder
     taxRate?: SortOrderInput | SortOrder
-    isCompleted?: SortOrder
     isCancelled?: SortOrder
-    specialInstructions?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    expiresAt?: SortOrderInput | SortOrder
+    isCompleted?: SortOrder
+    eventTimeZone?: SortOrder
     couponId?: SortOrderInput | SortOrder
-    businessId?: SortOrder
-    customerId?: SortOrderInput | SortOrder
+    expiresAt?: SortOrderInput | SortOrder
+    currentQuoteId?: SortOrderInput | SortOrder
     _count?: BookingCountOrderByAggregateInput
     _avg?: BookingAvgOrderByAggregateInput
     _max?: BookingMaxOrderByAggregateInput
@@ -24038,21 +24403,22 @@ export namespace Prisma {
     eventCity?: StringNullableWithAggregatesFilter<"Booking"> | string | null
     eventState?: StringNullableWithAggregatesFilter<"Booking"> | string | null
     eventZipCode?: StringNullableWithAggregatesFilter<"Booking"> | string | null
-    eventTimeZone?: StringWithAggregatesFilter<"Booking"> | string
     participantAge?: IntNullableWithAggregatesFilter<"Booking"> | number | null
     participantCount?: IntNullableWithAggregatesFilter<"Booking"> | number | null
+    createdAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
+    businessId?: StringWithAggregatesFilter<"Booking"> | string
+    customerId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
+    specialInstructions?: StringNullableWithAggregatesFilter<"Booking"> | string | null
     subtotalAmount?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
     taxAmount?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
     taxRate?: FloatNullableWithAggregatesFilter<"Booking"> | number | null
-    isCompleted?: BoolWithAggregatesFilter<"Booking"> | boolean
     isCancelled?: BoolWithAggregatesFilter<"Booking"> | boolean
-    specialInstructions?: StringNullableWithAggregatesFilter<"Booking"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Booking"> | Date | string
-    expiresAt?: DateTimeNullableWithAggregatesFilter<"Booking"> | Date | string | null
+    isCompleted?: BoolWithAggregatesFilter<"Booking"> | boolean
+    eventTimeZone?: StringWithAggregatesFilter<"Booking"> | string
     couponId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
-    businessId?: StringWithAggregatesFilter<"Booking"> | string
-    customerId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
+    expiresAt?: DateTimeNullableWithAggregatesFilter<"Booking"> | Date | string | null
+    currentQuoteId?: StringNullableWithAggregatesFilter<"Booking"> | string | null
   }
 
   export type BookingItemWhereInput = {
@@ -24060,30 +24426,30 @@ export namespace Prisma {
     OR?: BookingItemWhereInput[]
     NOT?: BookingItemWhereInput | BookingItemWhereInput[]
     id?: StringFilter<"BookingItem"> | string
+    bookingId?: StringFilter<"BookingItem"> | string
+    inventoryId?: StringFilter<"BookingItem"> | string
     quantity?: IntFilter<"BookingItem"> | number
     price?: FloatFilter<"BookingItem"> | number
     createdAt?: DateTimeFilter<"BookingItem"> | Date | string
     updatedAt?: DateTimeFilter<"BookingItem"> | Date | string
-    startUTC?: DateTimeFilter<"BookingItem"> | Date | string
-    endUTC?: DateTimeFilter<"BookingItem"> | Date | string
-    bookingId?: StringFilter<"BookingItem"> | string
     status?: StringFilter<"BookingItem"> | string
-    inventoryId?: StringFilter<"BookingItem"> | string
+    endUTC?: DateTimeFilter<"BookingItem"> | Date | string
+    startUTC?: DateTimeFilter<"BookingItem"> | Date | string
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     inventory?: XOR<InventoryScalarRelationFilter, InventoryWhereInput>
   }
 
   export type BookingItemOrderByWithRelationInput = {
     id?: SortOrder
+    bookingId?: SortOrder
+    inventoryId?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    startUTC?: SortOrder
-    endUTC?: SortOrder
-    bookingId?: SortOrder
     status?: SortOrder
-    inventoryId?: SortOrder
+    endUTC?: SortOrder
+    startUTC?: SortOrder
     booking?: BookingOrderByWithRelationInput
     inventory?: InventoryOrderByWithRelationInput
   }
@@ -24093,30 +24459,30 @@ export namespace Prisma {
     AND?: BookingItemWhereInput | BookingItemWhereInput[]
     OR?: BookingItemWhereInput[]
     NOT?: BookingItemWhereInput | BookingItemWhereInput[]
+    bookingId?: StringFilter<"BookingItem"> | string
+    inventoryId?: StringFilter<"BookingItem"> | string
     quantity?: IntFilter<"BookingItem"> | number
     price?: FloatFilter<"BookingItem"> | number
     createdAt?: DateTimeFilter<"BookingItem"> | Date | string
     updatedAt?: DateTimeFilter<"BookingItem"> | Date | string
-    startUTC?: DateTimeFilter<"BookingItem"> | Date | string
-    endUTC?: DateTimeFilter<"BookingItem"> | Date | string
-    bookingId?: StringFilter<"BookingItem"> | string
     status?: StringFilter<"BookingItem"> | string
-    inventoryId?: StringFilter<"BookingItem"> | string
+    endUTC?: DateTimeFilter<"BookingItem"> | Date | string
+    startUTC?: DateTimeFilter<"BookingItem"> | Date | string
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     inventory?: XOR<InventoryScalarRelationFilter, InventoryWhereInput>
   }, "id">
 
   export type BookingItemOrderByWithAggregationInput = {
     id?: SortOrder
+    bookingId?: SortOrder
+    inventoryId?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    startUTC?: SortOrder
-    endUTC?: SortOrder
-    bookingId?: SortOrder
     status?: SortOrder
-    inventoryId?: SortOrder
+    endUTC?: SortOrder
+    startUTC?: SortOrder
     _count?: BookingItemCountOrderByAggregateInput
     _avg?: BookingItemAvgOrderByAggregateInput
     _max?: BookingItemMaxOrderByAggregateInput
@@ -24129,15 +24495,15 @@ export namespace Prisma {
     OR?: BookingItemScalarWhereWithAggregatesInput[]
     NOT?: BookingItemScalarWhereWithAggregatesInput | BookingItemScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"BookingItem"> | string
+    bookingId?: StringWithAggregatesFilter<"BookingItem"> | string
+    inventoryId?: StringWithAggregatesFilter<"BookingItem"> | string
     quantity?: IntWithAggregatesFilter<"BookingItem"> | number
     price?: FloatWithAggregatesFilter<"BookingItem"> | number
     createdAt?: DateTimeWithAggregatesFilter<"BookingItem"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"BookingItem"> | Date | string
-    startUTC?: DateTimeWithAggregatesFilter<"BookingItem"> | Date | string
-    endUTC?: DateTimeWithAggregatesFilter<"BookingItem"> | Date | string
-    bookingId?: StringWithAggregatesFilter<"BookingItem"> | string
     status?: StringWithAggregatesFilter<"BookingItem"> | string
-    inventoryId?: StringWithAggregatesFilter<"BookingItem"> | string
+    endUTC?: DateTimeWithAggregatesFilter<"BookingItem"> | Date | string
+    startUTC?: DateTimeWithAggregatesFilter<"BookingItem"> | Date | string
   }
 
   export type PaymentWhereInput = {
@@ -24148,15 +24514,15 @@ export namespace Prisma {
     amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFilter<"Payment"> | $Enums.PaymentType
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
+    createdAt?: DateTimeFilter<"Payment"> | Date | string
+    bookingId?: StringFilter<"Payment"> | string
+    businessId?: StringFilter<"Payment"> | string
     currency?: StringFilter<"Payment"> | string
     metadata?: JsonNullableFilter<"Payment">
     stripeClientSecret?: StringNullableFilter<"Payment"> | string | null
     stripePaymentId?: StringNullableFilter<"Payment"> | string | null
-    createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
-    bookingId?: StringFilter<"Payment"> | string
-    businessId?: StringFilter<"Payment"> | string
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }
@@ -24166,15 +24532,15 @@ export namespace Prisma {
     amount?: SortOrder
     type?: SortOrder
     status?: SortOrder
+    createdAt?: SortOrder
+    bookingId?: SortOrder
+    businessId?: SortOrder
     currency?: SortOrder
     metadata?: SortOrderInput | SortOrder
     stripeClientSecret?: SortOrderInput | SortOrder
     stripePaymentId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
     updatedAt?: SortOrder
     paidAt?: SortOrderInput | SortOrder
-    bookingId?: SortOrder
-    businessId?: SortOrder
     booking?: BookingOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
   }
@@ -24187,15 +24553,15 @@ export namespace Prisma {
     amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFilter<"Payment"> | $Enums.PaymentType
     status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
+    createdAt?: DateTimeFilter<"Payment"> | Date | string
+    bookingId?: StringFilter<"Payment"> | string
+    businessId?: StringFilter<"Payment"> | string
     currency?: StringFilter<"Payment"> | string
     metadata?: JsonNullableFilter<"Payment">
     stripeClientSecret?: StringNullableFilter<"Payment"> | string | null
     stripePaymentId?: StringNullableFilter<"Payment"> | string | null
-    createdAt?: DateTimeFilter<"Payment"> | Date | string
     updatedAt?: DateTimeFilter<"Payment"> | Date | string
     paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
-    bookingId?: StringFilter<"Payment"> | string
-    businessId?: StringFilter<"Payment"> | string
     booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
   }, "id">
@@ -24205,15 +24571,15 @@ export namespace Prisma {
     amount?: SortOrder
     type?: SortOrder
     status?: SortOrder
+    createdAt?: SortOrder
+    bookingId?: SortOrder
+    businessId?: SortOrder
     currency?: SortOrder
     metadata?: SortOrderInput | SortOrder
     stripeClientSecret?: SortOrderInput | SortOrder
     stripePaymentId?: SortOrderInput | SortOrder
-    createdAt?: SortOrder
     updatedAt?: SortOrder
     paidAt?: SortOrderInput | SortOrder
-    bookingId?: SortOrder
-    businessId?: SortOrder
     _count?: PaymentCountOrderByAggregateInput
     _avg?: PaymentAvgOrderByAggregateInput
     _max?: PaymentMaxOrderByAggregateInput
@@ -24229,15 +24595,15 @@ export namespace Prisma {
     amount?: DecimalWithAggregatesFilter<"Payment"> | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeWithAggregatesFilter<"Payment"> | $Enums.PaymentType
     status?: EnumPaymentStatusWithAggregatesFilter<"Payment"> | $Enums.PaymentStatus
+    createdAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
+    bookingId?: StringWithAggregatesFilter<"Payment"> | string
+    businessId?: StringWithAggregatesFilter<"Payment"> | string
     currency?: StringWithAggregatesFilter<"Payment"> | string
     metadata?: JsonNullableWithAggregatesFilter<"Payment">
     stripeClientSecret?: StringNullableWithAggregatesFilter<"Payment"> | string | null
     stripePaymentId?: StringNullableWithAggregatesFilter<"Payment"> | string | null
-    createdAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Payment"> | Date | string
     paidAt?: DateTimeNullableWithAggregatesFilter<"Payment"> | Date | string | null
-    bookingId?: StringWithAggregatesFilter<"Payment"> | string
-    businessId?: StringWithAggregatesFilter<"Payment"> | string
   }
 
   export type CouponWhereInput = {
@@ -24256,12 +24622,13 @@ export namespace Prisma {
     isActive?: BoolFilter<"Coupon"> | boolean
     minimumAmount?: FloatNullableFilter<"Coupon"> | number | null
     businessId?: StringFilter<"Coupon"> | string
-    stripeCouponId?: StringNullableFilter<"Coupon"> | string | null
-    stripePromotionId?: StringNullableFilter<"Coupon"> | string | null
     createdAt?: DateTimeFilter<"Coupon"> | Date | string
     updatedAt?: DateTimeFilter<"Coupon"> | Date | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    stripeCouponId?: StringNullableFilter<"Coupon"> | string | null
+    stripePromotionId?: StringNullableFilter<"Coupon"> | string | null
     booking?: BookingListRelationFilter
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    salesFunnels?: SalesFunnelListRelationFilter
   }
 
   export type CouponOrderByWithRelationInput = {
@@ -24277,12 +24644,13 @@ export namespace Prisma {
     isActive?: SortOrder
     minimumAmount?: SortOrderInput | SortOrder
     businessId?: SortOrder
-    stripeCouponId?: SortOrderInput | SortOrder
-    stripePromotionId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    business?: BusinessOrderByWithRelationInput
+    stripeCouponId?: SortOrderInput | SortOrder
+    stripePromotionId?: SortOrderInput | SortOrder
     booking?: BookingOrderByRelationAggregateInput
+    business?: BusinessOrderByWithRelationInput
+    salesFunnels?: SalesFunnelOrderByRelationAggregateInput
   }
 
   export type CouponWhereUniqueInput = Prisma.AtLeast<{
@@ -24302,12 +24670,13 @@ export namespace Prisma {
     isActive?: BoolFilter<"Coupon"> | boolean
     minimumAmount?: FloatNullableFilter<"Coupon"> | number | null
     businessId?: StringFilter<"Coupon"> | string
-    stripeCouponId?: StringNullableFilter<"Coupon"> | string | null
-    stripePromotionId?: StringNullableFilter<"Coupon"> | string | null
     createdAt?: DateTimeFilter<"Coupon"> | Date | string
     updatedAt?: DateTimeFilter<"Coupon"> | Date | string
-    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    stripeCouponId?: StringNullableFilter<"Coupon"> | string | null
+    stripePromotionId?: StringNullableFilter<"Coupon"> | string | null
     booking?: BookingListRelationFilter
+    business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    salesFunnels?: SalesFunnelListRelationFilter
   }, "id" | "code_businessId">
 
   export type CouponOrderByWithAggregationInput = {
@@ -24323,10 +24692,10 @@ export namespace Prisma {
     isActive?: SortOrder
     minimumAmount?: SortOrderInput | SortOrder
     businessId?: SortOrder
-    stripeCouponId?: SortOrderInput | SortOrder
-    stripePromotionId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    stripeCouponId?: SortOrderInput | SortOrder
+    stripePromotionId?: SortOrderInput | SortOrder
     _count?: CouponCountOrderByAggregateInput
     _avg?: CouponAvgOrderByAggregateInput
     _max?: CouponMaxOrderByAggregateInput
@@ -24350,10 +24719,10 @@ export namespace Prisma {
     isActive?: BoolWithAggregatesFilter<"Coupon"> | boolean
     minimumAmount?: FloatNullableWithAggregatesFilter<"Coupon"> | number | null
     businessId?: StringWithAggregatesFilter<"Coupon"> | string
-    stripeCouponId?: StringNullableWithAggregatesFilter<"Coupon"> | string | null
-    stripePromotionId?: StringNullableWithAggregatesFilter<"Coupon"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Coupon"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Coupon"> | Date | string
+    stripeCouponId?: StringNullableWithAggregatesFilter<"Coupon"> | string | null
+    stripePromotionId?: StringNullableWithAggregatesFilter<"Coupon"> | string | null
   }
 
   export type SalesFunnelWhereInput = {
@@ -24368,11 +24737,12 @@ export namespace Prisma {
     popupImage?: StringNullableFilter<"SalesFunnel"> | string | null
     formTitle?: StringFilter<"SalesFunnel"> | string
     thankYouMessage?: StringFilter<"SalesFunnel"> | string
-    couponId?: StringNullableFilter<"SalesFunnel"> | string | null
     businessId?: StringFilter<"SalesFunnel"> | string
     createdAt?: DateTimeFilter<"SalesFunnel"> | Date | string
     updatedAt?: DateTimeFilter<"SalesFunnel"> | Date | string
+    couponId?: StringNullableFilter<"SalesFunnel"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
   }
 
   export type SalesFunnelOrderByWithRelationInput = {
@@ -24384,11 +24754,12 @@ export namespace Prisma {
     popupImage?: SortOrderInput | SortOrder
     formTitle?: SortOrder
     thankYouMessage?: SortOrder
-    couponId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    couponId?: SortOrderInput | SortOrder
     business?: BusinessOrderByWithRelationInput
+    coupon?: CouponOrderByWithRelationInput
   }
 
   export type SalesFunnelWhereUniqueInput = Prisma.AtLeast<{
@@ -24403,11 +24774,12 @@ export namespace Prisma {
     popupImage?: StringNullableFilter<"SalesFunnel"> | string | null
     formTitle?: StringFilter<"SalesFunnel"> | string
     thankYouMessage?: StringFilter<"SalesFunnel"> | string
-    couponId?: StringNullableFilter<"SalesFunnel"> | string | null
     businessId?: StringFilter<"SalesFunnel"> | string
     createdAt?: DateTimeFilter<"SalesFunnel"> | Date | string
     updatedAt?: DateTimeFilter<"SalesFunnel"> | Date | string
+    couponId?: StringNullableFilter<"SalesFunnel"> | string | null
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    coupon?: XOR<CouponNullableScalarRelationFilter, CouponWhereInput> | null
   }, "id">
 
   export type SalesFunnelOrderByWithAggregationInput = {
@@ -24419,10 +24791,10 @@ export namespace Prisma {
     popupImage?: SortOrderInput | SortOrder
     formTitle?: SortOrder
     thankYouMessage?: SortOrder
-    couponId?: SortOrderInput | SortOrder
     businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    couponId?: SortOrderInput | SortOrder
     _count?: SalesFunnelCountOrderByAggregateInput
     _max?: SalesFunnelMaxOrderByAggregateInput
     _min?: SalesFunnelMinOrderByAggregateInput
@@ -24440,10 +24812,10 @@ export namespace Prisma {
     popupImage?: StringNullableWithAggregatesFilter<"SalesFunnel"> | string | null
     formTitle?: StringWithAggregatesFilter<"SalesFunnel"> | string
     thankYouMessage?: StringWithAggregatesFilter<"SalesFunnel"> | string
-    couponId?: StringNullableWithAggregatesFilter<"SalesFunnel"> | string | null
     businessId?: StringWithAggregatesFilter<"SalesFunnel"> | string
     createdAt?: DateTimeWithAggregatesFilter<"SalesFunnel"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"SalesFunnel"> | Date | string
+    couponId?: StringNullableWithAggregatesFilter<"SalesFunnel"> | string | null
   }
 
   export type WaiverWhereInput = {
@@ -24451,34 +24823,34 @@ export namespace Prisma {
     OR?: WaiverWhereInput[]
     NOT?: WaiverWhereInput | WaiverWhereInput[]
     id?: StringFilter<"Waiver"> | string
-    status?: EnumWaiverStatusFilter<"Waiver"> | $Enums.WaiverStatus
-    templateVersion?: StringFilter<"Waiver"> | string
-    documentUrl?: StringFilter<"Waiver"> | string
-    docuSealDocumentId?: StringFilter<"Waiver"> | string
-    createdAt?: DateTimeFilter<"Waiver"> | Date | string
-    updatedAt?: DateTimeFilter<"Waiver"> | Date | string
     businessId?: StringFilter<"Waiver"> | string
     customerId?: StringFilter<"Waiver"> | string
     bookingId?: StringFilter<"Waiver"> | string
+    status?: EnumWaiverStatusFilter<"Waiver"> | $Enums.WaiverStatus
+    templateVersion?: StringFilter<"Waiver"> | string
+    documentUrl?: StringFilter<"Waiver"> | string
+    createdAt?: DateTimeFilter<"Waiver"> | Date | string
+    updatedAt?: DateTimeFilter<"Waiver"> | Date | string
+    docuSealDocumentId?: StringFilter<"Waiver"> | string
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
-    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
   }
 
   export type WaiverOrderByWithRelationInput = {
     id?: SortOrder
-    status?: SortOrder
-    templateVersion?: SortOrder
-    documentUrl?: SortOrder
-    docuSealDocumentId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
     bookingId?: SortOrder
+    status?: SortOrder
+    templateVersion?: SortOrder
+    documentUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    docuSealDocumentId?: SortOrder
+    booking?: BookingOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
-    booking?: BookingOrderByWithRelationInput
   }
 
   export type WaiverWhereUniqueInput = Prisma.AtLeast<{
@@ -24488,30 +24860,30 @@ export namespace Prisma {
     AND?: WaiverWhereInput | WaiverWhereInput[]
     OR?: WaiverWhereInput[]
     NOT?: WaiverWhereInput | WaiverWhereInput[]
+    businessId?: StringFilter<"Waiver"> | string
+    customerId?: StringFilter<"Waiver"> | string
+    bookingId?: StringFilter<"Waiver"> | string
     status?: EnumWaiverStatusFilter<"Waiver"> | $Enums.WaiverStatus
     templateVersion?: StringFilter<"Waiver"> | string
     documentUrl?: StringFilter<"Waiver"> | string
     createdAt?: DateTimeFilter<"Waiver"> | Date | string
     updatedAt?: DateTimeFilter<"Waiver"> | Date | string
-    businessId?: StringFilter<"Waiver"> | string
-    customerId?: StringFilter<"Waiver"> | string
-    bookingId?: StringFilter<"Waiver"> | string
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
-    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
   }, "id" | "docuSealDocumentId" | "customerId_businessId_bookingId">
 
   export type WaiverOrderByWithAggregationInput = {
     id?: SortOrder
-    status?: SortOrder
-    templateVersion?: SortOrder
-    documentUrl?: SortOrder
-    docuSealDocumentId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
     bookingId?: SortOrder
+    status?: SortOrder
+    templateVersion?: SortOrder
+    documentUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    docuSealDocumentId?: SortOrder
     _count?: WaiverCountOrderByAggregateInput
     _max?: WaiverMaxOrderByAggregateInput
     _min?: WaiverMinOrderByAggregateInput
@@ -24522,15 +24894,15 @@ export namespace Prisma {
     OR?: WaiverScalarWhereWithAggregatesInput[]
     NOT?: WaiverScalarWhereWithAggregatesInput | WaiverScalarWhereWithAggregatesInput[]
     id?: StringWithAggregatesFilter<"Waiver"> | string
-    status?: EnumWaiverStatusWithAggregatesFilter<"Waiver"> | $Enums.WaiverStatus
-    templateVersion?: StringWithAggregatesFilter<"Waiver"> | string
-    documentUrl?: StringWithAggregatesFilter<"Waiver"> | string
-    docuSealDocumentId?: StringWithAggregatesFilter<"Waiver"> | string
-    createdAt?: DateTimeWithAggregatesFilter<"Waiver"> | Date | string
-    updatedAt?: DateTimeWithAggregatesFilter<"Waiver"> | Date | string
     businessId?: StringWithAggregatesFilter<"Waiver"> | string
     customerId?: StringWithAggregatesFilter<"Waiver"> | string
     bookingId?: StringWithAggregatesFilter<"Waiver"> | string
+    status?: EnumWaiverStatusWithAggregatesFilter<"Waiver"> | $Enums.WaiverStatus
+    templateVersion?: StringWithAggregatesFilter<"Waiver"> | string
+    documentUrl?: StringWithAggregatesFilter<"Waiver"> | string
+    createdAt?: DateTimeWithAggregatesFilter<"Waiver"> | Date | string
+    updatedAt?: DateTimeWithAggregatesFilter<"Waiver"> | Date | string
+    docuSealDocumentId?: StringWithAggregatesFilter<"Waiver"> | string
   }
 
   export type SubscriptionWhereInput = {
@@ -24647,9 +25019,9 @@ export namespace Prisma {
     businessId?: StringFilter<"Invoice"> | string
     customerId?: StringFilter<"Invoice"> | string
     bookingId?: StringFilter<"Invoice"> | string
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
-    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
   }
 
   export type InvoiceOrderByWithRelationInput = {
@@ -24673,15 +25045,14 @@ export namespace Prisma {
     businessId?: SortOrder
     customerId?: SortOrder
     bookingId?: SortOrder
+    booking?: BookingOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
-    booking?: BookingOrderByWithRelationInput
   }
 
   export type InvoiceWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     stripeInvoiceId?: string
-    bookingId?: string
     AND?: InvoiceWhereInput | InvoiceWhereInput[]
     OR?: InvoiceWhereInput[]
     NOT?: InvoiceWhereInput | InvoiceWhereInput[]
@@ -24702,10 +25073,11 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"Invoice"> | Date | string
     businessId?: StringFilter<"Invoice"> | string
     customerId?: StringFilter<"Invoice"> | string
+    bookingId?: StringFilter<"Invoice"> | string
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
-    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
-  }, "id" | "stripeInvoiceId" | "bookingId">
+  }, "id" | "stripeInvoiceId">
 
   export type InvoiceOrderByWithAggregationInput = {
     id?: SortOrder
@@ -24772,18 +25144,22 @@ export namespace Prisma {
     amountSubtotal?: FloatFilter<"Quote"> | number
     amountTax?: FloatFilter<"Quote"> | number
     currency?: StringFilter<"Quote"> | string
-    hostedQuoteUrl?: StringNullableFilter<"Quote"> | string | null
+    appQuoteUrl?: StringNullableFilter<"Quote"> | string | null
+    stripeHostedUrl?: StringNullableFilter<"Quote"> | string | null
     pdfUrl?: StringNullableFilter<"Quote"> | string | null
     expiresAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     metadata?: JsonNullableFilter<"Quote">
+    version?: IntFilter<"Quote"> | number
+    replacesQuoteId?: StringNullableFilter<"Quote"> | string | null
     createdAt?: DateTimeFilter<"Quote"> | Date | string
     updatedAt?: DateTimeFilter<"Quote"> | Date | string
     businessId?: StringFilter<"Quote"> | string
     customerId?: StringFilter<"Quote"> | string
     bookingId?: StringFilter<"Quote"> | string
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
-    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
+    currentBookings?: BookingListRelationFilter
   }
 
   export type QuoteOrderByWithRelationInput = {
@@ -24794,24 +25170,27 @@ export namespace Prisma {
     amountSubtotal?: SortOrder
     amountTax?: SortOrder
     currency?: SortOrder
-    hostedQuoteUrl?: SortOrderInput | SortOrder
+    appQuoteUrl?: SortOrderInput | SortOrder
+    stripeHostedUrl?: SortOrderInput | SortOrder
     pdfUrl?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
+    version?: SortOrder
+    replacesQuoteId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
     bookingId?: SortOrder
+    booking?: BookingOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
     customer?: CustomerOrderByWithRelationInput
-    booking?: BookingOrderByWithRelationInput
+    currentBookings?: BookingOrderByRelationAggregateInput
   }
 
   export type QuoteWhereUniqueInput = Prisma.AtLeast<{
     id?: string
     stripeQuoteId?: string
-    bookingId?: string
     AND?: QuoteWhereInput | QuoteWhereInput[]
     OR?: QuoteWhereInput[]
     NOT?: QuoteWhereInput | QuoteWhereInput[]
@@ -24820,18 +25199,23 @@ export namespace Prisma {
     amountSubtotal?: FloatFilter<"Quote"> | number
     amountTax?: FloatFilter<"Quote"> | number
     currency?: StringFilter<"Quote"> | string
-    hostedQuoteUrl?: StringNullableFilter<"Quote"> | string | null
+    appQuoteUrl?: StringNullableFilter<"Quote"> | string | null
+    stripeHostedUrl?: StringNullableFilter<"Quote"> | string | null
     pdfUrl?: StringNullableFilter<"Quote"> | string | null
     expiresAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     metadata?: JsonNullableFilter<"Quote">
+    version?: IntFilter<"Quote"> | number
+    replacesQuoteId?: StringNullableFilter<"Quote"> | string | null
     createdAt?: DateTimeFilter<"Quote"> | Date | string
     updatedAt?: DateTimeFilter<"Quote"> | Date | string
     businessId?: StringFilter<"Quote"> | string
     customerId?: StringFilter<"Quote"> | string
+    bookingId?: StringFilter<"Quote"> | string
+    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
     customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
-    booking?: XOR<BookingScalarRelationFilter, BookingWhereInput>
-  }, "id" | "stripeQuoteId" | "bookingId">
+    currentBookings?: BookingListRelationFilter
+  }, "id" | "stripeQuoteId">
 
   export type QuoteOrderByWithAggregationInput = {
     id?: SortOrder
@@ -24841,10 +25225,13 @@ export namespace Prisma {
     amountSubtotal?: SortOrder
     amountTax?: SortOrder
     currency?: SortOrder
-    hostedQuoteUrl?: SortOrderInput | SortOrder
+    appQuoteUrl?: SortOrderInput | SortOrder
+    stripeHostedUrl?: SortOrderInput | SortOrder
     pdfUrl?: SortOrderInput | SortOrder
     expiresAt?: SortOrderInput | SortOrder
     metadata?: SortOrderInput | SortOrder
+    version?: SortOrder
+    replacesQuoteId?: SortOrderInput | SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     businessId?: SortOrder
@@ -24868,10 +25255,13 @@ export namespace Prisma {
     amountSubtotal?: FloatWithAggregatesFilter<"Quote"> | number
     amountTax?: FloatWithAggregatesFilter<"Quote"> | number
     currency?: StringWithAggregatesFilter<"Quote"> | string
-    hostedQuoteUrl?: StringNullableWithAggregatesFilter<"Quote"> | string | null
+    appQuoteUrl?: StringNullableWithAggregatesFilter<"Quote"> | string | null
+    stripeHostedUrl?: StringNullableWithAggregatesFilter<"Quote"> | string | null
     pdfUrl?: StringNullableWithAggregatesFilter<"Quote"> | string | null
     expiresAt?: DateTimeNullableWithAggregatesFilter<"Quote"> | Date | string | null
     metadata?: JsonNullableWithAggregatesFilter<"Quote">
+    version?: IntWithAggregatesFilter<"Quote"> | number
+    replacesQuoteId?: StringNullableWithAggregatesFilter<"Quote"> | string | null
     createdAt?: DateTimeWithAggregatesFilter<"Quote"> | Date | string
     updatedAt?: DateTimeWithAggregatesFilter<"Quote"> | Date | string
     businessId?: StringWithAggregatesFilter<"Quote"> | string
@@ -24889,8 +25279,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
     customerId?: StringFilter<"CustomerStripeAccount"> | string
     businessId?: StringFilter<"CustomerStripeAccount"> | string
-    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
   }
 
   export type CustomerStripeAccountOrderByWithRelationInput = {
@@ -24900,8 +25290,8 @@ export namespace Prisma {
     updatedAt?: SortOrder
     customerId?: SortOrder
     businessId?: SortOrder
-    customer?: CustomerOrderByWithRelationInput
     business?: BusinessOrderByWithRelationInput
+    customer?: CustomerOrderByWithRelationInput
   }
 
   export type CustomerStripeAccountWhereUniqueInput = Prisma.AtLeast<{
@@ -24915,8 +25305,8 @@ export namespace Prisma {
     updatedAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
     customerId?: StringFilter<"CustomerStripeAccount"> | string
     businessId?: StringFilter<"CustomerStripeAccount"> | string
-    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
     business?: XOR<BusinessScalarRelationFilter, BusinessWhereInput>
+    customer?: XOR<CustomerScalarRelationFilter, CustomerWhereInput>
   }, "id" | "stripeCustomerId" | "customerId_businessId">
 
   export type CustomerStripeAccountOrderByWithAggregationInput = {
@@ -24947,74 +25337,74 @@ export namespace Prisma {
     id?: string
     email?: string | null
     name?: string | null
-    image?: string | null
-    clerkUserId?: string | null
     createdAt?: Date | string
+    image?: string | null
     updatedAt?: Date | string
-    membership?: MembershipCreateNestedOneWithoutUserInput
+    clerkUserId?: string | null
+    memberships?: MembershipCreateNestedManyWithoutUserInput
   }
 
   export type UserUncheckedCreateInput = {
     id?: string
     email?: string | null
     name?: string | null
-    image?: string | null
-    clerkUserId?: string | null
     createdAt?: Date | string
+    image?: string | null
     updatedAt?: Date | string
-    membership?: MembershipUncheckedCreateNestedOneWithoutUserInput
+    clerkUserId?: string | null
+    memberships?: MembershipUncheckedCreateNestedManyWithoutUserInput
   }
 
   export type UserUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    membership?: MembershipUpdateOneWithoutUserNestedInput
+    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberships?: MembershipUpdateManyWithoutUserNestedInput
   }
 
   export type UserUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    membership?: MembershipUncheckedUpdateOneWithoutUserNestedInput
+    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
+    memberships?: MembershipUncheckedUpdateManyWithoutUserNestedInput
   }
 
   export type UserCreateManyInput = {
     id?: string
     email?: string | null
     name?: string | null
-    image?: string | null
-    clerkUserId?: string | null
     createdAt?: Date | string
+    image?: string | null
     updatedAt?: Date | string
+    clerkUserId?: string | null
   }
 
   export type UserUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type UserUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
     email?: NullableStringFieldUpdateOperationsInput | string | null
     name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BusinessCreateInput = {
@@ -25027,32 +25417,36 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateInput = {
@@ -25065,32 +25459,36 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUpdateInput = {
@@ -25103,32 +25501,36 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateInput = {
@@ -25141,32 +25543,36 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessCreateManyInput = {
@@ -25179,22 +25585,26 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessUpdateManyMutationInput = {
@@ -25207,21 +25617,25 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type BusinessUncheckedUpdateManyInput = {
@@ -25234,22 +25648,26 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
   }
 
   export type OrganizationCreateInput = {
@@ -25322,70 +25740,70 @@ export namespace Prisma {
 
   export type MembershipCreateInput = {
     id?: string
-    role: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    role: $Enums.Role
     clerkMembershipId: string
-    user: UserCreateNestedOneWithoutMembershipInput
     organization: OrganizationCreateNestedOneWithoutMembershipsInput
+    user: UserCreateNestedOneWithoutMembershipsInput
   }
 
   export type MembershipUncheckedCreateInput = {
     id?: string
-    role: $Enums.Role
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    clerkMembershipId: string
     userId: string
     organizationId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role: $Enums.Role
+    clerkMembershipId: string
   }
 
   export type MembershipUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    user?: UserUpdateOneRequiredWithoutMembershipNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutMembershipsNestedInput
+    user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
   export type MembershipUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    clerkMembershipId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     organizationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    clerkMembershipId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MembershipCreateManyInput = {
     id?: string
-    role: $Enums.Role
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    clerkMembershipId: string
     userId: string
     organizationId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    role: $Enums.Role
+    clerkMembershipId: string
   }
 
   export type MembershipUpdateManyMutationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     clerkMembershipId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MembershipUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    clerkMembershipId?: StringFieldUpdateOperationsInput | string
     userId?: StringFieldUpdateOperationsInput | string
     organizationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    clerkMembershipId?: StringFieldUpdateOperationsInput | string
   }
 
   export type InventoryCreateInput = {
@@ -25400,19 +25818,19 @@ export namespace Prisma {
     teardownTime: number
     images?: InventoryCreateimagesInput | string[]
     primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
     status: $Enums.InventoryStatus
     minimumSpace: string
     weightLimit: number
     ageRange: string
     weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
     version?: number
-    business: BusinessCreateNestedOneWithoutInventoryInput
     bookingItems?: BookingItemCreateNestedManyWithoutInventoryInput
+    business: BusinessCreateNestedOneWithoutInventoryInput
   }
 
   export type InventoryUncheckedCreateInput = {
@@ -25427,18 +25845,18 @@ export namespace Prisma {
     teardownTime: number
     images?: InventoryCreateimagesInput | string[]
     primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
     status: $Enums.InventoryStatus
     minimumSpace: string
     weightLimit: number
     ageRange: string
     weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
+    businessId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
     version?: number
-    businessId: string
     bookingItems?: BookingItemUncheckedCreateNestedManyWithoutInventoryInput
   }
 
@@ -25454,19 +25872,19 @@ export namespace Prisma {
     teardownTime?: IntFieldUpdateOperationsInput | number
     images?: InventoryUpdateimagesInput | string[]
     primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
     minimumSpace?: StringFieldUpdateOperationsInput | string
     weightLimit?: IntFieldUpdateOperationsInput | number
     ageRange?: StringFieldUpdateOperationsInput | string
     weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
-    business?: BusinessUpdateOneRequiredWithoutInventoryNestedInput
     bookingItems?: BookingItemUpdateManyWithoutInventoryNestedInput
+    business?: BusinessUpdateOneRequiredWithoutInventoryNestedInput
   }
 
   export type InventoryUncheckedUpdateInput = {
@@ -25481,18 +25899,18 @@ export namespace Prisma {
     teardownTime?: IntFieldUpdateOperationsInput | number
     images?: InventoryUpdateimagesInput | string[]
     primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
     minimumSpace?: StringFieldUpdateOperationsInput | string
     weightLimit?: IntFieldUpdateOperationsInput | number
     ageRange?: StringFieldUpdateOperationsInput | string
     weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
-    businessId?: StringFieldUpdateOperationsInput | string
     bookingItems?: BookingItemUncheckedUpdateManyWithoutInventoryNestedInput
   }
 
@@ -25508,18 +25926,18 @@ export namespace Prisma {
     teardownTime: number
     images?: InventoryCreateimagesInput | string[]
     primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
     status: $Enums.InventoryStatus
     minimumSpace: string
     weightLimit: number
     ageRange: string
     weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
+    businessId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
     version?: number
-    businessId: string
   }
 
   export type InventoryUpdateManyMutationInput = {
@@ -25534,16 +25952,16 @@ export namespace Prisma {
     teardownTime?: IntFieldUpdateOperationsInput | number
     images?: InventoryUpdateimagesInput | string[]
     primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
     minimumSpace?: StringFieldUpdateOperationsInput | string
     weightLimit?: IntFieldUpdateOperationsInput | number
     ageRange?: StringFieldUpdateOperationsInput | string
     weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
   }
 
@@ -25559,18 +25977,18 @@ export namespace Prisma {
     teardownTime?: IntFieldUpdateOperationsInput | number
     images?: InventoryUpdateimagesInput | string[]
     primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
     minimumSpace?: StringFieldUpdateOperationsInput | string
     weightLimit?: IntFieldUpdateOperationsInput | number
     ageRange?: StringFieldUpdateOperationsInput | string
     weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type CustomerCreateInput = {
@@ -25591,12 +26009,12 @@ export namespace Prisma {
     isLead?: boolean
     status?: string
     type?: string
-    business: BusinessCreateNestedOneWithoutCustomersInput
     bookings?: BookingCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
     quotes?: QuoteCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateInput = {
@@ -25614,15 +26032,15 @@ export namespace Prisma {
     lastBooking?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    businessId: string
     isLead?: boolean
     status?: string
     type?: string
-    businessId: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
     quotes?: QuoteUncheckedCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUpdateInput = {
@@ -25643,12 +26061,12 @@ export namespace Prisma {
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateInput = {
@@ -25666,15 +26084,15 @@ export namespace Prisma {
     lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUncheckedUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerCreateManyInput = {
@@ -25692,10 +26110,10 @@ export namespace Prisma {
     lastBooking?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    businessId: string
     isLead?: boolean
     status?: string
     type?: string
-    businessId: string
   }
 
   export type CustomerUpdateManyMutationInput = {
@@ -25733,10 +26151,10 @@ export namespace Prisma {
     lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type BookingCreateInput = {
@@ -25753,26 +26171,27 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    isCompleted?: boolean
+    eventTimeZone?: string
     expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateInput = {
@@ -25789,26 +26208,27 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
     couponId?: string | null
-    businessId: string
-    customerId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUpdateInput = {
@@ -25825,26 +26245,27 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateInput = {
@@ -25861,26 +26282,27 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingCreateManyInput = {
@@ -25897,21 +26319,22 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
     couponId?: string | null
-    businessId: string
-    customerId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
   }
 
   export type BookingUpdateManyMutationInput = {
@@ -25928,17 +26351,17 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
@@ -25956,21 +26379,22 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type BookingItemUpdateInput = {
@@ -25979,24 +26403,24 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     booking?: BookingUpdateOneRequiredWithoutInventoryItemsNestedInput
     inventory?: InventoryUpdateOneRequiredWithoutBookingItemsNestedInput
   }
 
   export type BookingItemUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    inventoryId?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    bookingId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    inventoryId?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BookingItemUpdateManyMutationInput = {
@@ -26005,22 +26429,22 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BookingItemUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    inventoryId?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    bookingId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
-    inventoryId?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type PaymentCreateInput = {
@@ -26028,11 +26452,11 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     type: $Enums.PaymentType
     status: $Enums.PaymentStatus
+    createdAt?: Date | string
     currency?: string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: string | null
     stripePaymentId?: string | null
-    createdAt?: Date | string
     updatedAt?: Date | string
     paidAt?: Date | string | null
     booking: BookingCreateNestedOneWithoutPaymentsInput
@@ -26044,15 +26468,15 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     type: $Enums.PaymentType
     status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    bookingId: string
+    businessId: string
     currency?: string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: string | null
     stripePaymentId?: string | null
-    createdAt?: Date | string
     updatedAt?: Date | string
     paidAt?: Date | string | null
-    bookingId: string
-    businessId: string
   }
 
   export type PaymentUpdateInput = {
@@ -26060,11 +26484,11 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     booking?: BookingUpdateOneRequiredWithoutPaymentsNestedInput
@@ -26076,15 +26500,15 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    bookingId?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type PaymentCreateManyInput = {
@@ -26092,15 +26516,15 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     type: $Enums.PaymentType
     status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    bookingId: string
+    businessId: string
     currency?: string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: string | null
     stripePaymentId?: string | null
-    createdAt?: Date | string
     updatedAt?: Date | string
     paidAt?: Date | string | null
-    bookingId: string
-    businessId: string
   }
 
   export type PaymentUpdateManyMutationInput = {
@@ -26108,11 +26532,11 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
@@ -26122,15 +26546,15 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    bookingId?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type CouponCreateInput = {
@@ -26145,12 +26569,13 @@ export namespace Prisma {
     endDate?: Date | string | null
     isActive?: boolean
     minimumAmount?: number | null
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business: BusinessCreateNestedOneWithoutCouponsInput
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
     booking?: BookingCreateNestedManyWithoutCouponInput
+    business: BusinessCreateNestedOneWithoutCouponsInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutCouponInput
   }
 
   export type CouponUncheckedCreateInput = {
@@ -26166,11 +26591,12 @@ export namespace Prisma {
     isActive?: boolean
     minimumAmount?: number | null
     businessId: string
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
     booking?: BookingUncheckedCreateNestedManyWithoutCouponInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutCouponInput
   }
 
   export type CouponUpdateInput = {
@@ -26185,12 +26611,13 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutCouponsNestedInput
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     booking?: BookingUpdateManyWithoutCouponNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCouponsNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponUncheckedUpdateInput = {
@@ -26206,11 +26633,12 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     businessId?: StringFieldUpdateOperationsInput | string
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     booking?: BookingUncheckedUpdateManyWithoutCouponNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponCreateManyInput = {
@@ -26226,10 +26654,10 @@ export namespace Prisma {
     isActive?: boolean
     minimumAmount?: number | null
     businessId: string
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
   }
 
   export type CouponUpdateManyMutationInput = {
@@ -26244,10 +26672,10 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CouponUncheckedUpdateManyInput = {
@@ -26263,10 +26691,10 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     businessId?: StringFieldUpdateOperationsInput | string
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SalesFunnelCreateInput = {
@@ -26278,10 +26706,10 @@ export namespace Prisma {
     popupImage?: string | null
     formTitle: string
     thankYouMessage: string
-    couponId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutSalesFunnelsInput
+    coupon?: CouponCreateNestedOneWithoutSalesFunnelsInput
   }
 
   export type SalesFunnelUncheckedCreateInput = {
@@ -26293,10 +26721,10 @@ export namespace Prisma {
     popupImage?: string | null
     formTitle: string
     thankYouMessage: string
-    couponId?: string | null
     businessId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    couponId?: string | null
   }
 
   export type SalesFunnelUpdateInput = {
@@ -26308,10 +26736,10 @@ export namespace Prisma {
     popupImage?: NullableStringFieldUpdateOperationsInput | string | null
     formTitle?: StringFieldUpdateOperationsInput | string
     thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     business?: BusinessUpdateOneRequiredWithoutSalesFunnelsNestedInput
+    coupon?: CouponUpdateOneWithoutSalesFunnelsNestedInput
   }
 
   export type SalesFunnelUncheckedUpdateInput = {
@@ -26323,10 +26751,10 @@ export namespace Prisma {
     popupImage?: NullableStringFieldUpdateOperationsInput | string | null
     formTitle?: StringFieldUpdateOperationsInput | string
     thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type SalesFunnelCreateManyInput = {
@@ -26338,10 +26766,10 @@ export namespace Prisma {
     popupImage?: string | null
     formTitle: string
     thankYouMessage: string
-    couponId?: string | null
     businessId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    couponId?: string | null
   }
 
   export type SalesFunnelUpdateManyMutationInput = {
@@ -26353,7 +26781,6 @@ export namespace Prisma {
     popupImage?: NullableStringFieldUpdateOperationsInput | string | null
     formTitle?: StringFieldUpdateOperationsInput | string
     thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26367,10 +26794,10 @@ export namespace Prisma {
     popupImage?: NullableStringFieldUpdateOperationsInput | string | null
     formTitle?: StringFieldUpdateOperationsInput | string
     thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
     businessId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type WaiverCreateInput = {
@@ -26378,25 +26805,25 @@ export namespace Prisma {
     status?: $Enums.WaiverStatus
     templateVersion: string
     documentUrl: string
-    docuSealDocumentId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    docuSealDocumentId: string
+    booking: BookingCreateNestedOneWithoutWaiversInput
     business: BusinessCreateNestedOneWithoutWaiversInput
     customer: CustomerCreateNestedOneWithoutWaiversInput
-    booking: BookingCreateNestedOneWithoutWaiversInput
   }
 
   export type WaiverUncheckedCreateInput = {
     id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
     businessId: string
     customerId: string
     bookingId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    docuSealDocumentId: string
   }
 
   export type WaiverUpdateInput = {
@@ -26404,38 +26831,38 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    booking?: BookingUpdateOneRequiredWithoutWaiversNestedInput
     business?: BusinessUpdateOneRequiredWithoutWaiversNestedInput
     customer?: CustomerUpdateOneRequiredWithoutWaiversNestedInput
-    booking?: BookingUpdateOneRequiredWithoutWaiversNestedInput
   }
 
   export type WaiverUncheckedUpdateInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
   }
 
   export type WaiverCreateManyInput = {
     id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
     businessId: string
     customerId: string
     bookingId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    docuSealDocumentId: string
   }
 
   export type WaiverUpdateManyMutationInput = {
@@ -26443,22 +26870,22 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
   }
 
   export type WaiverUncheckedUpdateManyInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
   }
 
   export type SubscriptionCreateInput = {
@@ -26583,9 +27010,9 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    booking: BookingCreateNestedOneWithoutInvoicesInput
     business: BusinessCreateNestedOneWithoutInvoicesInput
     customer: CustomerCreateNestedOneWithoutInvoicesInput
-    booking: BookingCreateNestedOneWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateInput = {
@@ -26629,9 +27056,9 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUpdateOneRequiredWithoutInvoicesNestedInput
     business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
     customer?: CustomerUpdateOneRequiredWithoutInvoicesNestedInput
-    booking?: BookingUpdateOneRequiredWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateInput = {
@@ -26731,15 +27158,19 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    booking: BookingCreateNestedOneWithoutQuotesInput
     business: BusinessCreateNestedOneWithoutQuotesInput
     customer: CustomerCreateNestedOneWithoutQuotesInput
-    booking: BookingCreateNestedOneWithoutQuoteInput
+    currentBookings?: BookingCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteUncheckedCreateInput = {
@@ -26750,15 +27181,19 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
     customerId: string
     bookingId: string
+    currentBookings?: BookingUncheckedCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteUpdateInput = {
@@ -26769,15 +27204,19 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUpdateOneRequiredWithoutQuotesNestedInput
     business?: BusinessUpdateOneRequiredWithoutQuotesNestedInput
     customer?: CustomerUpdateOneRequiredWithoutQuotesNestedInput
-    booking?: BookingUpdateOneRequiredWithoutQuoteNestedInput
+    currentBookings?: BookingUpdateManyWithoutCurrentQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateInput = {
@@ -26788,15 +27227,19 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
+    currentBookings?: BookingUncheckedUpdateManyWithoutCurrentQuoteNestedInput
   }
 
   export type QuoteCreateManyInput = {
@@ -26807,10 +27250,13 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
@@ -26826,10 +27272,13 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
   }
@@ -26842,10 +27291,13 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
@@ -26858,8 +27310,8 @@ export namespace Prisma {
     stripeCustomerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    customer: CustomerCreateNestedOneWithoutCustomerStripeAccountsInput
     business: BusinessCreateNestedOneWithoutCustomerStripeAccountsInput
+    customer: CustomerCreateNestedOneWithoutCustomerStripeAccountsInput
   }
 
   export type CustomerStripeAccountUncheckedCreateInput = {
@@ -26876,8 +27328,8 @@ export namespace Prisma {
     stripeCustomerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    customer?: CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
     business?: BusinessUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
   }
 
   export type CustomerStripeAccountUncheckedUpdateInput = {
@@ -26955,9 +27407,10 @@ export namespace Prisma {
     not?: NestedDateTimeFilter<$PrismaModel> | Date | string
   }
 
-  export type MembershipNullableScalarRelationFilter = {
-    is?: MembershipWhereInput | null
-    isNot?: MembershipWhereInput | null
+  export type MembershipListRelationFilter = {
+    every?: MembershipWhereInput
+    some?: MembershipWhereInput
+    none?: MembershipWhereInput
   }
 
   export type SortOrderInput = {
@@ -26965,34 +27418,38 @@ export namespace Prisma {
     nulls?: NullsOrder
   }
 
+  export type MembershipOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
   export type UserCountOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrder
-    image?: SortOrder
-    clerkUserId?: SortOrder
     createdAt?: SortOrder
+    image?: SortOrder
     updatedAt?: SortOrder
+    clerkUserId?: SortOrder
   }
 
   export type UserMaxOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrder
-    image?: SortOrder
-    clerkUserId?: SortOrder
     createdAt?: SortOrder
+    image?: SortOrder
     updatedAt?: SortOrder
+    clerkUserId?: SortOrder
   }
 
   export type UserMinOrderByAggregateInput = {
     id?: SortOrder
     email?: SortOrder
     name?: SortOrder
-    image?: SortOrder
-    clerkUserId?: SortOrder
     createdAt?: SortOrder
+    image?: SortOrder
     updatedAt?: SortOrder
+    clerkUserId?: SortOrder
   }
 
   export type StringWithAggregatesFilter<$PrismaModel = never> = {
@@ -27044,6 +27501,29 @@ export namespace Prisma {
     _min?: NestedDateTimeFilter<$PrismaModel>
     _max?: NestedDateTimeFilter<$PrismaModel>
   }
+  export type JsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type StringNullableListFilter<$PrismaModel = never> = {
     equals?: string[] | ListStringFieldRefInput<$PrismaModel> | null
@@ -27051,6 +27531,29 @@ export namespace Prisma {
     hasEvery?: string[] | ListStringFieldRefInput<$PrismaModel>
     hasSome?: string[] | ListStringFieldRefInput<$PrismaModel>
     isEmpty?: boolean
+  }
+  export type JsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type BoolFilter<$PrismaModel = never> = {
@@ -27079,57 +27582,22 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
   }
-  export type JsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableFilterBase<$PrismaModel>>, 'path'>>
 
-  export type JsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
-  export type JsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  export type BookingListRelationFilter = {
+    every?: BookingWhereInput
+    some?: BookingWhereInput
+    none?: BookingWhereInput
   }
 
-  export type InventoryListRelationFilter = {
-    every?: InventoryWhereInput
-    some?: InventoryWhereInput
-    none?: InventoryWhereInput
+  export type OrganizationScalarRelationFilter = {
+    is?: OrganizationWhereInput
+    isNot?: OrganizationWhereInput
+  }
+
+  export type CouponListRelationFilter = {
+    every?: CouponWhereInput
+    some?: CouponWhereInput
+    none?: CouponWhereInput
   }
 
   export type CustomerListRelationFilter = {
@@ -27138,10 +27606,22 @@ export namespace Prisma {
     none?: CustomerWhereInput
   }
 
-  export type BookingListRelationFilter = {
-    every?: BookingWhereInput
-    some?: BookingWhereInput
-    none?: BookingWhereInput
+  export type CustomerStripeAccountListRelationFilter = {
+    every?: CustomerStripeAccountWhereInput
+    some?: CustomerStripeAccountWhereInput
+    none?: CustomerStripeAccountWhereInput
+  }
+
+  export type InventoryListRelationFilter = {
+    every?: InventoryWhereInput
+    some?: InventoryWhereInput
+    none?: InventoryWhereInput
+  }
+
+  export type InvoiceListRelationFilter = {
+    every?: InvoiceWhereInput
+    some?: InvoiceWhereInput
+    none?: InvoiceWhereInput
   }
 
   export type PaymentListRelationFilter = {
@@ -27150,10 +27630,10 @@ export namespace Prisma {
     none?: PaymentWhereInput
   }
 
-  export type CouponListRelationFilter = {
-    every?: CouponWhereInput
-    some?: CouponWhereInput
-    none?: CouponWhereInput
+  export type QuoteListRelationFilter = {
+    every?: QuoteWhereInput
+    some?: QuoteWhereInput
+    none?: QuoteWhereInput
   }
 
   export type SalesFunnelListRelationFilter = {
@@ -27168,30 +27648,11 @@ export namespace Prisma {
     none?: WaiverWhereInput
   }
 
-  export type InvoiceListRelationFilter = {
-    every?: InvoiceWhereInput
-    some?: InvoiceWhereInput
-    none?: InvoiceWhereInput
+  export type BookingOrderByRelationAggregateInput = {
+    _count?: SortOrder
   }
 
-  export type QuoteListRelationFilter = {
-    every?: QuoteWhereInput
-    some?: QuoteWhereInput
-    none?: QuoteWhereInput
-  }
-
-  export type CustomerStripeAccountListRelationFilter = {
-    every?: CustomerStripeAccountWhereInput
-    some?: CustomerStripeAccountWhereInput
-    none?: CustomerStripeAccountWhereInput
-  }
-
-  export type OrganizationScalarRelationFilter = {
-    is?: OrganizationWhereInput
-    isNot?: OrganizationWhereInput
-  }
-
-  export type InventoryOrderByRelationAggregateInput = {
+  export type CouponOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27199,7 +27660,15 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type BookingOrderByRelationAggregateInput = {
+  export type CustomerStripeAccountOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InventoryOrderByRelationAggregateInput = {
+    _count?: SortOrder
+  }
+
+  export type InvoiceOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27207,7 +27676,7 @@ export namespace Prisma {
     _count?: SortOrder
   }
 
-  export type CouponOrderByRelationAggregateInput = {
+  export type QuoteOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27216,18 +27685,6 @@ export namespace Prisma {
   }
 
   export type WaiverOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type InvoiceOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type QuoteOrderByRelationAggregateInput = {
-    _count?: SortOrder
-  }
-
-  export type CustomerStripeAccountOrderByRelationAggregateInput = {
     _count?: SortOrder
   }
 
@@ -27241,28 +27698,34 @@ export namespace Prisma {
     zipCode?: SortOrder
     phone?: SortOrder
     email?: SortOrder
-    serviceArea?: SortOrder
-    onboarded?: SortOrder
     logo?: SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
-    timeZone?: SortOrder
-    stripeAccountId?: SortOrder
-    socialMedia?: SortOrder
-    customDomain?: SortOrder
-    subdomain?: SortOrder
-    siteConfig?: SortOrder
-    onboardingError?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    stripeAccountId?: SortOrder
+    customDomain?: SortOrder
+    siteConfig?: SortOrder
+    serviceArea?: SortOrder
+    subdomain?: SortOrder
+    onboardingError?: SortOrder
+    timeZone?: SortOrder
+    socialMedia?: SortOrder
+    onboarded?: SortOrder
     organizationId?: SortOrder
+    bufferAfterHours?: SortOrder
+    bufferBeforeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    minNoticeHours?: SortOrder
+    embeddedComponents?: SortOrder
+    embedConfig?: SortOrder
   }
 
   export type BusinessAvgOrderByAggregateInput = {
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    bufferAfterHours?: SortOrder
+    bufferBeforeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    minNoticeHours?: SortOrder
   }
 
   export type BusinessMaxOrderByAggregateInput = {
@@ -27275,19 +27738,22 @@ export namespace Prisma {
     zipCode?: SortOrder
     phone?: SortOrder
     email?: SortOrder
-    onboarded?: SortOrder
     logo?: SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
-    timeZone?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     stripeAccountId?: SortOrder
     customDomain?: SortOrder
     subdomain?: SortOrder
     onboardingError?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
+    timeZone?: SortOrder
+    onboarded?: SortOrder
     organizationId?: SortOrder
+    bufferAfterHours?: SortOrder
+    bufferBeforeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    minNoticeHours?: SortOrder
+    embeddedComponents?: SortOrder
   }
 
   export type BusinessMinOrderByAggregateInput = {
@@ -27300,25 +27766,82 @@ export namespace Prisma {
     zipCode?: SortOrder
     phone?: SortOrder
     email?: SortOrder
-    onboarded?: SortOrder
     logo?: SortOrder
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
-    timeZone?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
     stripeAccountId?: SortOrder
     customDomain?: SortOrder
     subdomain?: SortOrder
     onboardingError?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
+    timeZone?: SortOrder
+    onboarded?: SortOrder
     organizationId?: SortOrder
+    bufferAfterHours?: SortOrder
+    bufferBeforeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    minNoticeHours?: SortOrder
+    embeddedComponents?: SortOrder
   }
 
   export type BusinessSumOrderByAggregateInput = {
-    minAdvanceBooking?: SortOrder
-    maxAdvanceBooking?: SortOrder
-    minimumPurchase?: SortOrder
+    bufferAfterHours?: SortOrder
+    bufferBeforeHours?: SortOrder
+    maxNoticeHours?: SortOrder
+    minBookingAmount?: SortOrder
+    minNoticeHours?: SortOrder
+  }
+  export type JsonWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntFilter<$PrismaModel>
+    _min?: NestedJsonFilter<$PrismaModel>
+    _max?: NestedJsonFilter<$PrismaModel>
+  }
+  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
+        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
+
+  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    _count?: NestedIntNullableFilter<$PrismaModel>
+    _min?: NestedJsonNullableFilter<$PrismaModel>
+    _max?: NestedJsonNullableFilter<$PrismaModel>
   }
 
   export type BoolWithAggregatesFilter<$PrismaModel = never> = {
@@ -27360,77 +27883,15 @@ export namespace Prisma {
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
   }
-  export type JsonNullableWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonNullableWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonNullableWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntNullableFilter<$PrismaModel>
-    _min?: NestedJsonNullableFilter<$PrismaModel>
-    _max?: NestedJsonNullableFilter<$PrismaModel>
-  }
-  export type JsonWithAggregatesFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, Exclude<keyof Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>,
-        Required<JsonWithAggregatesFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<JsonWithAggregatesFilterBase<$PrismaModel>>, 'path'>>
-
-  export type JsonWithAggregatesFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    _count?: NestedIntFilter<$PrismaModel>
-    _min?: NestedJsonFilter<$PrismaModel>
-    _max?: NestedJsonFilter<$PrismaModel>
-  }
 
   export type BusinessNullableScalarRelationFilter = {
     is?: BusinessWhereInput | null
     isNot?: BusinessWhereInput | null
   }
 
-  export type MembershipListRelationFilter = {
-    every?: MembershipWhereInput
-    some?: MembershipWhereInput
-    none?: MembershipWhereInput
-  }
-
   export type SubscriptionNullableScalarRelationFilter = {
     is?: SubscriptionWhereInput | null
     isNot?: SubscriptionWhereInput | null
-  }
-
-  export type MembershipOrderByRelationAggregateInput = {
-    _count?: SortOrder
   }
 
   export type OrganizationCountOrderByAggregateInput = {
@@ -27469,34 +27930,39 @@ export namespace Prisma {
     isNot?: UserWhereInput
   }
 
+  export type MembershipUserIdOrganizationIdCompoundUniqueInput = {
+    userId: string
+    organizationId: string
+  }
+
   export type MembershipCountOrderByAggregateInput = {
     id?: SortOrder
-    role?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    clerkMembershipId?: SortOrder
     userId?: SortOrder
     organizationId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    role?: SortOrder
+    clerkMembershipId?: SortOrder
   }
 
   export type MembershipMaxOrderByAggregateInput = {
     id?: SortOrder
-    role?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    clerkMembershipId?: SortOrder
     userId?: SortOrder
     organizationId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    role?: SortOrder
+    clerkMembershipId?: SortOrder
   }
 
   export type MembershipMinOrderByAggregateInput = {
     id?: SortOrder
-    role?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    clerkMembershipId?: SortOrder
     userId?: SortOrder
     organizationId?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    role?: SortOrder
+    clerkMembershipId?: SortOrder
   }
 
   export type EnumRoleWithAggregatesFilter<$PrismaModel = never> = {
@@ -27523,15 +27989,15 @@ export namespace Prisma {
     not?: NestedEnumInventoryStatusFilter<$PrismaModel> | $Enums.InventoryStatus
   }
 
-  export type BusinessScalarRelationFilter = {
-    is?: BusinessWhereInput
-    isNot?: BusinessWhereInput
-  }
-
   export type BookingItemListRelationFilter = {
     every?: BookingItemWhereInput
     some?: BookingItemWhereInput
     none?: BookingItemWhereInput
+  }
+
+  export type BusinessScalarRelationFilter = {
+    is?: BusinessWhereInput
+    isNot?: BusinessWhereInput
   }
 
   export type BookingItemOrderByRelationAggregateInput = {
@@ -27550,18 +28016,18 @@ export namespace Prisma {
     teardownTime?: SortOrder
     images?: SortOrder
     primaryImage?: SortOrder
-    stripeProductId?: SortOrder
-    stripePriceId?: SortOrder
     status?: SortOrder
     minimumSpace?: SortOrder
     weightLimit?: SortOrder
     ageRange?: SortOrder
     weatherRestrictions?: SortOrder
-    quantity?: SortOrder
+    businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    quantity?: SortOrder
+    stripePriceId?: SortOrder
+    stripeProductId?: SortOrder
     version?: SortOrder
-    businessId?: SortOrder
   }
 
   export type InventoryAvgOrderByAggregateInput = {
@@ -27585,17 +28051,17 @@ export namespace Prisma {
     setupTime?: SortOrder
     teardownTime?: SortOrder
     primaryImage?: SortOrder
-    stripeProductId?: SortOrder
-    stripePriceId?: SortOrder
     status?: SortOrder
     minimumSpace?: SortOrder
     weightLimit?: SortOrder
     ageRange?: SortOrder
-    quantity?: SortOrder
+    businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    quantity?: SortOrder
+    stripePriceId?: SortOrder
+    stripeProductId?: SortOrder
     version?: SortOrder
-    businessId?: SortOrder
   }
 
   export type InventoryMinOrderByAggregateInput = {
@@ -27609,17 +28075,17 @@ export namespace Prisma {
     setupTime?: SortOrder
     teardownTime?: SortOrder
     primaryImage?: SortOrder
-    stripeProductId?: SortOrder
-    stripePriceId?: SortOrder
     status?: SortOrder
     minimumSpace?: SortOrder
     weightLimit?: SortOrder
     ageRange?: SortOrder
-    quantity?: SortOrder
+    businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    quantity?: SortOrder
+    stripePriceId?: SortOrder
+    stripeProductId?: SortOrder
     version?: SortOrder
-    businessId?: SortOrder
   }
 
   export type InventorySumOrderByAggregateInput = {
@@ -27683,10 +28149,10 @@ export namespace Prisma {
     lastBooking?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    businessId?: SortOrder
     isLead?: SortOrder
     status?: SortOrder
     type?: SortOrder
-    businessId?: SortOrder
   }
 
   export type CustomerAvgOrderByAggregateInput = {
@@ -27709,10 +28175,10 @@ export namespace Prisma {
     lastBooking?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    businessId?: SortOrder
     isLead?: SortOrder
     status?: SortOrder
     type?: SortOrder
-    businessId?: SortOrder
   }
 
   export type CustomerMinOrderByAggregateInput = {
@@ -27730,10 +28196,10 @@ export namespace Prisma {
     lastBooking?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    businessId?: SortOrder
     isLead?: SortOrder
     status?: SortOrder
     type?: SortOrder
-    businessId?: SortOrder
   }
 
   export type CustomerSumOrderByAggregateInput = {
@@ -27794,11 +28260,6 @@ export namespace Prisma {
     isNot?: CustomerWhereInput | null
   }
 
-  export type InvoiceNullableScalarRelationFilter = {
-    is?: InvoiceWhereInput | null
-    isNot?: InvoiceWhereInput | null
-  }
-
   export type QuoteNullableScalarRelationFilter = {
     is?: QuoteWhereInput | null
     isNot?: QuoteWhereInput | null
@@ -27818,21 +28279,22 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
-    eventTimeZone?: SortOrder
     participantAge?: SortOrder
     participantCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    specialInstructions?: SortOrder
     subtotalAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
-    isCompleted?: SortOrder
     isCancelled?: SortOrder
-    specialInstructions?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    expiresAt?: SortOrder
+    isCompleted?: SortOrder
+    eventTimeZone?: SortOrder
     couponId?: SortOrder
-    businessId?: SortOrder
-    customerId?: SortOrder
+    expiresAt?: SortOrder
+    currentQuoteId?: SortOrder
   }
 
   export type BookingAvgOrderByAggregateInput = {
@@ -27859,21 +28321,22 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
-    eventTimeZone?: SortOrder
     participantAge?: SortOrder
     participantCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    specialInstructions?: SortOrder
     subtotalAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
-    isCompleted?: SortOrder
     isCancelled?: SortOrder
-    specialInstructions?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    expiresAt?: SortOrder
+    isCompleted?: SortOrder
+    eventTimeZone?: SortOrder
     couponId?: SortOrder
-    businessId?: SortOrder
-    customerId?: SortOrder
+    expiresAt?: SortOrder
+    currentQuoteId?: SortOrder
   }
 
   export type BookingMinOrderByAggregateInput = {
@@ -27890,21 +28353,22 @@ export namespace Prisma {
     eventCity?: SortOrder
     eventState?: SortOrder
     eventZipCode?: SortOrder
-    eventTimeZone?: SortOrder
     participantAge?: SortOrder
     participantCount?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    businessId?: SortOrder
+    customerId?: SortOrder
+    specialInstructions?: SortOrder
     subtotalAmount?: SortOrder
     taxAmount?: SortOrder
     taxRate?: SortOrder
-    isCompleted?: SortOrder
     isCancelled?: SortOrder
-    specialInstructions?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
-    expiresAt?: SortOrder
+    isCompleted?: SortOrder
+    eventTimeZone?: SortOrder
     couponId?: SortOrder
-    businessId?: SortOrder
-    customerId?: SortOrder
+    expiresAt?: SortOrder
+    currentQuoteId?: SortOrder
   }
 
   export type BookingSumOrderByAggregateInput = {
@@ -27971,15 +28435,15 @@ export namespace Prisma {
 
   export type BookingItemCountOrderByAggregateInput = {
     id?: SortOrder
+    bookingId?: SortOrder
+    inventoryId?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    startUTC?: SortOrder
-    endUTC?: SortOrder
-    bookingId?: SortOrder
     status?: SortOrder
-    inventoryId?: SortOrder
+    endUTC?: SortOrder
+    startUTC?: SortOrder
   }
 
   export type BookingItemAvgOrderByAggregateInput = {
@@ -27989,28 +28453,28 @@ export namespace Prisma {
 
   export type BookingItemMaxOrderByAggregateInput = {
     id?: SortOrder
+    bookingId?: SortOrder
+    inventoryId?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    startUTC?: SortOrder
-    endUTC?: SortOrder
-    bookingId?: SortOrder
     status?: SortOrder
-    inventoryId?: SortOrder
+    endUTC?: SortOrder
+    startUTC?: SortOrder
   }
 
   export type BookingItemMinOrderByAggregateInput = {
     id?: SortOrder
+    bookingId?: SortOrder
+    inventoryId?: SortOrder
     quantity?: SortOrder
     price?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
-    startUTC?: SortOrder
-    endUTC?: SortOrder
-    bookingId?: SortOrder
     status?: SortOrder
-    inventoryId?: SortOrder
+    endUTC?: SortOrder
+    startUTC?: SortOrder
   }
 
   export type BookingItemSumOrderByAggregateInput = {
@@ -28048,15 +28512,15 @@ export namespace Prisma {
     amount?: SortOrder
     type?: SortOrder
     status?: SortOrder
+    createdAt?: SortOrder
+    bookingId?: SortOrder
+    businessId?: SortOrder
     currency?: SortOrder
     metadata?: SortOrder
     stripeClientSecret?: SortOrder
     stripePaymentId?: SortOrder
-    createdAt?: SortOrder
     updatedAt?: SortOrder
     paidAt?: SortOrder
-    bookingId?: SortOrder
-    businessId?: SortOrder
   }
 
   export type PaymentAvgOrderByAggregateInput = {
@@ -28068,14 +28532,14 @@ export namespace Prisma {
     amount?: SortOrder
     type?: SortOrder
     status?: SortOrder
+    createdAt?: SortOrder
+    bookingId?: SortOrder
+    businessId?: SortOrder
     currency?: SortOrder
     stripeClientSecret?: SortOrder
     stripePaymentId?: SortOrder
-    createdAt?: SortOrder
     updatedAt?: SortOrder
     paidAt?: SortOrder
-    bookingId?: SortOrder
-    businessId?: SortOrder
   }
 
   export type PaymentMinOrderByAggregateInput = {
@@ -28083,14 +28547,14 @@ export namespace Prisma {
     amount?: SortOrder
     type?: SortOrder
     status?: SortOrder
+    createdAt?: SortOrder
+    bookingId?: SortOrder
+    businessId?: SortOrder
     currency?: SortOrder
     stripeClientSecret?: SortOrder
     stripePaymentId?: SortOrder
-    createdAt?: SortOrder
     updatedAt?: SortOrder
     paidAt?: SortOrder
-    bookingId?: SortOrder
-    businessId?: SortOrder
   }
 
   export type PaymentSumOrderByAggregateInput = {
@@ -28158,10 +28622,10 @@ export namespace Prisma {
     isActive?: SortOrder
     minimumAmount?: SortOrder
     businessId?: SortOrder
-    stripeCouponId?: SortOrder
-    stripePromotionId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    stripeCouponId?: SortOrder
+    stripePromotionId?: SortOrder
   }
 
   export type CouponAvgOrderByAggregateInput = {
@@ -28184,10 +28648,10 @@ export namespace Prisma {
     isActive?: SortOrder
     minimumAmount?: SortOrder
     businessId?: SortOrder
-    stripeCouponId?: SortOrder
-    stripePromotionId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    stripeCouponId?: SortOrder
+    stripePromotionId?: SortOrder
   }
 
   export type CouponMinOrderByAggregateInput = {
@@ -28203,10 +28667,10 @@ export namespace Prisma {
     isActive?: SortOrder
     minimumAmount?: SortOrder
     businessId?: SortOrder
-    stripeCouponId?: SortOrder
-    stripePromotionId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    stripeCouponId?: SortOrder
+    stripePromotionId?: SortOrder
   }
 
   export type CouponSumOrderByAggregateInput = {
@@ -28235,10 +28699,10 @@ export namespace Prisma {
     popupImage?: SortOrder
     formTitle?: SortOrder
     thankYouMessage?: SortOrder
-    couponId?: SortOrder
     businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    couponId?: SortOrder
   }
 
   export type SalesFunnelMaxOrderByAggregateInput = {
@@ -28250,10 +28714,10 @@ export namespace Prisma {
     popupImage?: SortOrder
     formTitle?: SortOrder
     thankYouMessage?: SortOrder
-    couponId?: SortOrder
     businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    couponId?: SortOrder
   }
 
   export type SalesFunnelMinOrderByAggregateInput = {
@@ -28265,10 +28729,10 @@ export namespace Prisma {
     popupImage?: SortOrder
     formTitle?: SortOrder
     thankYouMessage?: SortOrder
-    couponId?: SortOrder
     businessId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
+    couponId?: SortOrder
   }
 
   export type EnumWaiverStatusFilter<$PrismaModel = never> = {
@@ -28291,41 +28755,41 @@ export namespace Prisma {
 
   export type WaiverCountOrderByAggregateInput = {
     id?: SortOrder
-    status?: SortOrder
-    templateVersion?: SortOrder
-    documentUrl?: SortOrder
-    docuSealDocumentId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
     bookingId?: SortOrder
+    status?: SortOrder
+    templateVersion?: SortOrder
+    documentUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    docuSealDocumentId?: SortOrder
   }
 
   export type WaiverMaxOrderByAggregateInput = {
     id?: SortOrder
-    status?: SortOrder
-    templateVersion?: SortOrder
-    documentUrl?: SortOrder
-    docuSealDocumentId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
     bookingId?: SortOrder
+    status?: SortOrder
+    templateVersion?: SortOrder
+    documentUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    docuSealDocumentId?: SortOrder
   }
 
   export type WaiverMinOrderByAggregateInput = {
     id?: SortOrder
-    status?: SortOrder
-    templateVersion?: SortOrder
-    documentUrl?: SortOrder
-    docuSealDocumentId?: SortOrder
-    createdAt?: SortOrder
-    updatedAt?: SortOrder
     businessId?: SortOrder
     customerId?: SortOrder
     bookingId?: SortOrder
+    status?: SortOrder
+    templateVersion?: SortOrder
+    documentUrl?: SortOrder
+    createdAt?: SortOrder
+    updatedAt?: SortOrder
+    docuSealDocumentId?: SortOrder
   }
 
   export type EnumWaiverStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -28511,10 +28975,13 @@ export namespace Prisma {
     amountSubtotal?: SortOrder
     amountTax?: SortOrder
     currency?: SortOrder
-    hostedQuoteUrl?: SortOrder
+    appQuoteUrl?: SortOrder
+    stripeHostedUrl?: SortOrder
     pdfUrl?: SortOrder
     expiresAt?: SortOrder
     metadata?: SortOrder
+    version?: SortOrder
+    replacesQuoteId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     businessId?: SortOrder
@@ -28526,6 +28993,7 @@ export namespace Prisma {
     amountTotal?: SortOrder
     amountSubtotal?: SortOrder
     amountTax?: SortOrder
+    version?: SortOrder
   }
 
   export type QuoteMaxOrderByAggregateInput = {
@@ -28536,9 +29004,12 @@ export namespace Prisma {
     amountSubtotal?: SortOrder
     amountTax?: SortOrder
     currency?: SortOrder
-    hostedQuoteUrl?: SortOrder
+    appQuoteUrl?: SortOrder
+    stripeHostedUrl?: SortOrder
     pdfUrl?: SortOrder
     expiresAt?: SortOrder
+    version?: SortOrder
+    replacesQuoteId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     businessId?: SortOrder
@@ -28554,9 +29025,12 @@ export namespace Prisma {
     amountSubtotal?: SortOrder
     amountTax?: SortOrder
     currency?: SortOrder
-    hostedQuoteUrl?: SortOrder
+    appQuoteUrl?: SortOrder
+    stripeHostedUrl?: SortOrder
     pdfUrl?: SortOrder
     expiresAt?: SortOrder
+    version?: SortOrder
+    replacesQuoteId?: SortOrder
     createdAt?: SortOrder
     updatedAt?: SortOrder
     businessId?: SortOrder
@@ -28568,6 +29042,7 @@ export namespace Prisma {
     amountTotal?: SortOrder
     amountSubtotal?: SortOrder
     amountTax?: SortOrder
+    version?: SortOrder
   }
 
   export type EnumQuoteStatusWithAggregatesFilter<$PrismaModel = never> = {
@@ -28612,16 +29087,18 @@ export namespace Prisma {
     businessId?: SortOrder
   }
 
-  export type MembershipCreateNestedOneWithoutUserInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
-    connect?: MembershipWhereUniqueInput
+  export type MembershipCreateNestedManyWithoutUserInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
+    createMany?: MembershipCreateManyUserInputEnvelope
+    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
   }
 
-  export type MembershipUncheckedCreateNestedOneWithoutUserInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
-    connect?: MembershipWhereUniqueInput
+  export type MembershipUncheckedCreateNestedManyWithoutUserInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
+    createMany?: MembershipCreateManyUserInputEnvelope
+    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
   }
 
   export type StringFieldUpdateOperationsInput = {
@@ -28636,42 +29113,36 @@ export namespace Prisma {
     set?: Date | string
   }
 
-  export type MembershipUpdateOneWithoutUserNestedInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
-    upsert?: MembershipUpsertWithoutUserInput
-    disconnect?: MembershipWhereInput | boolean
-    delete?: MembershipWhereInput | boolean
-    connect?: MembershipWhereUniqueInput
-    update?: XOR<XOR<MembershipUpdateToOneWithWhereWithoutUserInput, MembershipUpdateWithoutUserInput>, MembershipUncheckedUpdateWithoutUserInput>
+  export type MembershipUpdateManyWithoutUserNestedInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
+    upsert?: MembershipUpsertWithWhereUniqueWithoutUserInput | MembershipUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: MembershipCreateManyUserInputEnvelope
+    set?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    disconnect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    delete?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    update?: MembershipUpdateWithWhereUniqueWithoutUserInput | MembershipUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: MembershipUpdateManyWithWhereWithoutUserInput | MembershipUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
   }
 
-  export type MembershipUncheckedUpdateOneWithoutUserNestedInput = {
-    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
-    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput
-    upsert?: MembershipUpsertWithoutUserInput
-    disconnect?: MembershipWhereInput | boolean
-    delete?: MembershipWhereInput | boolean
-    connect?: MembershipWhereUniqueInput
-    update?: XOR<XOR<MembershipUpdateToOneWithWhereWithoutUserInput, MembershipUpdateWithoutUserInput>, MembershipUncheckedUpdateWithoutUserInput>
+  export type MembershipUncheckedUpdateManyWithoutUserNestedInput = {
+    create?: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput> | MembershipCreateWithoutUserInput[] | MembershipUncheckedCreateWithoutUserInput[]
+    connectOrCreate?: MembershipCreateOrConnectWithoutUserInput | MembershipCreateOrConnectWithoutUserInput[]
+    upsert?: MembershipUpsertWithWhereUniqueWithoutUserInput | MembershipUpsertWithWhereUniqueWithoutUserInput[]
+    createMany?: MembershipCreateManyUserInputEnvelope
+    set?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    disconnect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    delete?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    connect?: MembershipWhereUniqueInput | MembershipWhereUniqueInput[]
+    update?: MembershipUpdateWithWhereUniqueWithoutUserInput | MembershipUpdateWithWhereUniqueWithoutUserInput[]
+    updateMany?: MembershipUpdateManyWithWhereWithoutUserInput | MembershipUpdateManyWithWhereWithoutUserInput[]
+    deleteMany?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
   }
 
   export type BusinessCreateserviceAreaInput = {
     set: string[]
-  }
-
-  export type InventoryCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
-    createMany?: InventoryCreateManyBusinessInputEnvelope
-    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-  }
-
-  export type CustomerCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<CustomerCreateWithoutBusinessInput, CustomerUncheckedCreateWithoutBusinessInput> | CustomerCreateWithoutBusinessInput[] | CustomerUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CustomerCreateOrConnectWithoutBusinessInput | CustomerCreateOrConnectWithoutBusinessInput[]
-    createMany?: CustomerCreateManyBusinessInputEnvelope
-    connect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
   }
 
   export type BookingCreateNestedManyWithoutBusinessInput = {
@@ -28681,11 +29152,10 @@ export namespace Prisma {
     connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
   }
 
-  export type PaymentCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<PaymentCreateWithoutBusinessInput, PaymentUncheckedCreateWithoutBusinessInput> | PaymentCreateWithoutBusinessInput[] | PaymentUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: PaymentCreateOrConnectWithoutBusinessInput | PaymentCreateOrConnectWithoutBusinessInput[]
-    createMany?: PaymentCreateManyBusinessInputEnvelope
-    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  export type OrganizationCreateNestedOneWithoutBusinessInput = {
+    create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
+    connect?: OrganizationWhereUniqueInput
   }
 
   export type CouponCreateNestedManyWithoutBusinessInput = {
@@ -28693,6 +29163,48 @@ export namespace Prisma {
     connectOrCreate?: CouponCreateOrConnectWithoutBusinessInput | CouponCreateOrConnectWithoutBusinessInput[]
     createMany?: CouponCreateManyBusinessInputEnvelope
     connect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+  }
+
+  export type CustomerCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<CustomerCreateWithoutBusinessInput, CustomerUncheckedCreateWithoutBusinessInput> | CustomerCreateWithoutBusinessInput[] | CustomerUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerCreateOrConnectWithoutBusinessInput | CustomerCreateOrConnectWithoutBusinessInput[]
+    createMany?: CustomerCreateManyBusinessInputEnvelope
+    connect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
+  }
+
+  export type CustomerStripeAccountCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+  }
+
+  export type InventoryCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryCreateManyBusinessInputEnvelope
+    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+  }
+
+  export type InvoiceCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
+  export type PaymentCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<PaymentCreateWithoutBusinessInput, PaymentUncheckedCreateWithoutBusinessInput> | PaymentCreateWithoutBusinessInput[] | PaymentUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: PaymentCreateOrConnectWithoutBusinessInput | PaymentCreateOrConnectWithoutBusinessInput[]
+    createMany?: PaymentCreateManyBusinessInputEnvelope
+    connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type QuoteCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuoteCreateManyBusinessInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
   }
 
   export type SalesFunnelCreateNestedManyWithoutBusinessInput = {
@@ -28709,38 +29221,18 @@ export namespace Prisma {
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
   }
 
-  export type InvoiceCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
-    createMany?: InvoiceCreateManyBusinessInputEnvelope
-    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  export type BookingUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput> | BookingCreateWithoutBusinessInput[] | BookingUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutBusinessInput | BookingCreateOrConnectWithoutBusinessInput[]
+    createMany?: BookingCreateManyBusinessInputEnvelope
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
   }
 
-  export type QuoteCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
-    createMany?: QuoteCreateManyBusinessInputEnvelope
-    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-  }
-
-  export type CustomerStripeAccountCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
-    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-  }
-
-  export type OrganizationCreateNestedOneWithoutBusinessInput = {
-    create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
-    connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
-    connect?: OrganizationWhereUniqueInput
-  }
-
-  export type InventoryUncheckedCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
-    createMany?: InventoryCreateManyBusinessInputEnvelope
-    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+  export type CouponUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput> | CouponCreateWithoutBusinessInput[] | CouponUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CouponCreateOrConnectWithoutBusinessInput | CouponCreateOrConnectWithoutBusinessInput[]
+    createMany?: CouponCreateManyBusinessInputEnvelope
+    connect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
   }
 
   export type CustomerUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -28750,11 +29242,25 @@ export namespace Prisma {
     connect?: CustomerWhereUniqueInput | CustomerWhereUniqueInput[]
   }
 
-  export type BookingUncheckedCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput> | BookingCreateWithoutBusinessInput[] | BookingUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: BookingCreateOrConnectWithoutBusinessInput | BookingCreateOrConnectWithoutBusinessInput[]
-    createMany?: BookingCreateManyBusinessInputEnvelope
-    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+  export type CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+  }
+
+  export type InventoryUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
+    createMany?: InventoryCreateManyBusinessInputEnvelope
+    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+  }
+
+  export type InvoiceUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
   }
 
   export type PaymentUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -28764,11 +29270,11 @@ export namespace Prisma {
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
   }
 
-  export type CouponUncheckedCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput> | CouponCreateWithoutBusinessInput[] | CouponUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CouponCreateOrConnectWithoutBusinessInput | CouponCreateOrConnectWithoutBusinessInput[]
-    createMany?: CouponCreateManyBusinessInputEnvelope
-    connect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+  export type QuoteUncheckedCreateNestedManyWithoutBusinessInput = {
+    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
+    createMany?: QuoteCreateManyBusinessInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
   }
 
   export type SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput = {
@@ -28783,27 +29289,6 @@ export namespace Prisma {
     connectOrCreate?: WaiverCreateOrConnectWithoutBusinessInput | WaiverCreateOrConnectWithoutBusinessInput[]
     createMany?: WaiverCreateManyBusinessInputEnvelope
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-  }
-
-  export type InvoiceUncheckedCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
-    createMany?: InvoiceCreateManyBusinessInputEnvelope
-    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-  }
-
-  export type QuoteUncheckedCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
-    createMany?: QuoteCreateManyBusinessInputEnvelope
-    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-  }
-
-  export type CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
-    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
   }
 
   export type BusinessUpdateserviceAreaInput = {
@@ -28831,18 +29316,40 @@ export namespace Prisma {
     divide?: number
   }
 
-  export type InventoryUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
-    upsert?: InventoryUpsertWithWhereUniqueWithoutBusinessInput | InventoryUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: InventoryCreateManyBusinessInputEnvelope
-    set?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    disconnect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    delete?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    update?: InventoryUpdateWithWhereUniqueWithoutBusinessInput | InventoryUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: InventoryUpdateManyWithWhereWithoutBusinessInput | InventoryUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
+  export type BookingUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput> | BookingCreateWithoutBusinessInput[] | BookingUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutBusinessInput | BookingCreateOrConnectWithoutBusinessInput[]
+    upsert?: BookingUpsertWithWhereUniqueWithoutBusinessInput | BookingUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: BookingCreateManyBusinessInputEnvelope
+    set?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    disconnect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    delete?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    update?: BookingUpdateWithWhereUniqueWithoutBusinessInput | BookingUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: BookingUpdateManyWithWhereWithoutBusinessInput | BookingUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
+  }
+
+  export type OrganizationUpdateOneRequiredWithoutBusinessNestedInput = {
+    create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
+    connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
+    upsert?: OrganizationUpsertWithoutBusinessInput
+    connect?: OrganizationWhereUniqueInput
+    update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutBusinessInput, OrganizationUpdateWithoutBusinessInput>, OrganizationUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type CouponUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput> | CouponCreateWithoutBusinessInput[] | CouponUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CouponCreateOrConnectWithoutBusinessInput | CouponCreateOrConnectWithoutBusinessInput[]
+    upsert?: CouponUpsertWithWhereUniqueWithoutBusinessInput | CouponUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: CouponCreateManyBusinessInputEnvelope
+    set?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    disconnect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    delete?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    connect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    update?: CouponUpdateWithWhereUniqueWithoutBusinessInput | CouponUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: CouponUpdateManyWithWhereWithoutBusinessInput | CouponUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: CouponScalarWhereInput | CouponScalarWhereInput[]
   }
 
   export type CustomerUpdateManyWithoutBusinessNestedInput = {
@@ -28859,18 +29366,46 @@ export namespace Prisma {
     deleteMany?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
   }
 
-  export type BookingUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput> | BookingCreateWithoutBusinessInput[] | BookingUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: BookingCreateOrConnectWithoutBusinessInput | BookingCreateOrConnectWithoutBusinessInput[]
-    upsert?: BookingUpsertWithWhereUniqueWithoutBusinessInput | BookingUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: BookingCreateManyBusinessInputEnvelope
-    set?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    disconnect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    delete?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    update?: BookingUpdateWithWhereUniqueWithoutBusinessInput | BookingUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: BookingUpdateManyWithWhereWithoutBusinessInput | BookingUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
+  export type CustomerStripeAccountUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput | CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+  }
+
+  export type InventoryUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryUpsertWithWhereUniqueWithoutBusinessInput | InventoryUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryCreateManyBusinessInputEnvelope
+    set?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    disconnect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    delete?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    update?: InventoryUpdateWithWhereUniqueWithoutBusinessInput | InventoryUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryUpdateManyWithWhereWithoutBusinessInput | InventoryUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
+  }
+
+  export type InvoiceUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
   }
 
   export type PaymentUpdateManyWithoutBusinessNestedInput = {
@@ -28887,18 +29422,18 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
-  export type CouponUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput> | CouponCreateWithoutBusinessInput[] | CouponUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CouponCreateOrConnectWithoutBusinessInput | CouponCreateOrConnectWithoutBusinessInput[]
-    upsert?: CouponUpsertWithWhereUniqueWithoutBusinessInput | CouponUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: CouponCreateManyBusinessInputEnvelope
-    set?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    disconnect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    delete?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    connect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    update?: CouponUpdateWithWhereUniqueWithoutBusinessInput | CouponUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: CouponUpdateManyWithWhereWithoutBusinessInput | CouponUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: CouponScalarWhereInput | CouponScalarWhereInput[]
+  export type QuoteUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutBusinessInput | QuoteUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuoteCreateManyBusinessInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutBusinessInput | QuoteUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutBusinessInput | QuoteUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
   }
 
   export type SalesFunnelUpdateManyWithoutBusinessNestedInput = {
@@ -28929,68 +29464,32 @@ export namespace Prisma {
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
   }
 
-  export type InvoiceUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
-    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: InvoiceCreateManyBusinessInputEnvelope
-    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  export type BookingUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput> | BookingCreateWithoutBusinessInput[] | BookingUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutBusinessInput | BookingCreateOrConnectWithoutBusinessInput[]
+    upsert?: BookingUpsertWithWhereUniqueWithoutBusinessInput | BookingUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: BookingCreateManyBusinessInputEnvelope
+    set?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    disconnect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    delete?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    update?: BookingUpdateWithWhereUniqueWithoutBusinessInput | BookingUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: BookingUpdateManyWithWhereWithoutBusinessInput | BookingUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
-  export type QuoteUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
-    upsert?: QuoteUpsertWithWhereUniqueWithoutBusinessInput | QuoteUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: QuoteCreateManyBusinessInputEnvelope
-    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    update?: QuoteUpdateWithWhereUniqueWithoutBusinessInput | QuoteUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: QuoteUpdateManyWithWhereWithoutBusinessInput | QuoteUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
-  }
-
-  export type CustomerStripeAccountUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
-    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
-    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput | CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
-  }
-
-  export type OrganizationUpdateOneRequiredWithoutBusinessNestedInput = {
-    create?: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
-    connectOrCreate?: OrganizationCreateOrConnectWithoutBusinessInput
-    upsert?: OrganizationUpsertWithoutBusinessInput
-    connect?: OrganizationWhereUniqueInput
-    update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutBusinessInput, OrganizationUpdateWithoutBusinessInput>, OrganizationUncheckedUpdateWithoutBusinessInput>
-  }
-
-  export type InventoryUncheckedUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
-    upsert?: InventoryUpsertWithWhereUniqueWithoutBusinessInput | InventoryUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: InventoryCreateManyBusinessInputEnvelope
-    set?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    disconnect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    delete?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
-    update?: InventoryUpdateWithWhereUniqueWithoutBusinessInput | InventoryUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: InventoryUpdateManyWithWhereWithoutBusinessInput | InventoryUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
+  export type CouponUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput> | CouponCreateWithoutBusinessInput[] | CouponUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CouponCreateOrConnectWithoutBusinessInput | CouponCreateOrConnectWithoutBusinessInput[]
+    upsert?: CouponUpsertWithWhereUniqueWithoutBusinessInput | CouponUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: CouponCreateManyBusinessInputEnvelope
+    set?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    disconnect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    delete?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    connect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
+    update?: CouponUpdateWithWhereUniqueWithoutBusinessInput | CouponUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: CouponUpdateManyWithWhereWithoutBusinessInput | CouponUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: CouponScalarWhereInput | CouponScalarWhereInput[]
   }
 
   export type CustomerUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -29007,18 +29506,46 @@ export namespace Prisma {
     deleteMany?: CustomerScalarWhereInput | CustomerScalarWhereInput[]
   }
 
-  export type BookingUncheckedUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput> | BookingCreateWithoutBusinessInput[] | BookingUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: BookingCreateOrConnectWithoutBusinessInput | BookingCreateOrConnectWithoutBusinessInput[]
-    upsert?: BookingUpsertWithWhereUniqueWithoutBusinessInput | BookingUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: BookingCreateManyBusinessInputEnvelope
-    set?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    disconnect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    delete?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
-    update?: BookingUpdateWithWhereUniqueWithoutBusinessInput | BookingUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: BookingUpdateManyWithWhereWithoutBusinessInput | BookingUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput | CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+  }
+
+  export type InventoryUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput> | InventoryCreateWithoutBusinessInput[] | InventoryUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InventoryCreateOrConnectWithoutBusinessInput | InventoryCreateOrConnectWithoutBusinessInput[]
+    upsert?: InventoryUpsertWithWhereUniqueWithoutBusinessInput | InventoryUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InventoryCreateManyBusinessInputEnvelope
+    set?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    disconnect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    delete?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    connect?: InventoryWhereUniqueInput | InventoryWhereUniqueInput[]
+    update?: InventoryUpdateWithWhereUniqueWithoutBusinessInput | InventoryUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InventoryUpdateManyWithWhereWithoutBusinessInput | InventoryUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: InvoiceCreateManyBusinessInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
   }
 
   export type PaymentUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -29035,18 +29562,18 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
-  export type CouponUncheckedUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput> | CouponCreateWithoutBusinessInput[] | CouponUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CouponCreateOrConnectWithoutBusinessInput | CouponCreateOrConnectWithoutBusinessInput[]
-    upsert?: CouponUpsertWithWhereUniqueWithoutBusinessInput | CouponUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: CouponCreateManyBusinessInputEnvelope
-    set?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    disconnect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    delete?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    connect?: CouponWhereUniqueInput | CouponWhereUniqueInput[]
-    update?: CouponUpdateWithWhereUniqueWithoutBusinessInput | CouponUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: CouponUpdateManyWithWhereWithoutBusinessInput | CouponUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: CouponScalarWhereInput | CouponScalarWhereInput[]
+  export type QuoteUncheckedUpdateManyWithoutBusinessNestedInput = {
+    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutBusinessInput | QuoteUpsertWithWhereUniqueWithoutBusinessInput[]
+    createMany?: QuoteCreateManyBusinessInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutBusinessInput | QuoteUpdateWithWhereUniqueWithoutBusinessInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutBusinessInput | QuoteUpdateManyWithWhereWithoutBusinessInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
   }
 
   export type SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput = {
@@ -29075,48 +29602,6 @@ export namespace Prisma {
     update?: WaiverUpdateWithWhereUniqueWithoutBusinessInput | WaiverUpdateWithWhereUniqueWithoutBusinessInput[]
     updateMany?: WaiverUpdateManyWithWhereWithoutBusinessInput | WaiverUpdateManyWithWhereWithoutBusinessInput[]
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
-  }
-
-  export type InvoiceUncheckedUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<InvoiceCreateWithoutBusinessInput, InvoiceUncheckedCreateWithoutBusinessInput> | InvoiceCreateWithoutBusinessInput[] | InvoiceUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBusinessInput | InvoiceCreateOrConnectWithoutBusinessInput[]
-    upsert?: InvoiceUpsertWithWhereUniqueWithoutBusinessInput | InvoiceUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: InvoiceCreateManyBusinessInputEnvelope
-    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
-    update?: InvoiceUpdateWithWhereUniqueWithoutBusinessInput | InvoiceUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: InvoiceUpdateManyWithWhereWithoutBusinessInput | InvoiceUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
-  }
-
-  export type QuoteUncheckedUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<QuoteCreateWithoutBusinessInput, QuoteUncheckedCreateWithoutBusinessInput> | QuoteCreateWithoutBusinessInput[] | QuoteUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: QuoteCreateOrConnectWithoutBusinessInput | QuoteCreateOrConnectWithoutBusinessInput[]
-    upsert?: QuoteUpsertWithWhereUniqueWithoutBusinessInput | QuoteUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: QuoteCreateManyBusinessInputEnvelope
-    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
-    update?: QuoteUpdateWithWhereUniqueWithoutBusinessInput | QuoteUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: QuoteUpdateManyWithWhereWithoutBusinessInput | QuoteUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
-  }
-
-  export type CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput> | CustomerStripeAccountCreateWithoutBusinessInput[] | CustomerStripeAccountUncheckedCreateWithoutBusinessInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutBusinessInput | CustomerStripeAccountCreateOrConnectWithoutBusinessInput[]
-    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput[]
-    createMany?: CustomerStripeAccountCreateManyBusinessInputEnvelope
-    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput[]
-    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput | CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput[]
-    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutOrganizationInput = {
@@ -29225,28 +29710,20 @@ export namespace Prisma {
     update?: XOR<XOR<SubscriptionUpdateToOneWithWhereWithoutOrganizationInput, SubscriptionUpdateWithoutOrganizationInput>, SubscriptionUncheckedUpdateWithoutOrganizationInput>
   }
 
-  export type UserCreateNestedOneWithoutMembershipInput = {
-    create?: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
-    connectOrCreate?: UserCreateOrConnectWithoutMembershipInput
-    connect?: UserWhereUniqueInput
-  }
-
   export type OrganizationCreateNestedOneWithoutMembershipsInput = {
     create?: XOR<OrganizationCreateWithoutMembershipsInput, OrganizationUncheckedCreateWithoutMembershipsInput>
     connectOrCreate?: OrganizationCreateOrConnectWithoutMembershipsInput
     connect?: OrganizationWhereUniqueInput
   }
 
-  export type EnumRoleFieldUpdateOperationsInput = {
-    set?: $Enums.Role
+  export type UserCreateNestedOneWithoutMembershipsInput = {
+    create?: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMembershipsInput
+    connect?: UserWhereUniqueInput
   }
 
-  export type UserUpdateOneRequiredWithoutMembershipNestedInput = {
-    create?: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
-    connectOrCreate?: UserCreateOrConnectWithoutMembershipInput
-    upsert?: UserUpsertWithoutMembershipInput
-    connect?: UserWhereUniqueInput
-    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMembershipInput, UserUpdateWithoutMembershipInput>, UserUncheckedUpdateWithoutMembershipInput>
+  export type EnumRoleFieldUpdateOperationsInput = {
+    set?: $Enums.Role
   }
 
   export type OrganizationUpdateOneRequiredWithoutMembershipsNestedInput = {
@@ -29257,6 +29734,14 @@ export namespace Prisma {
     update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutMembershipsInput, OrganizationUpdateWithoutMembershipsInput>, OrganizationUncheckedUpdateWithoutMembershipsInput>
   }
 
+  export type UserUpdateOneRequiredWithoutMembershipsNestedInput = {
+    create?: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
+    connectOrCreate?: UserCreateOrConnectWithoutMembershipsInput
+    upsert?: UserUpsertWithoutMembershipsInput
+    connect?: UserWhereUniqueInput
+    update?: XOR<XOR<UserUpdateToOneWithWhereWithoutMembershipsInput, UserUpdateWithoutMembershipsInput>, UserUncheckedUpdateWithoutMembershipsInput>
+  }
+
   export type InventoryCreateimagesInput = {
     set: string[]
   }
@@ -29265,14 +29750,14 @@ export namespace Prisma {
     set: string[]
   }
 
+  export type BookingItemCreateNestedManyWithoutInventoryInput = {
+    connect?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutInventoryInput = {
     create?: XOR<BusinessCreateWithoutInventoryInput, BusinessUncheckedCreateWithoutInventoryInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutInventoryInput
     connect?: BusinessWhereUniqueInput
-  }
-
-  export type BookingItemCreateNestedManyWithoutInventoryInput = {
-    connect?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
   }
 
   export type BookingItemUncheckedCreateNestedManyWithoutInventoryInput = {
@@ -29297,14 +29782,6 @@ export namespace Prisma {
     push?: string | string[]
   }
 
-  export type BusinessUpdateOneRequiredWithoutInventoryNestedInput = {
-    create?: XOR<BusinessCreateWithoutInventoryInput, BusinessUncheckedCreateWithoutInventoryInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryInput
-    upsert?: BusinessUpsertWithoutInventoryInput
-    connect?: BusinessWhereUniqueInput
-    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutInventoryInput, BusinessUpdateWithoutInventoryInput>, BusinessUncheckedUpdateWithoutInventoryInput>
-  }
-
   export type BookingItemUpdateManyWithoutInventoryNestedInput = {
     set?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
     disconnect?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
@@ -29313,6 +29790,14 @@ export namespace Prisma {
     update?: BookingItemUpdateWithWhereUniqueWithoutInventoryInput | BookingItemUpdateWithWhereUniqueWithoutInventoryInput[]
     updateMany?: BookingItemUpdateManyWithWhereWithoutInventoryInput | BookingItemUpdateManyWithWhereWithoutInventoryInput[]
     deleteMany?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
+  }
+
+  export type BusinessUpdateOneRequiredWithoutInventoryNestedInput = {
+    create?: XOR<BusinessCreateWithoutInventoryInput, BusinessUncheckedCreateWithoutInventoryInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutInventoryInput
+    upsert?: BusinessUpsertWithoutInventoryInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutInventoryInput, BusinessUpdateWithoutInventoryInput>, BusinessUncheckedUpdateWithoutInventoryInput>
   }
 
   export type BookingItemUncheckedUpdateManyWithoutInventoryNestedInput = {
@@ -29325,12 +29810,6 @@ export namespace Prisma {
     deleteMany?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
   }
 
-  export type BusinessCreateNestedOneWithoutCustomersInput = {
-    create?: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutCustomersInput
-    connect?: BusinessWhereUniqueInput
-  }
-
   export type BookingCreateNestedManyWithoutCustomerInput = {
     create?: XOR<BookingCreateWithoutCustomerInput, BookingUncheckedCreateWithoutCustomerInput> | BookingCreateWithoutCustomerInput[] | BookingUncheckedCreateWithoutCustomerInput[]
     connectOrCreate?: BookingCreateOrConnectWithoutCustomerInput | BookingCreateOrConnectWithoutCustomerInput[]
@@ -29338,11 +29817,17 @@ export namespace Prisma {
     connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
   }
 
-  export type WaiverCreateNestedManyWithoutCustomerInput = {
-    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
-    createMany?: WaiverCreateManyCustomerInputEnvelope
-    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+  export type BusinessCreateNestedOneWithoutCustomersInput = {
+    create?: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutCustomersInput
+    connect?: BusinessWhereUniqueInput
+  }
+
+  export type CustomerStripeAccountCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
   }
 
   export type InvoiceCreateNestedManyWithoutCustomerInput = {
@@ -29359,11 +29844,11 @@ export namespace Prisma {
     connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
   }
 
-  export type CustomerStripeAccountCreateNestedManyWithoutCustomerInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
-    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+  export type WaiverCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
+    createMany?: WaiverCreateManyCustomerInputEnvelope
+    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
   }
 
   export type BookingUncheckedCreateNestedManyWithoutCustomerInput = {
@@ -29373,11 +29858,11 @@ export namespace Prisma {
     connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
   }
 
-  export type WaiverUncheckedCreateNestedManyWithoutCustomerInput = {
-    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
-    createMany?: WaiverCreateManyCustomerInputEnvelope
-    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+  export type CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
   }
 
   export type InvoiceUncheckedCreateNestedManyWithoutCustomerInput = {
@@ -29394,23 +29879,15 @@ export namespace Prisma {
     connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
   }
 
-  export type CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
-    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+  export type WaiverUncheckedCreateNestedManyWithoutCustomerInput = {
+    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
+    createMany?: WaiverCreateManyCustomerInputEnvelope
+    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
   }
 
   export type NullableDateTimeFieldUpdateOperationsInput = {
     set?: Date | string | null
-  }
-
-  export type BusinessUpdateOneRequiredWithoutCustomersNestedInput = {
-    create?: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutCustomersInput
-    upsert?: BusinessUpsertWithoutCustomersInput
-    connect?: BusinessWhereUniqueInput
-    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutCustomersInput, BusinessUpdateWithoutCustomersInput>, BusinessUncheckedUpdateWithoutCustomersInput>
   }
 
   export type BookingUpdateManyWithoutCustomerNestedInput = {
@@ -29427,18 +29904,26 @@ export namespace Prisma {
     deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
-  export type WaiverUpdateManyWithoutCustomerNestedInput = {
-    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
-    upsert?: WaiverUpsertWithWhereUniqueWithoutCustomerInput | WaiverUpsertWithWhereUniqueWithoutCustomerInput[]
-    createMany?: WaiverCreateManyCustomerInputEnvelope
-    set?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    disconnect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    delete?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    update?: WaiverUpdateWithWhereUniqueWithoutCustomerInput | WaiverUpdateWithWhereUniqueWithoutCustomerInput[]
-    updateMany?: WaiverUpdateManyWithWhereWithoutCustomerInput | WaiverUpdateManyWithWhereWithoutCustomerInput[]
-    deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
+  export type BusinessUpdateOneRequiredWithoutCustomersNestedInput = {
+    create?: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutCustomersInput
+    upsert?: BusinessUpsertWithoutCustomersInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutCustomersInput, BusinessUpdateWithoutCustomersInput>, BusinessUncheckedUpdateWithoutCustomersInput>
+  }
+
+  export type CustomerStripeAccountUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput | CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
   }
 
   export type InvoiceUpdateManyWithoutCustomerNestedInput = {
@@ -29469,18 +29954,18 @@ export namespace Prisma {
     deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
   }
 
-  export type CustomerStripeAccountUpdateManyWithoutCustomerNestedInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
-    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput[]
-    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
-    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput[]
-    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput | CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput[]
-    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+  export type WaiverUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
+    upsert?: WaiverUpsertWithWhereUniqueWithoutCustomerInput | WaiverUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: WaiverCreateManyCustomerInputEnvelope
+    set?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    disconnect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    delete?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    update?: WaiverUpdateWithWhereUniqueWithoutCustomerInput | WaiverUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: WaiverUpdateManyWithWhereWithoutCustomerInput | WaiverUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
   }
 
   export type BookingUncheckedUpdateManyWithoutCustomerNestedInput = {
@@ -29497,18 +29982,18 @@ export namespace Prisma {
     deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
-  export type WaiverUncheckedUpdateManyWithoutCustomerNestedInput = {
-    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
-    upsert?: WaiverUpsertWithWhereUniqueWithoutCustomerInput | WaiverUpsertWithWhereUniqueWithoutCustomerInput[]
-    createMany?: WaiverCreateManyCustomerInputEnvelope
-    set?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    disconnect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    delete?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-    update?: WaiverUpdateWithWhereUniqueWithoutCustomerInput | WaiverUpdateWithWhereUniqueWithoutCustomerInput[]
-    updateMany?: WaiverUpdateManyWithWhereWithoutCustomerInput | WaiverUpdateManyWithWhereWithoutCustomerInput[]
-    deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
+    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
+    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
+    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput | CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
   }
 
   export type InvoiceUncheckedUpdateManyWithoutCustomerNestedInput = {
@@ -29539,30 +30024,30 @@ export namespace Prisma {
     deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
   }
 
-  export type CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput = {
-    create?: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput> | CustomerStripeAccountCreateWithoutCustomerInput[] | CustomerStripeAccountUncheckedCreateWithoutCustomerInput[]
-    connectOrCreate?: CustomerStripeAccountCreateOrConnectWithoutCustomerInput | CustomerStripeAccountCreateOrConnectWithoutCustomerInput[]
-    upsert?: CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput[]
-    createMany?: CustomerStripeAccountCreateManyCustomerInputEnvelope
-    set?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    disconnect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    delete?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    connect?: CustomerStripeAccountWhereUniqueInput | CustomerStripeAccountWhereUniqueInput[]
-    update?: CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput | CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput[]
-    updateMany?: CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput | CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput[]
-    deleteMany?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
-  }
-
-  export type CouponCreateNestedOneWithoutBookingInput = {
-    create?: XOR<CouponCreateWithoutBookingInput, CouponUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: CouponCreateOrConnectWithoutBookingInput
-    connect?: CouponWhereUniqueInput
+  export type WaiverUncheckedUpdateManyWithoutCustomerNestedInput = {
+    create?: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput> | WaiverCreateWithoutCustomerInput[] | WaiverUncheckedCreateWithoutCustomerInput[]
+    connectOrCreate?: WaiverCreateOrConnectWithoutCustomerInput | WaiverCreateOrConnectWithoutCustomerInput[]
+    upsert?: WaiverUpsertWithWhereUniqueWithoutCustomerInput | WaiverUpsertWithWhereUniqueWithoutCustomerInput[]
+    createMany?: WaiverCreateManyCustomerInputEnvelope
+    set?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    disconnect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    delete?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
+    update?: WaiverUpdateWithWhereUniqueWithoutCustomerInput | WaiverUpdateWithWhereUniqueWithoutCustomerInput[]
+    updateMany?: WaiverUpdateManyWithWhereWithoutCustomerInput | WaiverUpdateManyWithWhereWithoutCustomerInput[]
+    deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutBookingsInput = {
     create?: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutBookingsInput
     connect?: BusinessWhereUniqueInput
+  }
+
+  export type CouponCreateNestedOneWithoutBookingInput = {
+    create?: XOR<CouponCreateWithoutBookingInput, CouponUncheckedCreateWithoutBookingInput>
+    connectOrCreate?: CouponCreateOrConnectWithoutBookingInput
+    connect?: CouponWhereUniqueInput
   }
 
   export type CustomerCreateNestedOneWithoutBookingsInput = {
@@ -29575,11 +30060,31 @@ export namespace Prisma {
     connect?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
   }
 
+  export type InvoiceCreateNestedManyWithoutBookingInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput> | InvoiceCreateWithoutBookingInput[] | InvoiceUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput | InvoiceCreateOrConnectWithoutBookingInput[]
+    createMany?: InvoiceCreateManyBookingInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+  }
+
   export type PaymentCreateNestedManyWithoutBookingInput = {
     create?: XOR<PaymentCreateWithoutBookingInput, PaymentUncheckedCreateWithoutBookingInput> | PaymentCreateWithoutBookingInput[] | PaymentUncheckedCreateWithoutBookingInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutBookingInput | PaymentCreateOrConnectWithoutBookingInput[]
     createMany?: PaymentCreateManyBookingInputEnvelope
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
+  }
+
+  export type QuoteCreateNestedManyWithoutBookingInput = {
+    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput> | QuoteCreateWithoutBookingInput[] | QuoteUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput | QuoteCreateOrConnectWithoutBookingInput[]
+    createMany?: QuoteCreateManyBookingInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+  }
+
+  export type QuoteCreateNestedOneWithoutCurrentBookingsInput = {
+    create?: XOR<QuoteCreateWithoutCurrentBookingsInput, QuoteUncheckedCreateWithoutCurrentBookingsInput>
+    connectOrCreate?: QuoteCreateOrConnectWithoutCurrentBookingsInput
+    connect?: QuoteWhereUniqueInput
   }
 
   export type WaiverCreateNestedManyWithoutBookingInput = {
@@ -29589,20 +30094,15 @@ export namespace Prisma {
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
   }
 
-  export type InvoiceCreateNestedOneWithoutBookingInput = {
-    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
-    connect?: InvoiceWhereUniqueInput
-  }
-
-  export type QuoteCreateNestedOneWithoutBookingInput = {
-    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput
-    connect?: QuoteWhereUniqueInput
-  }
-
   export type BookingItemUncheckedCreateNestedManyWithoutBookingInput = {
     connect?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
+  }
+
+  export type InvoiceUncheckedCreateNestedManyWithoutBookingInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput> | InvoiceCreateWithoutBookingInput[] | InvoiceUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput | InvoiceCreateOrConnectWithoutBookingInput[]
+    createMany?: InvoiceCreateManyBookingInputEnvelope
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
   }
 
   export type PaymentUncheckedCreateNestedManyWithoutBookingInput = {
@@ -29612,23 +30112,18 @@ export namespace Prisma {
     connect?: PaymentWhereUniqueInput | PaymentWhereUniqueInput[]
   }
 
+  export type QuoteUncheckedCreateNestedManyWithoutBookingInput = {
+    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput> | QuoteCreateWithoutBookingInput[] | QuoteUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput | QuoteCreateOrConnectWithoutBookingInput[]
+    createMany?: QuoteCreateManyBookingInputEnvelope
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+  }
+
   export type WaiverUncheckedCreateNestedManyWithoutBookingInput = {
     create?: XOR<WaiverCreateWithoutBookingInput, WaiverUncheckedCreateWithoutBookingInput> | WaiverCreateWithoutBookingInput[] | WaiverUncheckedCreateWithoutBookingInput[]
     connectOrCreate?: WaiverCreateOrConnectWithoutBookingInput | WaiverCreateOrConnectWithoutBookingInput[]
     createMany?: WaiverCreateManyBookingInputEnvelope
     connect?: WaiverWhereUniqueInput | WaiverWhereUniqueInput[]
-  }
-
-  export type InvoiceUncheckedCreateNestedOneWithoutBookingInput = {
-    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
-    connect?: InvoiceWhereUniqueInput
-  }
-
-  export type QuoteUncheckedCreateNestedOneWithoutBookingInput = {
-    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput
-    connect?: QuoteWhereUniqueInput
   }
 
   export type EnumBookingStatusFieldUpdateOperationsInput = {
@@ -29651,6 +30146,14 @@ export namespace Prisma {
     divide?: number
   }
 
+  export type BusinessUpdateOneRequiredWithoutBookingsNestedInput = {
+    create?: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutBookingsInput
+    upsert?: BusinessUpsertWithoutBookingsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutBookingsInput, BusinessUpdateWithoutBookingsInput>, BusinessUncheckedUpdateWithoutBookingsInput>
+  }
+
   export type CouponUpdateOneWithoutBookingNestedInput = {
     create?: XOR<CouponCreateWithoutBookingInput, CouponUncheckedCreateWithoutBookingInput>
     connectOrCreate?: CouponCreateOrConnectWithoutBookingInput
@@ -29659,14 +30162,6 @@ export namespace Prisma {
     delete?: CouponWhereInput | boolean
     connect?: CouponWhereUniqueInput
     update?: XOR<XOR<CouponUpdateToOneWithWhereWithoutBookingInput, CouponUpdateWithoutBookingInput>, CouponUncheckedUpdateWithoutBookingInput>
-  }
-
-  export type BusinessUpdateOneRequiredWithoutBookingsNestedInput = {
-    create?: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutBookingsInput
-    upsert?: BusinessUpsertWithoutBookingsInput
-    connect?: BusinessWhereUniqueInput
-    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutBookingsInput, BusinessUpdateWithoutBookingsInput>, BusinessUncheckedUpdateWithoutBookingsInput>
   }
 
   export type CustomerUpdateOneWithoutBookingsNestedInput = {
@@ -29689,6 +30184,20 @@ export namespace Prisma {
     deleteMany?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
   }
 
+  export type InvoiceUpdateManyWithoutBookingNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput> | InvoiceCreateWithoutBookingInput[] | InvoiceUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput | InvoiceCreateOrConnectWithoutBookingInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBookingInput | InvoiceUpsertWithWhereUniqueWithoutBookingInput[]
+    createMany?: InvoiceCreateManyBookingInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBookingInput | InvoiceUpdateWithWhereUniqueWithoutBookingInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBookingInput | InvoiceUpdateManyWithWhereWithoutBookingInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
+  }
+
   export type PaymentUpdateManyWithoutBookingNestedInput = {
     create?: XOR<PaymentCreateWithoutBookingInput, PaymentUncheckedCreateWithoutBookingInput> | PaymentCreateWithoutBookingInput[] | PaymentUncheckedCreateWithoutBookingInput[]
     connectOrCreate?: PaymentCreateOrConnectWithoutBookingInput | PaymentCreateOrConnectWithoutBookingInput[]
@@ -29701,6 +30210,30 @@ export namespace Prisma {
     update?: PaymentUpdateWithWhereUniqueWithoutBookingInput | PaymentUpdateWithWhereUniqueWithoutBookingInput[]
     updateMany?: PaymentUpdateManyWithWhereWithoutBookingInput | PaymentUpdateManyWithWhereWithoutBookingInput[]
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+  }
+
+  export type QuoteUpdateManyWithoutBookingNestedInput = {
+    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput> | QuoteCreateWithoutBookingInput[] | QuoteUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput | QuoteCreateOrConnectWithoutBookingInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutBookingInput | QuoteUpsertWithWhereUniqueWithoutBookingInput[]
+    createMany?: QuoteCreateManyBookingInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutBookingInput | QuoteUpdateWithWhereUniqueWithoutBookingInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutBookingInput | QuoteUpdateManyWithWhereWithoutBookingInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
+  }
+
+  export type QuoteUpdateOneWithoutCurrentBookingsNestedInput = {
+    create?: XOR<QuoteCreateWithoutCurrentBookingsInput, QuoteUncheckedCreateWithoutCurrentBookingsInput>
+    connectOrCreate?: QuoteCreateOrConnectWithoutCurrentBookingsInput
+    upsert?: QuoteUpsertWithoutCurrentBookingsInput
+    disconnect?: QuoteWhereInput | boolean
+    delete?: QuoteWhereInput | boolean
+    connect?: QuoteWhereUniqueInput
+    update?: XOR<XOR<QuoteUpdateToOneWithWhereWithoutCurrentBookingsInput, QuoteUpdateWithoutCurrentBookingsInput>, QuoteUncheckedUpdateWithoutCurrentBookingsInput>
   }
 
   export type WaiverUpdateManyWithoutBookingNestedInput = {
@@ -29717,26 +30250,6 @@ export namespace Prisma {
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
   }
 
-  export type InvoiceUpdateOneWithoutBookingNestedInput = {
-    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
-    upsert?: InvoiceUpsertWithoutBookingInput
-    disconnect?: InvoiceWhereInput | boolean
-    delete?: InvoiceWhereInput | boolean
-    connect?: InvoiceWhereUniqueInput
-    update?: XOR<XOR<InvoiceUpdateToOneWithWhereWithoutBookingInput, InvoiceUpdateWithoutBookingInput>, InvoiceUncheckedUpdateWithoutBookingInput>
-  }
-
-  export type QuoteUpdateOneWithoutBookingNestedInput = {
-    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput
-    upsert?: QuoteUpsertWithoutBookingInput
-    disconnect?: QuoteWhereInput | boolean
-    delete?: QuoteWhereInput | boolean
-    connect?: QuoteWhereUniqueInput
-    update?: XOR<XOR<QuoteUpdateToOneWithWhereWithoutBookingInput, QuoteUpdateWithoutBookingInput>, QuoteUncheckedUpdateWithoutBookingInput>
-  }
-
   export type BookingItemUncheckedUpdateManyWithoutBookingNestedInput = {
     set?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
     disconnect?: BookingItemWhereUniqueInput | BookingItemWhereUniqueInput[]
@@ -29745,6 +30258,20 @@ export namespace Prisma {
     update?: BookingItemUpdateWithWhereUniqueWithoutBookingInput | BookingItemUpdateWithWhereUniqueWithoutBookingInput[]
     updateMany?: BookingItemUpdateManyWithWhereWithoutBookingInput | BookingItemUpdateManyWithWhereWithoutBookingInput[]
     deleteMany?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutBookingNestedInput = {
+    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput> | InvoiceCreateWithoutBookingInput[] | InvoiceUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput | InvoiceCreateOrConnectWithoutBookingInput[]
+    upsert?: InvoiceUpsertWithWhereUniqueWithoutBookingInput | InvoiceUpsertWithWhereUniqueWithoutBookingInput[]
+    createMany?: InvoiceCreateManyBookingInputEnvelope
+    set?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    disconnect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    delete?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    connect?: InvoiceWhereUniqueInput | InvoiceWhereUniqueInput[]
+    update?: InvoiceUpdateWithWhereUniqueWithoutBookingInput | InvoiceUpdateWithWhereUniqueWithoutBookingInput[]
+    updateMany?: InvoiceUpdateManyWithWhereWithoutBookingInput | InvoiceUpdateManyWithWhereWithoutBookingInput[]
+    deleteMany?: InvoiceScalarWhereInput | InvoiceScalarWhereInput[]
   }
 
   export type PaymentUncheckedUpdateManyWithoutBookingNestedInput = {
@@ -29761,6 +30288,20 @@ export namespace Prisma {
     deleteMany?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
   }
 
+  export type QuoteUncheckedUpdateManyWithoutBookingNestedInput = {
+    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput> | QuoteCreateWithoutBookingInput[] | QuoteUncheckedCreateWithoutBookingInput[]
+    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput | QuoteCreateOrConnectWithoutBookingInput[]
+    upsert?: QuoteUpsertWithWhereUniqueWithoutBookingInput | QuoteUpsertWithWhereUniqueWithoutBookingInput[]
+    createMany?: QuoteCreateManyBookingInputEnvelope
+    set?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    disconnect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    delete?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    connect?: QuoteWhereUniqueInput | QuoteWhereUniqueInput[]
+    update?: QuoteUpdateWithWhereUniqueWithoutBookingInput | QuoteUpdateWithWhereUniqueWithoutBookingInput[]
+    updateMany?: QuoteUpdateManyWithWhereWithoutBookingInput | QuoteUpdateManyWithWhereWithoutBookingInput[]
+    deleteMany?: QuoteScalarWhereInput | QuoteScalarWhereInput[]
+  }
+
   export type WaiverUncheckedUpdateManyWithoutBookingNestedInput = {
     create?: XOR<WaiverCreateWithoutBookingInput, WaiverUncheckedCreateWithoutBookingInput> | WaiverCreateWithoutBookingInput[] | WaiverUncheckedCreateWithoutBookingInput[]
     connectOrCreate?: WaiverCreateOrConnectWithoutBookingInput | WaiverCreateOrConnectWithoutBookingInput[]
@@ -29773,26 +30314,6 @@ export namespace Prisma {
     update?: WaiverUpdateWithWhereUniqueWithoutBookingInput | WaiverUpdateWithWhereUniqueWithoutBookingInput[]
     updateMany?: WaiverUpdateManyWithWhereWithoutBookingInput | WaiverUpdateManyWithWhereWithoutBookingInput[]
     deleteMany?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
-  }
-
-  export type InvoiceUncheckedUpdateOneWithoutBookingNestedInput = {
-    create?: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: InvoiceCreateOrConnectWithoutBookingInput
-    upsert?: InvoiceUpsertWithoutBookingInput
-    disconnect?: InvoiceWhereInput | boolean
-    delete?: InvoiceWhereInput | boolean
-    connect?: InvoiceWhereUniqueInput
-    update?: XOR<XOR<InvoiceUpdateToOneWithWhereWithoutBookingInput, InvoiceUpdateWithoutBookingInput>, InvoiceUncheckedUpdateWithoutBookingInput>
-  }
-
-  export type QuoteUncheckedUpdateOneWithoutBookingNestedInput = {
-    create?: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput>
-    connectOrCreate?: QuoteCreateOrConnectWithoutBookingInput
-    upsert?: QuoteUpsertWithoutBookingInput
-    disconnect?: QuoteWhereInput | boolean
-    delete?: QuoteWhereInput | boolean
-    connect?: QuoteWhereUniqueInput
-    update?: XOR<XOR<QuoteUpdateToOneWithWhereWithoutBookingInput, QuoteUpdateWithoutBookingInput>, QuoteUncheckedUpdateWithoutBookingInput>
   }
 
   export type BookingUpdateOneRequiredWithoutInventoryItemsNestedInput = {
@@ -29855,17 +30376,24 @@ export namespace Prisma {
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutPaymentsInput, BusinessUpdateWithoutPaymentsInput>, BusinessUncheckedUpdateWithoutPaymentsInput>
   }
 
+  export type BookingCreateNestedManyWithoutCouponInput = {
+    create?: XOR<BookingCreateWithoutCouponInput, BookingUncheckedCreateWithoutCouponInput> | BookingCreateWithoutCouponInput[] | BookingUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutCouponInput | BookingCreateOrConnectWithoutCouponInput[]
+    createMany?: BookingCreateManyCouponInputEnvelope
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutCouponsInput = {
     create?: XOR<BusinessCreateWithoutCouponsInput, BusinessUncheckedCreateWithoutCouponsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutCouponsInput
     connect?: BusinessWhereUniqueInput
   }
 
-  export type BookingCreateNestedManyWithoutCouponInput = {
-    create?: XOR<BookingCreateWithoutCouponInput, BookingUncheckedCreateWithoutCouponInput> | BookingCreateWithoutCouponInput[] | BookingUncheckedCreateWithoutCouponInput[]
-    connectOrCreate?: BookingCreateOrConnectWithoutCouponInput | BookingCreateOrConnectWithoutCouponInput[]
-    createMany?: BookingCreateManyCouponInputEnvelope
-    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+  export type SalesFunnelCreateNestedManyWithoutCouponInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
   }
 
   export type BookingUncheckedCreateNestedManyWithoutCouponInput = {
@@ -29875,16 +30403,15 @@ export namespace Prisma {
     connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
   }
 
-  export type EnumDiscountTypeFieldUpdateOperationsInput = {
-    set?: $Enums.DiscountType
+  export type SalesFunnelUncheckedCreateNestedManyWithoutCouponInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
   }
 
-  export type BusinessUpdateOneRequiredWithoutCouponsNestedInput = {
-    create?: XOR<BusinessCreateWithoutCouponsInput, BusinessUncheckedCreateWithoutCouponsInput>
-    connectOrCreate?: BusinessCreateOrConnectWithoutCouponsInput
-    upsert?: BusinessUpsertWithoutCouponsInput
-    connect?: BusinessWhereUniqueInput
-    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutCouponsInput, BusinessUpdateWithoutCouponsInput>, BusinessUncheckedUpdateWithoutCouponsInput>
+  export type EnumDiscountTypeFieldUpdateOperationsInput = {
+    set?: $Enums.DiscountType
   }
 
   export type BookingUpdateManyWithoutCouponNestedInput = {
@@ -29901,6 +30428,28 @@ export namespace Prisma {
     deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
+  export type BusinessUpdateOneRequiredWithoutCouponsNestedInput = {
+    create?: XOR<BusinessCreateWithoutCouponsInput, BusinessUncheckedCreateWithoutCouponsInput>
+    connectOrCreate?: BusinessCreateOrConnectWithoutCouponsInput
+    upsert?: BusinessUpsertWithoutCouponsInput
+    connect?: BusinessWhereUniqueInput
+    update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutCouponsInput, BusinessUpdateWithoutCouponsInput>, BusinessUncheckedUpdateWithoutCouponsInput>
+  }
+
+  export type SalesFunnelUpdateManyWithoutCouponNestedInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    upsert?: SalesFunnelUpsertWithWhereUniqueWithoutCouponInput | SalesFunnelUpsertWithWhereUniqueWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    set?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    disconnect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    delete?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    update?: SalesFunnelUpdateWithWhereUniqueWithoutCouponInput | SalesFunnelUpdateWithWhereUniqueWithoutCouponInput[]
+    updateMany?: SalesFunnelUpdateManyWithWhereWithoutCouponInput | SalesFunnelUpdateManyWithWhereWithoutCouponInput[]
+    deleteMany?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
+  }
+
   export type BookingUncheckedUpdateManyWithoutCouponNestedInput = {
     create?: XOR<BookingCreateWithoutCouponInput, BookingUncheckedCreateWithoutCouponInput> | BookingCreateWithoutCouponInput[] | BookingUncheckedCreateWithoutCouponInput[]
     connectOrCreate?: BookingCreateOrConnectWithoutCouponInput | BookingCreateOrConnectWithoutCouponInput[]
@@ -29915,10 +30464,30 @@ export namespace Prisma {
     deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
+  export type SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput = {
+    create?: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput> | SalesFunnelCreateWithoutCouponInput[] | SalesFunnelUncheckedCreateWithoutCouponInput[]
+    connectOrCreate?: SalesFunnelCreateOrConnectWithoutCouponInput | SalesFunnelCreateOrConnectWithoutCouponInput[]
+    upsert?: SalesFunnelUpsertWithWhereUniqueWithoutCouponInput | SalesFunnelUpsertWithWhereUniqueWithoutCouponInput[]
+    createMany?: SalesFunnelCreateManyCouponInputEnvelope
+    set?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    disconnect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    delete?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    connect?: SalesFunnelWhereUniqueInput | SalesFunnelWhereUniqueInput[]
+    update?: SalesFunnelUpdateWithWhereUniqueWithoutCouponInput | SalesFunnelUpdateWithWhereUniqueWithoutCouponInput[]
+    updateMany?: SalesFunnelUpdateManyWithWhereWithoutCouponInput | SalesFunnelUpdateManyWithWhereWithoutCouponInput[]
+    deleteMany?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
+  }
+
   export type BusinessCreateNestedOneWithoutSalesFunnelsInput = {
     create?: XOR<BusinessCreateWithoutSalesFunnelsInput, BusinessUncheckedCreateWithoutSalesFunnelsInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutSalesFunnelsInput
     connect?: BusinessWhereUniqueInput
+  }
+
+  export type CouponCreateNestedOneWithoutSalesFunnelsInput = {
+    create?: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
+    connectOrCreate?: CouponCreateOrConnectWithoutSalesFunnelsInput
+    connect?: CouponWhereUniqueInput
   }
 
   export type BusinessUpdateOneRequiredWithoutSalesFunnelsNestedInput = {
@@ -29927,6 +30496,22 @@ export namespace Prisma {
     upsert?: BusinessUpsertWithoutSalesFunnelsInput
     connect?: BusinessWhereUniqueInput
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutSalesFunnelsInput, BusinessUpdateWithoutSalesFunnelsInput>, BusinessUncheckedUpdateWithoutSalesFunnelsInput>
+  }
+
+  export type CouponUpdateOneWithoutSalesFunnelsNestedInput = {
+    create?: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
+    connectOrCreate?: CouponCreateOrConnectWithoutSalesFunnelsInput
+    upsert?: CouponUpsertWithoutSalesFunnelsInput
+    disconnect?: CouponWhereInput | boolean
+    delete?: CouponWhereInput | boolean
+    connect?: CouponWhereUniqueInput
+    update?: XOR<XOR<CouponUpdateToOneWithWhereWithoutSalesFunnelsInput, CouponUpdateWithoutSalesFunnelsInput>, CouponUncheckedUpdateWithoutSalesFunnelsInput>
+  }
+
+  export type BookingCreateNestedOneWithoutWaiversInput = {
+    create?: XOR<BookingCreateWithoutWaiversInput, BookingUncheckedCreateWithoutWaiversInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutWaiversInput
+    connect?: BookingWhereUniqueInput
   }
 
   export type BusinessCreateNestedOneWithoutWaiversInput = {
@@ -29941,14 +30526,16 @@ export namespace Prisma {
     connect?: CustomerWhereUniqueInput
   }
 
-  export type BookingCreateNestedOneWithoutWaiversInput = {
-    create?: XOR<BookingCreateWithoutWaiversInput, BookingUncheckedCreateWithoutWaiversInput>
-    connectOrCreate?: BookingCreateOrConnectWithoutWaiversInput
-    connect?: BookingWhereUniqueInput
-  }
-
   export type EnumWaiverStatusFieldUpdateOperationsInput = {
     set?: $Enums.WaiverStatus
+  }
+
+  export type BookingUpdateOneRequiredWithoutWaiversNestedInput = {
+    create?: XOR<BookingCreateWithoutWaiversInput, BookingUncheckedCreateWithoutWaiversInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutWaiversInput
+    upsert?: BookingUpsertWithoutWaiversInput
+    connect?: BookingWhereUniqueInput
+    update?: XOR<XOR<BookingUpdateToOneWithWhereWithoutWaiversInput, BookingUpdateWithoutWaiversInput>, BookingUncheckedUpdateWithoutWaiversInput>
   }
 
   export type BusinessUpdateOneRequiredWithoutWaiversNestedInput = {
@@ -29965,14 +30552,6 @@ export namespace Prisma {
     upsert?: CustomerUpsertWithoutWaiversInput
     connect?: CustomerWhereUniqueInput
     update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutWaiversInput, CustomerUpdateWithoutWaiversInput>, CustomerUncheckedUpdateWithoutWaiversInput>
-  }
-
-  export type BookingUpdateOneRequiredWithoutWaiversNestedInput = {
-    create?: XOR<BookingCreateWithoutWaiversInput, BookingUncheckedCreateWithoutWaiversInput>
-    connectOrCreate?: BookingCreateOrConnectWithoutWaiversInput
-    upsert?: BookingUpsertWithoutWaiversInput
-    connect?: BookingWhereUniqueInput
-    update?: XOR<XOR<BookingUpdateToOneWithWhereWithoutWaiversInput, BookingUpdateWithoutWaiversInput>, BookingUncheckedUpdateWithoutWaiversInput>
   }
 
   export type OrganizationCreateNestedOneWithoutSubscriptionInput = {
@@ -29993,6 +30572,12 @@ export namespace Prisma {
     update?: XOR<XOR<OrganizationUpdateToOneWithWhereWithoutSubscriptionInput, OrganizationUpdateWithoutSubscriptionInput>, OrganizationUncheckedUpdateWithoutSubscriptionInput>
   }
 
+  export type BookingCreateNestedOneWithoutInvoicesInput = {
+    create?: XOR<BookingCreateWithoutInvoicesInput, BookingUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutInvoicesInput
+    connect?: BookingWhereUniqueInput
+  }
+
   export type BusinessCreateNestedOneWithoutInvoicesInput = {
     create?: XOR<BusinessCreateWithoutInvoicesInput, BusinessUncheckedCreateWithoutInvoicesInput>
     connectOrCreate?: BusinessCreateOrConnectWithoutInvoicesInput
@@ -30005,14 +30590,16 @@ export namespace Prisma {
     connect?: CustomerWhereUniqueInput
   }
 
-  export type BookingCreateNestedOneWithoutInvoiceInput = {
-    create?: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
-    connectOrCreate?: BookingCreateOrConnectWithoutInvoiceInput
-    connect?: BookingWhereUniqueInput
-  }
-
   export type EnumInvoiceStatusFieldUpdateOperationsInput = {
     set?: $Enums.InvoiceStatus
+  }
+
+  export type BookingUpdateOneRequiredWithoutInvoicesNestedInput = {
+    create?: XOR<BookingCreateWithoutInvoicesInput, BookingUncheckedCreateWithoutInvoicesInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutInvoicesInput
+    upsert?: BookingUpsertWithoutInvoicesInput
+    connect?: BookingWhereUniqueInput
+    update?: XOR<XOR<BookingUpdateToOneWithWhereWithoutInvoicesInput, BookingUpdateWithoutInvoicesInput>, BookingUncheckedUpdateWithoutInvoicesInput>
   }
 
   export type BusinessUpdateOneRequiredWithoutInvoicesNestedInput = {
@@ -30031,12 +30618,10 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutInvoicesInput, CustomerUpdateWithoutInvoicesInput>, CustomerUncheckedUpdateWithoutInvoicesInput>
   }
 
-  export type BookingUpdateOneRequiredWithoutInvoiceNestedInput = {
-    create?: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
-    connectOrCreate?: BookingCreateOrConnectWithoutInvoiceInput
-    upsert?: BookingUpsertWithoutInvoiceInput
+  export type BookingCreateNestedOneWithoutQuotesInput = {
+    create?: XOR<BookingCreateWithoutQuotesInput, BookingUncheckedCreateWithoutQuotesInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutQuotesInput
     connect?: BookingWhereUniqueInput
-    update?: XOR<XOR<BookingUpdateToOneWithWhereWithoutInvoiceInput, BookingUpdateWithoutInvoiceInput>, BookingUncheckedUpdateWithoutInvoiceInput>
   }
 
   export type BusinessCreateNestedOneWithoutQuotesInput = {
@@ -30051,14 +30636,30 @@ export namespace Prisma {
     connect?: CustomerWhereUniqueInput
   }
 
-  export type BookingCreateNestedOneWithoutQuoteInput = {
-    create?: XOR<BookingCreateWithoutQuoteInput, BookingUncheckedCreateWithoutQuoteInput>
-    connectOrCreate?: BookingCreateOrConnectWithoutQuoteInput
-    connect?: BookingWhereUniqueInput
+  export type BookingCreateNestedManyWithoutCurrentQuoteInput = {
+    create?: XOR<BookingCreateWithoutCurrentQuoteInput, BookingUncheckedCreateWithoutCurrentQuoteInput> | BookingCreateWithoutCurrentQuoteInput[] | BookingUncheckedCreateWithoutCurrentQuoteInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutCurrentQuoteInput | BookingCreateOrConnectWithoutCurrentQuoteInput[]
+    createMany?: BookingCreateManyCurrentQuoteInputEnvelope
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+  }
+
+  export type BookingUncheckedCreateNestedManyWithoutCurrentQuoteInput = {
+    create?: XOR<BookingCreateWithoutCurrentQuoteInput, BookingUncheckedCreateWithoutCurrentQuoteInput> | BookingCreateWithoutCurrentQuoteInput[] | BookingUncheckedCreateWithoutCurrentQuoteInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutCurrentQuoteInput | BookingCreateOrConnectWithoutCurrentQuoteInput[]
+    createMany?: BookingCreateManyCurrentQuoteInputEnvelope
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
   }
 
   export type EnumQuoteStatusFieldUpdateOperationsInput = {
     set?: $Enums.QuoteStatus
+  }
+
+  export type BookingUpdateOneRequiredWithoutQuotesNestedInput = {
+    create?: XOR<BookingCreateWithoutQuotesInput, BookingUncheckedCreateWithoutQuotesInput>
+    connectOrCreate?: BookingCreateOrConnectWithoutQuotesInput
+    upsert?: BookingUpsertWithoutQuotesInput
+    connect?: BookingWhereUniqueInput
+    update?: XOR<XOR<BookingUpdateToOneWithWhereWithoutQuotesInput, BookingUpdateWithoutQuotesInput>, BookingUncheckedUpdateWithoutQuotesInput>
   }
 
   export type BusinessUpdateOneRequiredWithoutQuotesNestedInput = {
@@ -30077,18 +30678,32 @@ export namespace Prisma {
     update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutQuotesInput, CustomerUpdateWithoutQuotesInput>, CustomerUncheckedUpdateWithoutQuotesInput>
   }
 
-  export type BookingUpdateOneRequiredWithoutQuoteNestedInput = {
-    create?: XOR<BookingCreateWithoutQuoteInput, BookingUncheckedCreateWithoutQuoteInput>
-    connectOrCreate?: BookingCreateOrConnectWithoutQuoteInput
-    upsert?: BookingUpsertWithoutQuoteInput
-    connect?: BookingWhereUniqueInput
-    update?: XOR<XOR<BookingUpdateToOneWithWhereWithoutQuoteInput, BookingUpdateWithoutQuoteInput>, BookingUncheckedUpdateWithoutQuoteInput>
+  export type BookingUpdateManyWithoutCurrentQuoteNestedInput = {
+    create?: XOR<BookingCreateWithoutCurrentQuoteInput, BookingUncheckedCreateWithoutCurrentQuoteInput> | BookingCreateWithoutCurrentQuoteInput[] | BookingUncheckedCreateWithoutCurrentQuoteInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutCurrentQuoteInput | BookingCreateOrConnectWithoutCurrentQuoteInput[]
+    upsert?: BookingUpsertWithWhereUniqueWithoutCurrentQuoteInput | BookingUpsertWithWhereUniqueWithoutCurrentQuoteInput[]
+    createMany?: BookingCreateManyCurrentQuoteInputEnvelope
+    set?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    disconnect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    delete?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    update?: BookingUpdateWithWhereUniqueWithoutCurrentQuoteInput | BookingUpdateWithWhereUniqueWithoutCurrentQuoteInput[]
+    updateMany?: BookingUpdateManyWithWhereWithoutCurrentQuoteInput | BookingUpdateManyWithWhereWithoutCurrentQuoteInput[]
+    deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
-  export type CustomerCreateNestedOneWithoutCustomerStripeAccountsInput = {
-    create?: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
-    connectOrCreate?: CustomerCreateOrConnectWithoutCustomerStripeAccountsInput
-    connect?: CustomerWhereUniqueInput
+  export type BookingUncheckedUpdateManyWithoutCurrentQuoteNestedInput = {
+    create?: XOR<BookingCreateWithoutCurrentQuoteInput, BookingUncheckedCreateWithoutCurrentQuoteInput> | BookingCreateWithoutCurrentQuoteInput[] | BookingUncheckedCreateWithoutCurrentQuoteInput[]
+    connectOrCreate?: BookingCreateOrConnectWithoutCurrentQuoteInput | BookingCreateOrConnectWithoutCurrentQuoteInput[]
+    upsert?: BookingUpsertWithWhereUniqueWithoutCurrentQuoteInput | BookingUpsertWithWhereUniqueWithoutCurrentQuoteInput[]
+    createMany?: BookingCreateManyCurrentQuoteInputEnvelope
+    set?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    disconnect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    delete?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    connect?: BookingWhereUniqueInput | BookingWhereUniqueInput[]
+    update?: BookingUpdateWithWhereUniqueWithoutCurrentQuoteInput | BookingUpdateWithWhereUniqueWithoutCurrentQuoteInput[]
+    updateMany?: BookingUpdateManyWithWhereWithoutCurrentQuoteInput | BookingUpdateManyWithWhereWithoutCurrentQuoteInput[]
+    deleteMany?: BookingScalarWhereInput | BookingScalarWhereInput[]
   }
 
   export type BusinessCreateNestedOneWithoutCustomerStripeAccountsInput = {
@@ -30097,12 +30712,10 @@ export namespace Prisma {
     connect?: BusinessWhereUniqueInput
   }
 
-  export type CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput = {
+  export type CustomerCreateNestedOneWithoutCustomerStripeAccountsInput = {
     create?: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
     connectOrCreate?: CustomerCreateOrConnectWithoutCustomerStripeAccountsInput
-    upsert?: CustomerUpsertWithoutCustomerStripeAccountsInput
     connect?: CustomerWhereUniqueInput
-    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutCustomerStripeAccountsInput, CustomerUpdateWithoutCustomerStripeAccountsInput>, CustomerUncheckedUpdateWithoutCustomerStripeAccountsInput>
   }
 
   export type BusinessUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput = {
@@ -30111,6 +30724,14 @@ export namespace Prisma {
     upsert?: BusinessUpsertWithoutCustomerStripeAccountsInput
     connect?: BusinessWhereUniqueInput
     update?: XOR<XOR<BusinessUpdateToOneWithWhereWithoutCustomerStripeAccountsInput, BusinessUpdateWithoutCustomerStripeAccountsInput>, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
+  }
+
+  export type CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput = {
+    create?: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
+    connectOrCreate?: CustomerCreateOrConnectWithoutCustomerStripeAccountsInput
+    upsert?: CustomerUpsertWithoutCustomerStripeAccountsInput
+    connect?: CustomerWhereUniqueInput
+    update?: XOR<XOR<CustomerUpdateToOneWithWhereWithoutCustomerStripeAccountsInput, CustomerUpdateWithoutCustomerStripeAccountsInput>, CustomerUncheckedUpdateWithoutCustomerStripeAccountsInput>
   }
 
   export type NestedStringFilter<$PrismaModel = never> = {
@@ -30237,6 +30858,52 @@ export namespace Prisma {
     gte?: number | FloatFieldRefInput<$PrismaModel>
     not?: NestedFloatFilter<$PrismaModel> | number
   }
+  export type NestedJsonFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
+  export type NestedJsonNullableFilter<$PrismaModel = never> =
+    | PatchUndefined<
+        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
+        Required<NestedJsonNullableFilterBase<$PrismaModel>>
+      >
+    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
+
+  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
+    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+    path?: string[]
+    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
+    string_contains?: string | StringFieldRefInput<$PrismaModel>
+    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
+    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
+    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
+    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
+    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
+  }
 
   export type NestedBoolWithAggregatesFilter<$PrismaModel = never> = {
     equals?: boolean | BooleanFieldRefInput<$PrismaModel>
@@ -30276,52 +30943,6 @@ export namespace Prisma {
     _sum?: NestedFloatFilter<$PrismaModel>
     _min?: NestedFloatFilter<$PrismaModel>
     _max?: NestedFloatFilter<$PrismaModel>
-  }
-  export type NestedJsonNullableFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonNullableFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonNullableFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonNullableFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonNullableFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-  }
-  export type NestedJsonFilter<$PrismaModel = never> =
-    | PatchUndefined<
-        Either<Required<NestedJsonFilterBase<$PrismaModel>>, Exclude<keyof Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>,
-        Required<NestedJsonFilterBase<$PrismaModel>>
-      >
-    | OptionalFlat<Omit<Required<NestedJsonFilterBase<$PrismaModel>>, 'path'>>
-
-  export type NestedJsonFilterBase<$PrismaModel = never> = {
-    equals?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
-    path?: string[]
-    mode?: QueryMode | EnumQueryModeFieldRefInput<$PrismaModel>
-    string_contains?: string | StringFieldRefInput<$PrismaModel>
-    string_starts_with?: string | StringFieldRefInput<$PrismaModel>
-    string_ends_with?: string | StringFieldRefInput<$PrismaModel>
-    array_starts_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_ends_with?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    array_contains?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | null
-    lt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    lte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gt?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    gte?: InputJsonValue | JsonFieldRefInput<$PrismaModel>
-    not?: InputJsonValue | JsonFieldRefInput<$PrismaModel> | JsonNullValueFilter
   }
 
   export type NestedEnumRoleFilter<$PrismaModel = never> = {
@@ -30608,20 +31229,20 @@ export namespace Prisma {
 
   export type MembershipCreateWithoutUserInput = {
     id?: string
-    role: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    role: $Enums.Role
     clerkMembershipId: string
     organization: OrganizationCreateNestedOneWithoutMembershipsInput
   }
 
   export type MembershipUncheckedCreateWithoutUserInput = {
     id?: string
-    role: $Enums.Role
+    organizationId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    role: $Enums.Role
     clerkMembershipId: string
-    organizationId: string
   }
 
   export type MembershipCreateOrConnectWithoutUserInput = {
@@ -30629,94 +31250,194 @@ export namespace Prisma {
     create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
   }
 
-  export type MembershipUpsertWithoutUserInput = {
-    update: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
-    create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
-    where?: MembershipWhereInput
+  export type MembershipCreateManyUserInputEnvelope = {
+    data: MembershipCreateManyUserInput | MembershipCreateManyUserInput[]
+    skipDuplicates?: boolean
   }
 
-  export type MembershipUpdateToOneWithWhereWithoutUserInput = {
-    where?: MembershipWhereInput
+  export type MembershipUpsertWithWhereUniqueWithoutUserInput = {
+    where: MembershipWhereUniqueInput
+    update: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
+    create: XOR<MembershipCreateWithoutUserInput, MembershipUncheckedCreateWithoutUserInput>
+  }
+
+  export type MembershipUpdateWithWhereUniqueWithoutUserInput = {
+    where: MembershipWhereUniqueInput
     data: XOR<MembershipUpdateWithoutUserInput, MembershipUncheckedUpdateWithoutUserInput>
   }
 
-  export type MembershipUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    organization?: OrganizationUpdateOneRequiredWithoutMembershipsNestedInput
+  export type MembershipUpdateManyWithWhereWithoutUserInput = {
+    where: MembershipScalarWhereInput
+    data: XOR<MembershipUpdateManyMutationInput, MembershipUncheckedUpdateManyWithoutUserInput>
   }
 
-  export type MembershipUncheckedUpdateWithoutUserInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    organizationId?: StringFieldUpdateOperationsInput | string
+  export type MembershipScalarWhereInput = {
+    AND?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
+    OR?: MembershipScalarWhereInput[]
+    NOT?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
+    id?: StringFilter<"Membership"> | string
+    userId?: StringFilter<"Membership"> | string
+    organizationId?: StringFilter<"Membership"> | string
+    createdAt?: DateTimeFilter<"Membership"> | Date | string
+    updatedAt?: DateTimeFilter<"Membership"> | Date | string
+    role?: EnumRoleFilter<"Membership"> | $Enums.Role
+    clerkMembershipId?: StringFilter<"Membership"> | string
   }
 
-  export type InventoryCreateWithoutBusinessInput = {
+  export type BookingCreateWithoutBusinessInput = {
     id?: string
-    type: $Enums.InventoryType
-    name: string
-    description?: string | null
-    dimensions: string
-    capacity: number
-    price: number
-    setupTime: number
-    teardownTime: number
-    images?: InventoryCreateimagesInput | string[]
-    primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
-    status: $Enums.InventoryStatus
-    minimumSpace: string
-    weightLimit: number
-    ageRange: string
-    weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    version?: number
-    bookingItems?: BookingItemCreateNestedManyWithoutInventoryInput
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    expiresAt?: Date | string | null
+    coupon?: CouponCreateNestedOneWithoutBookingInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
+    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
+    payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
+    waivers?: WaiverCreateNestedManyWithoutBookingInput
   }
 
-  export type InventoryUncheckedCreateWithoutBusinessInput = {
+  export type BookingUncheckedCreateWithoutBusinessInput = {
     id?: string
-    type: $Enums.InventoryType
-    name: string
-    description?: string | null
-    dimensions: string
-    capacity: number
-    price: number
-    setupTime: number
-    teardownTime: number
-    images?: InventoryCreateimagesInput | string[]
-    primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
-    status: $Enums.InventoryStatus
-    minimumSpace: string
-    weightLimit: number
-    ageRange: string
-    weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    version?: number
-    bookingItems?: BookingItemUncheckedCreateNestedManyWithoutInventoryInput
+    customerId?: string | null
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    couponId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
+    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
   }
 
-  export type InventoryCreateOrConnectWithoutBusinessInput = {
-    where: InventoryWhereUniqueInput
-    create: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput>
+  export type BookingCreateOrConnectWithoutBusinessInput = {
+    where: BookingWhereUniqueInput
+    create: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput>
   }
 
-  export type InventoryCreateManyBusinessInputEnvelope = {
-    data: InventoryCreateManyBusinessInput | InventoryCreateManyBusinessInput[]
+  export type BookingCreateManyBusinessInputEnvelope = {
+    data: BookingCreateManyBusinessInput | BookingCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type OrganizationCreateWithoutBusinessInput = {
+    id?: string
+    clerkOrgId: string
+    name?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    memberships?: MembershipCreateNestedManyWithoutOrganizationInput
+    subscription?: SubscriptionCreateNestedOneWithoutOrganizationInput
+  }
+
+  export type OrganizationUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    clerkOrgId: string
+    name?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    memberships?: MembershipUncheckedCreateNestedManyWithoutOrganizationInput
+    subscription?: SubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+  }
+
+  export type OrganizationCreateOrConnectWithoutBusinessInput = {
+    where: OrganizationWhereUniqueInput
+    create: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type CouponCreateWithoutBusinessInput = {
+    id?: string
+    code: string
+    description?: string | null
+    discountType: $Enums.DiscountType
+    discountAmount: number
+    maxUses?: number | null
+    usedCount?: number
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    isActive?: boolean
+    minimumAmount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
+    booking?: BookingCreateNestedManyWithoutCouponInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutCouponInput
+  }
+
+  export type CouponUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    code: string
+    description?: string | null
+    discountType: $Enums.DiscountType
+    discountAmount: number
+    maxUses?: number | null
+    usedCount?: number
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    isActive?: boolean
+    minimumAmount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
+    booking?: BookingUncheckedCreateNestedManyWithoutCouponInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutCouponInput
+  }
+
+  export type CouponCreateOrConnectWithoutBusinessInput = {
+    where: CouponWhereUniqueInput
+    create: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type CouponCreateManyBusinessInputEnvelope = {
+    data: CouponCreateManyBusinessInput | CouponCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -30739,10 +31460,10 @@ export namespace Prisma {
     status?: string
     type?: string
     bookings?: BookingCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
     quotes?: QuoteCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBusinessInput = {
@@ -30764,10 +31485,10 @@ export namespace Prisma {
     status?: string
     type?: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
     quotes?: QuoteUncheckedCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBusinessInput = {
@@ -30780,243 +31501,91 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type BookingCreateWithoutBusinessInput = {
+  export type CustomerStripeAccountCreateWithoutBusinessInput = {
     id?: string
-    eventDate: Date | string
-    startTime: Date | string
-    endTime: Date | string
-    status?: $Enums.BookingStatus
-    totalAmount?: number | null
-    depositAmount?: number | null
-    depositPaid?: boolean
-    eventType?: string | null
-    eventAddress?: string | null
-    eventCity?: string | null
-    eventState?: string | null
-    eventZipCode?: string | null
-    eventTimeZone?: string
-    participantAge?: number | null
-    participantCount?: number | null
-    subtotalAmount?: number | null
-    taxAmount?: number | null
-    taxRate?: number | null
-    isCompleted?: boolean
-    isCancelled?: boolean
-    specialInstructions?: string | null
+    stripeCustomerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
-    customer?: CustomerCreateNestedOneWithoutBookingsInput
-    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
-    payments?: PaymentCreateNestedManyWithoutBookingInput
-    waivers?: WaiverCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
+    customer: CustomerCreateNestedOneWithoutCustomerStripeAccountsInput
   }
 
-  export type BookingUncheckedCreateWithoutBusinessInput = {
+  export type CustomerStripeAccountUncheckedCreateWithoutBusinessInput = {
     id?: string
-    eventDate: Date | string
-    startTime: Date | string
-    endTime: Date | string
-    status?: $Enums.BookingStatus
-    totalAmount?: number | null
-    depositAmount?: number | null
-    depositPaid?: boolean
-    eventType?: string | null
-    eventAddress?: string | null
-    eventCity?: string | null
-    eventState?: string | null
-    eventZipCode?: string | null
-    eventTimeZone?: string
-    participantAge?: number | null
-    participantCount?: number | null
-    subtotalAmount?: number | null
-    taxAmount?: number | null
-    taxRate?: number | null
-    isCompleted?: boolean
-    isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    couponId?: string | null
-    customerId?: string | null
-    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
-  }
-
-  export type BookingCreateOrConnectWithoutBusinessInput = {
-    where: BookingWhereUniqueInput
-    create: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput>
-  }
-
-  export type BookingCreateManyBusinessInputEnvelope = {
-    data: BookingCreateManyBusinessInput | BookingCreateManyBusinessInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type PaymentCreateWithoutBusinessInput = {
-    id?: string
-    amount: Decimal | DecimalJsLike | number | string
-    type: $Enums.PaymentType
-    status: $Enums.PaymentStatus
-    currency?: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: string | null
-    stripePaymentId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    paidAt?: Date | string | null
-    booking: BookingCreateNestedOneWithoutPaymentsInput
-  }
-
-  export type PaymentUncheckedCreateWithoutBusinessInput = {
-    id?: string
-    amount: Decimal | DecimalJsLike | number | string
-    type: $Enums.PaymentType
-    status: $Enums.PaymentStatus
-    currency?: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: string | null
-    stripePaymentId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    paidAt?: Date | string | null
-    bookingId: string
-  }
-
-  export type PaymentCreateOrConnectWithoutBusinessInput = {
-    where: PaymentWhereUniqueInput
-    create: XOR<PaymentCreateWithoutBusinessInput, PaymentUncheckedCreateWithoutBusinessInput>
-  }
-
-  export type PaymentCreateManyBusinessInputEnvelope = {
-    data: PaymentCreateManyBusinessInput | PaymentCreateManyBusinessInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type CouponCreateWithoutBusinessInput = {
-    id?: string
-    code: string
-    description?: string | null
-    discountType: $Enums.DiscountType
-    discountAmount: number
-    maxUses?: number | null
-    usedCount?: number
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    isActive?: boolean
-    minimumAmount?: number | null
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    booking?: BookingCreateNestedManyWithoutCouponInput
-  }
-
-  export type CouponUncheckedCreateWithoutBusinessInput = {
-    id?: string
-    code: string
-    description?: string | null
-    discountType: $Enums.DiscountType
-    discountAmount: number
-    maxUses?: number | null
-    usedCount?: number
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    isActive?: boolean
-    minimumAmount?: number | null
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    booking?: BookingUncheckedCreateNestedManyWithoutCouponInput
-  }
-
-  export type CouponCreateOrConnectWithoutBusinessInput = {
-    where: CouponWhereUniqueInput
-    create: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput>
-  }
-
-  export type CouponCreateManyBusinessInputEnvelope = {
-    data: CouponCreateManyBusinessInput | CouponCreateManyBusinessInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type SalesFunnelCreateWithoutBusinessInput = {
-    id?: string
-    name: string
-    isActive?: boolean
-    popupTitle: string
-    popupText: string
-    popupImage?: string | null
-    formTitle: string
-    thankYouMessage: string
-    couponId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type SalesFunnelUncheckedCreateWithoutBusinessInput = {
-    id?: string
-    name: string
-    isActive?: boolean
-    popupTitle: string
-    popupText: string
-    popupImage?: string | null
-    formTitle: string
-    thankYouMessage: string
-    couponId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type SalesFunnelCreateOrConnectWithoutBusinessInput = {
-    where: SalesFunnelWhereUniqueInput
-    create: XOR<SalesFunnelCreateWithoutBusinessInput, SalesFunnelUncheckedCreateWithoutBusinessInput>
-  }
-
-  export type SalesFunnelCreateManyBusinessInputEnvelope = {
-    data: SalesFunnelCreateManyBusinessInput | SalesFunnelCreateManyBusinessInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type WaiverCreateWithoutBusinessInput = {
-    id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    customer: CustomerCreateNestedOneWithoutWaiversInput
-    booking: BookingCreateNestedOneWithoutWaiversInput
-  }
-
-  export type WaiverUncheckedCreateWithoutBusinessInput = {
-    id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
+    stripeCustomerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     customerId: string
-    bookingId: string
   }
 
-  export type WaiverCreateOrConnectWithoutBusinessInput = {
-    where: WaiverWhereUniqueInput
-    create: XOR<WaiverCreateWithoutBusinessInput, WaiverUncheckedCreateWithoutBusinessInput>
+  export type CustomerStripeAccountCreateOrConnectWithoutBusinessInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    create: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput>
   }
 
-  export type WaiverCreateManyBusinessInputEnvelope = {
-    data: WaiverCreateManyBusinessInput | WaiverCreateManyBusinessInput[]
+  export type CustomerStripeAccountCreateManyBusinessInputEnvelope = {
+    data: CustomerStripeAccountCreateManyBusinessInput | CustomerStripeAccountCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type InventoryCreateWithoutBusinessInput = {
+    id?: string
+    type: $Enums.InventoryType
+    name: string
+    description?: string | null
+    dimensions: string
+    capacity: number
+    price: number
+    setupTime: number
+    teardownTime: number
+    images?: InventoryCreateimagesInput | string[]
+    primaryImage?: string | null
+    status: $Enums.InventoryStatus
+    minimumSpace: string
+    weightLimit: number
+    ageRange: string
+    weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
+    version?: number
+    bookingItems?: BookingItemCreateNestedManyWithoutInventoryInput
+  }
+
+  export type InventoryUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    type: $Enums.InventoryType
+    name: string
+    description?: string | null
+    dimensions: string
+    capacity: number
+    price: number
+    setupTime: number
+    teardownTime: number
+    images?: InventoryCreateimagesInput | string[]
+    primaryImage?: string | null
+    status: $Enums.InventoryStatus
+    minimumSpace: string
+    weightLimit: number
+    ageRange: string
+    weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
+    version?: number
+    bookingItems?: BookingItemUncheckedCreateNestedManyWithoutInventoryInput
+  }
+
+  export type InventoryCreateOrConnectWithoutBusinessInput = {
+    where: InventoryWhereUniqueInput
+    create: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type InventoryCreateManyBusinessInputEnvelope = {
+    data: InventoryCreateManyBusinessInput | InventoryCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
@@ -31038,8 +31607,8 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    booking: BookingCreateNestedOneWithoutInvoicesInput
     customer: CustomerCreateNestedOneWithoutInvoicesInput
-    booking: BookingCreateNestedOneWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateWithoutBusinessInput = {
@@ -31074,6 +31643,46 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
+  export type PaymentCreateWithoutBusinessInput = {
+    id?: string
+    amount: Decimal | DecimalJsLike | number | string
+    type: $Enums.PaymentType
+    status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    currency?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: string | null
+    stripePaymentId?: string | null
+    updatedAt?: Date | string
+    paidAt?: Date | string | null
+    booking: BookingCreateNestedOneWithoutPaymentsInput
+  }
+
+  export type PaymentUncheckedCreateWithoutBusinessInput = {
+    id?: string
+    amount: Decimal | DecimalJsLike | number | string
+    type: $Enums.PaymentType
+    status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    bookingId: string
+    currency?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: string | null
+    stripePaymentId?: string | null
+    updatedAt?: Date | string
+    paidAt?: Date | string | null
+  }
+
+  export type PaymentCreateOrConnectWithoutBusinessInput = {
+    where: PaymentWhereUniqueInput
+    create: XOR<PaymentCreateWithoutBusinessInput, PaymentUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type PaymentCreateManyBusinessInputEnvelope = {
+    data: PaymentCreateManyBusinessInput | PaymentCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
   export type QuoteCreateWithoutBusinessInput = {
     id?: string
     stripeQuoteId: string
@@ -31082,14 +31691,18 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    booking: BookingCreateNestedOneWithoutQuotesInput
     customer: CustomerCreateNestedOneWithoutQuotesInput
-    booking: BookingCreateNestedOneWithoutQuoteInput
+    currentBookings?: BookingCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutBusinessInput = {
@@ -31100,14 +31713,18 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     customerId: string
     bookingId: string
+    currentBookings?: BookingUncheckedCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutBusinessInput = {
@@ -31120,100 +31737,196 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type CustomerStripeAccountCreateWithoutBusinessInput = {
+  export type SalesFunnelCreateWithoutBusinessInput = {
     id?: string
-    stripeCustomerId: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    customer: CustomerCreateNestedOneWithoutCustomerStripeAccountsInput
+    coupon?: CouponCreateNestedOneWithoutSalesFunnelsInput
   }
 
-  export type CustomerStripeAccountUncheckedCreateWithoutBusinessInput = {
+  export type SalesFunnelUncheckedCreateWithoutBusinessInput = {
     id?: string
-    stripeCustomerId: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    customerId: string
+    couponId?: string | null
   }
 
-  export type CustomerStripeAccountCreateOrConnectWithoutBusinessInput = {
-    where: CustomerStripeAccountWhereUniqueInput
-    create: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput>
+  export type SalesFunnelCreateOrConnectWithoutBusinessInput = {
+    where: SalesFunnelWhereUniqueInput
+    create: XOR<SalesFunnelCreateWithoutBusinessInput, SalesFunnelUncheckedCreateWithoutBusinessInput>
   }
 
-  export type CustomerStripeAccountCreateManyBusinessInputEnvelope = {
-    data: CustomerStripeAccountCreateManyBusinessInput | CustomerStripeAccountCreateManyBusinessInput[]
+  export type SalesFunnelCreateManyBusinessInputEnvelope = {
+    data: SalesFunnelCreateManyBusinessInput | SalesFunnelCreateManyBusinessInput[]
     skipDuplicates?: boolean
   }
 
-  export type OrganizationCreateWithoutBusinessInput = {
+  export type WaiverCreateWithoutBusinessInput = {
     id?: string
-    clerkOrgId: string
-    name?: string | null
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    memberships?: MembershipCreateNestedManyWithoutOrganizationInput
-    subscription?: SubscriptionCreateNestedOneWithoutOrganizationInput
+    docuSealDocumentId: string
+    booking: BookingCreateNestedOneWithoutWaiversInput
+    customer: CustomerCreateNestedOneWithoutWaiversInput
   }
 
-  export type OrganizationUncheckedCreateWithoutBusinessInput = {
+  export type WaiverUncheckedCreateWithoutBusinessInput = {
     id?: string
-    clerkOrgId: string
-    name?: string | null
+    customerId: string
+    bookingId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    memberships?: MembershipUncheckedCreateNestedManyWithoutOrganizationInput
-    subscription?: SubscriptionUncheckedCreateNestedOneWithoutOrganizationInput
+    docuSealDocumentId: string
   }
 
-  export type OrganizationCreateOrConnectWithoutBusinessInput = {
-    where: OrganizationWhereUniqueInput
+  export type WaiverCreateOrConnectWithoutBusinessInput = {
+    where: WaiverWhereUniqueInput
+    create: XOR<WaiverCreateWithoutBusinessInput, WaiverUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type WaiverCreateManyBusinessInputEnvelope = {
+    data: WaiverCreateManyBusinessInput | WaiverCreateManyBusinessInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BookingUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: BookingWhereUniqueInput
+    update: XOR<BookingUpdateWithoutBusinessInput, BookingUncheckedUpdateWithoutBusinessInput>
+    create: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type BookingUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: BookingWhereUniqueInput
+    data: XOR<BookingUpdateWithoutBusinessInput, BookingUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type BookingUpdateManyWithWhereWithoutBusinessInput = {
+    where: BookingScalarWhereInput
+    data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type BookingScalarWhereInput = {
+    AND?: BookingScalarWhereInput | BookingScalarWhereInput[]
+    OR?: BookingScalarWhereInput[]
+    NOT?: BookingScalarWhereInput | BookingScalarWhereInput[]
+    id?: StringFilter<"Booking"> | string
+    eventDate?: DateTimeFilter<"Booking"> | Date | string
+    startTime?: DateTimeFilter<"Booking"> | Date | string
+    endTime?: DateTimeFilter<"Booking"> | Date | string
+    status?: EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
+    totalAmount?: FloatNullableFilter<"Booking"> | number | null
+    depositAmount?: FloatNullableFilter<"Booking"> | number | null
+    depositPaid?: BoolFilter<"Booking"> | boolean
+    eventType?: StringNullableFilter<"Booking"> | string | null
+    eventAddress?: StringNullableFilter<"Booking"> | string | null
+    eventCity?: StringNullableFilter<"Booking"> | string | null
+    eventState?: StringNullableFilter<"Booking"> | string | null
+    eventZipCode?: StringNullableFilter<"Booking"> | string | null
+    participantAge?: IntNullableFilter<"Booking"> | number | null
+    participantCount?: IntNullableFilter<"Booking"> | number | null
+    createdAt?: DateTimeFilter<"Booking"> | Date | string
+    updatedAt?: DateTimeFilter<"Booking"> | Date | string
+    businessId?: StringFilter<"Booking"> | string
+    customerId?: StringNullableFilter<"Booking"> | string | null
+    specialInstructions?: StringNullableFilter<"Booking"> | string | null
+    subtotalAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxAmount?: FloatNullableFilter<"Booking"> | number | null
+    taxRate?: FloatNullableFilter<"Booking"> | number | null
+    isCancelled?: BoolFilter<"Booking"> | boolean
+    isCompleted?: BoolFilter<"Booking"> | boolean
+    eventTimeZone?: StringFilter<"Booking"> | string
+    couponId?: StringNullableFilter<"Booking"> | string | null
+    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
+    currentQuoteId?: StringNullableFilter<"Booking"> | string | null
+  }
+
+  export type OrganizationUpsertWithoutBusinessInput = {
+    update: XOR<OrganizationUpdateWithoutBusinessInput, OrganizationUncheckedUpdateWithoutBusinessInput>
     create: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
+    where?: OrganizationWhereInput
   }
 
-  export type InventoryUpsertWithWhereUniqueWithoutBusinessInput = {
-    where: InventoryWhereUniqueInput
-    update: XOR<InventoryUpdateWithoutBusinessInput, InventoryUncheckedUpdateWithoutBusinessInput>
-    create: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput>
+  export type OrganizationUpdateToOneWithWhereWithoutBusinessInput = {
+    where?: OrganizationWhereInput
+    data: XOR<OrganizationUpdateWithoutBusinessInput, OrganizationUncheckedUpdateWithoutBusinessInput>
   }
 
-  export type InventoryUpdateWithWhereUniqueWithoutBusinessInput = {
-    where: InventoryWhereUniqueInput
-    data: XOR<InventoryUpdateWithoutBusinessInput, InventoryUncheckedUpdateWithoutBusinessInput>
+  export type OrganizationUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkOrgId?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
+    subscription?: SubscriptionUpdateOneWithoutOrganizationNestedInput
   }
 
-  export type InventoryUpdateManyWithWhereWithoutBusinessInput = {
-    where: InventoryScalarWhereInput
-    data: XOR<InventoryUpdateManyMutationInput, InventoryUncheckedUpdateManyWithoutBusinessInput>
+  export type OrganizationUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    clerkOrgId?: StringFieldUpdateOperationsInput | string
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
+    subscription?: SubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   }
 
-  export type InventoryScalarWhereInput = {
-    AND?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
-    OR?: InventoryScalarWhereInput[]
-    NOT?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
-    id?: StringFilter<"Inventory"> | string
-    type?: EnumInventoryTypeFilter<"Inventory"> | $Enums.InventoryType
-    name?: StringFilter<"Inventory"> | string
-    description?: StringNullableFilter<"Inventory"> | string | null
-    dimensions?: StringFilter<"Inventory"> | string
-    capacity?: IntFilter<"Inventory"> | number
-    price?: FloatFilter<"Inventory"> | number
-    setupTime?: IntFilter<"Inventory"> | number
-    teardownTime?: IntFilter<"Inventory"> | number
-    images?: StringNullableListFilter<"Inventory">
-    primaryImage?: StringNullableFilter<"Inventory"> | string | null
-    stripeProductId?: StringNullableFilter<"Inventory"> | string | null
-    stripePriceId?: StringNullableFilter<"Inventory"> | string | null
-    status?: EnumInventoryStatusFilter<"Inventory"> | $Enums.InventoryStatus
-    minimumSpace?: StringFilter<"Inventory"> | string
-    weightLimit?: IntFilter<"Inventory"> | number
-    ageRange?: StringFilter<"Inventory"> | string
-    weatherRestrictions?: StringNullableListFilter<"Inventory">
-    quantity?: IntFilter<"Inventory"> | number
-    createdAt?: DateTimeFilter<"Inventory"> | Date | string
-    updatedAt?: DateTimeFilter<"Inventory"> | Date | string
-    version?: IntFilter<"Inventory"> | number
-    businessId?: StringFilter<"Inventory"> | string
+  export type CouponUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: CouponWhereUniqueInput
+    update: XOR<CouponUpdateWithoutBusinessInput, CouponUncheckedUpdateWithoutBusinessInput>
+    create: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type CouponUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: CouponWhereUniqueInput
+    data: XOR<CouponUpdateWithoutBusinessInput, CouponUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type CouponUpdateManyWithWhereWithoutBusinessInput = {
+    where: CouponScalarWhereInput
+    data: XOR<CouponUpdateManyMutationInput, CouponUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type CouponScalarWhereInput = {
+    AND?: CouponScalarWhereInput | CouponScalarWhereInput[]
+    OR?: CouponScalarWhereInput[]
+    NOT?: CouponScalarWhereInput | CouponScalarWhereInput[]
+    id?: StringFilter<"Coupon"> | string
+    code?: StringFilter<"Coupon"> | string
+    description?: StringNullableFilter<"Coupon"> | string | null
+    discountType?: EnumDiscountTypeFilter<"Coupon"> | $Enums.DiscountType
+    discountAmount?: FloatFilter<"Coupon"> | number
+    maxUses?: IntNullableFilter<"Coupon"> | number | null
+    usedCount?: IntFilter<"Coupon"> | number
+    startDate?: DateTimeNullableFilter<"Coupon"> | Date | string | null
+    endDate?: DateTimeNullableFilter<"Coupon"> | Date | string | null
+    isActive?: BoolFilter<"Coupon"> | boolean
+    minimumAmount?: FloatNullableFilter<"Coupon"> | number | null
+    businessId?: StringFilter<"Coupon"> | string
+    createdAt?: DateTimeFilter<"Coupon"> | Date | string
+    updatedAt?: DateTimeFilter<"Coupon"> | Date | string
+    stripeCouponId?: StringNullableFilter<"Coupon"> | string | null
+    stripePromotionId?: StringNullableFilter<"Coupon"> | string | null
   }
 
   export type CustomerUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -31250,199 +31963,83 @@ export namespace Prisma {
     lastBooking?: DateTimeNullableFilter<"Customer"> | Date | string | null
     createdAt?: DateTimeFilter<"Customer"> | Date | string
     updatedAt?: DateTimeFilter<"Customer"> | Date | string
+    businessId?: StringFilter<"Customer"> | string
     isLead?: BoolFilter<"Customer"> | boolean
     status?: StringFilter<"Customer"> | string
     type?: StringFilter<"Customer"> | string
-    businessId?: StringFilter<"Customer"> | string
   }
 
-  export type BookingUpsertWithWhereUniqueWithoutBusinessInput = {
-    where: BookingWhereUniqueInput
-    update: XOR<BookingUpdateWithoutBusinessInput, BookingUncheckedUpdateWithoutBusinessInput>
-    create: XOR<BookingCreateWithoutBusinessInput, BookingUncheckedCreateWithoutBusinessInput>
+  export type CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    update: XOR<CustomerStripeAccountUpdateWithoutBusinessInput, CustomerStripeAccountUncheckedUpdateWithoutBusinessInput>
+    create: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput>
   }
 
-  export type BookingUpdateWithWhereUniqueWithoutBusinessInput = {
-    where: BookingWhereUniqueInput
-    data: XOR<BookingUpdateWithoutBusinessInput, BookingUncheckedUpdateWithoutBusinessInput>
+  export type CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    data: XOR<CustomerStripeAccountUpdateWithoutBusinessInput, CustomerStripeAccountUncheckedUpdateWithoutBusinessInput>
   }
 
-  export type BookingUpdateManyWithWhereWithoutBusinessInput = {
-    where: BookingScalarWhereInput
-    data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutBusinessInput>
+  export type CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput = {
+    where: CustomerStripeAccountScalarWhereInput
+    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyWithoutBusinessInput>
   }
 
-  export type BookingScalarWhereInput = {
-    AND?: BookingScalarWhereInput | BookingScalarWhereInput[]
-    OR?: BookingScalarWhereInput[]
-    NOT?: BookingScalarWhereInput | BookingScalarWhereInput[]
-    id?: StringFilter<"Booking"> | string
-    eventDate?: DateTimeFilter<"Booking"> | Date | string
-    startTime?: DateTimeFilter<"Booking"> | Date | string
-    endTime?: DateTimeFilter<"Booking"> | Date | string
-    status?: EnumBookingStatusFilter<"Booking"> | $Enums.BookingStatus
-    totalAmount?: FloatNullableFilter<"Booking"> | number | null
-    depositAmount?: FloatNullableFilter<"Booking"> | number | null
-    depositPaid?: BoolFilter<"Booking"> | boolean
-    eventType?: StringNullableFilter<"Booking"> | string | null
-    eventAddress?: StringNullableFilter<"Booking"> | string | null
-    eventCity?: StringNullableFilter<"Booking"> | string | null
-    eventState?: StringNullableFilter<"Booking"> | string | null
-    eventZipCode?: StringNullableFilter<"Booking"> | string | null
-    eventTimeZone?: StringFilter<"Booking"> | string
-    participantAge?: IntNullableFilter<"Booking"> | number | null
-    participantCount?: IntNullableFilter<"Booking"> | number | null
-    subtotalAmount?: FloatNullableFilter<"Booking"> | number | null
-    taxAmount?: FloatNullableFilter<"Booking"> | number | null
-    taxRate?: FloatNullableFilter<"Booking"> | number | null
-    isCompleted?: BoolFilter<"Booking"> | boolean
-    isCancelled?: BoolFilter<"Booking"> | boolean
-    specialInstructions?: StringNullableFilter<"Booking"> | string | null
-    createdAt?: DateTimeFilter<"Booking"> | Date | string
-    updatedAt?: DateTimeFilter<"Booking"> | Date | string
-    expiresAt?: DateTimeNullableFilter<"Booking"> | Date | string | null
-    couponId?: StringNullableFilter<"Booking"> | string | null
-    businessId?: StringFilter<"Booking"> | string
-    customerId?: StringNullableFilter<"Booking"> | string | null
+  export type CustomerStripeAccountScalarWhereInput = {
+    AND?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+    OR?: CustomerStripeAccountScalarWhereInput[]
+    NOT?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
+    id?: StringFilter<"CustomerStripeAccount"> | string
+    stripeCustomerId?: StringFilter<"CustomerStripeAccount"> | string
+    createdAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    updatedAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
+    customerId?: StringFilter<"CustomerStripeAccount"> | string
+    businessId?: StringFilter<"CustomerStripeAccount"> | string
   }
 
-  export type PaymentUpsertWithWhereUniqueWithoutBusinessInput = {
-    where: PaymentWhereUniqueInput
-    update: XOR<PaymentUpdateWithoutBusinessInput, PaymentUncheckedUpdateWithoutBusinessInput>
-    create: XOR<PaymentCreateWithoutBusinessInput, PaymentUncheckedCreateWithoutBusinessInput>
+  export type InventoryUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryWhereUniqueInput
+    update: XOR<InventoryUpdateWithoutBusinessInput, InventoryUncheckedUpdateWithoutBusinessInput>
+    create: XOR<InventoryCreateWithoutBusinessInput, InventoryUncheckedCreateWithoutBusinessInput>
   }
 
-  export type PaymentUpdateWithWhereUniqueWithoutBusinessInput = {
-    where: PaymentWhereUniqueInput
-    data: XOR<PaymentUpdateWithoutBusinessInput, PaymentUncheckedUpdateWithoutBusinessInput>
+  export type InventoryUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: InventoryWhereUniqueInput
+    data: XOR<InventoryUpdateWithoutBusinessInput, InventoryUncheckedUpdateWithoutBusinessInput>
   }
 
-  export type PaymentUpdateManyWithWhereWithoutBusinessInput = {
-    where: PaymentScalarWhereInput
-    data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyWithoutBusinessInput>
+  export type InventoryUpdateManyWithWhereWithoutBusinessInput = {
+    where: InventoryScalarWhereInput
+    data: XOR<InventoryUpdateManyMutationInput, InventoryUncheckedUpdateManyWithoutBusinessInput>
   }
 
-  export type PaymentScalarWhereInput = {
-    AND?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
-    OR?: PaymentScalarWhereInput[]
-    NOT?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
-    id?: StringFilter<"Payment"> | string
-    amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
-    type?: EnumPaymentTypeFilter<"Payment"> | $Enums.PaymentType
-    status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
-    currency?: StringFilter<"Payment"> | string
-    metadata?: JsonNullableFilter<"Payment">
-    stripeClientSecret?: StringNullableFilter<"Payment"> | string | null
-    stripePaymentId?: StringNullableFilter<"Payment"> | string | null
-    createdAt?: DateTimeFilter<"Payment"> | Date | string
-    updatedAt?: DateTimeFilter<"Payment"> | Date | string
-    paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
-    bookingId?: StringFilter<"Payment"> | string
-    businessId?: StringFilter<"Payment"> | string
-  }
-
-  export type CouponUpsertWithWhereUniqueWithoutBusinessInput = {
-    where: CouponWhereUniqueInput
-    update: XOR<CouponUpdateWithoutBusinessInput, CouponUncheckedUpdateWithoutBusinessInput>
-    create: XOR<CouponCreateWithoutBusinessInput, CouponUncheckedCreateWithoutBusinessInput>
-  }
-
-  export type CouponUpdateWithWhereUniqueWithoutBusinessInput = {
-    where: CouponWhereUniqueInput
-    data: XOR<CouponUpdateWithoutBusinessInput, CouponUncheckedUpdateWithoutBusinessInput>
-  }
-
-  export type CouponUpdateManyWithWhereWithoutBusinessInput = {
-    where: CouponScalarWhereInput
-    data: XOR<CouponUpdateManyMutationInput, CouponUncheckedUpdateManyWithoutBusinessInput>
-  }
-
-  export type CouponScalarWhereInput = {
-    AND?: CouponScalarWhereInput | CouponScalarWhereInput[]
-    OR?: CouponScalarWhereInput[]
-    NOT?: CouponScalarWhereInput | CouponScalarWhereInput[]
-    id?: StringFilter<"Coupon"> | string
-    code?: StringFilter<"Coupon"> | string
-    description?: StringNullableFilter<"Coupon"> | string | null
-    discountType?: EnumDiscountTypeFilter<"Coupon"> | $Enums.DiscountType
-    discountAmount?: FloatFilter<"Coupon"> | number
-    maxUses?: IntNullableFilter<"Coupon"> | number | null
-    usedCount?: IntFilter<"Coupon"> | number
-    startDate?: DateTimeNullableFilter<"Coupon"> | Date | string | null
-    endDate?: DateTimeNullableFilter<"Coupon"> | Date | string | null
-    isActive?: BoolFilter<"Coupon"> | boolean
-    minimumAmount?: FloatNullableFilter<"Coupon"> | number | null
-    businessId?: StringFilter<"Coupon"> | string
-    stripeCouponId?: StringNullableFilter<"Coupon"> | string | null
-    stripePromotionId?: StringNullableFilter<"Coupon"> | string | null
-    createdAt?: DateTimeFilter<"Coupon"> | Date | string
-    updatedAt?: DateTimeFilter<"Coupon"> | Date | string
-  }
-
-  export type SalesFunnelUpsertWithWhereUniqueWithoutBusinessInput = {
-    where: SalesFunnelWhereUniqueInput
-    update: XOR<SalesFunnelUpdateWithoutBusinessInput, SalesFunnelUncheckedUpdateWithoutBusinessInput>
-    create: XOR<SalesFunnelCreateWithoutBusinessInput, SalesFunnelUncheckedCreateWithoutBusinessInput>
-  }
-
-  export type SalesFunnelUpdateWithWhereUniqueWithoutBusinessInput = {
-    where: SalesFunnelWhereUniqueInput
-    data: XOR<SalesFunnelUpdateWithoutBusinessInput, SalesFunnelUncheckedUpdateWithoutBusinessInput>
-  }
-
-  export type SalesFunnelUpdateManyWithWhereWithoutBusinessInput = {
-    where: SalesFunnelScalarWhereInput
-    data: XOR<SalesFunnelUpdateManyMutationInput, SalesFunnelUncheckedUpdateManyWithoutBusinessInput>
-  }
-
-  export type SalesFunnelScalarWhereInput = {
-    AND?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
-    OR?: SalesFunnelScalarWhereInput[]
-    NOT?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
-    id?: StringFilter<"SalesFunnel"> | string
-    name?: StringFilter<"SalesFunnel"> | string
-    isActive?: BoolFilter<"SalesFunnel"> | boolean
-    popupTitle?: StringFilter<"SalesFunnel"> | string
-    popupText?: StringFilter<"SalesFunnel"> | string
-    popupImage?: StringNullableFilter<"SalesFunnel"> | string | null
-    formTitle?: StringFilter<"SalesFunnel"> | string
-    thankYouMessage?: StringFilter<"SalesFunnel"> | string
-    couponId?: StringNullableFilter<"SalesFunnel"> | string | null
-    businessId?: StringFilter<"SalesFunnel"> | string
-    createdAt?: DateTimeFilter<"SalesFunnel"> | Date | string
-    updatedAt?: DateTimeFilter<"SalesFunnel"> | Date | string
-  }
-
-  export type WaiverUpsertWithWhereUniqueWithoutBusinessInput = {
-    where: WaiverWhereUniqueInput
-    update: XOR<WaiverUpdateWithoutBusinessInput, WaiverUncheckedUpdateWithoutBusinessInput>
-    create: XOR<WaiverCreateWithoutBusinessInput, WaiverUncheckedCreateWithoutBusinessInput>
-  }
-
-  export type WaiverUpdateWithWhereUniqueWithoutBusinessInput = {
-    where: WaiverWhereUniqueInput
-    data: XOR<WaiverUpdateWithoutBusinessInput, WaiverUncheckedUpdateWithoutBusinessInput>
-  }
-
-  export type WaiverUpdateManyWithWhereWithoutBusinessInput = {
-    where: WaiverScalarWhereInput
-    data: XOR<WaiverUpdateManyMutationInput, WaiverUncheckedUpdateManyWithoutBusinessInput>
-  }
-
-  export type WaiverScalarWhereInput = {
-    AND?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
-    OR?: WaiverScalarWhereInput[]
-    NOT?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
-    id?: StringFilter<"Waiver"> | string
-    status?: EnumWaiverStatusFilter<"Waiver"> | $Enums.WaiverStatus
-    templateVersion?: StringFilter<"Waiver"> | string
-    documentUrl?: StringFilter<"Waiver"> | string
-    docuSealDocumentId?: StringFilter<"Waiver"> | string
-    createdAt?: DateTimeFilter<"Waiver"> | Date | string
-    updatedAt?: DateTimeFilter<"Waiver"> | Date | string
-    businessId?: StringFilter<"Waiver"> | string
-    customerId?: StringFilter<"Waiver"> | string
-    bookingId?: StringFilter<"Waiver"> | string
+  export type InventoryScalarWhereInput = {
+    AND?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
+    OR?: InventoryScalarWhereInput[]
+    NOT?: InventoryScalarWhereInput | InventoryScalarWhereInput[]
+    id?: StringFilter<"Inventory"> | string
+    type?: EnumInventoryTypeFilter<"Inventory"> | $Enums.InventoryType
+    name?: StringFilter<"Inventory"> | string
+    description?: StringNullableFilter<"Inventory"> | string | null
+    dimensions?: StringFilter<"Inventory"> | string
+    capacity?: IntFilter<"Inventory"> | number
+    price?: FloatFilter<"Inventory"> | number
+    setupTime?: IntFilter<"Inventory"> | number
+    teardownTime?: IntFilter<"Inventory"> | number
+    images?: StringNullableListFilter<"Inventory">
+    primaryImage?: StringNullableFilter<"Inventory"> | string | null
+    status?: EnumInventoryStatusFilter<"Inventory"> | $Enums.InventoryStatus
+    minimumSpace?: StringFilter<"Inventory"> | string
+    weightLimit?: IntFilter<"Inventory"> | number
+    ageRange?: StringFilter<"Inventory"> | string
+    weatherRestrictions?: StringNullableListFilter<"Inventory">
+    businessId?: StringFilter<"Inventory"> | string
+    createdAt?: DateTimeFilter<"Inventory"> | Date | string
+    updatedAt?: DateTimeFilter<"Inventory"> | Date | string
+    quantity?: IntFilter<"Inventory"> | number
+    stripePriceId?: StringNullableFilter<"Inventory"> | string | null
+    stripeProductId?: StringNullableFilter<"Inventory"> | string | null
+    version?: IntFilter<"Inventory"> | number
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutBusinessInput = {
@@ -31487,6 +32084,41 @@ export namespace Prisma {
     bookingId?: StringFilter<"Invoice"> | string
   }
 
+  export type PaymentUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: PaymentWhereUniqueInput
+    update: XOR<PaymentUpdateWithoutBusinessInput, PaymentUncheckedUpdateWithoutBusinessInput>
+    create: XOR<PaymentCreateWithoutBusinessInput, PaymentUncheckedCreateWithoutBusinessInput>
+  }
+
+  export type PaymentUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: PaymentWhereUniqueInput
+    data: XOR<PaymentUpdateWithoutBusinessInput, PaymentUncheckedUpdateWithoutBusinessInput>
+  }
+
+  export type PaymentUpdateManyWithWhereWithoutBusinessInput = {
+    where: PaymentScalarWhereInput
+    data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyWithoutBusinessInput>
+  }
+
+  export type PaymentScalarWhereInput = {
+    AND?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+    OR?: PaymentScalarWhereInput[]
+    NOT?: PaymentScalarWhereInput | PaymentScalarWhereInput[]
+    id?: StringFilter<"Payment"> | string
+    amount?: DecimalFilter<"Payment"> | Decimal | DecimalJsLike | number | string
+    type?: EnumPaymentTypeFilter<"Payment"> | $Enums.PaymentType
+    status?: EnumPaymentStatusFilter<"Payment"> | $Enums.PaymentStatus
+    createdAt?: DateTimeFilter<"Payment"> | Date | string
+    bookingId?: StringFilter<"Payment"> | string
+    businessId?: StringFilter<"Payment"> | string
+    currency?: StringFilter<"Payment"> | string
+    metadata?: JsonNullableFilter<"Payment">
+    stripeClientSecret?: StringNullableFilter<"Payment"> | string | null
+    stripePaymentId?: StringNullableFilter<"Payment"> | string | null
+    updatedAt?: DateTimeFilter<"Payment"> | Date | string
+    paidAt?: DateTimeNullableFilter<"Payment"> | Date | string | null
+  }
+
   export type QuoteUpsertWithWhereUniqueWithoutBusinessInput = {
     where: QuoteWhereUniqueInput
     update: XOR<QuoteUpdateWithoutBusinessInput, QuoteUncheckedUpdateWithoutBusinessInput>
@@ -31514,10 +32146,13 @@ export namespace Prisma {
     amountSubtotal?: FloatFilter<"Quote"> | number
     amountTax?: FloatFilter<"Quote"> | number
     currency?: StringFilter<"Quote"> | string
-    hostedQuoteUrl?: StringNullableFilter<"Quote"> | string | null
+    appQuoteUrl?: StringNullableFilter<"Quote"> | string | null
+    stripeHostedUrl?: StringNullableFilter<"Quote"> | string | null
     pdfUrl?: StringNullableFilter<"Quote"> | string | null
     expiresAt?: DateTimeNullableFilter<"Quote"> | Date | string | null
     metadata?: JsonNullableFilter<"Quote">
+    version?: IntFilter<"Quote"> | number
+    replacesQuoteId?: StringNullableFilter<"Quote"> | string | null
     createdAt?: DateTimeFilter<"Quote"> | Date | string
     updatedAt?: DateTimeFilter<"Quote"> | Date | string
     businessId?: StringFilter<"Quote"> | string
@@ -31525,63 +32160,70 @@ export namespace Prisma {
     bookingId?: StringFilter<"Quote"> | string
   }
 
-  export type CustomerStripeAccountUpsertWithWhereUniqueWithoutBusinessInput = {
-    where: CustomerStripeAccountWhereUniqueInput
-    update: XOR<CustomerStripeAccountUpdateWithoutBusinessInput, CustomerStripeAccountUncheckedUpdateWithoutBusinessInput>
-    create: XOR<CustomerStripeAccountCreateWithoutBusinessInput, CustomerStripeAccountUncheckedCreateWithoutBusinessInput>
+  export type SalesFunnelUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: SalesFunnelWhereUniqueInput
+    update: XOR<SalesFunnelUpdateWithoutBusinessInput, SalesFunnelUncheckedUpdateWithoutBusinessInput>
+    create: XOR<SalesFunnelCreateWithoutBusinessInput, SalesFunnelUncheckedCreateWithoutBusinessInput>
   }
 
-  export type CustomerStripeAccountUpdateWithWhereUniqueWithoutBusinessInput = {
-    where: CustomerStripeAccountWhereUniqueInput
-    data: XOR<CustomerStripeAccountUpdateWithoutBusinessInput, CustomerStripeAccountUncheckedUpdateWithoutBusinessInput>
+  export type SalesFunnelUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: SalesFunnelWhereUniqueInput
+    data: XOR<SalesFunnelUpdateWithoutBusinessInput, SalesFunnelUncheckedUpdateWithoutBusinessInput>
   }
 
-  export type CustomerStripeAccountUpdateManyWithWhereWithoutBusinessInput = {
-    where: CustomerStripeAccountScalarWhereInput
-    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyWithoutBusinessInput>
+  export type SalesFunnelUpdateManyWithWhereWithoutBusinessInput = {
+    where: SalesFunnelScalarWhereInput
+    data: XOR<SalesFunnelUpdateManyMutationInput, SalesFunnelUncheckedUpdateManyWithoutBusinessInput>
   }
 
-  export type CustomerStripeAccountScalarWhereInput = {
-    AND?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
-    OR?: CustomerStripeAccountScalarWhereInput[]
-    NOT?: CustomerStripeAccountScalarWhereInput | CustomerStripeAccountScalarWhereInput[]
-    id?: StringFilter<"CustomerStripeAccount"> | string
-    stripeCustomerId?: StringFilter<"CustomerStripeAccount"> | string
-    createdAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
-    updatedAt?: DateTimeFilter<"CustomerStripeAccount"> | Date | string
-    customerId?: StringFilter<"CustomerStripeAccount"> | string
-    businessId?: StringFilter<"CustomerStripeAccount"> | string
+  export type SalesFunnelScalarWhereInput = {
+    AND?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
+    OR?: SalesFunnelScalarWhereInput[]
+    NOT?: SalesFunnelScalarWhereInput | SalesFunnelScalarWhereInput[]
+    id?: StringFilter<"SalesFunnel"> | string
+    name?: StringFilter<"SalesFunnel"> | string
+    isActive?: BoolFilter<"SalesFunnel"> | boolean
+    popupTitle?: StringFilter<"SalesFunnel"> | string
+    popupText?: StringFilter<"SalesFunnel"> | string
+    popupImage?: StringNullableFilter<"SalesFunnel"> | string | null
+    formTitle?: StringFilter<"SalesFunnel"> | string
+    thankYouMessage?: StringFilter<"SalesFunnel"> | string
+    businessId?: StringFilter<"SalesFunnel"> | string
+    createdAt?: DateTimeFilter<"SalesFunnel"> | Date | string
+    updatedAt?: DateTimeFilter<"SalesFunnel"> | Date | string
+    couponId?: StringNullableFilter<"SalesFunnel"> | string | null
   }
 
-  export type OrganizationUpsertWithoutBusinessInput = {
-    update: XOR<OrganizationUpdateWithoutBusinessInput, OrganizationUncheckedUpdateWithoutBusinessInput>
-    create: XOR<OrganizationCreateWithoutBusinessInput, OrganizationUncheckedCreateWithoutBusinessInput>
-    where?: OrganizationWhereInput
+  export type WaiverUpsertWithWhereUniqueWithoutBusinessInput = {
+    where: WaiverWhereUniqueInput
+    update: XOR<WaiverUpdateWithoutBusinessInput, WaiverUncheckedUpdateWithoutBusinessInput>
+    create: XOR<WaiverCreateWithoutBusinessInput, WaiverUncheckedCreateWithoutBusinessInput>
   }
 
-  export type OrganizationUpdateToOneWithWhereWithoutBusinessInput = {
-    where?: OrganizationWhereInput
-    data: XOR<OrganizationUpdateWithoutBusinessInput, OrganizationUncheckedUpdateWithoutBusinessInput>
+  export type WaiverUpdateWithWhereUniqueWithoutBusinessInput = {
+    where: WaiverWhereUniqueInput
+    data: XOR<WaiverUpdateWithoutBusinessInput, WaiverUncheckedUpdateWithoutBusinessInput>
   }
 
-  export type OrganizationUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    clerkOrgId?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    memberships?: MembershipUpdateManyWithoutOrganizationNestedInput
-    subscription?: SubscriptionUpdateOneWithoutOrganizationNestedInput
+  export type WaiverUpdateManyWithWhereWithoutBusinessInput = {
+    where: WaiverScalarWhereInput
+    data: XOR<WaiverUpdateManyMutationInput, WaiverUncheckedUpdateManyWithoutBusinessInput>
   }
 
-  export type OrganizationUncheckedUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    clerkOrgId?: StringFieldUpdateOperationsInput | string
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
-    subscription?: SubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
+  export type WaiverScalarWhereInput = {
+    AND?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
+    OR?: WaiverScalarWhereInput[]
+    NOT?: WaiverScalarWhereInput | WaiverScalarWhereInput[]
+    id?: StringFilter<"Waiver"> | string
+    businessId?: StringFilter<"Waiver"> | string
+    customerId?: StringFilter<"Waiver"> | string
+    bookingId?: StringFilter<"Waiver"> | string
+    status?: EnumWaiverStatusFilter<"Waiver"> | $Enums.WaiverStatus
+    templateVersion?: StringFilter<"Waiver"> | string
+    documentUrl?: StringFilter<"Waiver"> | string
+    createdAt?: DateTimeFilter<"Waiver"> | Date | string
+    updatedAt?: DateTimeFilter<"Waiver"> | Date | string
+    docuSealDocumentId?: StringFilter<"Waiver"> | string
   }
 
   export type BusinessCreateWithoutOrganizationInput = {
@@ -31594,31 +32236,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutOrganizationInput = {
@@ -31631,31 +32277,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutOrganizationInput = {
@@ -31665,20 +32315,20 @@ export namespace Prisma {
 
   export type MembershipCreateWithoutOrganizationInput = {
     id?: string
-    role: $Enums.Role
     createdAt?: Date | string
     updatedAt?: Date | string
+    role: $Enums.Role
     clerkMembershipId: string
-    user: UserCreateNestedOneWithoutMembershipInput
+    user: UserCreateNestedOneWithoutMembershipsInput
   }
 
   export type MembershipUncheckedCreateWithoutOrganizationInput = {
     id?: string
-    role: $Enums.Role
+    userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    role: $Enums.Role
     clerkMembershipId: string
-    userId: string
   }
 
   export type MembershipCreateOrConnectWithoutOrganizationInput = {
@@ -31745,31 +32395,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutOrganizationInput = {
@@ -31782,31 +32436,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type MembershipUpsertWithWhereUniqueWithoutOrganizationInput = {
@@ -31823,19 +32481,6 @@ export namespace Prisma {
   export type MembershipUpdateManyWithWhereWithoutOrganizationInput = {
     where: MembershipScalarWhereInput
     data: XOR<MembershipUpdateManyMutationInput, MembershipUncheckedUpdateManyWithoutOrganizationInput>
-  }
-
-  export type MembershipScalarWhereInput = {
-    AND?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
-    OR?: MembershipScalarWhereInput[]
-    NOT?: MembershipScalarWhereInput | MembershipScalarWhereInput[]
-    id?: StringFilter<"Membership"> | string
-    role?: EnumRoleFilter<"Membership"> | $Enums.Role
-    createdAt?: DateTimeFilter<"Membership"> | Date | string
-    updatedAt?: DateTimeFilter<"Membership"> | Date | string
-    clerkMembershipId?: StringFilter<"Membership"> | string
-    userId?: StringFilter<"Membership"> | string
-    organizationId?: StringFilter<"Membership"> | string
   }
 
   export type SubscriptionUpsertWithoutOrganizationInput = {
@@ -31877,31 +32522,6 @@ export namespace Prisma {
     type?: EnumSubscriptionTypeFieldUpdateOperationsInput | $Enums.SubscriptionType
   }
 
-  export type UserCreateWithoutMembershipInput = {
-    id?: string
-    email?: string | null
-    name?: string | null
-    image?: string | null
-    clerkUserId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type UserUncheckedCreateWithoutMembershipInput = {
-    id?: string
-    email?: string | null
-    name?: string | null
-    image?: string | null
-    clerkUserId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type UserCreateOrConnectWithoutMembershipInput = {
-    where: UserWhereUniqueInput
-    create: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
-  }
-
   export type OrganizationCreateWithoutMembershipsInput = {
     id?: string
     clerkOrgId: string
@@ -31927,35 +32547,29 @@ export namespace Prisma {
     create: XOR<OrganizationCreateWithoutMembershipsInput, OrganizationUncheckedCreateWithoutMembershipsInput>
   }
 
-  export type UserUpsertWithoutMembershipInput = {
-    update: XOR<UserUpdateWithoutMembershipInput, UserUncheckedUpdateWithoutMembershipInput>
-    create: XOR<UserCreateWithoutMembershipInput, UserUncheckedCreateWithoutMembershipInput>
-    where?: UserWhereInput
+  export type UserCreateWithoutMembershipsInput = {
+    id?: string
+    email?: string | null
+    name?: string | null
+    createdAt?: Date | string
+    image?: string | null
+    updatedAt?: Date | string
+    clerkUserId?: string | null
   }
 
-  export type UserUpdateToOneWithWhereWithoutMembershipInput = {
-    where?: UserWhereInput
-    data: XOR<UserUpdateWithoutMembershipInput, UserUncheckedUpdateWithoutMembershipInput>
+  export type UserUncheckedCreateWithoutMembershipsInput = {
+    id?: string
+    email?: string | null
+    name?: string | null
+    createdAt?: Date | string
+    image?: string | null
+    updatedAt?: Date | string
+    clerkUserId?: string | null
   }
 
-  export type UserUpdateWithoutMembershipInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type UserUncheckedUpdateWithoutMembershipInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    name?: NullableStringFieldUpdateOperationsInput | string | null
-    image?: NullableStringFieldUpdateOperationsInput | string | null
-    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  export type UserCreateOrConnectWithoutMembershipsInput = {
+    where: UserWhereUniqueInput
+    create: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
   }
 
   export type OrganizationUpsertWithoutMembershipsInput = {
@@ -31989,6 +32603,37 @@ export namespace Prisma {
     subscription?: SubscriptionUncheckedUpdateOneWithoutOrganizationNestedInput
   }
 
+  export type UserUpsertWithoutMembershipsInput = {
+    update: XOR<UserUpdateWithoutMembershipsInput, UserUncheckedUpdateWithoutMembershipsInput>
+    create: XOR<UserCreateWithoutMembershipsInput, UserUncheckedCreateWithoutMembershipsInput>
+    where?: UserWhereInput
+  }
+
+  export type UserUpdateToOneWithWhereWithoutMembershipsInput = {
+    where?: UserWhereInput
+    data: XOR<UserUpdateWithoutMembershipsInput, UserUncheckedUpdateWithoutMembershipsInput>
+  }
+
+  export type UserUpdateWithoutMembershipsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type UserUncheckedUpdateWithoutMembershipsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    name?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    image?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    clerkUserId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
   export type BusinessCreateWithoutInventoryInput = {
     id?: string
     name: string
@@ -31999,31 +32644,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInventoryInput = {
@@ -32036,36 +32685,66 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInventoryInput = {
     where: BusinessWhereUniqueInput
     create: XOR<BusinessCreateWithoutInventoryInput, BusinessUncheckedCreateWithoutInventoryInput>
+  }
+
+  export type BookingItemUpdateWithWhereUniqueWithoutInventoryInput = {
+    where: BookingItemWhereUniqueInput
+    data: XOR<BookingItemUpdateWithoutInventoryInput, BookingItemUncheckedUpdateWithoutInventoryInput>
+  }
+
+  export type BookingItemUpdateManyWithWhereWithoutInventoryInput = {
+    where: BookingItemScalarWhereInput
+    data: XOR<BookingItemUpdateManyMutationInput, BookingItemUncheckedUpdateManyWithoutInventoryInput>
+  }
+
+  export type BookingItemScalarWhereInput = {
+    AND?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
+    OR?: BookingItemScalarWhereInput[]
+    NOT?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
+    id?: StringFilter<"BookingItem"> | string
+    bookingId?: StringFilter<"BookingItem"> | string
+    inventoryId?: StringFilter<"BookingItem"> | string
+    quantity?: IntFilter<"BookingItem"> | number
+    price?: FloatFilter<"BookingItem"> | number
+    createdAt?: DateTimeFilter<"BookingItem"> | Date | string
+    updatedAt?: DateTimeFilter<"BookingItem"> | Date | string
+    status?: StringFilter<"BookingItem"> | string
+    endUTC?: DateTimeFilter<"BookingItem"> | Date | string
+    startUTC?: DateTimeFilter<"BookingItem"> | Date | string
   }
 
   export type BusinessUpsertWithoutInventoryInput = {
@@ -32089,31 +32768,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInventoryInput = {
@@ -32126,136 +32809,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-  }
-
-  export type BookingItemUpdateWithWhereUniqueWithoutInventoryInput = {
-    where: BookingItemWhereUniqueInput
-    data: XOR<BookingItemUpdateWithoutInventoryInput, BookingItemUncheckedUpdateWithoutInventoryInput>
-  }
-
-  export type BookingItemUpdateManyWithWhereWithoutInventoryInput = {
-    where: BookingItemScalarWhereInput
-    data: XOR<BookingItemUpdateManyMutationInput, BookingItemUncheckedUpdateManyWithoutInventoryInput>
-  }
-
-  export type BookingItemScalarWhereInput = {
-    AND?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
-    OR?: BookingItemScalarWhereInput[]
-    NOT?: BookingItemScalarWhereInput | BookingItemScalarWhereInput[]
-    id?: StringFilter<"BookingItem"> | string
-    quantity?: IntFilter<"BookingItem"> | number
-    price?: FloatFilter<"BookingItem"> | number
-    createdAt?: DateTimeFilter<"BookingItem"> | Date | string
-    updatedAt?: DateTimeFilter<"BookingItem"> | Date | string
-    startUTC?: DateTimeFilter<"BookingItem"> | Date | string
-    endUTC?: DateTimeFilter<"BookingItem"> | Date | string
-    bookingId?: StringFilter<"BookingItem"> | string
-    status?: StringFilter<"BookingItem"> | string
-    inventoryId?: StringFilter<"BookingItem"> | string
-  }
-
-  export type BusinessCreateWithoutCustomersInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
-    coupons?: CouponCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
-  }
-
-  export type BusinessUncheckedCreateWithoutCustomersInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
-    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-  }
-
-  export type BusinessCreateOrConnectWithoutCustomersInput = {
-    where: BusinessWhereUniqueInput
-    create: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
   }
 
   export type BookingCreateWithoutCustomerInput = {
@@ -32272,25 +32854,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    isCompleted?: boolean
+    eventTimeZone?: string
     expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutCustomerInput = {
@@ -32307,25 +32890,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
     couponId?: string | null
-    businessId: string
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutCustomerInput = {
@@ -32338,37 +32922,116 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type WaiverCreateWithoutCustomerInput = {
+  export type BusinessCreateWithoutCustomersInput = {
     id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    business: BusinessCreateNestedOneWithoutWaiversInput
-    booking: BookingCreateNestedOneWithoutWaiversInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
+    coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
   }
 
-  export type WaiverUncheckedCreateWithoutCustomerInput = {
+  export type BusinessUncheckedCreateWithoutCustomersInput = {
     id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    organizationId: string
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
+    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutCustomersInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutCustomersInput, BusinessUncheckedCreateWithoutCustomersInput>
+  }
+
+  export type CustomerStripeAccountCreateWithoutCustomerInput = {
+    id?: string
+    stripeCustomerId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutCustomerStripeAccountsInput
+  }
+
+  export type CustomerStripeAccountUncheckedCreateWithoutCustomerInput = {
+    id?: string
+    stripeCustomerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
-    bookingId: string
   }
 
-  export type WaiverCreateOrConnectWithoutCustomerInput = {
-    where: WaiverWhereUniqueInput
-    create: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput>
+  export type CustomerStripeAccountCreateOrConnectWithoutCustomerInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    create: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput>
   }
 
-  export type WaiverCreateManyCustomerInputEnvelope = {
-    data: WaiverCreateManyCustomerInput | WaiverCreateManyCustomerInput[]
+  export type CustomerStripeAccountCreateManyCustomerInputEnvelope = {
+    data: CustomerStripeAccountCreateManyCustomerInput | CustomerStripeAccountCreateManyCustomerInput[]
     skipDuplicates?: boolean
   }
 
@@ -32390,8 +33053,8 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: Date | string
     updatedAt?: Date | string
+    booking: BookingCreateNestedOneWithoutInvoicesInput
     business: BusinessCreateNestedOneWithoutInvoicesInput
-    booking: BookingCreateNestedOneWithoutInvoiceInput
   }
 
   export type InvoiceUncheckedCreateWithoutCustomerInput = {
@@ -32434,14 +33097,18 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    booking: BookingCreateNestedOneWithoutQuotesInput
     business: BusinessCreateNestedOneWithoutQuotesInput
-    booking: BookingCreateNestedOneWithoutQuoteInput
+    currentBookings?: BookingCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutCustomerInput = {
@@ -32452,14 +33119,18 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
     bookingId: string
+    currentBookings?: BookingUncheckedCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutCustomerInput = {
@@ -32472,30 +33143,54 @@ export namespace Prisma {
     skipDuplicates?: boolean
   }
 
-  export type CustomerStripeAccountCreateWithoutCustomerInput = {
+  export type WaiverCreateWithoutCustomerInput = {
     id?: string
-    stripeCustomerId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    business: BusinessCreateNestedOneWithoutCustomerStripeAccountsInput
+    docuSealDocumentId: string
+    booking: BookingCreateNestedOneWithoutWaiversInput
+    business: BusinessCreateNestedOneWithoutWaiversInput
   }
 
-  export type CustomerStripeAccountUncheckedCreateWithoutCustomerInput = {
+  export type WaiverUncheckedCreateWithoutCustomerInput = {
     id?: string
-    stripeCustomerId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
     businessId: string
+    bookingId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    docuSealDocumentId: string
   }
 
-  export type CustomerStripeAccountCreateOrConnectWithoutCustomerInput = {
-    where: CustomerStripeAccountWhereUniqueInput
-    create: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput>
+  export type WaiverCreateOrConnectWithoutCustomerInput = {
+    where: WaiverWhereUniqueInput
+    create: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput>
   }
 
-  export type CustomerStripeAccountCreateManyCustomerInputEnvelope = {
-    data: CustomerStripeAccountCreateManyCustomerInput | CustomerStripeAccountCreateManyCustomerInput[]
+  export type WaiverCreateManyCustomerInputEnvelope = {
+    data: WaiverCreateManyCustomerInput | WaiverCreateManyCustomerInput[]
     skipDuplicates?: boolean
+  }
+
+  export type BookingUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: BookingWhereUniqueInput
+    update: XOR<BookingUpdateWithoutCustomerInput, BookingUncheckedUpdateWithoutCustomerInput>
+    create: XOR<BookingCreateWithoutCustomerInput, BookingUncheckedCreateWithoutCustomerInput>
+  }
+
+  export type BookingUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: BookingWhereUniqueInput
+    data: XOR<BookingUpdateWithoutCustomerInput, BookingUncheckedUpdateWithoutCustomerInput>
+  }
+
+  export type BookingUpdateManyWithWhereWithoutCustomerInput = {
+    where: BookingScalarWhereInput
+    data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutCustomerInput>
   }
 
   export type BusinessUpsertWithoutCustomersInput = {
@@ -32519,31 +33214,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCustomersInput = {
@@ -32556,63 +33255,51 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
-  export type BookingUpsertWithWhereUniqueWithoutCustomerInput = {
-    where: BookingWhereUniqueInput
-    update: XOR<BookingUpdateWithoutCustomerInput, BookingUncheckedUpdateWithoutCustomerInput>
-    create: XOR<BookingCreateWithoutCustomerInput, BookingUncheckedCreateWithoutCustomerInput>
+  export type CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    update: XOR<CustomerStripeAccountUpdateWithoutCustomerInput, CustomerStripeAccountUncheckedUpdateWithoutCustomerInput>
+    create: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput>
   }
 
-  export type BookingUpdateWithWhereUniqueWithoutCustomerInput = {
-    where: BookingWhereUniqueInput
-    data: XOR<BookingUpdateWithoutCustomerInput, BookingUncheckedUpdateWithoutCustomerInput>
+  export type CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: CustomerStripeAccountWhereUniqueInput
+    data: XOR<CustomerStripeAccountUpdateWithoutCustomerInput, CustomerStripeAccountUncheckedUpdateWithoutCustomerInput>
   }
 
-  export type BookingUpdateManyWithWhereWithoutCustomerInput = {
-    where: BookingScalarWhereInput
-    data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutCustomerInput>
-  }
-
-  export type WaiverUpsertWithWhereUniqueWithoutCustomerInput = {
-    where: WaiverWhereUniqueInput
-    update: XOR<WaiverUpdateWithoutCustomerInput, WaiverUncheckedUpdateWithoutCustomerInput>
-    create: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput>
-  }
-
-  export type WaiverUpdateWithWhereUniqueWithoutCustomerInput = {
-    where: WaiverWhereUniqueInput
-    data: XOR<WaiverUpdateWithoutCustomerInput, WaiverUncheckedUpdateWithoutCustomerInput>
-  }
-
-  export type WaiverUpdateManyWithWhereWithoutCustomerInput = {
-    where: WaiverScalarWhereInput
-    data: XOR<WaiverUpdateManyMutationInput, WaiverUncheckedUpdateManyWithoutCustomerInput>
+  export type CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput = {
+    where: CustomerStripeAccountScalarWhereInput
+    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyWithoutCustomerInput>
   }
 
   export type InvoiceUpsertWithWhereUniqueWithoutCustomerInput = {
@@ -32647,20 +33334,107 @@ export namespace Prisma {
     data: XOR<QuoteUpdateManyMutationInput, QuoteUncheckedUpdateManyWithoutCustomerInput>
   }
 
-  export type CustomerStripeAccountUpsertWithWhereUniqueWithoutCustomerInput = {
-    where: CustomerStripeAccountWhereUniqueInput
-    update: XOR<CustomerStripeAccountUpdateWithoutCustomerInput, CustomerStripeAccountUncheckedUpdateWithoutCustomerInput>
-    create: XOR<CustomerStripeAccountCreateWithoutCustomerInput, CustomerStripeAccountUncheckedCreateWithoutCustomerInput>
+  export type WaiverUpsertWithWhereUniqueWithoutCustomerInput = {
+    where: WaiverWhereUniqueInput
+    update: XOR<WaiverUpdateWithoutCustomerInput, WaiverUncheckedUpdateWithoutCustomerInput>
+    create: XOR<WaiverCreateWithoutCustomerInput, WaiverUncheckedCreateWithoutCustomerInput>
   }
 
-  export type CustomerStripeAccountUpdateWithWhereUniqueWithoutCustomerInput = {
-    where: CustomerStripeAccountWhereUniqueInput
-    data: XOR<CustomerStripeAccountUpdateWithoutCustomerInput, CustomerStripeAccountUncheckedUpdateWithoutCustomerInput>
+  export type WaiverUpdateWithWhereUniqueWithoutCustomerInput = {
+    where: WaiverWhereUniqueInput
+    data: XOR<WaiverUpdateWithoutCustomerInput, WaiverUncheckedUpdateWithoutCustomerInput>
   }
 
-  export type CustomerStripeAccountUpdateManyWithWhereWithoutCustomerInput = {
-    where: CustomerStripeAccountScalarWhereInput
-    data: XOR<CustomerStripeAccountUpdateManyMutationInput, CustomerStripeAccountUncheckedUpdateManyWithoutCustomerInput>
+  export type WaiverUpdateManyWithWhereWithoutCustomerInput = {
+    where: WaiverScalarWhereInput
+    data: XOR<WaiverUpdateManyMutationInput, WaiverUncheckedUpdateManyWithoutCustomerInput>
+  }
+
+  export type BusinessCreateWithoutBookingsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
+    coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutBookingsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    organizationId: string
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutBookingsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
   }
 
   export type CouponCreateWithoutBookingInput = {
@@ -32675,11 +33449,12 @@ export namespace Prisma {
     endDate?: Date | string | null
     isActive?: boolean
     minimumAmount?: number | null
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
     business: BusinessCreateNestedOneWithoutCouponsInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutCouponInput
   }
 
   export type CouponUncheckedCreateWithoutBookingInput = {
@@ -32695,94 +33470,16 @@ export namespace Prisma {
     isActive?: boolean
     minimumAmount?: number | null
     businessId: string
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutCouponInput
   }
 
   export type CouponCreateOrConnectWithoutBookingInput = {
     where: CouponWhereUniqueInput
     create: XOR<CouponCreateWithoutBookingInput, CouponUncheckedCreateWithoutBookingInput>
-  }
-
-  export type BusinessCreateWithoutBookingsInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
-    coupons?: CouponCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
-  }
-
-  export type BusinessUncheckedCreateWithoutBookingsInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
-    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-  }
-
-  export type BusinessCreateOrConnectWithoutBookingsInput = {
-    where: BusinessWhereUniqueInput
-    create: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
   }
 
   export type CustomerCreateWithoutBookingsInput = {
@@ -32804,10 +33501,10 @@ export namespace Prisma {
     status?: string
     type?: string
     business: BusinessCreateNestedOneWithoutCustomersInput
-    waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
     quotes?: QuoteCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutBookingsInput = {
@@ -32825,93 +33522,19 @@ export namespace Prisma {
     lastBooking?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    businessId: string
     isLead?: boolean
     status?: string
     type?: string
-    businessId: string
-    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
     quotes?: QuoteUncheckedCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutBookingsInput = {
     where: CustomerWhereUniqueInput
     create: XOR<CustomerCreateWithoutBookingsInput, CustomerUncheckedCreateWithoutBookingsInput>
-  }
-
-  export type PaymentCreateWithoutBookingInput = {
-    id?: string
-    amount: Decimal | DecimalJsLike | number | string
-    type: $Enums.PaymentType
-    status: $Enums.PaymentStatus
-    currency?: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: string | null
-    stripePaymentId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    paidAt?: Date | string | null
-    business: BusinessCreateNestedOneWithoutPaymentsInput
-  }
-
-  export type PaymentUncheckedCreateWithoutBookingInput = {
-    id?: string
-    amount: Decimal | DecimalJsLike | number | string
-    type: $Enums.PaymentType
-    status: $Enums.PaymentStatus
-    currency?: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: string | null
-    stripePaymentId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    paidAt?: Date | string | null
-    businessId: string
-  }
-
-  export type PaymentCreateOrConnectWithoutBookingInput = {
-    where: PaymentWhereUniqueInput
-    create: XOR<PaymentCreateWithoutBookingInput, PaymentUncheckedCreateWithoutBookingInput>
-  }
-
-  export type PaymentCreateManyBookingInputEnvelope = {
-    data: PaymentCreateManyBookingInput | PaymentCreateManyBookingInput[]
-    skipDuplicates?: boolean
-  }
-
-  export type WaiverCreateWithoutBookingInput = {
-    id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    business: BusinessCreateNestedOneWithoutWaiversInput
-    customer: CustomerCreateNestedOneWithoutWaiversInput
-  }
-
-  export type WaiverUncheckedCreateWithoutBookingInput = {
-    id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    businessId: string
-    customerId: string
-  }
-
-  export type WaiverCreateOrConnectWithoutBookingInput = {
-    where: WaiverWhereUniqueInput
-    create: XOR<WaiverCreateWithoutBookingInput, WaiverUncheckedCreateWithoutBookingInput>
-  }
-
-  export type WaiverCreateManyBookingInputEnvelope = {
-    data: WaiverCreateManyBookingInput | WaiverCreateManyBookingInput[]
-    skipDuplicates?: boolean
   }
 
   export type InvoiceCreateWithoutBookingInput = {
@@ -32963,6 +33586,51 @@ export namespace Prisma {
     create: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
   }
 
+  export type InvoiceCreateManyBookingInputEnvelope = {
+    data: InvoiceCreateManyBookingInput | InvoiceCreateManyBookingInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type PaymentCreateWithoutBookingInput = {
+    id?: string
+    amount: Decimal | DecimalJsLike | number | string
+    type: $Enums.PaymentType
+    status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    currency?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: string | null
+    stripePaymentId?: string | null
+    updatedAt?: Date | string
+    paidAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutPaymentsInput
+  }
+
+  export type PaymentUncheckedCreateWithoutBookingInput = {
+    id?: string
+    amount: Decimal | DecimalJsLike | number | string
+    type: $Enums.PaymentType
+    status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    businessId: string
+    currency?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: string | null
+    stripePaymentId?: string | null
+    updatedAt?: Date | string
+    paidAt?: Date | string | null
+  }
+
+  export type PaymentCreateOrConnectWithoutBookingInput = {
+    where: PaymentWhereUniqueInput
+    create: XOR<PaymentCreateWithoutBookingInput, PaymentUncheckedCreateWithoutBookingInput>
+  }
+
+  export type PaymentCreateManyBookingInputEnvelope = {
+    data: PaymentCreateManyBookingInput | PaymentCreateManyBookingInput[]
+    skipDuplicates?: boolean
+  }
+
   export type QuoteCreateWithoutBookingInput = {
     id?: string
     stripeQuoteId: string
@@ -32971,14 +33639,18 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     business: BusinessCreateNestedOneWithoutQuotesInput
     customer: CustomerCreateNestedOneWithoutQuotesInput
+    currentBookings?: BookingCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteUncheckedCreateWithoutBookingInput = {
@@ -32989,19 +33661,204 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
     customerId: string
+    currentBookings?: BookingUncheckedCreateNestedManyWithoutCurrentQuoteInput
   }
 
   export type QuoteCreateOrConnectWithoutBookingInput = {
     where: QuoteWhereUniqueInput
     create: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput>
+  }
+
+  export type QuoteCreateManyBookingInputEnvelope = {
+    data: QuoteCreateManyBookingInput | QuoteCreateManyBookingInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type QuoteCreateWithoutCurrentBookingsInput = {
+    id?: string
+    stripeQuoteId: string
+    status: $Enums.QuoteStatus
+    amountTotal: number
+    amountSubtotal: number
+    amountTax: number
+    currency: string
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
+    pdfUrl?: string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    booking: BookingCreateNestedOneWithoutQuotesInput
+    business: BusinessCreateNestedOneWithoutQuotesInput
+    customer: CustomerCreateNestedOneWithoutQuotesInput
+  }
+
+  export type QuoteUncheckedCreateWithoutCurrentBookingsInput = {
+    id?: string
+    stripeQuoteId: string
+    status: $Enums.QuoteStatus
+    amountTotal: number
+    amountSubtotal: number
+    amountTax: number
+    currency: string
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
+    pdfUrl?: string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId: string
+    bookingId: string
+  }
+
+  export type QuoteCreateOrConnectWithoutCurrentBookingsInput = {
+    where: QuoteWhereUniqueInput
+    create: XOR<QuoteCreateWithoutCurrentBookingsInput, QuoteUncheckedCreateWithoutCurrentBookingsInput>
+  }
+
+  export type WaiverCreateWithoutBookingInput = {
+    id?: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    docuSealDocumentId: string
+    business: BusinessCreateNestedOneWithoutWaiversInput
+    customer: CustomerCreateNestedOneWithoutWaiversInput
+  }
+
+  export type WaiverUncheckedCreateWithoutBookingInput = {
+    id?: string
+    businessId: string
+    customerId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    docuSealDocumentId: string
+  }
+
+  export type WaiverCreateOrConnectWithoutBookingInput = {
+    where: WaiverWhereUniqueInput
+    create: XOR<WaiverCreateWithoutBookingInput, WaiverUncheckedCreateWithoutBookingInput>
+  }
+
+  export type WaiverCreateManyBookingInputEnvelope = {
+    data: WaiverCreateManyBookingInput | WaiverCreateManyBookingInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BusinessUpsertWithoutBookingsInput = {
+    update: XOR<BusinessUpdateWithoutBookingsInput, BusinessUncheckedUpdateWithoutBookingsInput>
+    create: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutBookingsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutBookingsInput, BusinessUncheckedUpdateWithoutBookingsInput>
+  }
+
+  export type BusinessUpdateWithoutBookingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
+    coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutBookingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CouponUpsertWithoutBookingInput = {
@@ -33027,11 +33884,12 @@ export namespace Prisma {
     endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     isActive?: BoolFieldUpdateOperationsInput | boolean
     minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
     business?: BusinessUpdateOneRequiredWithoutCouponsNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutCouponNestedInput
   }
 
   export type CouponUncheckedUpdateWithoutBookingInput = {
@@ -33047,95 +33905,11 @@ export namespace Prisma {
     isActive?: BoolFieldUpdateOperationsInput | boolean
     minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     businessId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
     stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type BusinessUpsertWithoutBookingsInput = {
-    update: XOR<BusinessUpdateWithoutBookingsInput, BusinessUncheckedUpdateWithoutBookingsInput>
-    create: XOR<BusinessCreateWithoutBookingsInput, BusinessUncheckedCreateWithoutBookingsInput>
-    where?: BusinessWhereInput
-  }
-
-  export type BusinessUpdateToOneWithWhereWithoutBookingsInput = {
-    where?: BusinessWhereInput
-    data: XOR<BusinessUpdateWithoutBookingsInput, BusinessUncheckedUpdateWithoutBookingsInput>
-  }
-
-  export type BusinessUpdateWithoutBookingsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    state?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
-    logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
-  }
-
-  export type BusinessUncheckedUpdateWithoutBookingsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    state?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
-    logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput
   }
 
   export type CustomerUpsertWithoutBookingsInput = {
@@ -33168,10 +33942,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
-    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBookingsInput = {
@@ -33189,14 +33963,14 @@ export namespace Prisma {
     lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
-    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUncheckedUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type BookingItemUpdateWithWhereUniqueWithoutBookingInput = {
@@ -33207,6 +33981,22 @@ export namespace Prisma {
   export type BookingItemUpdateManyWithWhereWithoutBookingInput = {
     where: BookingItemScalarWhereInput
     data: XOR<BookingItemUpdateManyMutationInput, BookingItemUncheckedUpdateManyWithoutBookingInput>
+  }
+
+  export type InvoiceUpsertWithWhereUniqueWithoutBookingInput = {
+    where: InvoiceWhereUniqueInput
+    update: XOR<InvoiceUpdateWithoutBookingInput, InvoiceUncheckedUpdateWithoutBookingInput>
+    create: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
+  }
+
+  export type InvoiceUpdateWithWhereUniqueWithoutBookingInput = {
+    where: InvoiceWhereUniqueInput
+    data: XOR<InvoiceUpdateWithoutBookingInput, InvoiceUncheckedUpdateWithoutBookingInput>
+  }
+
+  export type InvoiceUpdateManyWithWhereWithoutBookingInput = {
+    where: InvoiceScalarWhereInput
+    data: XOR<InvoiceUpdateManyMutationInput, InvoiceUncheckedUpdateManyWithoutBookingInput>
   }
 
   export type PaymentUpsertWithWhereUniqueWithoutBookingInput = {
@@ -33225,6 +34015,77 @@ export namespace Prisma {
     data: XOR<PaymentUpdateManyMutationInput, PaymentUncheckedUpdateManyWithoutBookingInput>
   }
 
+  export type QuoteUpsertWithWhereUniqueWithoutBookingInput = {
+    where: QuoteWhereUniqueInput
+    update: XOR<QuoteUpdateWithoutBookingInput, QuoteUncheckedUpdateWithoutBookingInput>
+    create: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput>
+  }
+
+  export type QuoteUpdateWithWhereUniqueWithoutBookingInput = {
+    where: QuoteWhereUniqueInput
+    data: XOR<QuoteUpdateWithoutBookingInput, QuoteUncheckedUpdateWithoutBookingInput>
+  }
+
+  export type QuoteUpdateManyWithWhereWithoutBookingInput = {
+    where: QuoteScalarWhereInput
+    data: XOR<QuoteUpdateManyMutationInput, QuoteUncheckedUpdateManyWithoutBookingInput>
+  }
+
+  export type QuoteUpsertWithoutCurrentBookingsInput = {
+    update: XOR<QuoteUpdateWithoutCurrentBookingsInput, QuoteUncheckedUpdateWithoutCurrentBookingsInput>
+    create: XOR<QuoteCreateWithoutCurrentBookingsInput, QuoteUncheckedCreateWithoutCurrentBookingsInput>
+    where?: QuoteWhereInput
+  }
+
+  export type QuoteUpdateToOneWithWhereWithoutCurrentBookingsInput = {
+    where?: QuoteWhereInput
+    data: XOR<QuoteUpdateWithoutCurrentBookingsInput, QuoteUncheckedUpdateWithoutCurrentBookingsInput>
+  }
+
+  export type QuoteUpdateWithoutCurrentBookingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeQuoteId?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    amountTotal?: FloatFieldUpdateOperationsInput | number
+    amountSubtotal?: FloatFieldUpdateOperationsInput | number
+    amountTax?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUpdateOneRequiredWithoutQuotesNestedInput
+    business?: BusinessUpdateOneRequiredWithoutQuotesNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutQuotesNestedInput
+  }
+
+  export type QuoteUncheckedUpdateWithoutCurrentBookingsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeQuoteId?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    amountTotal?: FloatFieldUpdateOperationsInput | number
+    amountSubtotal?: FloatFieldUpdateOperationsInput | number
+    amountTax?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
   export type WaiverUpsertWithWhereUniqueWithoutBookingInput = {
     where: WaiverWhereUniqueInput
     update: XOR<WaiverUpdateWithoutBookingInput, WaiverUncheckedUpdateWithoutBookingInput>
@@ -33241,108 +34102,6 @@ export namespace Prisma {
     data: XOR<WaiverUpdateManyMutationInput, WaiverUncheckedUpdateManyWithoutBookingInput>
   }
 
-  export type InvoiceUpsertWithoutBookingInput = {
-    update: XOR<InvoiceUpdateWithoutBookingInput, InvoiceUncheckedUpdateWithoutBookingInput>
-    create: XOR<InvoiceCreateWithoutBookingInput, InvoiceUncheckedCreateWithoutBookingInput>
-    where?: InvoiceWhereInput
-  }
-
-  export type InvoiceUpdateToOneWithWhereWithoutBookingInput = {
-    where?: InvoiceWhereInput
-    data: XOR<InvoiceUpdateWithoutBookingInput, InvoiceUncheckedUpdateWithoutBookingInput>
-  }
-
-  export type InvoiceUpdateWithoutBookingInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
-    amountDue?: FloatFieldUpdateOperationsInput | number
-    amountPaid?: FloatFieldUpdateOperationsInput | number
-    amountRemaining?: FloatFieldUpdateOperationsInput | number
-    currency?: StringFieldUpdateOperationsInput | string
-    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutInvoicesNestedInput
-  }
-
-  export type InvoiceUncheckedUpdateWithoutBookingInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
-    amountDue?: FloatFieldUpdateOperationsInput | number
-    amountPaid?: FloatFieldUpdateOperationsInput | number
-    amountRemaining?: FloatFieldUpdateOperationsInput | number
-    currency?: StringFieldUpdateOperationsInput | string
-    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type QuoteUpsertWithoutBookingInput = {
-    update: XOR<QuoteUpdateWithoutBookingInput, QuoteUncheckedUpdateWithoutBookingInput>
-    create: XOR<QuoteCreateWithoutBookingInput, QuoteUncheckedCreateWithoutBookingInput>
-    where?: QuoteWhereInput
-  }
-
-  export type QuoteUpdateToOneWithWhereWithoutBookingInput = {
-    where?: QuoteWhereInput
-    data: XOR<QuoteUpdateWithoutBookingInput, QuoteUncheckedUpdateWithoutBookingInput>
-  }
-
-  export type QuoteUpdateWithoutBookingInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    stripeQuoteId?: StringFieldUpdateOperationsInput | string
-    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
-    amountTotal?: FloatFieldUpdateOperationsInput | number
-    amountSubtotal?: FloatFieldUpdateOperationsInput | number
-    amountTax?: FloatFieldUpdateOperationsInput | number
-    currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutQuotesNestedInput
-    customer?: CustomerUpdateOneRequiredWithoutQuotesNestedInput
-  }
-
-  export type QuoteUncheckedUpdateWithoutBookingInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    stripeQuoteId?: StringFieldUpdateOperationsInput | string
-    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
-    amountTotal?: FloatFieldUpdateOperationsInput | number
-    amountSubtotal?: FloatFieldUpdateOperationsInput | number
-    amountTax?: FloatFieldUpdateOperationsInput | number
-    currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
-  }
-
   export type BookingCreateWithoutInventoryItemsInput = {
     id?: string
     eventDate: Date | string
@@ -33357,25 +34116,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    isCompleted?: boolean
+    eventTimeZone?: string
     expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutInventoryItemsInput = {
@@ -33392,25 +34152,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
     couponId?: string | null
-    businessId: string
-    customerId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutInventoryItemsInput = {
@@ -33443,25 +34204,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutInventoryItemsInput = {
@@ -33478,25 +34240,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type InventoryCreateWithoutBookingItemsInput = {
@@ -33511,16 +34274,16 @@ export namespace Prisma {
     teardownTime: number
     images?: InventoryCreateimagesInput | string[]
     primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
     status: $Enums.InventoryStatus
     minimumSpace: string
     weightLimit: number
     ageRange: string
     weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
     createdAt?: Date | string
     updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
     version?: number
     business: BusinessCreateNestedOneWithoutInventoryInput
   }
@@ -33537,18 +34300,18 @@ export namespace Prisma {
     teardownTime: number
     images?: InventoryCreateimagesInput | string[]
     primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
     status: $Enums.InventoryStatus
     minimumSpace: string
     weightLimit: number
     ageRange: string
     weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
+    businessId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
     version?: number
-    businessId: string
   }
 
   export type InventoryCreateOrConnectWithoutBookingItemsInput = {
@@ -33579,16 +34342,16 @@ export namespace Prisma {
     teardownTime?: IntFieldUpdateOperationsInput | number
     images?: InventoryUpdateimagesInput | string[]
     primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
     minimumSpace?: StringFieldUpdateOperationsInput | string
     weightLimit?: IntFieldUpdateOperationsInput | number
     ageRange?: StringFieldUpdateOperationsInput | string
     weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
     business?: BusinessUpdateOneRequiredWithoutInventoryNestedInput
   }
@@ -33605,18 +34368,18 @@ export namespace Prisma {
     teardownTime?: IntFieldUpdateOperationsInput | number
     images?: InventoryUpdateimagesInput | string[]
     primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
     status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
     minimumSpace?: StringFieldUpdateOperationsInput | string
     weightLimit?: IntFieldUpdateOperationsInput | number
     ageRange?: StringFieldUpdateOperationsInput | string
     weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
+    businessId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
     version?: IntFieldUpdateOperationsInput | number
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type BookingCreateWithoutPaymentsInput = {
@@ -33633,25 +34396,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    isCompleted?: boolean
+    eventTimeZone?: string
     expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutPaymentsInput = {
@@ -33668,25 +34432,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
     couponId?: string | null
-    businessId: string
-    customerId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutPaymentsInput = {
@@ -33704,31 +34469,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceCreateNestedManyWithoutBusinessInput
     quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutPaymentsInput = {
@@ -33741,31 +34510,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
     quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutPaymentsInput = {
@@ -33798,25 +34571,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutPaymentsInput = {
@@ -33833,25 +34607,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BusinessUpsertWithoutPaymentsInput = {
@@ -33875,31 +34650,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutPaymentsInput = {
@@ -33912,110 +34691,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
-  }
-
-  export type BusinessCreateWithoutCouponsInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
-    bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
-  }
-
-  export type BusinessUncheckedCreateWithoutCouponsInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
-    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
-  }
-
-  export type BusinessCreateOrConnectWithoutCouponsInput = {
-    where: BusinessWhereUniqueInput
-    create: XOR<BusinessCreateWithoutCouponsInput, BusinessUncheckedCreateWithoutCouponsInput>
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type BookingCreateWithoutCouponInput = {
@@ -34032,25 +34736,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    isCompleted?: boolean
+    eventTimeZone?: string
     expiresAt?: Date | string | null
     business: BusinessCreateNestedOneWithoutBookingsInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
   }
 
   export type BookingUncheckedCreateWithoutCouponInput = {
@@ -34067,25 +34772,26 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    isCompleted?: boolean
+    eventTimeZone?: string
     expiresAt?: Date | string | null
-    businessId: string
-    customerId?: string | null
+    currentQuoteId?: string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
   }
 
   export type BookingCreateOrConnectWithoutCouponInput = {
@@ -34096,6 +34802,147 @@ export namespace Prisma {
   export type BookingCreateManyCouponInputEnvelope = {
     data: BookingCreateManyCouponInput | BookingCreateManyCouponInput[]
     skipDuplicates?: boolean
+  }
+
+  export type BusinessCreateWithoutCouponsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutCouponsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    organizationId: string
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutCouponsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutCouponsInput, BusinessUncheckedCreateWithoutCouponsInput>
+  }
+
+  export type SalesFunnelCreateWithoutCouponInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    business: BusinessCreateNestedOneWithoutSalesFunnelsInput
+  }
+
+  export type SalesFunnelUncheckedCreateWithoutCouponInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
+    businessId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+  }
+
+  export type SalesFunnelCreateOrConnectWithoutCouponInput = {
+    where: SalesFunnelWhereUniqueInput
+    create: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput>
+  }
+
+  export type SalesFunnelCreateManyCouponInputEnvelope = {
+    data: SalesFunnelCreateManyCouponInput | SalesFunnelCreateManyCouponInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BookingUpsertWithWhereUniqueWithoutCouponInput = {
+    where: BookingWhereUniqueInput
+    update: XOR<BookingUpdateWithoutCouponInput, BookingUncheckedUpdateWithoutCouponInput>
+    create: XOR<BookingCreateWithoutCouponInput, BookingUncheckedCreateWithoutCouponInput>
+  }
+
+  export type BookingUpdateWithWhereUniqueWithoutCouponInput = {
+    where: BookingWhereUniqueInput
+    data: XOR<BookingUpdateWithoutCouponInput, BookingUncheckedUpdateWithoutCouponInput>
+  }
+
+  export type BookingUpdateManyWithWhereWithoutCouponInput = {
+    where: BookingScalarWhereInput
+    data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutCouponInput>
   }
 
   export type BusinessUpsertWithoutCouponsInput = {
@@ -34119,31 +34966,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutCouponsInput = {
@@ -34156,47 +35007,51 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
-  export type BookingUpsertWithWhereUniqueWithoutCouponInput = {
-    where: BookingWhereUniqueInput
-    update: XOR<BookingUpdateWithoutCouponInput, BookingUncheckedUpdateWithoutCouponInput>
-    create: XOR<BookingCreateWithoutCouponInput, BookingUncheckedCreateWithoutCouponInput>
+  export type SalesFunnelUpsertWithWhereUniqueWithoutCouponInput = {
+    where: SalesFunnelWhereUniqueInput
+    update: XOR<SalesFunnelUpdateWithoutCouponInput, SalesFunnelUncheckedUpdateWithoutCouponInput>
+    create: XOR<SalesFunnelCreateWithoutCouponInput, SalesFunnelUncheckedCreateWithoutCouponInput>
   }
 
-  export type BookingUpdateWithWhereUniqueWithoutCouponInput = {
-    where: BookingWhereUniqueInput
-    data: XOR<BookingUpdateWithoutCouponInput, BookingUncheckedUpdateWithoutCouponInput>
+  export type SalesFunnelUpdateWithWhereUniqueWithoutCouponInput = {
+    where: SalesFunnelWhereUniqueInput
+    data: XOR<SalesFunnelUpdateWithoutCouponInput, SalesFunnelUncheckedUpdateWithoutCouponInput>
   }
 
-  export type BookingUpdateManyWithWhereWithoutCouponInput = {
-    where: BookingScalarWhereInput
-    data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutCouponInput>
+  export type SalesFunnelUpdateManyWithWhereWithoutCouponInput = {
+    where: SalesFunnelScalarWhereInput
+    data: XOR<SalesFunnelUpdateManyMutationInput, SalesFunnelUncheckedUpdateManyWithoutCouponInput>
   }
 
   export type BusinessCreateWithoutSalesFunnelsInput = {
@@ -34209,31 +35064,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
-    coupons?: CouponCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization: OrganizationCreateNestedOneWithoutBusinessInput
+    coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutSalesFunnelsInput = {
@@ -34246,36 +35105,85 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutSalesFunnelsInput = {
     where: BusinessWhereUniqueInput
     create: XOR<BusinessCreateWithoutSalesFunnelsInput, BusinessUncheckedCreateWithoutSalesFunnelsInput>
+  }
+
+  export type CouponCreateWithoutSalesFunnelsInput = {
+    id?: string
+    code: string
+    description?: string | null
+    discountType: $Enums.DiscountType
+    discountAmount: number
+    maxUses?: number | null
+    usedCount?: number
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    isActive?: boolean
+    minimumAmount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
+    booking?: BookingCreateNestedManyWithoutCouponInput
+    business: BusinessCreateNestedOneWithoutCouponsInput
+  }
+
+  export type CouponUncheckedCreateWithoutSalesFunnelsInput = {
+    id?: string
+    code: string
+    description?: string | null
+    discountType: $Enums.DiscountType
+    discountAmount: number
+    maxUses?: number | null
+    usedCount?: number
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    isActive?: boolean
+    minimumAmount?: number | null
+    businessId: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
+    booking?: BookingUncheckedCreateNestedManyWithoutCouponInput
+  }
+
+  export type CouponCreateOrConnectWithoutSalesFunnelsInput = {
+    where: CouponWhereUniqueInput
+    create: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
   }
 
   export type BusinessUpsertWithoutSalesFunnelsInput = {
@@ -34299,31 +35207,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
+    coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutSalesFunnelsInput = {
@@ -34336,31 +35248,163 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type CouponUpsertWithoutSalesFunnelsInput = {
+    update: XOR<CouponUpdateWithoutSalesFunnelsInput, CouponUncheckedUpdateWithoutSalesFunnelsInput>
+    create: XOR<CouponCreateWithoutSalesFunnelsInput, CouponUncheckedCreateWithoutSalesFunnelsInput>
+    where?: CouponWhereInput
+  }
+
+  export type CouponUpdateToOneWithWhereWithoutSalesFunnelsInput = {
+    where?: CouponWhereInput
+    data: XOR<CouponUpdateWithoutSalesFunnelsInput, CouponUncheckedUpdateWithoutSalesFunnelsInput>
+  }
+
+  export type CouponUpdateWithoutSalesFunnelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
+    usedCount?: IntFieldUpdateOperationsInput | number
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
+    booking?: BookingUpdateManyWithoutCouponNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCouponsNestedInput
+  }
+
+  export type CouponUncheckedUpdateWithoutSalesFunnelsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
+    usedCount?: IntFieldUpdateOperationsInput | number
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
+    booking?: BookingUncheckedUpdateManyWithoutCouponNestedInput
+  }
+
+  export type BookingCreateWithoutWaiversInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    expiresAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
+    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
+    payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
+  }
+
+  export type BookingUncheckedCreateWithoutWaiversInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    couponId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
+    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
+  }
+
+  export type BookingCreateOrConnectWithoutWaiversInput = {
+    where: BookingWhereUniqueInput
+    create: XOR<BookingCreateWithoutWaiversInput, BookingUncheckedCreateWithoutWaiversInput>
   }
 
   export type BusinessCreateWithoutWaiversInput = {
@@ -34373,31 +35417,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
-    coupons?: CouponCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
     organization: OrganizationCreateNestedOneWithoutBusinessInput
+    coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutWaiversInput = {
@@ -34410,31 +35458,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutWaiversInput = {
@@ -34460,11 +35512,11 @@ export namespace Prisma {
     isLead?: boolean
     status?: string
     type?: string
-    business: BusinessCreateNestedOneWithoutCustomersInput
     bookings?: BookingCreateNestedManyWithoutCustomerInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
     quotes?: QuoteCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutWaiversInput = {
@@ -34482,14 +35534,14 @@ export namespace Prisma {
     lastBooking?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    businessId: string
     isLead?: boolean
     status?: string
     type?: string
-    businessId: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
     quotes?: QuoteUncheckedCreateNestedManyWithoutCustomerInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutWaiversInput = {
@@ -34497,79 +35549,87 @@ export namespace Prisma {
     create: XOR<CustomerCreateWithoutWaiversInput, CustomerUncheckedCreateWithoutWaiversInput>
   }
 
-  export type BookingCreateWithoutWaiversInput = {
-    id?: string
-    eventDate: Date | string
-    startTime: Date | string
-    endTime: Date | string
-    status?: $Enums.BookingStatus
-    totalAmount?: number | null
-    depositAmount?: number | null
-    depositPaid?: boolean
-    eventType?: string | null
-    eventAddress?: string | null
-    eventCity?: string | null
-    eventState?: string | null
-    eventZipCode?: string | null
-    eventTimeZone?: string
-    participantAge?: number | null
-    participantCount?: number | null
-    subtotalAmount?: number | null
-    taxAmount?: number | null
-    taxRate?: number | null
-    isCompleted?: boolean
-    isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
-    business: BusinessCreateNestedOneWithoutBookingsInput
-    customer?: CustomerCreateNestedOneWithoutBookingsInput
-    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
-    payments?: PaymentCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
-  }
-
-  export type BookingUncheckedCreateWithoutWaiversInput = {
-    id?: string
-    eventDate: Date | string
-    startTime: Date | string
-    endTime: Date | string
-    status?: $Enums.BookingStatus
-    totalAmount?: number | null
-    depositAmount?: number | null
-    depositPaid?: boolean
-    eventType?: string | null
-    eventAddress?: string | null
-    eventCity?: string | null
-    eventState?: string | null
-    eventZipCode?: string | null
-    eventTimeZone?: string
-    participantAge?: number | null
-    participantCount?: number | null
-    subtotalAmount?: number | null
-    taxAmount?: number | null
-    taxRate?: number | null
-    isCompleted?: boolean
-    isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    couponId?: string | null
-    businessId: string
-    customerId?: string | null
-    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
-  }
-
-  export type BookingCreateOrConnectWithoutWaiversInput = {
-    where: BookingWhereUniqueInput
+  export type BookingUpsertWithoutWaiversInput = {
+    update: XOR<BookingUpdateWithoutWaiversInput, BookingUncheckedUpdateWithoutWaiversInput>
     create: XOR<BookingCreateWithoutWaiversInput, BookingUncheckedCreateWithoutWaiversInput>
+    where?: BookingWhereInput
+  }
+
+  export type BookingUpdateToOneWithWhereWithoutWaiversInput = {
+    where?: BookingWhereInput
+    data: XOR<BookingUpdateWithoutWaiversInput, BookingUncheckedUpdateWithoutWaiversInput>
+  }
+
+  export type BookingUpdateWithoutWaiversInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
+    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
+  }
+
+  export type BookingUncheckedUpdateWithoutWaiversInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
   }
 
   export type BusinessUpsertWithoutWaiversInput = {
@@ -34593,31 +35653,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
     organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
+    coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutWaiversInput = {
@@ -34630,31 +35694,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutWaiversInput = {
@@ -34686,11 +35754,11 @@ export namespace Prisma {
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutWaiversInput = {
@@ -34708,95 +35776,14 @@ export namespace Prisma {
     lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUncheckedUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
-  }
-
-  export type BookingUpsertWithoutWaiversInput = {
-    update: XOR<BookingUpdateWithoutWaiversInput, BookingUncheckedUpdateWithoutWaiversInput>
-    create: XOR<BookingCreateWithoutWaiversInput, BookingUncheckedCreateWithoutWaiversInput>
-    where?: BookingWhereInput
-  }
-
-  export type BookingUpdateToOneWithWhereWithoutWaiversInput = {
-    where?: BookingWhereInput
-    data: XOR<BookingUpdateWithoutWaiversInput, BookingUncheckedUpdateWithoutWaiversInput>
-  }
-
-  export type BookingUpdateWithoutWaiversInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
-    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneWithoutBookingsNestedInput
-    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
-  }
-
-  export type BookingUncheckedUpdateWithoutWaiversInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
-    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type OrganizationCreateWithoutSubscriptionInput = {
@@ -34855,6 +35842,83 @@ export namespace Prisma {
     memberships?: MembershipUncheckedUpdateManyWithoutOrganizationNestedInput
   }
 
+  export type BookingCreateWithoutInvoicesInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    expiresAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
+    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
+    waivers?: WaiverCreateNestedManyWithoutBookingInput
+  }
+
+  export type BookingUncheckedCreateWithoutInvoicesInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    couponId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
+    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
+  }
+
+  export type BookingCreateOrConnectWithoutInvoicesInput = {
+    where: BookingWhereUniqueInput
+    create: XOR<BookingCreateWithoutInvoicesInput, BookingUncheckedCreateWithoutInvoicesInput>
+  }
+
   export type BusinessCreateWithoutInvoicesInput = {
     id?: string
     name: string
@@ -34865,31 +35929,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutInvoicesInput = {
@@ -34902,31 +35970,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutInvoicesInput = {
@@ -34952,11 +36024,11 @@ export namespace Prisma {
     isLead?: boolean
     status?: string
     type?: string
-    business: BusinessCreateNestedOneWithoutCustomersInput
     bookings?: BookingCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverCreateNestedManyWithoutCustomerInput
-    quotes?: QuoteCreateNestedManyWithoutCustomerInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
+    quotes?: QuoteCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutInvoicesInput = {
@@ -34974,14 +36046,14 @@ export namespace Prisma {
     lastBooking?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    businessId: string
     isLead?: boolean
     status?: string
     type?: string
-    businessId: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutCustomerInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutInvoicesInput = {
@@ -34989,79 +36061,87 @@ export namespace Prisma {
     create: XOR<CustomerCreateWithoutInvoicesInput, CustomerUncheckedCreateWithoutInvoicesInput>
   }
 
-  export type BookingCreateWithoutInvoiceInput = {
-    id?: string
-    eventDate: Date | string
-    startTime: Date | string
-    endTime: Date | string
-    status?: $Enums.BookingStatus
-    totalAmount?: number | null
-    depositAmount?: number | null
-    depositPaid?: boolean
-    eventType?: string | null
-    eventAddress?: string | null
-    eventCity?: string | null
-    eventState?: string | null
-    eventZipCode?: string | null
-    eventTimeZone?: string
-    participantAge?: number | null
-    participantCount?: number | null
-    subtotalAmount?: number | null
-    taxAmount?: number | null
-    taxRate?: number | null
-    isCompleted?: boolean
-    isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
-    business: BusinessCreateNestedOneWithoutBookingsInput
-    customer?: CustomerCreateNestedOneWithoutBookingsInput
-    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
-    payments?: PaymentCreateNestedManyWithoutBookingInput
-    waivers?: WaiverCreateNestedManyWithoutBookingInput
-    quote?: QuoteCreateNestedOneWithoutBookingInput
+  export type BookingUpsertWithoutInvoicesInput = {
+    update: XOR<BookingUpdateWithoutInvoicesInput, BookingUncheckedUpdateWithoutInvoicesInput>
+    create: XOR<BookingCreateWithoutInvoicesInput, BookingUncheckedCreateWithoutInvoicesInput>
+    where?: BookingWhereInput
   }
 
-  export type BookingUncheckedCreateWithoutInvoiceInput = {
-    id?: string
-    eventDate: Date | string
-    startTime: Date | string
-    endTime: Date | string
-    status?: $Enums.BookingStatus
-    totalAmount?: number | null
-    depositAmount?: number | null
-    depositPaid?: boolean
-    eventType?: string | null
-    eventAddress?: string | null
-    eventCity?: string | null
-    eventState?: string | null
-    eventZipCode?: string | null
-    eventTimeZone?: string
-    participantAge?: number | null
-    participantCount?: number | null
-    subtotalAmount?: number | null
-    taxAmount?: number | null
-    taxRate?: number | null
-    isCompleted?: boolean
-    isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    couponId?: string | null
-    businessId: string
-    customerId?: string | null
-    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    quote?: QuoteUncheckedCreateNestedOneWithoutBookingInput
+  export type BookingUpdateToOneWithWhereWithoutInvoicesInput = {
+    where?: BookingWhereInput
+    data: XOR<BookingUpdateWithoutInvoicesInput, BookingUncheckedUpdateWithoutInvoicesInput>
   }
 
-  export type BookingCreateOrConnectWithoutInvoiceInput = {
-    where: BookingWhereUniqueInput
-    create: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
+  export type BookingUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
+    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
+    waivers?: WaiverUpdateManyWithoutBookingNestedInput
+  }
+
+  export type BookingUncheckedUpdateWithoutInvoicesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
   }
 
   export type BusinessUpsertWithoutInvoicesInput = {
@@ -35085,31 +36165,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutInvoicesInput = {
@@ -35122,31 +36206,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutInvoicesInput = {
@@ -35178,11 +36266,11 @@ export namespace Prisma {
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
-    quotes?: QuoteUpdateManyWithoutCustomerNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
+    quotes?: QuoteUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutInvoicesInput = {
@@ -35200,95 +36288,91 @@ export namespace Prisma {
     lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutCustomerNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
-  export type BookingUpsertWithoutInvoiceInput = {
-    update: XOR<BookingUpdateWithoutInvoiceInput, BookingUncheckedUpdateWithoutInvoiceInput>
-    create: XOR<BookingCreateWithoutInvoiceInput, BookingUncheckedCreateWithoutInvoiceInput>
-    where?: BookingWhereInput
+  export type BookingCreateWithoutQuotesInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    expiresAt?: Date | string | null
+    business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
+    customer?: CustomerCreateNestedOneWithoutBookingsInput
+    inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
+    payments?: PaymentCreateNestedManyWithoutBookingInput
+    currentQuote?: QuoteCreateNestedOneWithoutCurrentBookingsInput
+    waivers?: WaiverCreateNestedManyWithoutBookingInput
   }
 
-  export type BookingUpdateToOneWithWhereWithoutInvoiceInput = {
-    where?: BookingWhereInput
-    data: XOR<BookingUpdateWithoutInvoiceInput, BookingUncheckedUpdateWithoutInvoiceInput>
+  export type BookingUncheckedCreateWithoutQuotesInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    couponId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
+    inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
   }
 
-  export type BookingUpdateWithoutInvoiceInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
-    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneWithoutBookingsNestedInput
-    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUpdateManyWithoutBookingNestedInput
-    waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
-  }
-
-  export type BookingUncheckedUpdateWithoutInvoiceInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
-    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
+  export type BookingCreateOrConnectWithoutQuotesInput = {
+    where: BookingWhereUniqueInput
+    create: XOR<BookingCreateWithoutQuotesInput, BookingUncheckedCreateWithoutQuotesInput>
   }
 
   export type BusinessCreateWithoutQuotesInput = {
@@ -35301,31 +36385,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
     coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
     waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
   }
 
   export type BusinessUncheckedCreateWithoutQuotesInput = {
@@ -35338,31 +36426,35 @@ export namespace Prisma {
     zipCode?: string | null
     phone?: string | null
     email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
     logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
     organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
     salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutBusinessInput
   }
 
   export type BusinessCreateOrConnectWithoutQuotesInput = {
@@ -35388,11 +36480,11 @@ export namespace Prisma {
     isLead?: boolean
     status?: string
     type?: string
-    business: BusinessCreateNestedOneWithoutCustomersInput
     bookings?: BookingCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverCreateNestedManyWithoutCustomerInput
-    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
     customerStripeAccounts?: CustomerStripeAccountCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutQuotesInput = {
@@ -35410,14 +36502,14 @@ export namespace Prisma {
     lastBooking?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    businessId: string
     isLead?: boolean
     status?: string
     type?: string
-    businessId: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedCreateNestedManyWithoutCustomerInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutQuotesInput = {
@@ -35425,7 +36517,7 @@ export namespace Prisma {
     create: XOR<CustomerCreateWithoutQuotesInput, CustomerUncheckedCreateWithoutQuotesInput>
   }
 
-  export type BookingCreateWithoutQuoteInput = {
+  export type BookingCreateWithoutCurrentQuoteInput = {
     id?: string
     eventDate: Date | string
     startTime: Date | string
@@ -35439,28 +36531,29 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
+    isCompleted?: boolean
+    eventTimeZone?: string
     expiresAt?: Date | string | null
-    coupon?: CouponCreateNestedOneWithoutBookingInput
     business: BusinessCreateNestedOneWithoutBookingsInput
+    coupon?: CouponCreateNestedOneWithoutBookingInput
     customer?: CustomerCreateNestedOneWithoutBookingsInput
     inventoryItems?: BookingItemCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceCreateNestedManyWithoutBookingInput
     payments?: PaymentCreateNestedManyWithoutBookingInput
+    quotes?: QuoteCreateNestedManyWithoutBookingInput
     waivers?: WaiverCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceCreateNestedOneWithoutBookingInput
   }
 
-  export type BookingUncheckedCreateWithoutQuoteInput = {
+  export type BookingUncheckedCreateWithoutCurrentQuoteInput = {
     id?: string
     eventDate: Date | string
     startTime: Date | string
@@ -35474,30 +36567,119 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
     couponId?: string | null
-    businessId: string
-    customerId?: string | null
+    expiresAt?: Date | string | null
     inventoryItems?: BookingItemUncheckedCreateNestedManyWithoutBookingInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBookingInput
     payments?: PaymentUncheckedCreateNestedManyWithoutBookingInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBookingInput
     waivers?: WaiverUncheckedCreateNestedManyWithoutBookingInput
-    invoice?: InvoiceUncheckedCreateNestedOneWithoutBookingInput
   }
 
-  export type BookingCreateOrConnectWithoutQuoteInput = {
+  export type BookingCreateOrConnectWithoutCurrentQuoteInput = {
     where: BookingWhereUniqueInput
-    create: XOR<BookingCreateWithoutQuoteInput, BookingUncheckedCreateWithoutQuoteInput>
+    create: XOR<BookingCreateWithoutCurrentQuoteInput, BookingUncheckedCreateWithoutCurrentQuoteInput>
+  }
+
+  export type BookingCreateManyCurrentQuoteInputEnvelope = {
+    data: BookingCreateManyCurrentQuoteInput | BookingCreateManyCurrentQuoteInput[]
+    skipDuplicates?: boolean
+  }
+
+  export type BookingUpsertWithoutQuotesInput = {
+    update: XOR<BookingUpdateWithoutQuotesInput, BookingUncheckedUpdateWithoutQuotesInput>
+    create: XOR<BookingCreateWithoutQuotesInput, BookingUncheckedCreateWithoutQuotesInput>
+    where?: BookingWhereInput
+  }
+
+  export type BookingUpdateToOneWithWhereWithoutQuotesInput = {
+    where?: BookingWhereInput
+    data: XOR<BookingUpdateWithoutQuotesInput, BookingUncheckedUpdateWithoutQuotesInput>
+  }
+
+  export type BookingUpdateWithoutQuotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
+    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
+    waivers?: WaiverUpdateManyWithoutBookingNestedInput
+  }
+
+  export type BookingUncheckedUpdateWithoutQuotesInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
   }
 
   export type BusinessUpsertWithoutQuotesInput = {
@@ -35521,31 +36703,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
     coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
   }
 
   export type BusinessUncheckedUpdateWithoutQuotesInput = {
@@ -35558,31 +36744,35 @@ export namespace Prisma {
     zipCode?: NullableStringFieldUpdateOperationsInput | string | null
     phone?: NullableStringFieldUpdateOperationsInput | string | null
     email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
     logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
     organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
     bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
     salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutQuotesInput = {
@@ -35614,11 +36804,11 @@ export namespace Prisma {
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
-    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutQuotesInput = {
@@ -35636,95 +36826,117 @@ export namespace Prisma {
     lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
     customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
-  export type BookingUpsertWithoutQuoteInput = {
-    update: XOR<BookingUpdateWithoutQuoteInput, BookingUncheckedUpdateWithoutQuoteInput>
-    create: XOR<BookingCreateWithoutQuoteInput, BookingUncheckedCreateWithoutQuoteInput>
-    where?: BookingWhereInput
+  export type BookingUpsertWithWhereUniqueWithoutCurrentQuoteInput = {
+    where: BookingWhereUniqueInput
+    update: XOR<BookingUpdateWithoutCurrentQuoteInput, BookingUncheckedUpdateWithoutCurrentQuoteInput>
+    create: XOR<BookingCreateWithoutCurrentQuoteInput, BookingUncheckedCreateWithoutCurrentQuoteInput>
   }
 
-  export type BookingUpdateToOneWithWhereWithoutQuoteInput = {
-    where?: BookingWhereInput
-    data: XOR<BookingUpdateWithoutQuoteInput, BookingUncheckedUpdateWithoutQuoteInput>
+  export type BookingUpdateWithWhereUniqueWithoutCurrentQuoteInput = {
+    where: BookingWhereUniqueInput
+    data: XOR<BookingUpdateWithoutCurrentQuoteInput, BookingUncheckedUpdateWithoutCurrentQuoteInput>
   }
 
-  export type BookingUpdateWithoutQuoteInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
-    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
-    customer?: CustomerUpdateOneWithoutBookingsNestedInput
-    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUpdateManyWithoutBookingNestedInput
-    waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
+  export type BookingUpdateManyWithWhereWithoutCurrentQuoteInput = {
+    where: BookingScalarWhereInput
+    data: XOR<BookingUpdateManyMutationInput, BookingUncheckedUpdateManyWithoutCurrentQuoteInput>
   }
 
-  export type BookingUncheckedUpdateWithoutQuoteInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
-    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
+  export type BusinessCreateWithoutCustomerStripeAccountsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingCreateNestedManyWithoutBusinessInput
+    organization: OrganizationCreateNestedOneWithoutBusinessInput
+    coupons?: CouponCreateNestedManyWithoutBusinessInput
+    customers?: CustomerCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
+    payments?: PaymentCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessUncheckedCreateWithoutCustomerStripeAccountsInput = {
+    id?: string
+    name: string
+    description?: string | null
+    address?: string | null
+    city?: string | null
+    state?: string | null
+    zipCode?: string | null
+    phone?: string | null
+    email?: string | null
+    logo?: string | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeAccountId?: string | null
+    customDomain?: string | null
+    siteConfig: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessCreateserviceAreaInput | string[]
+    subdomain?: string | null
+    onboardingError?: string | null
+    timeZone?: string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: boolean
+    organizationId: string
+    bufferAfterHours?: number
+    bufferBeforeHours?: number
+    maxNoticeHours?: number
+    minBookingAmount?: number
+    minNoticeHours?: number
+    embeddedComponents?: boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
+    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
+    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
+    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
+    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
+    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
+    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
+    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
+  }
+
+  export type BusinessCreateOrConnectWithoutCustomerStripeAccountsInput = {
+    where: BusinessWhereUniqueInput
+    create: XOR<BusinessCreateWithoutCustomerStripeAccountsInput, BusinessUncheckedCreateWithoutCustomerStripeAccountsInput>
   }
 
   export type CustomerCreateWithoutCustomerStripeAccountsInput = {
@@ -35745,11 +36957,11 @@ export namespace Prisma {
     isLead?: boolean
     status?: string
     type?: string
-    business: BusinessCreateNestedOneWithoutCustomersInput
     bookings?: BookingCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverCreateNestedManyWithoutCustomerInput
+    business: BusinessCreateNestedOneWithoutCustomersInput
     invoices?: InvoiceCreateNestedManyWithoutCustomerInput
     quotes?: QuoteCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerUncheckedCreateWithoutCustomerStripeAccountsInput = {
@@ -35767,14 +36979,14 @@ export namespace Prisma {
     lastBooking?: Date | string | null
     createdAt?: Date | string
     updatedAt?: Date | string
+    businessId: string
     isLead?: boolean
     status?: string
     type?: string
-    businessId: string
     bookings?: BookingUncheckedCreateNestedManyWithoutCustomerInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
     invoices?: InvoiceUncheckedCreateNestedManyWithoutCustomerInput
     quotes?: QuoteUncheckedCreateNestedManyWithoutCustomerInput
+    waivers?: WaiverUncheckedCreateNestedManyWithoutCustomerInput
   }
 
   export type CustomerCreateOrConnectWithoutCustomerStripeAccountsInput = {
@@ -35782,83 +36994,97 @@ export namespace Prisma {
     create: XOR<CustomerCreateWithoutCustomerStripeAccountsInput, CustomerUncheckedCreateWithoutCustomerStripeAccountsInput>
   }
 
-  export type BusinessCreateWithoutCustomerStripeAccountsInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    inventory?: InventoryCreateNestedManyWithoutBusinessInput
-    customers?: CustomerCreateNestedManyWithoutBusinessInput
-    bookings?: BookingCreateNestedManyWithoutBusinessInput
-    payments?: PaymentCreateNestedManyWithoutBusinessInput
-    coupons?: CouponCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteCreateNestedManyWithoutBusinessInput
-    organization: OrganizationCreateNestedOneWithoutBusinessInput
-  }
-
-  export type BusinessUncheckedCreateWithoutCustomerStripeAccountsInput = {
-    id?: string
-    name: string
-    description?: string | null
-    address?: string | null
-    city?: string | null
-    state?: string | null
-    zipCode?: string | null
-    phone?: string | null
-    email?: string | null
-    serviceArea?: BusinessCreateserviceAreaInput | string[]
-    onboarded?: boolean
-    logo?: string | null
-    minAdvanceBooking?: number
-    maxAdvanceBooking?: number
-    minimumPurchase?: number
-    timeZone?: string
-    stripeAccountId?: string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: string | null
-    subdomain?: string | null
-    siteConfig: JsonNullValueInput | InputJsonValue
-    onboardingError?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    organizationId: string
-    inventory?: InventoryUncheckedCreateNestedManyWithoutBusinessInput
-    customers?: CustomerUncheckedCreateNestedManyWithoutBusinessInput
-    bookings?: BookingUncheckedCreateNestedManyWithoutBusinessInput
-    payments?: PaymentUncheckedCreateNestedManyWithoutBusinessInput
-    coupons?: CouponUncheckedCreateNestedManyWithoutBusinessInput
-    salesFunnels?: SalesFunnelUncheckedCreateNestedManyWithoutBusinessInput
-    waivers?: WaiverUncheckedCreateNestedManyWithoutBusinessInput
-    invoices?: InvoiceUncheckedCreateNestedManyWithoutBusinessInput
-    quotes?: QuoteUncheckedCreateNestedManyWithoutBusinessInput
-  }
-
-  export type BusinessCreateOrConnectWithoutCustomerStripeAccountsInput = {
-    where: BusinessWhereUniqueInput
+  export type BusinessUpsertWithoutCustomerStripeAccountsInput = {
+    update: XOR<BusinessUpdateWithoutCustomerStripeAccountsInput, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
     create: XOR<BusinessCreateWithoutCustomerStripeAccountsInput, BusinessUncheckedCreateWithoutCustomerStripeAccountsInput>
+    where?: BusinessWhereInput
+  }
+
+  export type BusinessUpdateToOneWithWhereWithoutCustomerStripeAccountsInput = {
+    where?: BusinessWhereInput
+    data: XOR<BusinessUpdateWithoutCustomerStripeAccountsInput, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
+  }
+
+  export type BusinessUpdateWithoutCustomerStripeAccountsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingUpdateManyWithoutBusinessNestedInput
+    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
+    coupons?: CouponUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
+  }
+
+  export type BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    address?: NullableStringFieldUpdateOperationsInput | string | null
+    city?: NullableStringFieldUpdateOperationsInput | string | null
+    state?: NullableStringFieldUpdateOperationsInput | string | null
+    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    phone?: NullableStringFieldUpdateOperationsInput | string | null
+    email?: NullableStringFieldUpdateOperationsInput | string | null
+    logo?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
+    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
+    siteConfig?: JsonNullValueInput | InputJsonValue
+    serviceArea?: BusinessUpdateserviceAreaInput | string[]
+    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
+    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
+    timeZone?: StringFieldUpdateOperationsInput | string
+    socialMedia?: NullableJsonNullValueInput | InputJsonValue
+    onboarded?: BoolFieldUpdateOperationsInput | boolean
+    organizationId?: StringFieldUpdateOperationsInput | string
+    bufferAfterHours?: IntFieldUpdateOperationsInput | number
+    bufferBeforeHours?: IntFieldUpdateOperationsInput | number
+    maxNoticeHours?: IntFieldUpdateOperationsInput | number
+    minBookingAmount?: FloatFieldUpdateOperationsInput | number
+    minNoticeHours?: IntFieldUpdateOperationsInput | number
+    embeddedComponents?: BoolFieldUpdateOperationsInput | boolean
+    embedConfig?: NullableJsonNullValueInput | InputJsonValue
+    bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
+    coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
+    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
+    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
   }
 
   export type CustomerUpsertWithoutCustomerStripeAccountsInput = {
@@ -35890,11 +37116,11 @@ export namespace Prisma {
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomersNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutCustomerStripeAccountsInput = {
@@ -35912,124 +37138,99 @@ export namespace Prisma {
     lastBooking?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     isLead?: BoolFieldUpdateOperationsInput | boolean
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
-    businessId?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
-  export type BusinessUpsertWithoutCustomerStripeAccountsInput = {
-    update: XOR<BusinessUpdateWithoutCustomerStripeAccountsInput, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
-    create: XOR<BusinessCreateWithoutCustomerStripeAccountsInput, BusinessUncheckedCreateWithoutCustomerStripeAccountsInput>
-    where?: BusinessWhereInput
-  }
-
-  export type BusinessUpdateToOneWithWhereWithoutCustomerStripeAccountsInput = {
-    where?: BusinessWhereInput
-    data: XOR<BusinessUpdateWithoutCustomerStripeAccountsInput, BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput>
-  }
-
-  export type BusinessUpdateWithoutCustomerStripeAccountsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    state?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
-    logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    inventory?: InventoryUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUpdateManyWithoutBusinessNestedInput
-    bookings?: BookingUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUpdateManyWithoutBusinessNestedInput
-    organization?: OrganizationUpdateOneRequiredWithoutBusinessNestedInput
-  }
-
-  export type BusinessUncheckedUpdateWithoutCustomerStripeAccountsInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    address?: NullableStringFieldUpdateOperationsInput | string | null
-    city?: NullableStringFieldUpdateOperationsInput | string | null
-    state?: NullableStringFieldUpdateOperationsInput | string | null
-    zipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    phone?: NullableStringFieldUpdateOperationsInput | string | null
-    email?: NullableStringFieldUpdateOperationsInput | string | null
-    serviceArea?: BusinessUpdateserviceAreaInput | string[]
-    onboarded?: BoolFieldUpdateOperationsInput | boolean
-    logo?: NullableStringFieldUpdateOperationsInput | string | null
-    minAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    maxAdvanceBooking?: IntFieldUpdateOperationsInput | number
-    minimumPurchase?: FloatFieldUpdateOperationsInput | number
-    timeZone?: StringFieldUpdateOperationsInput | string
-    stripeAccountId?: NullableStringFieldUpdateOperationsInput | string | null
-    socialMedia?: NullableJsonNullValueInput | InputJsonValue
-    customDomain?: NullableStringFieldUpdateOperationsInput | string | null
-    subdomain?: NullableStringFieldUpdateOperationsInput | string | null
-    siteConfig?: JsonNullValueInput | InputJsonValue
-    onboardingError?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    organizationId?: StringFieldUpdateOperationsInput | string
-    inventory?: InventoryUncheckedUpdateManyWithoutBusinessNestedInput
-    customers?: CustomerUncheckedUpdateManyWithoutBusinessNestedInput
-    bookings?: BookingUncheckedUpdateManyWithoutBusinessNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBusinessNestedInput
-    coupons?: CouponUncheckedUpdateManyWithoutBusinessNestedInput
-    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutBusinessNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBusinessNestedInput
-    invoices?: InvoiceUncheckedUpdateManyWithoutBusinessNestedInput
-    quotes?: QuoteUncheckedUpdateManyWithoutBusinessNestedInput
-  }
-
-  export type InventoryCreateManyBusinessInput = {
+  export type MembershipCreateManyUserInput = {
     id?: string
-    type: $Enums.InventoryType
-    name: string
-    description?: string | null
-    dimensions: string
-    capacity: number
-    price: number
-    setupTime: number
-    teardownTime: number
-    images?: InventoryCreateimagesInput | string[]
-    primaryImage?: string | null
-    stripeProductId?: string | null
-    stripePriceId?: string | null
-    status: $Enums.InventoryStatus
-    minimumSpace: string
-    weightLimit: number
-    ageRange: string
-    weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
-    quantity?: number
+    organizationId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    version?: number
+    role: $Enums.Role
+    clerkMembershipId: string
+  }
+
+  export type MembershipUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    clerkMembershipId?: StringFieldUpdateOperationsInput | string
+    organization?: OrganizationUpdateOneRequiredWithoutMembershipsNestedInput
+  }
+
+  export type MembershipUncheckedUpdateWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    clerkMembershipId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type MembershipUncheckedUpdateManyWithoutUserInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    organizationId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    clerkMembershipId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type BookingCreateManyBusinessInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    customerId?: string | null
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    couponId?: string | null
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
+  }
+
+  export type CouponCreateManyBusinessInput = {
+    id?: string
+    code: string
+    description?: string | null
+    discountType: $Enums.DiscountType
+    discountAmount: number
+    maxUses?: number | null
+    usedCount?: number
+    startDate?: Date | string | null
+    endDate?: Date | string | null
+    isActive?: boolean
+    minimumAmount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    stripeCouponId?: string | null
+    stripePromotionId?: string | null
   }
 
   export type CustomerCreateManyBusinessInput = {
@@ -36052,93 +37253,37 @@ export namespace Prisma {
     type?: string
   }
 
-  export type BookingCreateManyBusinessInput = {
+  export type CustomerStripeAccountCreateManyBusinessInput = {
     id?: string
-    eventDate: Date | string
-    startTime: Date | string
-    endTime: Date | string
-    status?: $Enums.BookingStatus
-    totalAmount?: number | null
-    depositAmount?: number | null
-    depositPaid?: boolean
-    eventType?: string | null
-    eventAddress?: string | null
-    eventCity?: string | null
-    eventState?: string | null
-    eventZipCode?: string | null
-    eventTimeZone?: string
-    participantAge?: number | null
-    participantCount?: number | null
-    subtotalAmount?: number | null
-    taxAmount?: number | null
-    taxRate?: number | null
-    isCompleted?: boolean
-    isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    couponId?: string | null
-    customerId?: string | null
-  }
-
-  export type PaymentCreateManyBusinessInput = {
-    id?: string
-    amount: Decimal | DecimalJsLike | number | string
-    type: $Enums.PaymentType
-    status: $Enums.PaymentStatus
-    currency?: string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: string | null
-    stripePaymentId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    paidAt?: Date | string | null
-    bookingId: string
-  }
-
-  export type CouponCreateManyBusinessInput = {
-    id?: string
-    code: string
-    description?: string | null
-    discountType: $Enums.DiscountType
-    discountAmount: number
-    maxUses?: number | null
-    usedCount?: number
-    startDate?: Date | string | null
-    endDate?: Date | string | null
-    isActive?: boolean
-    minimumAmount?: number | null
-    stripeCouponId?: string | null
-    stripePromotionId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type SalesFunnelCreateManyBusinessInput = {
-    id?: string
-    name: string
-    isActive?: boolean
-    popupTitle: string
-    popupText: string
-    popupImage?: string | null
-    formTitle: string
-    thankYouMessage: string
-    couponId?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-  }
-
-  export type WaiverCreateManyBusinessInput = {
-    id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
+    stripeCustomerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     customerId: string
-    bookingId: string
+  }
+
+  export type InventoryCreateManyBusinessInput = {
+    id?: string
+    type: $Enums.InventoryType
+    name: string
+    description?: string | null
+    dimensions: string
+    capacity: number
+    price: number
+    setupTime: number
+    teardownTime: number
+    images?: InventoryCreateimagesInput | string[]
+    primaryImage?: string | null
+    status: $Enums.InventoryStatus
+    minimumSpace: string
+    weightLimit: number
+    ageRange: string
+    weatherRestrictions?: InventoryCreateweatherRestrictionsInput | string[]
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    quantity?: number
+    stripePriceId?: string | null
+    stripeProductId?: string | null
+    version?: number
   }
 
   export type InvoiceCreateManyBusinessInput = {
@@ -36163,6 +37308,21 @@ export namespace Prisma {
     bookingId: string
   }
 
+  export type PaymentCreateManyBusinessInput = {
+    id?: string
+    amount: Decimal | DecimalJsLike | number | string
+    type: $Enums.PaymentType
+    status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    bookingId: string
+    currency?: string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: string | null
+    stripePaymentId?: string | null
+    updatedAt?: Date | string
+    paidAt?: Date | string | null
+  }
+
   export type QuoteCreateManyBusinessInput = {
     id?: string
     stripeQuoteId: string
@@ -36171,99 +37331,204 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     customerId: string
     bookingId: string
   }
 
-  export type CustomerStripeAccountCreateManyBusinessInput = {
+  export type SalesFunnelCreateManyBusinessInput = {
     id?: string
-    stripeCustomerId: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    couponId?: string | null
+  }
+
+  export type WaiverCreateManyBusinessInput = {
+    id?: string
     customerId: string
+    bookingId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    docuSealDocumentId: string
   }
 
-  export type InventoryUpdateWithoutBusinessInput = {
+  export type BookingUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumInventoryTypeFieldUpdateOperationsInput | $Enums.InventoryType
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    dimensions?: StringFieldUpdateOperationsInput | string
-    capacity?: IntFieldUpdateOperationsInput | number
-    price?: FloatFieldUpdateOperationsInput | number
-    setupTime?: IntFieldUpdateOperationsInput | number
-    teardownTime?: IntFieldUpdateOperationsInput | number
-    images?: InventoryUpdateimagesInput | string[]
-    primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
-    minimumSpace?: StringFieldUpdateOperationsInput | string
-    weightLimit?: IntFieldUpdateOperationsInput | number
-    ageRange?: StringFieldUpdateOperationsInput | string
-    weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    bookingItems?: BookingItemUpdateManyWithoutInventoryNestedInput
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
+    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
+    waivers?: WaiverUpdateManyWithoutBookingNestedInput
   }
 
-  export type InventoryUncheckedUpdateWithoutBusinessInput = {
+  export type BookingUncheckedUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumInventoryTypeFieldUpdateOperationsInput | $Enums.InventoryType
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    dimensions?: StringFieldUpdateOperationsInput | string
-    capacity?: IntFieldUpdateOperationsInput | number
-    price?: FloatFieldUpdateOperationsInput | number
-    setupTime?: IntFieldUpdateOperationsInput | number
-    teardownTime?: IntFieldUpdateOperationsInput | number
-    images?: InventoryUpdateimagesInput | string[]
-    primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
-    minimumSpace?: StringFieldUpdateOperationsInput | string
-    weightLimit?: IntFieldUpdateOperationsInput | number
-    ageRange?: StringFieldUpdateOperationsInput | string
-    weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
-    bookingItems?: BookingItemUncheckedUpdateManyWithoutInventoryNestedInput
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
   }
 
-  export type InventoryUncheckedUpdateManyWithoutBusinessInput = {
+  export type BookingUncheckedUpdateManyWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    type?: EnumInventoryTypeFieldUpdateOperationsInput | $Enums.InventoryType
-    name?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    dimensions?: StringFieldUpdateOperationsInput | string
-    capacity?: IntFieldUpdateOperationsInput | number
-    price?: FloatFieldUpdateOperationsInput | number
-    setupTime?: IntFieldUpdateOperationsInput | number
-    teardownTime?: IntFieldUpdateOperationsInput | number
-    images?: InventoryUpdateimagesInput | string[]
-    primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
-    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
-    status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
-    minimumSpace?: StringFieldUpdateOperationsInput | string
-    weightLimit?: IntFieldUpdateOperationsInput | number
-    ageRange?: StringFieldUpdateOperationsInput | string
-    weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
-    quantity?: IntFieldUpdateOperationsInput | number
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    version?: IntFieldUpdateOperationsInput | number
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type CouponUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
+    usedCount?: IntFieldUpdateOperationsInput | number
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
+    booking?: BookingUpdateManyWithoutCouponNestedInput
+    salesFunnels?: SalesFunnelUpdateManyWithoutCouponNestedInput
+  }
+
+  export type CouponUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
+    usedCount?: IntFieldUpdateOperationsInput | number
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
+    booking?: BookingUncheckedUpdateManyWithoutCouponNestedInput
+    salesFunnels?: SalesFunnelUncheckedUpdateManyWithoutCouponNestedInput
+  }
+
+  export type CouponUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    code?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
+    discountAmount?: FloatFieldUpdateOperationsInput | number
+    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
+    usedCount?: IntFieldUpdateOperationsInput | number
+    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
   export type CustomerUpdateWithoutBusinessInput = {
@@ -36285,10 +37550,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateWithoutBusinessInput = {
@@ -36310,10 +37575,10 @@ export namespace Prisma {
     status?: StringFieldUpdateOperationsInput | string
     type?: StringFieldUpdateOperationsInput | string
     bookings?: BookingUncheckedUpdateManyWithoutCustomerNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
+    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
     invoices?: InvoiceUncheckedUpdateManyWithoutCustomerNestedInput
     quotes?: QuoteUncheckedUpdateManyWithoutCustomerNestedInput
-    customerStripeAccounts?: CustomerStripeAccountUncheckedUpdateManyWithoutCustomerNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutCustomerNestedInput
   }
 
   export type CustomerUncheckedUpdateManyWithoutBusinessInput = {
@@ -36336,283 +37601,105 @@ export namespace Prisma {
     type?: StringFieldUpdateOperationsInput | string
   }
 
-  export type BookingUpdateWithoutBusinessInput = {
+  export type CustomerStripeAccountUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
-    customer?: CustomerUpdateOneWithoutBookingsNestedInput
-    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUpdateManyWithoutBookingNestedInput
-    waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
   }
 
-  export type BookingUncheckedUpdateWithoutBusinessInput = {
+  export type CustomerStripeAccountUncheckedUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
-    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
-    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
-    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
-  }
-
-  export type BookingUncheckedUpdateManyWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
-    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
-    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
-    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    depositPaid?: BoolFieldUpdateOperationsInput | boolean
-    eventType?: NullableStringFieldUpdateOperationsInput | string | null
-    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
-    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
-    eventState?: NullableStringFieldUpdateOperationsInput | string | null
-    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
-    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
-    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
-    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
-    isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
-  }
-
-  export type PaymentUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
-    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
-    currency?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    booking?: BookingUpdateOneRequiredWithoutPaymentsNestedInput
-  }
-
-  export type PaymentUncheckedUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
-    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
-    currency?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    bookingId?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type PaymentUncheckedUpdateManyWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
-    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
-    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
-    currency?: StringFieldUpdateOperationsInput | string
-    metadata?: NullableJsonNullValueInput | InputJsonValue
-    stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    bookingId?: StringFieldUpdateOperationsInput | string
-  }
-
-  export type CouponUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
-    discountAmount?: FloatFieldUpdateOperationsInput | number
-    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
-    usedCount?: IntFieldUpdateOperationsInput | number
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    booking?: BookingUpdateManyWithoutCouponNestedInput
-  }
-
-  export type CouponUncheckedUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
-    discountAmount?: FloatFieldUpdateOperationsInput | number
-    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
-    usedCount?: IntFieldUpdateOperationsInput | number
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    booking?: BookingUncheckedUpdateManyWithoutCouponNestedInput
-  }
-
-  export type CouponUncheckedUpdateManyWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    code?: StringFieldUpdateOperationsInput | string
-    description?: NullableStringFieldUpdateOperationsInput | string | null
-    discountType?: EnumDiscountTypeFieldUpdateOperationsInput | $Enums.DiscountType
-    discountAmount?: FloatFieldUpdateOperationsInput | number
-    maxUses?: NullableIntFieldUpdateOperationsInput | number | null
-    usedCount?: IntFieldUpdateOperationsInput | number
-    startDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    endDate?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    minimumAmount?: NullableFloatFieldUpdateOperationsInput | number | null
-    stripeCouponId?: NullableStringFieldUpdateOperationsInput | string | null
-    stripePromotionId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SalesFunnelUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    popupTitle?: StringFieldUpdateOperationsInput | string
-    popupText?: StringFieldUpdateOperationsInput | string
-    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
-    formTitle?: StringFieldUpdateOperationsInput | string
-    thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SalesFunnelUncheckedUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    popupTitle?: StringFieldUpdateOperationsInput | string
-    popupText?: StringFieldUpdateOperationsInput | string
-    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
-    formTitle?: StringFieldUpdateOperationsInput | string
-    thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type SalesFunnelUncheckedUpdateManyWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    name?: StringFieldUpdateOperationsInput | string
-    isActive?: BoolFieldUpdateOperationsInput | boolean
-    popupTitle?: StringFieldUpdateOperationsInput | string
-    popupText?: StringFieldUpdateOperationsInput | string
-    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
-    formTitle?: StringFieldUpdateOperationsInput | string
-    thankYouMessage?: StringFieldUpdateOperationsInput | string
-    couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-  }
-
-  export type WaiverUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    customer?: CustomerUpdateOneRequiredWithoutWaiversNestedInput
-    booking?: BookingUpdateOneRequiredWithoutWaiversNestedInput
-  }
-
-  export type WaiverUncheckedUpdateWithoutBusinessInput = {
-    id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerId?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
   }
 
-  export type WaiverUncheckedUpdateManyWithoutBusinessInput = {
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerId?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InventoryUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumInventoryTypeFieldUpdateOperationsInput | $Enums.InventoryType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    dimensions?: StringFieldUpdateOperationsInput | string
+    capacity?: IntFieldUpdateOperationsInput | number
+    price?: FloatFieldUpdateOperationsInput | number
+    setupTime?: IntFieldUpdateOperationsInput | number
+    teardownTime?: IntFieldUpdateOperationsInput | number
+    images?: InventoryUpdateimagesInput | string[]
+    primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
+    minimumSpace?: StringFieldUpdateOperationsInput | string
+    weightLimit?: IntFieldUpdateOperationsInput | number
+    ageRange?: StringFieldUpdateOperationsInput | string
+    weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    bookingItems?: BookingItemUpdateManyWithoutInventoryNestedInput
+  }
+
+  export type InventoryUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumInventoryTypeFieldUpdateOperationsInput | $Enums.InventoryType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    dimensions?: StringFieldUpdateOperationsInput | string
+    capacity?: IntFieldUpdateOperationsInput | number
+    price?: FloatFieldUpdateOperationsInput | number
+    setupTime?: IntFieldUpdateOperationsInput | number
+    teardownTime?: IntFieldUpdateOperationsInput | number
+    images?: InventoryUpdateimagesInput | string[]
+    primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
+    minimumSpace?: StringFieldUpdateOperationsInput | string
+    weightLimit?: IntFieldUpdateOperationsInput | number
+    ageRange?: StringFieldUpdateOperationsInput | string
+    weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    version?: IntFieldUpdateOperationsInput | number
+    bookingItems?: BookingItemUncheckedUpdateManyWithoutInventoryNestedInput
+  }
+
+  export type InventoryUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    type?: EnumInventoryTypeFieldUpdateOperationsInput | $Enums.InventoryType
+    name?: StringFieldUpdateOperationsInput | string
+    description?: NullableStringFieldUpdateOperationsInput | string | null
+    dimensions?: StringFieldUpdateOperationsInput | string
+    capacity?: IntFieldUpdateOperationsInput | number
+    price?: FloatFieldUpdateOperationsInput | number
+    setupTime?: IntFieldUpdateOperationsInput | number
+    teardownTime?: IntFieldUpdateOperationsInput | number
+    images?: InventoryUpdateimagesInput | string[]
+    primaryImage?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInventoryStatusFieldUpdateOperationsInput | $Enums.InventoryStatus
+    minimumSpace?: StringFieldUpdateOperationsInput | string
+    weightLimit?: IntFieldUpdateOperationsInput | number
+    ageRange?: StringFieldUpdateOperationsInput | string
+    weatherRestrictions?: InventoryUpdateweatherRestrictionsInput | string[]
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    quantity?: IntFieldUpdateOperationsInput | number
+    stripePriceId?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeProductId?: NullableStringFieldUpdateOperationsInput | string | null
+    version?: IntFieldUpdateOperationsInput | number
   }
 
   export type InvoiceUpdateWithoutBusinessInput = {
@@ -36633,8 +37720,8 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUpdateOneRequiredWithoutInvoicesNestedInput
     customer?: CustomerUpdateOneRequiredWithoutInvoicesNestedInput
-    booking?: BookingUpdateOneRequiredWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateWithoutBusinessInput = {
@@ -36681,6 +37768,51 @@ export namespace Prisma {
     bookingId?: StringFieldUpdateOperationsInput | string
   }
 
+  export type PaymentUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    currency?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    booking?: BookingUpdateOneRequiredWithoutPaymentsNestedInput
+  }
+
+  export type PaymentUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type PaymentUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
+    type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
+    status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    currency?: StringFieldUpdateOperationsInput | string
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
+    stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
   export type QuoteUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
     stripeQuoteId?: StringFieldUpdateOperationsInput | string
@@ -36689,14 +37821,18 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUpdateOneRequiredWithoutQuotesNestedInput
     customer?: CustomerUpdateOneRequiredWithoutQuotesNestedInput
-    booking?: BookingUpdateOneRequiredWithoutQuoteNestedInput
+    currentBookings?: BookingUpdateManyWithoutCurrentQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutBusinessInput = {
@@ -36707,14 +37843,18 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
+    currentBookings?: BookingUncheckedUpdateManyWithoutCurrentQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutBusinessInput = {
@@ -36725,74 +37865,131 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     customerId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
   }
 
-  export type CustomerStripeAccountUpdateWithoutBusinessInput = {
+  export type SalesFunnelUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    customer?: CustomerUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
+    coupon?: CouponUpdateOneWithoutSalesFunnelsNestedInput
   }
 
-  export type CustomerStripeAccountUncheckedUpdateWithoutBusinessInput = {
+  export type SalesFunnelUncheckedUpdateWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type CustomerStripeAccountUncheckedUpdateManyWithoutBusinessInput = {
+  export type SalesFunnelUncheckedUpdateManyWithoutBusinessInput = {
     id?: StringFieldUpdateOperationsInput | string
-    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type WaiverUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    booking?: BookingUpdateOneRequiredWithoutWaiversNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutWaiversNestedInput
+  }
+
+  export type WaiverUncheckedUpdateWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
     customerId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type WaiverUncheckedUpdateManyWithoutBusinessInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MembershipCreateManyOrganizationInput = {
     id?: string
-    role: $Enums.Role
+    userId: string
     createdAt?: Date | string
     updatedAt?: Date | string
+    role: $Enums.Role
     clerkMembershipId: string
-    userId: string
   }
 
   export type MembershipUpdateWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    user?: UserUpdateOneRequiredWithoutMembershipNestedInput
+    user?: UserUpdateOneRequiredWithoutMembershipsNestedInput
   }
 
   export type MembershipUncheckedUpdateWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type MembershipUncheckedUpdateManyWithoutOrganizationInput = {
     id?: StringFieldUpdateOperationsInput | string
-    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
+    userId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    role?: EnumRoleFieldUpdateOperationsInput | $Enums.Role
     clerkMembershipId?: StringFieldUpdateOperationsInput | string
-    userId?: StringFieldUpdateOperationsInput | string
   }
 
   export type BookingItemUpdateWithoutInventoryInput = {
@@ -36801,34 +37998,34 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     booking?: BookingUpdateOneRequiredWithoutInventoryItemsNestedInput
   }
 
   export type BookingItemUncheckedUpdateWithoutInventoryInput = {
     id?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    bookingId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BookingItemUncheckedUpdateManyWithoutInventoryInput = {
     id?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    bookingId?: StringFieldUpdateOperationsInput | string
     status?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BookingCreateManyCustomerInput = {
@@ -36845,32 +38042,29 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
-    createdAt?: Date | string
-    updatedAt?: Date | string
-    expiresAt?: Date | string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
     couponId?: string | null
-    businessId: string
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
   }
 
-  export type WaiverCreateManyCustomerInput = {
+  export type CustomerStripeAccountCreateManyCustomerInput = {
     id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
+    stripeCustomerId: string
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
-    bookingId: string
   }
 
   export type InvoiceCreateManyCustomerInput = {
@@ -36903,22 +38097,29 @@ export namespace Prisma {
     amountSubtotal: number
     amountTax: number
     currency: string
-    hostedQuoteUrl?: string | null
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
     pdfUrl?: string | null
     expiresAt?: Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
     bookingId: string
   }
 
-  export type CustomerStripeAccountCreateManyCustomerInput = {
+  export type WaiverCreateManyCustomerInput = {
     id?: string
-    stripeCustomerId: string
+    businessId: string
+    bookingId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    businessId: string
+    docuSealDocumentId: string
   }
 
   export type BookingUpdateWithoutCustomerInput = {
@@ -36935,25 +38136,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    coupon?: CouponUpdateOneWithoutBookingNestedInput
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutCustomerInput = {
@@ -36970,25 +38172,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateManyWithoutCustomerInput = {
@@ -37005,56 +38208,45 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     couponId?: NullableStringFieldUpdateOperationsInput | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
   }
 
-  export type WaiverUpdateWithoutCustomerInput = {
+  export type CustomerStripeAccountUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutWaiversNestedInput
-    booking?: BookingUpdateOneRequiredWithoutWaiversNestedInput
+    business?: BusinessUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
   }
 
-  export type WaiverUncheckedUpdateWithoutCustomerInput = {
+  export type CustomerStripeAccountUncheckedUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
   }
 
-  export type WaiverUncheckedUpdateManyWithoutCustomerInput = {
+  export type CustomerStripeAccountUncheckedUpdateManyWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
-    templateVersion?: StringFieldUpdateOperationsInput | string
-    documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    stripeCustomerId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
-    bookingId?: StringFieldUpdateOperationsInput | string
   }
 
   export type InvoiceUpdateWithoutCustomerInput = {
@@ -37075,8 +38267,8 @@ export namespace Prisma {
     metadata?: NullableJsonNullValueInput | InputJsonValue
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUpdateOneRequiredWithoutInvoicesNestedInput
     business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
-    booking?: BookingUpdateOneRequiredWithoutInvoiceNestedInput
   }
 
   export type InvoiceUncheckedUpdateWithoutCustomerInput = {
@@ -37131,14 +38323,18 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    booking?: BookingUpdateOneRequiredWithoutQuotesNestedInput
     business?: BusinessUpdateOneRequiredWithoutQuotesNestedInput
-    booking?: BookingUpdateOneRequiredWithoutQuoteNestedInput
+    currentBookings?: BookingUpdateManyWithoutCurrentQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateWithoutCustomerInput = {
@@ -37149,14 +38345,18 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
+    currentBookings?: BookingUncheckedUpdateManyWithoutCurrentQuoteNestedInput
   }
 
   export type QuoteUncheckedUpdateManyWithoutCustomerInput = {
@@ -37167,38 +38367,75 @@ export namespace Prisma {
     amountSubtotal?: FloatFieldUpdateOperationsInput | number
     amountTax?: FloatFieldUpdateOperationsInput | number
     currency?: StringFieldUpdateOperationsInput | string
-    hostedQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
     pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     bookingId?: StringFieldUpdateOperationsInput | string
   }
 
-  export type CustomerStripeAccountUpdateWithoutCustomerInput = {
+  export type WaiverUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    business?: BusinessUpdateOneRequiredWithoutCustomerStripeAccountsNestedInput
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+    booking?: BookingUpdateOneRequiredWithoutWaiversNestedInput
+    business?: BusinessUpdateOneRequiredWithoutWaiversNestedInput
   }
 
-  export type CustomerStripeAccountUncheckedUpdateWithoutCustomerInput = {
+  export type WaiverUncheckedUpdateWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
   }
 
-  export type CustomerStripeAccountUncheckedUpdateManyWithoutCustomerInput = {
+  export type WaiverUncheckedUpdateManyWithoutCustomerInput = {
     id?: StringFieldUpdateOperationsInput | string
-    stripeCustomerId?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    bookingId?: StringFieldUpdateOperationsInput | string
+    status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
+    templateVersion?: StringFieldUpdateOperationsInput | string
+    documentUrl?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InvoiceCreateManyBookingInput = {
+    id?: string
+    stripeInvoiceId?: string | null
+    status: $Enums.InvoiceStatus
+    amountDue: number
+    amountPaid?: number
+    amountRemaining?: number
+    currency: string
+    invoicePdfUrl?: string | null
+    hostedInvoiceUrl?: string | null
+    issuedAt?: Date | string | null
+    paidAt?: Date | string | null
+    voidedAt?: Date | string | null
+    dueAt?: Date | string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId: string
   }
 
   export type PaymentCreateManyBookingInput = {
@@ -37206,26 +38443,47 @@ export namespace Prisma {
     amount: Decimal | DecimalJsLike | number | string
     type: $Enums.PaymentType
     status: $Enums.PaymentStatus
+    createdAt?: Date | string
+    businessId: string
     currency?: string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: string | null
     stripePaymentId?: string | null
-    createdAt?: Date | string
     updatedAt?: Date | string
     paidAt?: Date | string | null
-    businessId: string
   }
 
-  export type WaiverCreateManyBookingInput = {
+  export type QuoteCreateManyBookingInput = {
     id?: string
-    status?: $Enums.WaiverStatus
-    templateVersion: string
-    documentUrl: string
-    docuSealDocumentId: string
+    stripeQuoteId: string
+    status: $Enums.QuoteStatus
+    amountTotal: number
+    amountSubtotal: number
+    amountTax: number
+    currency: string
+    appQuoteUrl?: string | null
+    stripeHostedUrl?: string | null
+    pdfUrl?: string | null
+    expiresAt?: Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: number
+    replacesQuoteId?: string | null
     createdAt?: Date | string
     updatedAt?: Date | string
     businessId: string
     customerId: string
+  }
+
+  export type WaiverCreateManyBookingInput = {
+    id?: string
+    businessId: string
+    customerId: string
+    status?: $Enums.WaiverStatus
+    templateVersion: string
+    documentUrl: string
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    docuSealDocumentId: string
   }
 
   export type BookingItemUpdateWithoutBookingInput = {
@@ -37234,34 +38492,100 @@ export namespace Prisma {
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     inventory?: InventoryUpdateOneRequiredWithoutBookingItemsNestedInput
   }
 
   export type BookingItemUncheckedUpdateWithoutBookingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    inventoryId?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
-    inventoryId?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
   }
 
   export type BookingItemUncheckedUpdateManyWithoutBookingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    inventoryId?: StringFieldUpdateOperationsInput | string
     quantity?: IntFieldUpdateOperationsInput | number
     price?: FloatFieldUpdateOperationsInput | number
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
-    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
     status?: StringFieldUpdateOperationsInput | string
-    inventoryId?: StringFieldUpdateOperationsInput | string
+    endUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+    startUTC?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type InvoiceUpdateWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutInvoicesNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutInvoicesNestedInput
+  }
+
+  export type InvoiceUncheckedUpdateWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+  }
+
+  export type InvoiceUncheckedUpdateManyWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeInvoiceId?: NullableStringFieldUpdateOperationsInput | string | null
+    status?: EnumInvoiceStatusFieldUpdateOperationsInput | $Enums.InvoiceStatus
+    amountDue?: FloatFieldUpdateOperationsInput | number
+    amountPaid?: FloatFieldUpdateOperationsInput | number
+    amountRemaining?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    invoicePdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    hostedInvoiceUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    issuedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    voidedAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    dueAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
   }
 
   export type PaymentUpdateWithoutBookingInput = {
@@ -37269,11 +38593,11 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     currency?: StringFieldUpdateOperationsInput | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutPaymentsNestedInput
@@ -37284,14 +38608,14 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
   }
 
   export type PaymentUncheckedUpdateManyWithoutBookingInput = {
@@ -37299,14 +38623,79 @@ export namespace Prisma {
     amount?: DecimalFieldUpdateOperationsInput | Decimal | DecimalJsLike | number | string
     type?: EnumPaymentTypeFieldUpdateOperationsInput | $Enums.PaymentType
     status?: EnumPaymentStatusFieldUpdateOperationsInput | $Enums.PaymentStatus
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
     currency?: StringFieldUpdateOperationsInput | string
     metadata?: NullableJsonNullValueInput | InputJsonValue
     stripeClientSecret?: NullableStringFieldUpdateOperationsInput | string | null
     stripePaymentId?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     paidAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  }
+
+  export type QuoteUpdateWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeQuoteId?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    amountTotal?: FloatFieldUpdateOperationsInput | number
+    amountSubtotal?: FloatFieldUpdateOperationsInput | number
+    amountTax?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutQuotesNestedInput
+    customer?: CustomerUpdateOneRequiredWithoutQuotesNestedInput
+    currentBookings?: BookingUpdateManyWithoutCurrentQuoteNestedInput
+  }
+
+  export type QuoteUncheckedUpdateWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeQuoteId?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    amountTotal?: FloatFieldUpdateOperationsInput | number
+    amountSubtotal?: FloatFieldUpdateOperationsInput | number
+    amountTax?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
+    currentBookings?: BookingUncheckedUpdateManyWithoutCurrentQuoteNestedInput
+  }
+
+  export type QuoteUncheckedUpdateManyWithoutBookingInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    stripeQuoteId?: StringFieldUpdateOperationsInput | string
+    status?: EnumQuoteStatusFieldUpdateOperationsInput | $Enums.QuoteStatus
+    amountTotal?: FloatFieldUpdateOperationsInput | number
+    amountSubtotal?: FloatFieldUpdateOperationsInput | number
+    amountTax?: FloatFieldUpdateOperationsInput | number
+    currency?: StringFieldUpdateOperationsInput | string
+    appQuoteUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    stripeHostedUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    pdfUrl?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    metadata?: NullableJsonNullValueInput | InputJsonValue
+    version?: IntFieldUpdateOperationsInput | number
+    replacesQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
   }
 
   export type WaiverUpdateWithoutBookingInput = {
@@ -37314,35 +38703,35 @@ export namespace Prisma {
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     business?: BusinessUpdateOneRequiredWithoutWaiversNestedInput
     customer?: CustomerUpdateOneRequiredWithoutWaiversNestedInput
   }
 
   export type WaiverUncheckedUpdateWithoutBookingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
   }
 
   export type WaiverUncheckedUpdateManyWithoutBookingInput = {
     id?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: StringFieldUpdateOperationsInput | string
     status?: EnumWaiverStatusFieldUpdateOperationsInput | $Enums.WaiverStatus
     templateVersion?: StringFieldUpdateOperationsInput | string
     documentUrl?: StringFieldUpdateOperationsInput | string
-    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: StringFieldUpdateOperationsInput | string
+    docuSealDocumentId?: StringFieldUpdateOperationsInput | string
   }
 
   export type BookingCreateManyCouponInput = {
@@ -37359,20 +38748,35 @@ export namespace Prisma {
     eventCity?: string | null
     eventState?: string | null
     eventZipCode?: string | null
-    eventTimeZone?: string
     participantAge?: number | null
     participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
     subtotalAmount?: number | null
     taxAmount?: number | null
     taxRate?: number | null
-    isCompleted?: boolean
     isCancelled?: boolean
-    specialInstructions?: string | null
+    isCompleted?: boolean
+    eventTimeZone?: string
+    expiresAt?: Date | string | null
+    currentQuoteId?: string | null
+  }
+
+  export type SalesFunnelCreateManyCouponInput = {
+    id?: string
+    name: string
+    isActive?: boolean
+    popupTitle: string
+    popupText: string
+    popupImage?: string | null
+    formTitle: string
+    thankYouMessage: string
+    businessId: string
     createdAt?: Date | string
     updatedAt?: Date | string
-    expiresAt?: Date | string | null
-    businessId: string
-    customerId?: string | null
   }
 
   export type BookingUpdateWithoutCouponInput = {
@@ -37389,25 +38793,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
     business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
     customer?: CustomerUpdateOneWithoutBookingsNestedInput
     inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
     payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    currentQuote?: QuoteUpdateOneWithoutCurrentBookingsNestedInput
     waivers?: WaiverUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateWithoutCouponInput = {
@@ -37424,25 +38829,26 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
-    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
-    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
-    businessId?: StringFieldUpdateOperationsInput | string
-    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
     inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
     payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
     waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
-    invoice?: InvoiceUncheckedUpdateOneWithoutBookingNestedInput
-    quote?: QuoteUncheckedUpdateOneWithoutBookingNestedInput
   }
 
   export type BookingUncheckedUpdateManyWithoutCouponInput = {
@@ -37459,20 +38865,197 @@ export namespace Prisma {
     eventCity?: NullableStringFieldUpdateOperationsInput | string | null
     eventState?: NullableStringFieldUpdateOperationsInput | string | null
     eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
-    eventTimeZone?: StringFieldUpdateOperationsInput | string
     participantAge?: NullableIntFieldUpdateOperationsInput | number | null
     participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
     subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
     taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
-    isCompleted?: BoolFieldUpdateOperationsInput | boolean
     isCancelled?: BoolFieldUpdateOperationsInput | boolean
-    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    currentQuoteId?: NullableStringFieldUpdateOperationsInput | string | null
+  }
+
+  export type SalesFunnelUpdateWithoutCouponInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
     createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
     updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    business?: BusinessUpdateOneRequiredWithoutSalesFunnelsNestedInput
+  }
+
+  export type SalesFunnelUncheckedUpdateWithoutCouponInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type SalesFunnelUncheckedUpdateManyWithoutCouponInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    name?: StringFieldUpdateOperationsInput | string
+    isActive?: BoolFieldUpdateOperationsInput | boolean
+    popupTitle?: StringFieldUpdateOperationsInput | string
+    popupText?: StringFieldUpdateOperationsInput | string
+    popupImage?: NullableStringFieldUpdateOperationsInput | string | null
+    formTitle?: StringFieldUpdateOperationsInput | string
+    thankYouMessage?: StringFieldUpdateOperationsInput | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+  }
+
+  export type BookingCreateManyCurrentQuoteInput = {
+    id?: string
+    eventDate: Date | string
+    startTime: Date | string
+    endTime: Date | string
+    status?: $Enums.BookingStatus
+    totalAmount?: number | null
+    depositAmount?: number | null
+    depositPaid?: boolean
+    eventType?: string | null
+    eventAddress?: string | null
+    eventCity?: string | null
+    eventState?: string | null
+    eventZipCode?: string | null
+    participantAge?: number | null
+    participantCount?: number | null
+    createdAt?: Date | string
+    updatedAt?: Date | string
+    businessId: string
+    customerId?: string | null
+    specialInstructions?: string | null
+    subtotalAmount?: number | null
+    taxAmount?: number | null
+    taxRate?: number | null
+    isCancelled?: boolean
+    isCompleted?: boolean
+    eventTimeZone?: string
+    couponId?: string | null
+    expiresAt?: Date | string | null
+  }
+
+  export type BookingUpdateWithoutCurrentQuoteInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
     expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    business?: BusinessUpdateOneRequiredWithoutBookingsNestedInput
+    coupon?: CouponUpdateOneWithoutBookingNestedInput
+    customer?: CustomerUpdateOneWithoutBookingsNestedInput
+    inventoryItems?: BookingItemUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUpdateManyWithoutBookingNestedInput
+    waivers?: WaiverUpdateManyWithoutBookingNestedInput
+  }
+
+  export type BookingUncheckedUpdateWithoutCurrentQuoteInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
     businessId?: StringFieldUpdateOperationsInput | string
     customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+    inventoryItems?: BookingItemUncheckedUpdateManyWithoutBookingNestedInput
+    invoices?: InvoiceUncheckedUpdateManyWithoutBookingNestedInput
+    payments?: PaymentUncheckedUpdateManyWithoutBookingNestedInput
+    quotes?: QuoteUncheckedUpdateManyWithoutBookingNestedInput
+    waivers?: WaiverUncheckedUpdateManyWithoutBookingNestedInput
+  }
+
+  export type BookingUncheckedUpdateManyWithoutCurrentQuoteInput = {
+    id?: StringFieldUpdateOperationsInput | string
+    eventDate?: DateTimeFieldUpdateOperationsInput | Date | string
+    startTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    endTime?: DateTimeFieldUpdateOperationsInput | Date | string
+    status?: EnumBookingStatusFieldUpdateOperationsInput | $Enums.BookingStatus
+    totalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    depositPaid?: BoolFieldUpdateOperationsInput | boolean
+    eventType?: NullableStringFieldUpdateOperationsInput | string | null
+    eventAddress?: NullableStringFieldUpdateOperationsInput | string | null
+    eventCity?: NullableStringFieldUpdateOperationsInput | string | null
+    eventState?: NullableStringFieldUpdateOperationsInput | string | null
+    eventZipCode?: NullableStringFieldUpdateOperationsInput | string | null
+    participantAge?: NullableIntFieldUpdateOperationsInput | number | null
+    participantCount?: NullableIntFieldUpdateOperationsInput | number | null
+    createdAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    updatedAt?: DateTimeFieldUpdateOperationsInput | Date | string
+    businessId?: StringFieldUpdateOperationsInput | string
+    customerId?: NullableStringFieldUpdateOperationsInput | string | null
+    specialInstructions?: NullableStringFieldUpdateOperationsInput | string | null
+    subtotalAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxAmount?: NullableFloatFieldUpdateOperationsInput | number | null
+    taxRate?: NullableFloatFieldUpdateOperationsInput | number | null
+    isCancelled?: BoolFieldUpdateOperationsInput | boolean
+    isCompleted?: BoolFieldUpdateOperationsInput | boolean
+    eventTimeZone?: StringFieldUpdateOperationsInput | string
+    couponId?: NullableStringFieldUpdateOperationsInput | string | null
+    expiresAt?: NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   }
 
 

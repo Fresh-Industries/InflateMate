@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { updateBookingSafely, UpdateBookingDataInput, BookingConflictError } from '@/lib/updateBookingSafely';
 import { z } from 'zod'; // Import Zod for schema validation
+import { supabaseAdmin } from "@/lib/supabaseClient";
 
 export async function GET(
   req: NextRequest,
@@ -18,16 +19,29 @@ export async function GET(
     const { businessId, bookingId } = await params;
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
     const booking = await prisma.booking.findFirst({
       where: { id: bookingId, businessId },
       include: {
-        inventoryItems: { include: { inventory: true } },
+        inventoryItems: { 
+          include: { 
+            inventory: {
+              select: { id: true, name: true, description: true, primaryImage: true }
+            }
+          }
+        },
         customer: true,
+        waivers: {
+          select: {
+            id: true,
+            status: true,
+            docuSealDocumentId: true
+          }
+        }
       },
     });
 
@@ -35,7 +49,9 @@ export async function GET(
       return NextResponse.json({ error: "Booking not found" }, { status: 404 });
     }
 
-    // Transform the data to match BookingFullDetails format
+    // Transform to match the BookingFullDetails format expected by the edit form
+    const hasSignedWaiver = booking.waivers.some((waiver: { status: string }) => waiver.status === 'SIGNED');
+    
     const bookingFullDetails = {
       booking: {
         id: booking.id,
@@ -44,16 +60,22 @@ export async function GET(
         endTime: booking.endTime,
         status: booking.status,
         totalAmount: booking.totalAmount,
+        subtotalAmount: booking.subtotalAmount,
+        taxAmount: booking.taxAmount,
+        taxRate: booking.taxRate,
+        depositAmount: booking.depositAmount,
+        depositPaid: booking.depositPaid,
         eventType: booking.eventType,
+        participantCount: booking.participantCount,
+        participantAge: booking.participantAge,
         eventAddress: booking.eventAddress,
         eventCity: booking.eventCity,
         eventState: booking.eventState,
         eventZipCode: booking.eventZipCode,
         eventTimeZone: booking.eventTimeZone || "America/Chicago",
-        participantCount: booking.participantCount,
-        participantAge: booking.participantAge,
         specialInstructions: booking.specialInstructions,
         expiresAt: booking.expiresAt,
+        isCompleted: booking.status === 'COMPLETED',
       },
       customer: booking.customer ? {
         id: booking.customer.id,
@@ -61,19 +83,31 @@ export async function GET(
         email: booking.customer.email,
         phone: booking.customer.phone,
       } : null,
-      bookingItems: booking.inventoryItems.map(item => ({
+      bookingItems: booking.inventoryItems.map((item: any) => ({
         id: item.id,
         quantity: item.quantity,
         price: item.price,
-        startUTC: item.startUTC,
-        endUTC: item.endUTC,
+        startUTC: item.startUTC || booking.startTime,
+        endUTC: item.endUTC || booking.endTime,
+        inventoryId: item.inventoryId,
+        bookingId: item.bookingId,
         inventory: {
           id: item.inventory.id,
           name: item.inventory.name,
           description: item.inventory.description,
           primaryImage: item.inventory.primaryImage,
-        }
-      }))
+        },
+      })),
+      // Additional properties that might be used by the edit form
+      waivers: booking.waivers,
+      hasSignedWaiver,
+      inventoryItems: booking.inventoryItems.map((item: any) => ({
+        id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        inventoryId: item.inventoryId,
+        bookingId: item.bookingId,
+      })),
     };
 
     return NextResponse.json(bookingFullDetails);
@@ -150,12 +184,13 @@ export async function PATCH(
     const { businessId, bookingId } = await params;
     const user = await getCurrentUserWithOrgAndBusiness();
 
-    if (!user || !user.membership || !user.membership.organization) {
-      return NextResponse.json({ error: "Unauthorized: User or organization details missing." }, { status: 401 });
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized: User details missing." }, { status: 401 });
     }
 
-    const userBusiness = user.membership.organization.business;
-    if (!userBusiness || userBusiness.id !== businessId) {
+    // Check that the user has access to this business
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Forbidden: Access denied to this business." }, { status: 403 });
     }
 
@@ -236,6 +271,17 @@ export async function PATCH(
         }
       });
       
+      // Send real-time update via Supabase for booking update
+      if (supabaseAdmin) {
+        await supabaseAdmin
+          .from('Booking')
+          .update({
+            updatedAt: new Date().toISOString(),
+          })
+          .eq('id', bookingId);
+        console.log("Booking updated: real-time update sent via Supabase");
+      }
+      
       console.log(`[API PATCH Booking] Successfully updated CONFIRMED booking ${bookingId} (simple update)`);
       return NextResponse.json(updatedBooking, { status: 200 });
     }
@@ -244,13 +290,104 @@ export async function PATCH(
     if (booking?.status === "CONFIRMED" && body.intent === "prepare_for_payment_difference" && body.items) {
       console.log(`[API PATCH Booking] Processing payment for additional items for CONFIRMED booking`);
       
-      // Process payment for additional items
       try {
-        // Use updateBookingSafely with our special intent
+        // First, update the booking with the new items using updateBookingSafely
         const updatedBookingWithItems = await updateBookingSafely(bookingId, businessId, body);
         
-        // Further processing will be handled by the Stripe webhook
-        return NextResponse.json(updatedBookingWithItems, { status: 200 });
+        // Now we need to create a payment intent for the difference amount
+        // Get the business for Stripe account info
+        const business = await prisma.business.findUnique({
+          where: { id: businessId },
+          select: { stripeAccountId: true }
+        });
+
+        if (!business?.stripeAccountId) {
+          return NextResponse.json({ 
+            error: "Business Stripe account not configured",
+            code: "STRIPE_ACCOUNT_MISSING"
+          }, { status: 400 });
+        }
+
+        // Calculate the difference amount (added items + tax)
+        const differenceAmount = (body.subtotalAmount || 0) + (body.taxAmount || 0);
+        const differenceAmountCents = Math.round(differenceAmount * 100);
+
+        if (differenceAmountCents <= 0) {
+          return NextResponse.json({ 
+            error: "No additional payment required",
+            code: "NO_PAYMENT_NEEDED"
+          }, { status: 400 });
+        }
+
+        // Get or create customer for Stripe
+        const customer = await prisma.customer.findFirst({
+          where: { 
+            email: body.customerEmail || "",
+            businessId: businessId 
+          }
+        });
+
+        if (!customer) {
+          return NextResponse.json({ 
+            error: "Customer not found",
+            code: "CUSTOMER_NOT_FOUND"
+          }, { status: 400 });
+        }
+
+        // Find or create Stripe customer
+        const { findOrCreateStripeCustomer } = await import("@/lib/stripe/customer-utils");
+        const stripeCustomerId = await findOrCreateStripeCustomer(
+          customer.email,
+          customer.name,
+          customer.phone || "",
+          body.eventCity || "",
+          body.eventState || "",
+          body.eventAddress || "",
+          body.eventZipCode || "",
+          businessId,
+          business.stripeAccountId
+        );
+
+        // Create payment intent for the difference
+        const { stripe } = await import("@/lib/stripe-server");
+        
+        const paymentIntent = await stripe.paymentIntents.create({
+          amount: differenceAmountCents,
+          currency: "usd",
+          customer: stripeCustomerId,
+          receipt_email: customer.email,
+          metadata: {
+            prismaBookingId: bookingId,
+            prismaBusinessId: businessId,
+            prismaCustomerId: customer.id,
+            paymentType: "booking_addition",
+            addedItemsAmount: (body.subtotalAmount || 0).toString(),
+            taxAmount: (body.taxAmount || 0).toString(),
+            totalDifferenceAmount: differenceAmount.toString(),
+            customerName: customer.name,
+            customerEmail: customer.email,
+          }
+        }, {
+          stripeAccount: business.stripeAccountId
+        });
+
+        if (!paymentIntent.client_secret) {
+          return NextResponse.json({ 
+            error: "Failed to create payment intent",
+            code: "PAYMENT_INTENT_FAILED"
+          }, { status: 500 });
+        }
+
+        console.log(`[API PATCH Booking] Created payment intent for difference: $${differenceAmount}`);
+        
+        // Return the updated booking with client secret
+        return NextResponse.json({
+          ...updatedBookingWithItems,
+          clientSecret: paymentIntent.client_secret,
+          differenceAmount: differenceAmount,
+          paymentIntentId: paymentIntent.id
+        }, { status: 200 });
+        
       } catch (error) {
         console.error("[API PATCH Booking] Error processing payment difference:", error);
         return NextResponse.json({ 
@@ -264,6 +401,18 @@ export async function PATCH(
     const updatedBooking = await updateBookingSafely(bookingId, businessId, body);
 
     console.log(`[API PATCH Booking] Successfully updated booking ${updatedBooking.id} to status ${updatedBooking.status}`);
+    
+    // Send real-time update via Supabase for general booking update
+    if (supabaseAdmin) {
+      await supabaseAdmin
+        .from('Booking')
+        .update({
+          status: updatedBooking.status,
+          updatedAt: new Date().toISOString(),
+        })
+        .eq('id', updatedBooking.id);
+      console.log("Booking updated: real-time update sent via Supabase");
+    }
     
     // Return the fully updated booking
     return NextResponse.json(updatedBooking, { status: 200 });
@@ -318,8 +467,8 @@ export async function DELETE(
     }
 
     // Check that the user has access to this business
-    const userBusinessId = user.membership?.organization?.business?.id;
-    if (!userBusinessId || userBusinessId !== businessId) {
+    const membership = getMembershipByBusinessId(user, businessId);
+    if (!membership) {
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
@@ -329,8 +478,8 @@ export async function DELETE(
       include: {
         payments: true,
         waivers: true,
-        invoice: true,
-        quote: true,
+        invoices: true,
+        quotes: true,
         inventoryItems: true,
       },
     });
@@ -348,9 +497,9 @@ export async function DELETE(
     }
 
     // Check if there are any completed payments
-    const hasCompletedPayments = booking.payments.some(
-      (payment) => payment.status === "COMPLETED"
-    );
+    const hasCompletedPayments = booking.payments?.some(
+      (payment: any) => payment.status === "COMPLETED"
+    ) || false;
     if (hasCompletedPayments) {
       return NextResponse.json(
         { error: "Cannot delete booking with completed payments" },
@@ -361,15 +510,15 @@ export async function DELETE(
     // Delete the booking and all related records in a transaction
     await prisma.$transaction(async (tx) => {
       // Delete related records first
-      if (booking.invoice) {
-        await tx.invoice.delete({
-          where: { id: booking.invoice.id },
+      if (booking.invoices && booking.invoices.length > 0) {
+        await tx.invoice.deleteMany({
+          where: { bookingId },
         });
       }
 
-      if (booking.quote) {
-        await tx.quote.delete({
-          where: { id: booking.quote.id },
+      if (booking.quotes && booking.quotes.length > 0) {
+        await tx.quote.deleteMany({
+          where: { bookingId },
         });
       }
 

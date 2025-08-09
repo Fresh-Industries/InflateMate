@@ -1,5 +1,5 @@
 import { Suspense } from "react";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import WebsiteCustomizer from "./_components/website-customizer";
@@ -15,9 +15,10 @@ async function getBusinessData(businessId: string) {
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
+  const membership = getMembershipByBusinessId(user, businessId);
+  const userBusinessId = membership?.organization?.business?.id;
   if (!userBusinessId || userBusinessId !== businessId) {
-    redirect('/dashboard');
+    redirect('/');
   }
 
   const business = await prisma.business.findUnique({
@@ -25,7 +26,7 @@ async function getBusinessData(businessId: string) {
   });
 
   if (!business) {
-    redirect('/dashboard');
+    redirect('/');
   }
 
   return business;
@@ -37,7 +38,7 @@ export default async function WebsitePage({ params }: { params: Promise<{ busine
 
   return (
     <div className="space-y-8">
-      <WebsiteHeader businessId={businessId} businessName={business.name} customDomain={business.customDomain} />
+      <WebsiteHeader businessId={businessId} businessName={business.name} customDomain={business.customDomain} embeddedComponents={business.embeddedComponents} />
       <Suspense fallback={<WebsiteCustomizerSkeleton />}>
         <WebsiteCustomizer businessId={businessId} initialData={business} />
       </Suspense>

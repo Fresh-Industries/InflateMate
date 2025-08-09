@@ -58,7 +58,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Label } from "@/components/ui/label";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -77,6 +77,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { utcToLocal } from "@/lib/utils";
+import { format } from "date-fns";
 
 interface Customer {
   id: string;
@@ -91,6 +92,7 @@ interface Customer {
   bookingCount: number;
   totalSpent: number;
   lastBooking: string | null;
+  lastBookingTimeZone: string | null;
   status: "Active" | "Inactive";
   type: "Regular" | "VIP";
   bookings?: CustomerBooking[];
@@ -133,7 +135,6 @@ type DialogMode = "add" | "edit" | null;
 export default function CustomersPage() {
   const params = useParams();
   const businessId = params.businessId as string;
-  const { toast } = useToast();
   const router = useRouter();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
@@ -172,11 +173,7 @@ export default function CustomersPage() {
       setCustomers(data);
     } catch (error) {
       console.error("Error fetching customers:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load customers",
-        variant: "destructive",
-      });
+      toast.error("Failed to load customers");
     } finally {
       setIsLoading(false);
     }
@@ -207,6 +204,8 @@ export default function CustomersPage() {
     });
   };
 
+
+  
   // Unified handler for Add or Edit
   const handleSubmitDialog = async () => {
     if (!dialogMode) return;
@@ -229,21 +228,15 @@ export default function CustomersPage() {
       }
 
       await fetchCustomers();
-      toast({
-        title: "Success",
-        description:
-          dialogMode === "add"
-            ? "Customer added successfully"
-            : "Customer updated successfully",
-      });
+      toast.success(
+        dialogMode === "add"
+          ? "Customer added successfully"
+          : "Customer updated successfully"
+      );
       closeDialog();
     } catch (error) {
       console.error(`Error on ${dialogMode} customer:`, error);
-      toast({
-        title: "Error",
-        description: `Failed to ${dialogMode} customer`,
-        variant: "destructive",
-      });
+      toast.error(`Failed to ${dialogMode} customer`);
     }
   };
 
@@ -258,26 +251,15 @@ export default function CustomersPage() {
       );
       const data = await response.json();
       if (!response.ok) {
-        toast({
-          title: "Error",
-          description: data.error || "Failed to delete customer",
-          variant: "destructive",
-        });
+        toast.error(data.error || "Failed to delete customer");
         return;
       }
 
       await fetchCustomers();
-      toast({
-        title: "Success",
-        description: data.message || "Customer deleted successfully",
-      });
+      toast.success(data.message || "Customer deleted successfully");
     } catch (error) {
       console.error("Error deleting customer:", error);
-      toast({
-        title: "Error",
-        description: "Failed to delete customer",
-        variant: "destructive",
-      });
+      toast.error("Failed to delete customer");
     }
   };
 
@@ -333,11 +315,7 @@ export default function CustomersPage() {
       setCustomerBookings(data);
     } catch (error) {
       console.error("Error fetching customer bookings:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load customer bookings",
-        variant: "destructive",
-      });
+      toast.error("Failed to load customer bookings");
     } finally {
       setIsLoadingBookings(false);
     }
@@ -349,8 +327,6 @@ export default function CustomersPage() {
     fetchCustomerBookings(customer.id);
     setIsDetailsOpen(true);
   };
-  console.log(customerBookings);
-  console.log(customers);
 
   return (
     <div className="max-w-7xl mx-auto px-4 py-12 space-y-8">
@@ -558,7 +534,7 @@ export default function CustomersPage() {
                       <TableCell>${customer.totalSpent}</TableCell>
                       <TableCell className="hidden md:table-cell">
                         {customer.lastBooking
-                          ? (new Date(customer.lastBooking)).toLocaleDateString()
+                          ? format(new Date(customer.lastBooking.split('T')[0] + 'T12:00:00'), 'MMM d, yyyy')
                           : "Never"}
                       </TableCell>
                       <TableCell>

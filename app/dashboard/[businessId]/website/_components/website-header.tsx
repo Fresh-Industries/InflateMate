@@ -1,6 +1,6 @@
 'use client';
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { Globe, ExternalLink, Eye, Copy } from "lucide-react";
 import Link from "next/link";
 
@@ -8,10 +8,11 @@ interface WebsiteHeaderProps {
   businessId: string;
   businessName: string;
   customDomain: string | null;
+  embeddedComponents: boolean;
 }
 
-export default function WebsiteHeader({ businessId, businessName, customDomain }: WebsiteHeaderProps) {
-  const { toast } = useToast();
+export default function WebsiteHeader({ businessId, businessName, customDomain, embeddedComponents }: WebsiteHeaderProps) {
+
   
   // Format business name for subdomain
   const formattedBusinessName = businessName
@@ -41,10 +42,7 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
   
   const handleCopyDomain = () => {
     navigator.clipboard.writeText(domain);
-    toast({
-      title: "Domain copied",
-      description: "The domain has been copied to your clipboard.",
-    });
+    toast.success("Domain copied");
   };
   
   return (
@@ -59,42 +57,46 @@ export default function WebsiteHeader({ businessId, businessName, customDomain }
       </div>
       
       <div className="flex flex-wrap items-center gap-3">
-        <div className="flex items-center gap-2 border bg-secondary/50 px-3 py-1.5 rounded-md text-sm font-medium">
-          <Globe className="h-4 w-4 text-muted-foreground" />
-          <span>{domain}</span>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-6 w-6 text-muted-foreground hover:text-foreground"
-            onClick={handleCopyDomain}
-            aria-label="Copy domain"
-          >
-            <Copy className="h-4 w-4" />
-            <span className="sr-only">Copy domain</span>
-          </Button>
-        </div>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          onClick={handlePreview}
-        >
-          <Eye className="h-4 w-4" />
-          Preview Site
-        </Button>
-        
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5"
-          asChild
-        >
-          <Link href={`/dashboard/${businessId}/website/domain`}>
-            <ExternalLink className="h-4 w-4" />
-            Manage Domain
-          </Link>
-        </Button>
+        {!embeddedComponents && (
+          <>
+            <div className="flex items-center gap-2 border bg-secondary/50 px-3 py-1.5 rounded-md text-sm font-medium">
+              <Globe className="h-4 w-4 text-muted-foreground" />
+              <span>{domain}</span>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-6 w-6 text-muted-foreground hover:text-foreground"
+                onClick={handleCopyDomain}
+                aria-label="Copy domain"
+              >
+                <Copy className="h-4 w-4" />
+                <span className="sr-only">Copy domain</span>
+              </Button>
+            </div>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              onClick={handlePreview}
+            >
+              <Eye className="h-4 w-4" />
+              Preview Site
+            </Button>
+            
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5"
+              asChild
+            >
+              <Link href={`/dashboard/${businessId}/website/domain`}>
+                <ExternalLink className="h-4 w-4" />
+                Manage Domain
+              </Link>
+            </Button>
+          </>
+        )}
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 
 // PUT /api/businesses/[businessId]/website
@@ -16,14 +16,14 @@ export async function PUT(
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
-  if (!userBusinessId || userBusinessId !== businessId) {
+  const membership = getMembershipByBusinessId(user, businessId);
+  if (!membership) {
     return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 
   try {
     const body = await req.json();
-    const { siteConfig } = body;
+    const { siteConfig, embedConfig } = body;
 
     if (!siteConfig) {
       return NextResponse.json(
@@ -32,14 +32,18 @@ export async function PUT(
       );
     }
 
+    // Prepare update data
+    const updateData = {
+      siteConfig,
+      ...(embedConfig !== undefined && { embedConfig }),
+    };
+
     // Update the business with the new site configuration
     const updatedBusiness = await prisma.business.update({
       where: {
         id: businessId,
       },
-      data: {
-        siteConfig,
-      },
+      data: updateData,
     });
 
     return NextResponse.json(updatedBusiness);
@@ -66,15 +70,15 @@ export async function GET(
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
-  if (!userBusinessId || userBusinessId !== businessId) {
+  const membership = getMembershipByBusinessId(user, businessId);
+  if (!membership) {
     return NextResponse.json({ error: "Access denied" }, { status: 403 });
   }
 
   try {
     const business = await prisma.business.findUnique({
       where: { id: businessId },
-      select: { siteConfig: true, customDomain: true },
+      select: { siteConfig: true, customDomain: true, embedConfig: true },
     });
 
     if (!business) {
@@ -84,6 +88,7 @@ export async function GET(
     return NextResponse.json({
       siteConfig: business.siteConfig || {},
       customDomain: business.customDomain,
+      embedConfig: business.embedConfig || {},
     });
   } catch (error) {
     console.error("Error fetching website configuration:", error);

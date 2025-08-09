@@ -8,7 +8,10 @@ export default function SignUpPage() {
 
                 <SignUp 
                     fallbackRedirectUrl="/callback" 
+                    forceRedirectUrl={process.env.NEXT_PUBLIC_API_HOST + '/callback'}
                     signInFallbackRedirectUrl="/sign-in"
+                    waitlistUrl='/waitlist'
+                    signInUrl="/sign-in"
                     appearance={{
                         elements: {
                             formButtonPrimary: 'bg-gradient-to-r from-[#8B5CF6] to-[#6366F1] text-white rounded-full shadow-lg hover:scale-105 transform transition-transform duration-300 rounded-full',

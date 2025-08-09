@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
+import { toast } from "sonner";
 import { useUploadThing } from "@/lib/uploadthing";
 
 export interface CreateBounceHouseFormData {
@@ -68,7 +68,6 @@ export function CreateBounceHouseForm({
   onFormDataChange,
   onSubmit,
 }: CreateBounceHouseFormProps) {
-  const { toast } = useToast();
   const { startUpload } = useUploadThing("imageUploader");
   const [selectedFiles, setSelectedFiles] = useState<ImageFile[]>([]);
   const [isUploading, setIsUploading] = useState(false);
@@ -95,11 +94,7 @@ export function CreateBounceHouseForm({
     // Validate each file size
     const validFiles = files.filter((file) => {
       if (file.size > 4 * 1024 * 1024) {
-        toast({
-          title: "Error",
-          description: `${file.name} exceeds 4MB limit`,
-          variant: "destructive",
-        });
+        toast.error(`${file.name} exceeds 4MB limit`);
         return false;
       }
       return true;
@@ -190,12 +185,7 @@ export function CreateBounceHouseForm({
       onSuccess();
     } catch (error) {
       console.error("Form submission error:", error);
-      toast({
-        title: "Error",
-        description:
-          error instanceof Error ? error.message : "Failed to submit form",
-        variant: "destructive",
-      });
+      toast.error(error instanceof Error ? error.message : "Failed to submit form");
     } finally {
       setIsLoading(false);
       setIsUploading(false);

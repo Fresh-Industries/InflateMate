@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ArrowRight, Users, Percent, TrendingUp, BarChart3 } from "lucide-react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { getCurrentUserWithOrgAndBusiness } from "@/lib/auth/clerk-utils";
+import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
 
 // Define the SalesFunnel type
@@ -27,7 +27,9 @@ export default async function MarketingPage(
   }
 
   // Check that the user has access to this business
-  const userBusinessId = user.membership?.organization?.business?.id;
+  const membership = getMembershipByBusinessId(user, params.businessId);
+  const userBusinessId = membership?.organization?.business?.id;
+
   if (!userBusinessId || userBusinessId !== params.businessId) {
     redirect("/");
   }
