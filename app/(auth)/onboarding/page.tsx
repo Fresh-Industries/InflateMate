@@ -232,6 +232,7 @@ const FormInput = ({
   type = "text",
   maxLength,
   tooltipContent,
+  required,
 }: {
   id: string;
   label: string;
@@ -241,6 +242,7 @@ const FormInput = ({
   type?: string;
   maxLength?: number;
   tooltipContent?: string;
+  required?: boolean;
 }) => (
   <TooltipProvider>
     <Tooltip delayDuration={150}>
@@ -271,7 +273,7 @@ const FormInput = ({
           onChange={onChange}
           placeholder={placeholder}
           maxLength={maxLength}
-          required
+          required={required ?? true}
           className="h-12 w-full rounded-xl border-gray-200 bg-white shadow-sm transition-all duration-200 hover:shadow-md focus:border-violet-400 focus:ring-2 focus:ring-violet-400/20"
         />
       </motion.div>
@@ -508,12 +510,16 @@ const Step3 = memo(
             value={formData.customDomain || ""}
             onChange={(e) => onFieldChange("customDomain", e.target.value)}
             placeholder="yourdomain.com"
+            required={formData.websiteType === "embedded"}
             tooltipContent={
               formData.websiteType === "embedded"
-                ? "Enter the domain where you want to embed the booking components"
+                ? "Enter the domain where you want to embed the components"
                 : "Enter your custom domain or leave empty to use the provided subdomain"
             }
           />
+          <p className="text-xs text-gray-500 mt-1">
+            Enter the domain as <code className="bg-gray-100 px-1 rounded">website.com</code>.
+          </p>
           {formData.websiteType === "template" && !formData.customDomain && (
             <p className="text-sm text-gray-500 mt-2">
               <strong>Don&apos;t have a domain?</strong> No worries! We&apos;ll provide you with a free subdomain like{" "}
@@ -611,10 +617,23 @@ export default function OnboardingPage() {
         return;
       }
 
+      // Normalize domain: if provided, ensure it has a scheme by prepending http://
+      const rawDomain = state.formData.customDomain?.trim();
+      const normalizedDomain = rawDomain && rawDomain.length > 0
+        ? (rawDomain.startsWith("http://") || rawDomain.startsWith("https://")
+            ? rawDomain
+            : `https://${rawDomain}`)
+        : undefined;
+
+      const payload: typeof state.formData = {
+        ...state.formData,
+        customDomain: normalizedDomain,
+      } as typeof state.formData;
+
       const res = await fetch("/api/auth/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(state.formData),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (!res.ok) {

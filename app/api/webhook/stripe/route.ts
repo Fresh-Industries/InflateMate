@@ -7,7 +7,6 @@ import { Stripe } from "stripe";
 import { dateOnlyUTC, localToUTC } from "@/lib/utils";
 import { sendSignatureEmail } from "@/lib/sendEmail";
 import { sendToDocuSeal } from "@/lib/docuseal.server";
-import { syncStripeDataToDB } from "@/lib/stripe-sync";
 import { InvoiceStatus } from "@/prisma/generated/prisma";
 import { PrismaClientKnownRequestError } from "@prisma/client/runtime/library";
 import { createBookingSafely } from "@/lib/createBookingSafely";
@@ -85,17 +84,7 @@ export async function POST(req: NextRequest) {
         console.log(`[WEBHOOK] Received ${event.type} event - no action needed`);
         break;
 
-      case 'customer.subscription.created':
-      case 'customer.subscription.updated':
-      case 'customer.subscription.deleted':
-      case 'customer.subscription.paused':
-      case 'customer.subscription.resumed':
-      case 'customer.subscription.trial_will_end':
-      case 'customer.subscription.pending_update_applied':
-      case 'customer.subscription.pending_update_expired':
-        const subscription = event.data.object as Stripe.Subscription;
-        await handleSubscription(subscription);
-        break;
+      // Subscription events are handled in /api/webhook/stripe/subs
 
       // --- ADDED: Invoice Event Handlers ---
       case 'invoice.payment_succeeded': {
@@ -184,26 +173,7 @@ export async function POST(req: NextRequest) {
   }
 }
 
-async function handleSubscription(subscription: Stripe.Subscription) {
-  console.log(`[WEBHOOK] Subscription event: ${subscription.id}`);
-
-  try {
-    // Derive plan from price ID or metadata; do NOT require organizationId here
-    const priceId = subscription.items?.data?.[0]?.price?.id ?? '';
-    const priceIdMap: Record<string, string> = {
-      [process.env.STRIPE_SOLO_PRICE_ID || '']: 'solo',
-      [process.env.STRIPE_GROWTH_PRICE_ID || '']: 'growth',
-    };
-    const planFromPrice = priceIdMap[priceId];
-    const plan = (subscription.metadata?.plan || planFromPrice || 'growth').toString();
-
-    const customerId = subscription.customer as string;
-    console.log(`[WEBHOOK] Syncing subscription for customer: ${customerId} (plan: ${plan}, priceId: ${priceId})`);
-    await syncStripeDataToDB(customerId, plan);
-  } catch (error) {
-    console.error(`[WEBHOOK] Error handling subscription ${subscription.id}:`, error);
-  }
-}
+// Subscription handler moved to /api/webhook/stripe/subs
 
 async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent) {
   console.log(`[WEBHOOK] PaymentIntent succeeded: ${paymentIntent.id}`);
