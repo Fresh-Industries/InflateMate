@@ -427,7 +427,6 @@ export async function POST(
           amount: bookingData.amountCents, // Amount in cents from payload
           currency: "usd", // Or get currency from business settings
           payment_method_types: ["card"], // Specify allowed payment methods
-          receipt_email: bookingData.customerEmail, // Send receipt to customer
           metadata: metadata, 
           customer: stripeCustomerId, 
         },

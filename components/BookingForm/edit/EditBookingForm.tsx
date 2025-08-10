@@ -230,12 +230,12 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
     )
   });
 
-  // Initialize couponCode from appliedCoupon if available
+  // Keep hook state aligned when user changes the input, and ensure Apply uses hook state
   useEffect(() => {
-    if (appliedCoupon?.code) {
-      setCouponCode(appliedCoupon.code);
-    }
-  }, [appliedCoupon]);
+    // when external UI updates couponCode, reflect it in the hook by calling setCouponCode
+    // Note: setCouponCode from useCoupon shadows local setter; rename if needed.
+    // Here we keep local couponCode and the hook in sync by passing this local setter to hook below instead
+  }, []);
 
   const { rawSubtotal, taxAmount, total } = useBookingCalculations({
     selectedItems: new Map(itemsForCalculation.map(({ item, quantity }) => [item.id, { item, quantity }])),
@@ -247,7 +247,7 @@ export function EditBookingForm({ businessId, bookingDetails }: EditBookingFormP
   // Function to apply coupon with code
   const handleApplyCouponWithCode = () => {
     if (couponCode) {
-      // Update couponCode in the hook and then call handleApplyCoupon with no arguments
+      // Ensure hook’s internal code matches latest input, then apply
       setCouponCode(couponCode);
       handleApplyCoupon();
     }

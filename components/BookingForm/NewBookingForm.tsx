@@ -87,8 +87,9 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
   const itemsForCalculation = React.useMemo(() => Array.from(selectedItems.values()), [selectedItems]);
 
   const { businessData, taxRate, applyTax } = useBusinessDetails(businessId);
-  const [couponCode, setCouponCode] = useState("");
   const {
+    couponCode,
+    setCouponCode,
     appliedCoupon,
     couponError,
     isApplyingCoupon,
