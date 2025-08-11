@@ -234,7 +234,23 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         throw new Error("Missing Stripe Customer ID after calling helper for quote");
       }
 
-      // 4. Prepare line items - use items from existing booking if available
+      // 4a. Ensure Stripe customer is up to date with destination address for tax
+      await stripe.customers.update(
+        stripeCustomerId,
+        {
+          email: customerEmail,
+          address: {
+            line1: eventAddress,
+            city: eventCity,
+            state: eventState,
+            postal_code: eventZipCode,
+            country: 'US',
+          },
+        },
+        { stripeAccount: stripeConnectedAccountId }
+      );
+
+      // 4b. Prepare line items - use items from existing booking if available
       let lineItems;
       if (existingBooking && existingBooking.inventoryItems.length > 0) {
         // Use inventory items from the existing booking
@@ -281,6 +297,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           prismaCustomerId: customer.id,
         },
         description: `Quote for event on ${eventDate}`,
+        // Enable automatic tax for quotes (flows through to the generated invoice)
+        automatic_tax: { enabled: true },
+        // Provide default invoice shipping address used for tax destination
+        default_tax_rates: undefined,
+        on_behalf_of: undefined,
       }, { 
         stripeAccount: stripeConnectedAccountId,
         idempotencyKey: idempotencyKey
@@ -320,6 +341,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       const tz = eventTimeZone || business.timeZone || 'America/Chicago';
       const startDateTime = localToUTC(eventDate, startTime, tz);
       const endDateTime = localToUTC(eventDate, endTime, tz);
+
+      // Pull Stripe-calculated amounts (in cents)
+      const amountSubtotalCents = finalized.amount_subtotal ?? 0;
+      const amountTotalCents = finalized.amount_total ?? 0;
+      const amountTaxCents = finalized.total_details?.amount_tax ?? Math.max(0, amountTotalCents - amountSubtotalCents);
 
       // 9. Update existing Booking and Create Quote in DB Transaction
       console.log(`Starting database transaction for updating Booking ${targetBookingId} and creating Quote...`);
@@ -408,9 +434,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           data: {
             stripeQuoteId: finalized.id,
             status: QuoteStatus.OPEN, // Store as OPEN status
-            amountTotal: totalAmount,
-            amountSubtotal: subtotalAmount,
-            amountTax: taxAmount,
+            amountTotal: amountTotalCents / 100,
+            amountSubtotal: amountSubtotalCents / 100,
+            amountTax: amountTaxCents / 100,
             currency: (finalized.currency ?? 'usd').toUpperCase(),
             appQuoteUrl: null, // No app URL needed
             stripeHostedUrl: null, // Not using Stripe's hosted view
@@ -540,6 +566,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
           select: {
             id: true,
             eventDate: true,
+            eventTimeZone: true,
             startTime: true,
             endTime: true,
             eventAddress: true,
@@ -556,7 +583,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
       }
     });
 
-    return NextResponse.json(quotes, { status: 200 });
+    // Normalize: date-only string to avoid TZ shifts on client
+    const normalized = quotes.map((q) => ({
+      ...q,
+      booking: {
+        ...q.booking,
+        eventDateString: q.booking?.eventDate
+          ? new Date(q.booking.eventDate).toISOString().slice(0, 10)
+          : null,
+      },
+    }));
+
+    return NextResponse.json(normalized, { status: 200 });
   } catch (error) {
     console.error("Error fetching quotes:", error);
     return NextResponse.json({ error: "An error occurred while fetching quotes." }, { status: 500 });

@@ -7,6 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Separator } from "@/components/ui/separator";
 import { Button } from "@/components/ui/button";
 import { format } from 'date-fns';
+import { utcToLocal } from '@/lib/utils';
 import { Loader2, Check, CalendarIcon, MapPinIcon, Clock, Package, DollarSign, AlertCircle, Phone, Mail } from 'lucide-react';
 
 interface BookingSuccess {
@@ -15,6 +16,7 @@ interface BookingSuccess {
   eventDate: string;
   startTime: string;
   endTime: string;
+  eventTimeZone?: string;
   eventAddress: string;
   eventCity: string;
   eventState: string;
@@ -97,21 +99,23 @@ export default function BookingSuccessPage() {
     fetchBookingDetails();
   }, [bookingId, businessId]);
   
-  const formatDate = (dateString: string) => {
+  const formatDateLocal = (startIso: string, tz?: string) => {
     try {
-      return format(new Date(dateString), 'MMMM d, yyyy');
+      if (!tz) return format(new Date(startIso), 'MMMM d, yyyy');
+      return utcToLocal(new Date(startIso), tz, 'MMMM d, yyyy');
     } catch (e) {
       console.error('Error formatting date:', e);
-      return dateString;
+      return startIso;
     }
   };
   
-  const formatTime = (timeString: string) => {
+  const formatTimeLocal = (iso: string, tz?: string) => {
     try {
-      return format(new Date(timeString), 'h:mm a');
+      if (!tz) return format(new Date(iso), 'h:mm a');
+      return utcToLocal(new Date(iso), tz, 'h:mm a');
     } catch (e) {
       console.error('Error formatting time:', e);
-      return timeString;
+      return iso;
     }
   };
   
@@ -183,10 +187,10 @@ export default function BookingSuccessPage() {
                 <CalendarIcon className="h-5 w-5 text-primary mt-1" />
                 <div>
                   <h3 className="font-medium">Event Date</h3>
-                  <p>{formatDate(bookingDetails.eventDate)}</p>
+                  <p>{formatDateLocal(bookingDetails.startTime, bookingDetails.eventTimeZone)}</p>
                   <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
                     <Clock className="h-3.5 w-3.5" />
-                    <span>{formatTime(bookingDetails.startTime)} - {formatTime(bookingDetails.endTime)}</span>
+                    <span>{formatTimeLocal(bookingDetails.startTime, bookingDetails.eventTimeZone)} - {formatTimeLocal(bookingDetails.endTime, bookingDetails.eventTimeZone)}</span>
                   </div>
                 </div>
               </div>

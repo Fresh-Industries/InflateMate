@@ -81,6 +81,9 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [displaySubtotal, setDisplaySubtotal] = useState<number | null>(null);
+  const [displayTaxAmount, setDisplayTaxAmount] = useState<number | null>(null);
+  const [displayTotal, setDisplayTotal] = useState<number | null>(null);
 
   const { selectedItems, selectInventoryItem, updateQuantity, clearSelection } = useSelectedItems();
 
@@ -243,6 +246,13 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
       if (!clientSecret) throw new Error("Missing client secret from server.");
       setClientSecret(clientSecret);
       setBookingId(bookingId);
+      // Prefer Stripe Tax computed amounts when available
+      const stripeSubtotal = typeof paymentData.stripeTaxSubtotal === 'number' ? paymentData.stripeTaxSubtotal : null;
+      const stripeTax = typeof paymentData.stripeTaxAmount === 'number' ? paymentData.stripeTaxAmount : null;
+      const stripeTotal = typeof paymentData.stripeTaxTotal === 'number' ? paymentData.stripeTaxTotal : null;
+      setDisplaySubtotal(stripeSubtotal ?? rawSubtotal);
+      setDisplayTaxAmount(stripeTax ?? taxAmount);
+      setDisplayTotal(stripeTotal ?? total);
       setShowPaymentForm(true);
     } catch (error) {
       toast({
@@ -347,11 +357,11 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
           }}
         >
           <PaymentForm
-            amount={total}
+            amount={displayTotal ?? total}
             customerEmail={newBooking.customerEmail}
             businessId={businessId}
-            subtotal={rawSubtotal}
-            taxAmount={taxAmount}
+            subtotal={displaySubtotal ?? rawSubtotal}
+            taxAmount={displayTaxAmount ?? taxAmount}
             taxRate={taxRate || 0}
             bookingId={bookingId || undefined}
             onSuccess={async () => {

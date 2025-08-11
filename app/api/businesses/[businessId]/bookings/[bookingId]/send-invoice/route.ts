@@ -26,6 +26,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       description: it.inventory.name,
       unitAmount: it.price, // already stored
       qty: it.quantity,
+      stripeProductId: it.inventory.stripeProductId || null,
     }));
 
     // You should already have stripeCustomerId via your helper; fetch/create if needed
@@ -38,17 +39,24 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
 
     const stripeAccount = business.stripeAccountId;
 
-    // Ensure Stripe customer has email before creating invoice
+    // Ensure Stripe customer has email and destination address before creating invoice (used for tax)
     await stripe.customers.update(customerStripe.stripeCustomerId, {
       email: booking.customer.email,
+      address: {
+        line1: booking.eventAddress || undefined,
+        city: booking.eventCity || undefined,
+        state: booking.eventState || undefined,
+        postal_code: booking.eventZipCode || undefined,
+        country: 'US',
+      }
     }, { stripeAccount });
 
-    // 2) Create invoice (send_invoice)
+    // 2) Create invoice (send_invoice) with automatic tax
     const inv = await stripe.invoices.create({
       customer: customerStripe.stripeCustomerId,
       collection_method: 'send_invoice',
       days_until_due: 3,
-
+      automatic_tax: { enabled: true },
       metadata: {
         prismaBusinessId: businessId,
         prismaBookingId: bookingId,
@@ -57,30 +65,43 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       },
     }, { stripeAccount });
 
-    // 3) Add lines - Fix: use total amount only, not unit_amount + quantity
+    // 3) Add lines
     for (const it of items) {
       const unitAmount = (it.unitAmount || 0);
       const quantity = it.qty || 1;
-      const totalAmount = Math.round(unitAmount * quantity * 100); // Total amount in cents
-      
-      console.log(`Creating invoice item: ${it.description}, unitAmount: $${unitAmount}, quantity: ${quantity}, totalAmount: ${totalAmount} cents`);
-      
-      if (totalAmount > 0) {
-        try {
+      if (quantity <= 0 || unitAmount <= 0) {
+        console.warn(`Skipping invoice item with non-positive amount/qty: ${it.description}`);
+        continue;
+      }
+
+      try {
+        if (it.stripeProductId) {
+          // Use price_data with product to leverage product tax code
+          await stripe.invoiceItems.create({
+            customer: customerStripe.stripeCustomerId,
+            invoice: inv.id,
+            price_data: {
+              currency: 'usd',
+              unit_amount: Math.round(unitAmount * 100),
+              product: it.stripeProductId,
+            },
+            quantity,
+            description: it.description,
+          }, { stripeAccount });
+        } else {
+          // Fallback: amount-only line (relies on account default tax code)
           await stripe.invoiceItems.create({
             customer: customerStripe.stripeCustomerId,
             invoice: inv.id,
             currency: 'usd',
-            amount: totalAmount, // Total amount in cents
+            amount: Math.round(unitAmount * quantity * 100),
             description: it.description,
           }, { stripeAccount });
-          console.log(`Successfully created invoice item for: ${it.description}`);
-        } catch (itemError) {
-          console.error(`Error creating invoice item for ${it.description}:`, itemError);
-          throw itemError;
         }
-      } else {
-        console.warn(`Skipping invoice item with zero amount: ${it.description}`);
+        console.log(`Successfully created invoice item for: ${it.description}`);
+      } catch (itemError) {
+        console.error(`Error creating invoice item for ${it.description}:`, itemError);
+        throw itemError;
       }
     }
 
@@ -152,6 +173,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         metadata: finalized.metadata as Record<string, string>,
       }
     });
+
+    // 6) Mark current quote as ACCEPTED when invoice is sent
+    if (booking.currentQuote?.id) {
+      try {
+        await prisma.quote.update({
+          where: { id: booking.currentQuote.id },
+          data: { status: 'ACCEPTED' },
+        });
+      } catch (e) {
+        console.warn(`[SendInvoice] Failed to mark quote ${booking.currentQuote.id} as ACCEPTED:`, e);
+      }
+    }
 
     return NextResponse.json({
       message: 'Invoice created and sent',

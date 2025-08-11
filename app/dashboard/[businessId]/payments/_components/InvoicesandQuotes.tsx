@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { format } from "date-fns";
+import { utcToLocal } from '@/lib/utils';
 import {
   Table,
   TableBody,
@@ -46,7 +47,9 @@ interface Quote {
   };
   booking: {
     id: string;
-    eventDate: string;
+    eventDate: string; // ISO from DB
+    eventDateString?: string; // normalized date-only from API
+    eventTimeZone: string;
     startTime: string;
     endTime: string;
     eventAddress: string;
@@ -61,7 +64,7 @@ interface Quote {
 interface Invoice {
   id: string;
   status: string;
-  amountTotal: number;
+  amountTotal?: number; // provided by API normalization
   amountDue: number;
   amountPaid: number;
   createdAt: string;
@@ -74,7 +77,9 @@ interface Invoice {
   };
   booking: {
     id: string;
-    eventDate: string;
+    eventDate: string; // ISO from DB
+    eventDateString?: string; // normalized date-only from API
+    eventTimeZone: string;
     startTime: string;
     endTime: string;
     eventAddress: string;
@@ -148,13 +153,16 @@ export default function InvoicesAndQuotes() {
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return format(new Date(dateString), "MMM d, yyyy");
+  const formatDate = (isoOrDateOnly: string) => {
+    // If already YYYY-MM-DD, avoid timezone shift
+    if (/^\d{4}-\d{2}-\d{2}$/.test(isoOrDateOnly)) {
+      const [y, m, d] = isoOrDateOnly.split('-').map(Number);
+      return format(new Date(Date.UTC(y, m - 1, d)), "MMM d, yyyy");
+    }
+    return format(new Date(isoOrDateOnly), "MMM d, yyyy");
   };
 
-  const formatTime = (dateString: string) => {
-    return format(new Date(dateString), "h:mm a");
-  };
+  const formatTime = (utcIsoString: string, tz: string) => utcToLocal(new Date(utcIsoString), tz, 'h:mm a');
 
   const handleSendInvoice = async (quote: Quote) => {
     if (isSendingInvoice) return;
@@ -263,9 +271,9 @@ export default function InvoicesAndQuotes() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span>{formatDate(quote.booking.eventDate)}</span>
+                          <span>{utcToLocal(new Date(quote.booking.startTime), quote.booking.eventTimeZone, 'MMM d, yyyy')}</span>
                           <span className="text-sm text-gray-500">
-                            {formatTime(quote.booking.startTime)} - {formatTime(quote.booking.endTime)}
+                            {formatTime(quote.booking.startTime, quote.booking.eventTimeZone)} - {formatTime(quote.booking.endTime, quote.booking.eventTimeZone)}
                           </span>
                         </div>
                       </TableCell>
@@ -336,13 +344,13 @@ export default function InvoicesAndQuotes() {
                       </TableCell>
                       <TableCell>
                         <div className="flex flex-col">
-                          <span>{formatDate(invoice.booking.eventDate)}</span>
+                          <span>{utcToLocal(new Date(invoice.booking.startTime), invoice.booking.eventTimeZone, 'MMM d, yyyy')}</span>
                           <span className="text-sm text-gray-500">
-                            {formatTime(invoice.booking.startTime)} - {formatTime(invoice.booking.endTime)}
+                            {formatTime(invoice.booking.startTime, invoice.booking.eventTimeZone)} - {formatTime(invoice.booking.endTime, invoice.booking.eventTimeZone)}
                           </span>
                         </div>
                       </TableCell>
-                      <TableCell>{formatCurrency(invoice.amountTotal)}</TableCell>
+                      <TableCell>{formatCurrency(Number(invoice.amountTotal ?? (invoice.amountPaid + invoice.amountDue)))}</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(invoice.status)}>
                           {invoice.status}
@@ -415,12 +423,12 @@ export default function InvoicesAndQuotes() {
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <span className="text-sm text-gray-500">Date</span>
-                    <p className="font-medium">{formatDate(selectedQuote.booking.eventDate)}</p>
+                    <p className="font-medium">{utcToLocal(new Date(selectedQuote.booking.startTime), selectedQuote.booking.eventTimeZone, 'MMM d, yyyy')}</p>
                   </div>
                   <div>
                     <span className="text-sm text-gray-500">Time</span>
                     <p className="font-medium">
-                      {formatTime(selectedQuote.booking.startTime)} - {formatTime(selectedQuote.booking.endTime)}
+                      {formatTime(selectedQuote.booking.startTime, selectedQuote.booking.eventTimeZone)} - {formatTime(selectedQuote.booking.endTime, selectedQuote.booking.eventTimeZone)}
                     </p>
                   </div>
                   <div className="col-span-2">
