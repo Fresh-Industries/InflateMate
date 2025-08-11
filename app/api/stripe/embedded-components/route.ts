@@ -79,6 +79,12 @@ export async function GET(req: NextRequest) {
         account_onboarding: {
           enabled: true,
         },
+        tax_registrations: {
+          enabled: true,
+        },
+        tax_settings: {
+          enabled: true,
+        },
       },
     });
     

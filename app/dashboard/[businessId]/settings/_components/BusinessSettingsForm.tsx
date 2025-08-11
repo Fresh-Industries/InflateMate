@@ -18,6 +18,7 @@ import { Separator } from "@/components/ui/separator";
 import { useUploadThing } from "@/lib/uploadthing";
 import StripeSettingsForm from "./StripeSettingsForm";
 import SubscriptionSettings from "./SubscriptionSettings";
+import StripeTaxesForm from "./StripeTaxesForm";
 interface BusinessSettings {
   id: string;
   name: string;
@@ -225,7 +226,7 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
       <div className="space-y-6">
         <Tabs defaultValue="general" className="w-full">
           <div className="flex justify-between flex-col-reverse lg:flex-row items-center mb-6">
-            <TabsList className="grid grid-cols-6 sm:mt-3 w-[500px] sm:w-[650px]">
+              <TabsList className="grid grid-cols-7 sm:mt-3 w-[560px] sm:w-[760px]">
               <TabsTrigger value="general" className="flex items-center gap-2">
                 <Home className="h-4 w-4" />
                 <span>General</span>
@@ -250,6 +251,10 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
               <CircleCheck className="h-4 w-4" />
               <span>Sub</span>
               </TabsTrigger>
+                <TabsTrigger value="taxes" className="flex items-center gap-2">
+                  <DollarSign className="h-4 w-4" />
+                  <span>Taxes</span>
+                </TabsTrigger>
             </TabsList>
 
             <div className="flex items-center gap-4 w-full lg:w-auto">
@@ -770,6 +775,13 @@ export default function BusinessSettingsForm({ business }: { business: BusinessS
         </TabsContent>
         <TabsContent value="subscription">
           <SubscriptionSettings />
+        </TabsContent>
+        <TabsContent value="taxes">
+          {/* Stripe Connect embedded components: Tax Settings + Registrations */}
+          {/* Rendered similarly to Stripe settings, using the same account session */}
+          {/* Component will handle onboarding state and errors */}
+          {/**/}
+          <StripeTaxesForm />
         </TabsContent>
         </Tabs>
       </div>
