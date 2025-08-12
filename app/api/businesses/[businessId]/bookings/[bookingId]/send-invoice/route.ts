@@ -27,6 +27,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       unitAmount: it.price, // already stored
       qty: it.quantity,
       stripeProductId: it.inventory.stripeProductId || null,
+      stripePriceId: it.inventory.stripePriceId || null,
     }));
 
     // You should already have stripeCustomerId via your helper; fetch/create if needed
@@ -65,7 +66,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       },
     }, { stripeAccount });
 
-    // 3) Add lines
+    // 3) Add lines - prefer price reference when available for automatic tax
     for (const it of items) {
       const unitAmount = (it.unitAmount || 0);
       const quantity = it.qty || 1;
@@ -76,7 +77,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
 
       try {
         if (it.stripeProductId) {
-          // Use price_data with product to leverage product tax code
+          // Use product with explicit tax_behavior
           await stripe.invoiceItems.create({
             customer: customerStripe.stripeCustomerId,
             invoice: inv.id,
@@ -84,12 +85,39 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
               currency: 'usd',
               unit_amount: Math.round(unitAmount * 100),
               product: it.stripeProductId,
+              tax_behavior: 'exclusive',
             },
             quantity,
             description: it.description,
           }, { stripeAccount });
+        } else if (it.stripePriceId) {
+          // Retrieve price to obtain its product id, then create inline price_data with tax_behavior
+          const priceObj = await stripe.prices.retrieve(it.stripePriceId, { stripeAccount });
+          const productId = (priceObj.product as unknown as string) || undefined;
+          if (productId) {
+            await stripe.invoiceItems.create({
+              customer: customerStripe.stripeCustomerId,
+              invoice: inv.id,
+              price_data: {
+                currency: 'usd',
+                unit_amount: Math.round(unitAmount * 100),
+                product: productId,
+                tax_behavior: 'exclusive',
+              },
+              quantity,
+              description: it.description,
+            }, { stripeAccount });
+          } else {
+            await stripe.invoiceItems.create({
+              customer: customerStripe.stripeCustomerId,
+              invoice: inv.id,
+              currency: 'usd',
+              amount: Math.round(unitAmount * quantity * 100),
+              description: it.description,
+            }, { stripeAccount });
+          }
         } else {
-          // Fallback: amount-only line (relies on account default tax code)
+          // Last fallback: raw amount line
           await stripe.invoiceItems.create({
             customer: customerStripe.stripeCustomerId,
             invoice: inv.id,

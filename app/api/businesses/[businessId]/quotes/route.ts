@@ -23,6 +23,7 @@ const quoteSchema = z.object({
     price: z.number(),
     quantity: z.number().min(1),
     stripeProductId: z.string(),
+    stripePriceId: z.string().optional(),
   })).min(1, "At least one item must be selected"),
   totalAmount: z.number().positive("Total amount must be positive"),
   subtotalAmount: z.number().nonnegative(),
@@ -253,25 +254,34 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       // 4b. Prepare line items - use items from existing booking if available
       let lineItems;
       if (existingBooking && existingBooking.inventoryItems.length > 0) {
-        // Use inventory items from the existing booking
-        lineItems = existingBooking.inventoryItems.map(item => ({
-          quantity: item.quantity,
-          price_data: {
-            currency: 'usd',
-            unit_amount: Math.round(item.price * 100), // Amount in cents
-            product: item.inventory.stripeProductId,
-          },
-        }));
+        // Prefer price reference when available for automatic tax
+        lineItems = existingBooking.inventoryItems.map(item => {
+          const priceId = item.inventory.stripePriceId;
+          if (priceId) {
+            return {
+              quantity: item.quantity,
+              price: priceId,
+            };
+          }
+          return {
+            quantity: item.quantity,
+            price_data: {
+              currency: 'usd',
+              unit_amount: Math.round(item.price * 100),
+              product: item.inventory.stripeProductId,
+              // Required when automatic_tax is enabled
+              tax_behavior: 'exclusive',
+            },
+          };
+        });
         console.log(`Using ${lineItems.length} items from existing booking for quote.`);
       } else {
-        // Use items from the request
+        // Use items from the request; prefer price id when provided
         lineItems = selectedItems.map(item => ({
           quantity: item.quantity,
-          price_data: {
-            currency: 'usd',
-            unit_amount: Math.round(item.price * 100),
-            product: item.stripeProductId,
-          },
+          ...(item.stripePriceId
+            ? { price: item.stripePriceId }
+            : { price_data: { currency: 'usd', unit_amount: Math.round(item.price * 100), product: item.stripeProductId, tax_behavior: 'exclusive' } }),
         }));
       }
 

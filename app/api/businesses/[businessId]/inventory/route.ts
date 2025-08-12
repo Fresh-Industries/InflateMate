@@ -96,10 +96,22 @@ export async function POST(
       validatedData.images.find(img => img.isPrimary)?.url ||
       (imageUrls.length > 0 ? imageUrls[0] : undefined);
 
+    // Create Stripe Product with tax code
     const stripeProduct = await stripe.products.create({
       name: validatedData.name,
       description: validatedData.description || "",
       images: imageUrls,
+      tax_code: 'txcd_10000000', // General - Services
+    }, {
+      stripeAccount: membership.organization?.business?.stripeAccountId || undefined,
+    });
+
+    // Create Stripe Price with exclusive tax behavior
+    const stripePrice = await stripe.prices.create({
+      unit_amount: Math.round(validatedData.price * 100),
+      currency: 'usd',
+      product: stripeProduct.id,
+      tax_behavior: 'exclusive',
     }, {
       stripeAccount: membership.organization?.business?.stripeAccountId || undefined,
     });
@@ -123,7 +135,7 @@ export async function POST(
         images: imageUrls,
         primaryImage: primaryImageUrl,
         stripeProductId: stripeProduct.id,
-        stripePriceId: stripeProduct.default_price as string,
+        stripePriceId: stripePrice.id,
         status: validatedData.status as InventoryStatus,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         minimumSpace: (validatedData as any).minimumSpace || "",

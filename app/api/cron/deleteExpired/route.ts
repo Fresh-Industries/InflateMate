@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
-import { expireOverdueBookings } from "@/lib/expireBookings";
+import { deleteExpiredBookings } from "@/lib/deleteExpiredBookings";
 
 export async function GET() {
   try {
-    console.log('[CRON] Starting expire overdue bookings job');
+    console.log('[CRON] Starting delete expired bookings job');
     
-    const expiredCount = await expireOverdueBookings();
+    const deletedCount = await deleteExpiredBookings();
     
     return NextResponse.json({ 
       success: true, 
-      expiredCount,
-      message: `Successfully expired ${expiredCount} overdue bookings`
+      deletedCount,
+      message: `Successfully deleted ${deletedCount} expired bookings`
     });
     
   } catch (error) {

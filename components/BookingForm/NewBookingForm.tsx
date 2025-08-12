@@ -192,6 +192,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
       price: item.price,
       quantity: quantity,
       stripeProductId: item.stripeProductId,
+      stripePriceId: (item as unknown as { stripePriceId?: string }).stripePriceId,
     }));
   };
 
