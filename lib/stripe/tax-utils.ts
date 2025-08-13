@@ -48,12 +48,10 @@ export function applyDiscountToLineItems(
     const totalLineItemAmount = lineItems.reduce((sum, item) => sum + item.amount, 0);
     if (totalLineItemAmount === 0) return lineItems; // Avoid division by zero
 
-    let remainingDiscount = discountAmountCents;
     return lineItems.map(item => {
       const itemProportion = item.amount / totalLineItemAmount;
       const itemDiscount = Math.round(discountAmountCents * itemProportion);
       const newAmount = Math.max(0, item.amount - itemDiscount);
-      remainingDiscount -= itemDiscount;
       return { ...item, amount: newAmount };
     });
   } else if (discountType === 'PERCENTAGE') {

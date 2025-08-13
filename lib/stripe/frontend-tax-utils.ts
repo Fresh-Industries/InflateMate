@@ -1,5 +1,3 @@
-import { SelectedItem } from '@/types/booking';
-
 export interface TaxCalculationRequest {
   selectedItems: {
     inventoryId: string;
