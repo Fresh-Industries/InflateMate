@@ -2,13 +2,11 @@
     "crons": [
       {
         "path": "/api/cron/deleteExpired",
-        "schedule": "59 23 * * *",
-        "headers": { "x-cron-secret": "@CRON_SECRET" }
+        "schedule": "59 23 * * *"
       },
       {
         "path": "/api/cron/expired",
-        "schedule": "*/5 * * * *",
-        "headers": { "x-cron-secret": "@CRON_SECRET" }
+        "schedule": "*/5 * * * *"
       }
     ]
   }
