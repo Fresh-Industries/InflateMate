@@ -7,6 +7,12 @@ import { z } from "zod";
 import { stripe } from "@/lib/stripe-server";
 import { prisma } from "@/lib/prisma";
 import { findOrCreateStripeCustomer } from "@/lib/stripe/customer-utils";
+import { 
+  calculateStripeTax, 
+  convertBookingItemsToTaxLineItems, 
+  applyDiscountToLineItems 
+} from "@/lib/stripe/tax-utils";
+import Stripe from "stripe";
 
 import { BookingStatus, Prisma } from "@/prisma/generated/prisma"; // Import necessary types/enums
 import { dateOnlyUTC, localToUTC } from "@/lib/utils";
@@ -182,77 +188,149 @@ export async function POST(
     // --- Coupon Logic (Lookup by code if provided) ---
      let appliedCoupon = null;
      let appliedCouponId: string | null = null;
-     let couponDiscountAmount = 0; // Store discount amount in dollars
      if (bookingData.couponCode) {
          console.log(`[POST /bookings] Looking up coupon code: ${bookingData.couponCode}`);
          const coupon = await prisma.coupon.findUnique({
              where: { code_businessId: { code: bookingData.couponCode, businessId } },
          });
 
-         const now = new Date();
-         // Re-validate coupon conditions before applying to the final booking
-         // This is a safety check, ideally frontend prevents invalid codes being sent
-         if (!coupon || !coupon.isActive || (coupon.startDate && now < coupon.startDate) ||
-             (coupon.endDate && now > coupon.endDate) ||
-             (typeof coupon.maxUses === "number" && coupon.usedCount >= coupon.maxUses) ||
-             (typeof coupon.minimumAmount === "number" && bookingData.subtotalAmount < coupon.minimumAmount)) {
-             console.warn(`[POST /bookings] Coupon code "${bookingData.couponCode}" is invalid or expired.`);
-             // Return an error to the client. They should ideally handle this validation upfront.
-             return NextResponse.json({ error: "The provided coupon code is invalid or cannot be applied." }, { status: 400 });
-         }
+                 const now = new Date();
+        
+        // Re-validate basic coupon conditions (but NOT minimum amount since coupon was already applied)
+        // At this point, the coupon has already been validated by the frontend and tax calculation API
+        // We only need to check: exists, active, dates, usage limit
+        if (!coupon || !coupon.isActive || (coupon.startDate && now < coupon.startDate) ||
+            (coupon.endDate && now > coupon.endDate) ||
+            (typeof coupon.maxUses === "number" && coupon.usedCount >= coupon.maxUses)) {
+            console.warn(`[POST /bookings] Coupon code "${bookingData.couponCode}" is invalid or expired.`);
+            console.warn(`[POST /bookings] Basic validation failed:`, {
+                exists: !!coupon,
+                isActive: coupon?.isActive,
+                startDateValid: !coupon?.startDate || now >= coupon.startDate,
+                endDateValid: !coupon?.endDate || now <= coupon.endDate,
+                usageValid: typeof coupon?.maxUses !== "number" || coupon.usedCount < coupon.maxUses
+            });
+            return NextResponse.json({ error: "The provided coupon code is invalid or cannot be applied." }, { status: 400 });
+        }
+        
+        if (!coupon.stripeCouponId) {
+            console.warn(`[POST /bookings] Coupon "${bookingData.couponCode}" does not have a Stripe coupon ID`);
+            return NextResponse.json({ error: "Coupon is not properly configured for Stripe." }, { status: 400 });
+        }
+
+        console.log(`[POST /bookings] Coupon "${bookingData.couponCode}" validation passed - already applied by frontend`);
+        console.log(`[POST /bookings] Using Stripe coupon: ${coupon.stripeCouponId}`);
+        
+        // Note: We skip minimum amount validation here because:
+        // 1. The coupon was already validated when first applied by the user
+        // 2. The frontend and tax calculation API already checked minimum amount against original subtotal
+        // 3. At this point, we're working with the discounted amount which is expected to be lower
          appliedCoupon = coupon;
          appliedCouponId = coupon.id;
 
-         // Calculate discount amount (in dollars) for metadata
-         if (coupon.discountType === "PERCENTAGE") {
-            couponDiscountAmount = Math.round(bookingData.subtotalAmount * (coupon.discountAmount / 100) * 100) / 100;
-         } else if (coupon.discountType === "FIXED") {
-            couponDiscountAmount = Math.min(coupon.discountAmount, bookingData.subtotalAmount);
-         }
-         console.log(`[POST /bookings] Coupon "${coupon.code}" is valid. ID: ${appliedCouponId}, Discount: $${couponDiscountAmount}`);
+         // Don't calculate discount manually - let Stripe handle it
+         console.log(`[POST /bookings] Coupon "${coupon.code}" is valid. ID: ${appliedCouponId}, Stripe ID: ${coupon.stripeCouponId}`);
      }
 
 
-    // --- Calculate Final Amounts (re-calculate server-side for safety) ---
-    // While you receive amounts in the payload, re-calculating server-side
-    // based on the actual items in the hold, the business's tax rules, and
-    // the validated coupon prevents manipulation.
-    // For this example, let's re-calculate based on the HOLD items and the validated coupon
-    // and tax rate from the payload for consistency, but note that tax calculation
-    // logic might be more complex (e.g., based on location).
+    // --- Calculate Final Amounts using Stripe Tax API ---
+    console.log(`[POST /bookings] Starting Stripe Tax calculation for booking ${existingBooking.id}`);
 
+    // Calculate items subtotal for validation
     const itemsSubtotal = existingBooking.inventoryItems.reduce((sum, item) => sum + (item.price || 0) * (item.quantity || 1), 0);
+    console.log(`[POST /bookings] Items subtotal from booking: $${itemsSubtotal}`);
+
     // Ensure the items subtotal from the hold matches the payload subtotal (within tolerance)
     const subtotalMatchTolerance = 0.01; // Tolerance for floating point comparison
     if (Math.abs(itemsSubtotal - bookingData.subtotalAmount) > subtotalMatchTolerance) {
-        console.warn(`[POST /bookings] Payload subtotal mismatch. Expected: $${itemsSubtotal}, Received: $${bookingData.subtotalAmount}. Trusting payload for now.`);
-         // In a real app, you might return an error or re-calculate tax based on itemsSubtotal
+        console.warn(`[POST /bookings] Payload subtotal mismatch. Expected: $${itemsSubtotal}, Received: $${bookingData.subtotalAmount}. Using booking items subtotal.`);
     }
 
-    let calculatedDiscount = 0;
-     if (appliedCoupon) {
-         if (appliedCoupon.discountType === "PERCENTAGE") {
-             calculatedDiscount = Math.round(itemsSubtotal * (appliedCoupon.discountAmount / 100) * 100) / 100;
-         } else if (appliedCoupon.discountType === "FIXED") {
-             calculatedDiscount = Math.min(appliedCoupon.discountAmount, itemsSubtotal);
-         }
-     }
+    // Convert booking items to tax line items
+    let taxLineItems = convertBookingItemsToTaxLineItems(
+      existingBooking.inventoryItems.map(item => ({
+        inventoryId: item.inventoryId,
+        quantity: item.quantity || 1,
+        price: item.price || 0
+      }))
+    );
 
-    const discountedSubtotal = Math.max(0, itemsSubtotal - calculatedDiscount);
-    // Calculate tax based on discounted subtotal and payload tax rate
-    const calculatedTax = Math.round(discountedSubtotal * (bookingData.taxRate / 100) * 100) / 100; // Calculate tax in dollars
-    const calculatedTotalAmountDollars = discountedSubtotal + calculatedTax;
-    const calculatedAmountCents = Math.round(calculatedTotalAmountDollars * 100);
+    // Apply coupon discount to line items before tax calculation
+    if (appliedCoupon) {
+      console.log(`[POST /bookings] Applying coupon ${appliedCoupon.code} (${appliedCoupon.discountType}: ${appliedCoupon.discountAmount}) to line items`);
+      taxLineItems = applyDiscountToLineItems(
+        taxLineItems,
+        appliedCoupon.discountAmount,
+        appliedCoupon.discountType
+      );
+    }
+
+    // Calculate tax using Stripe Tax API with fallback to manual calculation
+    let stripeTaxResult;
+    let calculationFallback = false;
+    
+    try {
+      stripeTaxResult = await calculateStripeTax(
+        taxLineItems,
+        {
+          address: {
+            line1: bookingData.eventAddress,
+            city: bookingData.eventCity,
+            state: bookingData.eventState,
+            postal_code: bookingData.eventZipCode,
+            country: 'US'
+          },
+          addressSource: 'shipping'
+        },
+        stripeConnectedAccountId
+      );
+    } catch (taxError) {
+      console.error(`[POST /bookings] Stripe Tax calculation failed, falling back to manual calculation:`, taxError);
+      calculationFallback = true;
+      
+      // Fallback to manual tax calculation using payload tax rate
+      const fallbackSubtotal = taxLineItems.reduce((sum, item) => sum + item.amount, 0) / 100; // Convert to dollars
+      const fallbackTaxAmount = Math.round(fallbackSubtotal * (bookingData.taxRate / 100) * 100) / 100;
+      const fallbackTotal = fallbackSubtotal + fallbackTaxAmount;
+      
+      stripeTaxResult = {
+        calculation: null as unknown as Stripe.Tax.Calculation, // Will need special handling for Payment Intent
+        taxAmountCents: Math.round(fallbackTaxAmount * 100),
+        totalAmountCents: Math.round(fallbackTotal * 100),
+        subtotalAmountCents: Math.round(fallbackSubtotal * 100),
+        taxRate: bookingData.taxRate
+      };
+      
+      console.log(`[POST /bookings] Using fallback tax calculation:`, {
+        subtotalCents: stripeTaxResult.subtotalAmountCents,
+        taxCents: stripeTaxResult.taxAmountCents,
+        totalCents: stripeTaxResult.totalAmountCents,
+        fallbackTaxRate: stripeTaxResult.taxRate
+      });
+    }
+
+    console.log(`[POST /bookings] Tax calculation completed:`, {
+      calculationId: stripeTaxResult.calculation?.id || 'fallback',
+      subtotalCents: stripeTaxResult.subtotalAmountCents,
+      taxCents: stripeTaxResult.taxAmountCents,
+      totalCents: stripeTaxResult.totalAmountCents,
+      effectiveTaxRate: stripeTaxResult.taxRate,
+      method: calculationFallback ? 'fallback_manual' : 'stripe_tax_api'
+    });
+
+    // Convert amounts from cents to dollars for consistency
+    const calculatedTotalAmountDollars = stripeTaxResult.totalAmountCents / 100;
+    const calculatedTax = stripeTaxResult.taxAmountCents / 100;
+    const discountedSubtotal = stripeTaxResult.subtotalAmountCents / 100;
+    const calculatedAmountCents = stripeTaxResult.totalAmountCents;
 
     // Compare calculated amounts with payload amounts (optional but recommended validation)
-    const centsMatchTolerance = 1; // Allow 1 cent difference
-     if (Math.abs(calculatedAmountCents - bookingData.amountCents) > centsMatchTolerance) {
-         console.warn(`[POST /bookings] Payload cents amount mismatch. Expected: ${calculatedAmountCents}, Received: ${bookingData.amountCents}. Using payload cents.`);
-          // Decide how to handle: Use calculated amount, use payload amount, return error.
-          // Using payload amountCents for the PI as requested in the schema, but logging warning.
-     } else {
-         console.log(`[POST /bookings] Calculated cents amount (${calculatedAmountCents}) matches payload cents amount (${bookingData.amountCents}).`);
-     }
+    const centsMatchTolerance = 5; // Allow 5 cent difference for Stripe Tax precision
+    if (Math.abs(calculatedAmountCents - bookingData.amountCents) > centsMatchTolerance) {
+        console.warn(`[POST /bookings] Payload cents amount mismatch. Stripe calculated: ${calculatedAmountCents}, Received: ${bookingData.amountCents}. Using Stripe calculation.`);
+    } else {
+        console.log(`[POST /bookings] Stripe calculated amount (${calculatedAmountCents}) matches payload amount (${bookingData.amountCents}).`);
+    }
 
 
     // --- Update the Existing Booking Record ---
@@ -277,10 +355,10 @@ export async function POST(
                     endTime: endUTC,
                     eventTimeZone: timezone,
                     ...statusUpdate, // Only apply status update if needed
-                    totalAmount: calculatedTotalAmountDollars, // Store calculated total
-                    subtotalAmount: itemsSubtotal, // Store items subtotal
-                    taxAmount: calculatedTax, // Store calculated tax
-                    taxRate: bookingData.taxRate, // Store the rate used
+                    totalAmount: calculatedTotalAmountDollars, // Store Stripe calculated total
+                    subtotalAmount: discountedSubtotal, // Store discounted subtotal
+                    taxAmount: calculatedTax, // Store Stripe calculated tax
+                    taxRate: stripeTaxResult.taxRate, // Store effective tax rate from Stripe
                     depositPaid: false, // Still false until payment succeeds via webhook
                     eventType: bookingData.eventType,
                     eventAddress: bookingData.eventAddress,
@@ -394,11 +472,13 @@ export async function POST(
           eventType: bookingData.eventType || 'OTHER',
           participantCount: bookingData.participantCount.toString(),
           participantAge: bookingData.participantAge?.toString() || '',
-          // Store amounts in dollars as strings
-          subtotalAmount: calculatedTotalAmountDollars.toString(), // Use calculated total amount after discount
-          taxAmount: calculatedTax.toString(), // Use calculated tax
-          taxRate: bookingData.taxRate.toString(),
-          totalAmount: calculatedTotalAmountDollars.toString(), // Use calculated total amount
+          // Store amounts in dollars as strings (from Stripe Tax calculation)
+          subtotalAmount: discountedSubtotal.toString(), // Use Stripe calculated discounted subtotal
+          taxAmount: calculatedTax.toString(), // Use Stripe calculated tax
+          taxRate: stripeTaxResult.taxRate.toString(), // Use Stripe effective tax rate
+          totalAmount: calculatedTotalAmountDollars.toString(), // Use Stripe calculated total amount
+          
+          // Tax calculation method will be included in PaymentIntent metadata
 
           // Include item details as a JSON string
            selectedItems: JSON.stringify(existingBooking.inventoryItems.map(item => ({
@@ -411,7 +491,7 @@ export async function POST(
            // Include coupon info if applied
           ...(appliedCouponId ? { couponId: appliedCouponId } : {}),
            ...(bookingData.couponCode ? { couponCode: bookingData.couponCode } : {}),
-           ...(couponDiscountAmount > 0 ? { couponAmount: couponDiscountAmount.toString() } : {}), // Discount amount in dollars
+           ...(appliedCoupon?.stripeCouponId ? { stripeCouponId: appliedCoupon.stripeCouponId } : {}),
 
           // Include special instructions if any
           ...(bookingData.specialInstructions && { specialInstructions: bookingData.specialInstructions }),
@@ -420,18 +500,31 @@ export async function POST(
           bookingFlow: existingBooking.status === 'HOLD' ? 'hold_to_payment' : 'pending_to_payment',
       };
 
-      // Create the PaymentIntent on behalf of the connected account
-      console.log(`[POST /bookings] Creating PaymentIntent with amount: ${bookingData.amountCents} cents`);
+      // Create the PaymentIntent on behalf of the connected account with Stripe-calculated tax amounts
+      console.log(`[POST /bookings] Creating PaymentIntent with amount: ${calculatedAmountCents} cents (tax calculated via Stripe Tax API)`);
+      
+      // Note: Using Stripe Tax API for accurate calculation, but not linking for automatic transactions yet
+      // This provides accurate, location-based tax calculation while maintaining compatibility
+      // Future enhancement: When Stripe Tax API beta becomes stable, can add automatic tax transaction creation
       const paymentIntent = await stripe.paymentIntents.create(
         {
-          amount: bookingData.amountCents, // Amount in cents from payload
+          amount: calculatedAmountCents, // Use Stripe Tax API calculated amount in cents
           currency: "usd", // Or get currency from business settings
           payment_method_types: ["card"], // Specify allowed payment methods
-          metadata: metadata, 
-          customer: stripeCustomerId, 
+          metadata: {
+            ...metadata,
+            // Add tax calculation details to metadata for reference
+            ...(stripeTaxResult.calculation?.id ? { 
+              stripeTaxCalculationId: stripeTaxResult.calculation.id,
+              taxCalculationMethod: 'stripe_tax_api'
+            } : {
+              taxCalculationMethod: 'fallback_manual'
+            })
+          }, 
+          customer: stripeCustomerId
         },
         {
-          stripeAccount: stripeConnectedAccountId, // Perform action on behalf of the connected account
+          stripeAccount: stripeConnectedAccountId // Perform action on behalf of the connected account
         }
       );
       console.log(`[POST /bookings] PaymentIntent created successfully: ${paymentIntent.id}`);

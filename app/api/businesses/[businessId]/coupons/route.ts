@@ -1,7 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { prisma } from "@/lib/prisma";
+import { stripe } from "@/lib/stripe-server";
 import { z } from "zod";
+import Stripe from "stripe";
 
 const couponSchema = z.object({
   code: z.string().min(2, "Code must be at least 2 characters"),
@@ -92,6 +94,19 @@ export async function POST(
     const body = await req.json();
     const validatedData = couponSchema.parse(body);
 
+    // Get business and check Stripe connection
+    const business = await prisma.business.findUnique({
+      where: { id: businessId },
+    });
+
+    if (!business) {
+      return NextResponse.json({ error: "Business not found" }, { status: 404 });
+    }
+
+    if (!business.stripeAccountId) {
+      return NextResponse.json({ error: "Stripe account not connected" }, { status: 400 });
+    }
+
     // Check if coupon code already exists for this business
     const existingCoupon = await prisma.coupon.findUnique({
       where: {
@@ -109,13 +124,57 @@ export async function POST(
       );
     }
 
+    // Create Stripe coupon
+    let stripeCoupon;
+    try {
+      const stripeCouponParams: Stripe.CouponCreateParams = {
+        id: validatedData.code, // Use our code as Stripe coupon ID
+        duration: 'once', // For one-time payments
+        name: validatedData.description || validatedData.code,
+      };
+
+      if (validatedData.discountType === "PERCENTAGE") {
+        stripeCouponParams.percent_off = validatedData.discountAmount;
+      } else {
+        stripeCouponParams.amount_off = Math.round(validatedData.discountAmount * 100); // Convert to cents
+        stripeCouponParams.currency = 'usd';
+      }
+
+      // Add optional parameters
+      if (validatedData.maxUses) {
+        stripeCouponParams.max_redemptions = validatedData.maxUses;
+      }
+
+      if (validatedData.endDate) {
+        stripeCouponParams.redeem_by = Math.floor(validatedData.endDate.getTime() / 1000);
+      }
+
+      console.log(`[Coupon Creation] Creating Stripe coupon with params:`, stripeCouponParams);
+
+      stripeCoupon = await stripe.coupons.create(stripeCouponParams, {
+        stripeAccount: business.stripeAccountId,
+      });
+
+      console.log(`[Coupon Creation] Stripe coupon created: ${stripeCoupon.id}`);
+    } catch (stripeError) {
+      console.error("[Coupon Creation] Stripe coupon creation failed:", stripeError);
+      return NextResponse.json(
+        { error: "Failed to create Stripe coupon", details: stripeError instanceof Error ? stripeError.message : 'Unknown error' },
+        { status: 500 }
+      );
+    }
+
+    // Create local coupon with Stripe coupon ID
     const coupon = await prisma.coupon.create({
       data: {
         ...validatedData,
         businessId: businessId,
         usedCount: 0,
+        stripeCouponId: stripeCoupon.id,
       },
     });
+
+    console.log(`[Coupon Creation] Local coupon created: ${coupon.id} with Stripe ID: ${stripeCoupon.id}`);
 
     return NextResponse.json(coupon, { status: 201 });
   } catch (error) {

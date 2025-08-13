@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { deleteExpiredBookings } from "@/lib/deleteExpiredBookings";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     console.log('[CRON] Starting delete expired bookings job');
+    if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        message: 'Unauthorized'
+      }, { status: 401 });
+    }
     
     const deletedCount = await deleteExpiredBookings();
     

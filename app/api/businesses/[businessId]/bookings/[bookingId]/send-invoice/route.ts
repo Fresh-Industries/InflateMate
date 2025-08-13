@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { stripe } from '@/lib/stripe-server';
 import { sendSignatureEmail } from '@/lib/sendEmail';
+import Stripe from 'stripe';
 
 export async function POST(req: NextRequest, { params }: { params: Promise<{ businessId: string; bookingId: string }>}) {
   const { businessId, bookingId } = await params;
@@ -15,13 +16,18 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
 
     const booking = await prisma.booking.findUnique({
       where: { id: bookingId },
-      include: { customer: true, currentQuote: true, inventoryItems: { include: { inventory: true } }, }
+      include: { 
+        customer: true, 
+        currentQuote: true, 
+        inventoryItems: { include: { inventory: true } },
+        coupon: true, // Include coupon information
+      }
     });
     if (!booking || !booking.customer) {
       return NextResponse.json({ error: 'Booking/customer not found' }, { status: 404 });
     }
 
-    // decide source of items: prefer currentQuote amounts if present else booking items
+    // Prepare items (no manual discount calculation needed)
     const items = booking.inventoryItems.map(it => ({
       description: it.inventory.name,
       unitAmount: it.price, // already stored
@@ -29,6 +35,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       stripeProductId: it.inventory.stripeProductId || null,
       stripePriceId: it.inventory.stripePriceId || null,
     }));
+
+    // Check for coupon (but don't manually calculate discount)
+    let appliedCoupon = null;
+    
+    if (booking.coupon) {
+      console.log(`[SendInvoice] Found coupon ${booking.coupon.code} for invoice`);
+      appliedCoupon = booking.coupon;
+      
+      if (!appliedCoupon.stripeCouponId) {
+        console.warn(`[SendInvoice] Coupon ${appliedCoupon.code} does not have a Stripe coupon ID`);
+      } else {
+        console.log(`[SendInvoice] Using Stripe coupon: ${appliedCoupon.stripeCouponId}`);
+      }
+    }
 
     // You should already have stripeCustomerId via your helper; fetch/create if needed
     const customerStripe = await prisma.customerStripeAccount.findFirst({
@@ -53,7 +73,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
     }, { stripeAccount });
 
     // 2) Create invoice (send_invoice) with automatic tax
-    const inv = await stripe.invoices.create({
+    const invoiceParams: Stripe.InvoiceCreateParams = {
       customer: customerStripe.stripeCustomerId,
       collection_method: 'send_invoice',
       days_until_due: 3,
@@ -63,8 +83,20 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         prismaBookingId: bookingId,
         prismaCustomerId: booking.customer.id,
         prismaSource: 'dashboard_send_invoice',
+        couponCode: appliedCoupon?.code || null,
+        stripeCouponId: appliedCoupon?.stripeCouponId || null,
       },
-    }, { stripeAccount });
+    };
+
+    // Add Stripe coupon if available
+    if (appliedCoupon?.stripeCouponId) {
+      invoiceParams.discounts = [{
+        coupon: appliedCoupon.stripeCouponId,
+      }];
+      console.log(`[SendInvoice] Adding Stripe coupon discount: ${appliedCoupon.stripeCouponId}`);
+    }
+
+    const inv = await stripe.invoices.create(invoiceParams, { stripeAccount });
 
     // 3) Add lines - prefer price reference when available for automatic tax
     for (const it of items) {
@@ -91,6 +123,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
             description: it.description,
           }, { stripeAccount });
         } else if (it.stripePriceId) {
+          // Prefer using price ID when available
           // Retrieve price to obtain its product id, then create inline price_data with tax_behavior
           const priceObj = await stripe.prices.retrieve(it.stripePriceId, { stripeAccount });
           const productId = (priceObj.product as unknown as string) || undefined;
@@ -117,7 +150,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
             }, { stripeAccount });
           }
         } else {
-          // Last fallback: raw amount line
+          // Last fallback: raw amount line (also used when coupon is applied)
           await stripe.invoiceItems.create({
             customer: customerStripe.stripeCustomerId,
             invoice: inv.id,
@@ -161,6 +194,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           html: `
             <p>Hi ${booking.customer.name || ''},</p>
             <p>Your invoice is ready. Please pay here:</p>
+            ${appliedCoupon && refreshed.total_discount_amounts && refreshed.total_discount_amounts.length > 0 ? 
+              `<p><strong>Discount Applied:</strong> ${appliedCoupon.code} (-$${(refreshed.total_discount_amounts[0].amount / 100).toFixed(2)})</p>` : ''}
             <p><a href="${hosted}">View & Pay Invoice</a></p>
             <p>Due: ${refreshed.due_date ? new Date(refreshed.due_date * 1000).toLocaleString() : '—'}</p>
           `,

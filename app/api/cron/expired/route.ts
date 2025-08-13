@@ -1,9 +1,15 @@
 import { NextResponse } from "next/server";
 import { expireOverdueBookings } from "@/lib/expireBookings";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     console.log('[CRON] Starting expire overdue bookings job');
+    if (req.headers.get('Authorization') !== `Bearer ${process.env.CRON_SECRET}`) {
+      return NextResponse.json({ 
+        error: 'Unauthorized',
+        message: 'Unauthorized'
+      }, { status: 401 });
+    }
     
     const expiredCount = await expireOverdueBookings();
     
