@@ -32,7 +32,7 @@ const steps: Step[] = [
       { text: "Smart conflict prevention", icon: CheckCircle },
       { text: "Automatic buffer times", icon: ArrowRight },
     ],
-    image: "/images/booking-screen.png",
+    image: "/videos/booking_demo.mp4",
   },
   {
     name: "Automated Waivers & Invoicing",
@@ -254,15 +254,27 @@ export default function WorkflowStoryboard() {
                     </div>
                   </div>
 
-                  {/* Image side */}
+                  {/* Media side */}
                   <div className="relative lg:w-1/2 min-h-[300px] lg:min-h-0 bg-white">
-                    <Image
-                      src={steps[activeStep].image || '/placeholder.png'}
-                      alt={`Illustration for ${steps[activeStep].title}`}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 1024px) 100vw, 50vw"
-                    />
+                    {steps[activeStep].image?.endsWith('.mp4') || steps[activeStep].image?.endsWith('.webm') || steps[activeStep].image?.endsWith('.mov') ? (
+                      <video
+                        src={steps[activeStep].image}
+                        className="w-full h-full object-contain bg-gray-50"
+                        controls
+                        muted
+                        loop
+                        playsInline
+                        preload="metadata"
+                      />
+                    ) : (
+                      <Image
+                        src={steps[activeStep].image || '/placeholder.png'}
+                        alt={`Illustration for ${steps[activeStep].title}`}
+                        fill
+                        className="object-cover"
+                        sizes="(max-width: 1024px) 100vw, 50vw"
+                      />
+                    )}
                     {/* Neutral frame */}
                     <div className="absolute inset-0 ring-1 ring-black/5 z-10 pointer-events-none" />
 
