@@ -132,6 +132,7 @@ export async function POST(req: NextRequest) {
 
       // 2. Create Clerk Organization
       const clerk = await clerkClient();
+      // The SDK here returns a client instance via function call
       const clerkOrg = await clerk.organizations.createOrganization({
         name: validatedData.businessName,
         createdBy: user.clerkUserId as string,
@@ -149,7 +150,7 @@ export async function POST(req: NextRequest) {
           organizationId: localOrg.id,
           userId: user.id,
           role: "ADMIN",
-          clerkMembershipId: (await clerkOrg).createdBy || "",
+          clerkMembershipId: clerkOrg.createdBy || "",
       },
     });
 

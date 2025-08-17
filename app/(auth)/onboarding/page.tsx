@@ -136,20 +136,19 @@ const AnimatedContainer = ({
   children: React.ReactNode;
   currentStep: number;
   targetStep: number;
-}) => (
-  <motion.div
-    initial={{ opacity: 0, x: 20 }}
-    animate={{
-      opacity: currentStep === targetStep ? 1 : 0,
-      x: currentStep === targetStep ? 0 : 20,
-    }}
-    exit={{ opacity: 0, x: -20 }}
-    transition={{ duration: 0.4, ease: "easeInOut" }}
-    style={{ display: currentStep === targetStep ? "block" : "none" }}
-  >
-    {children}
-  </motion.div>
-);
+}) => {
+  if (currentStep !== targetStep) return null;
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.4, ease: "easeInOut" }}
+    >
+      {children}
+    </motion.div>
+  );
+};
 
 const GradientText = memo(
   ({
@@ -268,6 +267,7 @@ const FormInput = ({
         </TooltipTrigger>
         <Input
           id={id}
+          name={id}
           type={type}
           value={value}
           onChange={onChange}
@@ -617,17 +617,19 @@ export default function OnboardingPage() {
         return;
       }
 
-      // Normalize domain: if provided, ensure it has a scheme by prepending http://
+      // Sanitize custom domain to bare domain (no scheme/path) to satisfy API schema
       const rawDomain = state.formData.customDomain?.trim();
       const normalizedDomain = rawDomain && rawDomain.length > 0
-        ? (rawDomain.startsWith("http://") || rawDomain.startsWith("https://")
-            ? rawDomain
-            : `https://${rawDomain}`)
+        ? rawDomain
+            .replace(/^https?:\/\//i, "")
+            .replace(/\/.*/, "")
+            .toLowerCase()
         : undefined;
 
       const payload: typeof state.formData = {
         ...state.formData,
         customDomain: normalizedDomain,
+        businessPhone: state.formData.businessPhone.replace(/\D/g, ""),
       } as typeof state.formData;
 
       const res = await fetch("/api/auth/onboarding", {
