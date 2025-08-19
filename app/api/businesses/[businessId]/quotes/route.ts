@@ -43,7 +43,7 @@ const quoteSchema = z.object({
   holdId: z.string().optional(),
   bookingId: z.string().optional(),
   eventTimeZone: z.string().optional(),
-  couponCode: z.string().optional(),
+  couponCode: z.string().nullish(),
   couponAmount: z.number().optional(),
 }).refine(data => data.holdId || data.bookingId, {
   message: "Either holdId or bookingId must be provided",
