@@ -36,6 +36,7 @@ export default function Header({
 }: HeaderProps) {
   const [notifOpen, setNotifOpen] = useState(false);
 
+
   return (
     <header className="bg-white border-b border-gray-200/75 fixed top-0 right-0 left-0 lg:left-64 z-20 h-[68px] shadow-sm">
       <div className="flex h-full items-center gap-4 px-8">

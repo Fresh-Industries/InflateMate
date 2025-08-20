@@ -81,7 +81,8 @@ export async function POST(req: NextRequest) {
 
       case 'charge.succeeded':
       case 'charge.updated':
-        console.log(`[WEBHOOK] Received ${event.type} event - no action needed`);
+        // These often arrive after payment_intent.succeeded; ignore to avoid duplicate emails/side effects
+        console.log(`[WEBHOOK] Received ${event.type} event - ignored to avoid duplicates.`);
         break;
 
       // Subscription events are handled in /api/webhook/stripe/subs
@@ -157,7 +158,8 @@ export async function POST(req: NextRequest) {
 
     // Return a 200 response to acknowledge receipt of the event to Stripe
     console.log(`[WEBHOOK] Finished processing event ${event.id} (${event.type}). Sending 200 OK to Stripe.`);
-    return NextResponse.json({ message: "Webhook processed successfully" }, { status: 200 });
+    // Explicitly return plain text to avoid Next.js messing with body formatting for signature retries
+    return new NextResponse("ok", { status: 200 });
 
   } catch (error) {
     // --- THIS CATCH BLOCK IS NOW FOR UNEXPECTED ERRORS *OUTSIDE* HANDLERS ---
@@ -185,6 +187,21 @@ async function handlePaymentIntentSucceeded(paymentIntent: Stripe.PaymentIntent)
 
   const metadata = paymentIntent.metadata;
   console.log("[WEBHOOK] PaymentIntent metadata:", JSON.stringify(metadata, null, 2));
+
+  // Idempotency guard: if we already recorded a COMPLETED payment for this PI, skip further processing
+  try {
+    const already = await prisma.payment.findFirst({
+      where: { stripePaymentId: paymentIntent.id, status: 'COMPLETED' },
+      select: { id: true },
+    });
+    if (already) {
+      console.warn(`[WEBHOOK] Duplicate payment_intent.succeeded received for ${paymentIntent.id}. Skipping (payment record already exists).`);
+      return;
+    }
+  } catch (lookupErr) {
+    console.error("[WEBHOOK] Error checking existing payment record:", lookupErr);
+    // continue; do not fail the webhook due to a read error
+  }
 
   if (!metadata || !metadata.prismaBookingId) {
     console.log("[WEBHOOK] No booking metadata found in payment intent");
