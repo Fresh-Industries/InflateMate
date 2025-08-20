@@ -1,0 +1,14 @@
+{
+    "crons": [
+      {
+        "path": "/api/cron/deleteExpired",
+        "schedule": "59 23 * * *"
+      },
+      {
+        "path": "/api/cron/expired",
+        "schedule": "*/5 * * * *"
+      }
+    ]
+  }
+
+  

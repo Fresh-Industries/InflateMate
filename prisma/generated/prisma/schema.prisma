@@ -288,19 +288,21 @@ model SalesFunnel {
 }
 
 model Waiver {
-  id                 String       @id @default(cuid())
-  businessId         String
-  customerId         String
-  bookingId          String
-  status             WaiverStatus @default(PENDING)
-  templateVersion    String
-  documentUrl        String
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @default(now())
-  docuSealDocumentId String       @unique
-  booking            Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
-  business           Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
-  customer           Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  id                  String       @id @default(cuid())
+  businessId          String
+  customerId          String
+  bookingId           String
+  status              WaiverStatus @default(PENDING)
+  templateVersion     String
+  documentUrl         String
+  auditLogUrl         String?
+  originalAuditLogUrl String?
+  createdAt           DateTime     @default(now())
+  updatedAt           DateTime     @default(now())
+  docuSealDocumentId  String       @unique
+  booking             Booking      @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  business            Business     @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  customer            Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
 
   @@unique([customerId, businessId, bookingId])
   @@index([businessId])

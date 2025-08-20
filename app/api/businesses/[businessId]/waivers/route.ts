@@ -17,6 +17,9 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
       booking: {
         select: {
           eventDate: true,
+          startTime: true,
+          endTime: true,
+          eventTimeZone: true,
         }
       }
     },
@@ -25,5 +28,15 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
     }
   });
 
-  return NextResponse.json(waivers);
+  const normalized = waivers.map(w => ({
+    ...w,
+    booking: {
+      ...w.booking,
+      eventDateString: w.booking?.eventDate
+        ? new Date(w.booking.eventDate).toISOString().slice(0, 10)
+        : null,
+    }
+  }))
+
+  return NextResponse.json(normalized);
 }

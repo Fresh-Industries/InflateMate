@@ -23,6 +23,7 @@ const quoteSchema = z.object({
     price: z.number(),
     quantity: z.number().min(1),
     stripeProductId: z.string(),
+    stripePriceId: z.string().optional(),
   })).min(1, "At least one item must be selected"),
   totalAmount: z.number().positive("Total amount must be positive"),
   subtotalAmount: z.number().nonnegative(),
@@ -42,6 +43,8 @@ const quoteSchema = z.object({
   holdId: z.string().optional(),
   bookingId: z.string().optional(),
   eventTimeZone: z.string().optional(),
+  couponCode: z.string().nullish(),
+  couponAmount: z.number().optional(),
 }).refine(data => data.holdId || data.bookingId, {
   message: "Either holdId or bookingId must be provided",
   path: ["holdId", "bookingId"],
@@ -86,7 +89,8 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       specialInstructions,
       holdId,
       bookingId,
-      eventTimeZone
+      eventTimeZone,
+      couponCode
     } = validation.data;
 
     // --- Start: Database and Stripe Operations ---
@@ -105,6 +109,54 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         return NextResponse.json({ error: "Stripe is not connected for this business." }, { status: 400 });
       }
       const stripeConnectedAccountId = business.stripeAccountId;
+
+      // Validate coupon if provided (but don't manually calculate discount)
+      let appliedCoupon = null;
+      let appliedCouponId = null;
+      
+      if (couponCode) {
+        console.log(`[POST /quotes] Looking up coupon code: ${couponCode}`);
+        const coupon = await prisma.coupon.findUnique({
+          where: { code_businessId: { code: couponCode, businessId } },
+        });
+
+        const now = new Date();
+        
+        // Calculate original subtotal for minimum amount validation
+        const originalSubtotal = selectedItems.reduce((sum, item) => {
+          return sum + (item.price * item.quantity);
+        }, 0);
+        
+        console.log(`[POST /quotes] Coupon validation - Original subtotal: $${originalSubtotal}, Minimum required: $${coupon?.minimumAmount || 'none'}`);
+        
+        // Validate coupon conditions (same as before, but don't calculate manual discount)
+        if (!coupon || !coupon.isActive || (coupon.startDate && now < coupon.startDate) ||
+            (coupon.endDate && now > coupon.endDate) ||
+            (typeof coupon.maxUses === "number" && coupon.usedCount >= coupon.maxUses) ||
+            (typeof coupon.minimumAmount === "number" && originalSubtotal < coupon.minimumAmount)) {
+          console.warn(`[POST /quotes] Coupon code "${couponCode}" is invalid or cannot be applied.`);
+          console.warn(`[POST /quotes] Validation details:`, {
+            exists: !!coupon,
+            isActive: coupon?.isActive,
+            startDateValid: !coupon?.startDate || now >= coupon.startDate,
+            endDateValid: !coupon?.endDate || now <= coupon.endDate,
+            usageValid: typeof coupon?.maxUses !== "number" || coupon.usedCount < coupon.maxUses,
+            minimumAmountValid: typeof coupon?.minimumAmount !== "number" || originalSubtotal >= coupon.minimumAmount,
+            originalSubtotal,
+            minimumAmount: coupon?.minimumAmount
+          });
+          return NextResponse.json({ error: "The provided coupon code is invalid or cannot be applied." }, { status: 400 });
+        }
+        
+        if (!coupon.stripeCouponId) {
+          console.warn(`[POST /quotes] Coupon "${couponCode}" does not have a Stripe coupon ID`);
+          return NextResponse.json({ error: "Coupon is not properly configured for Stripe." }, { status: 400 });
+        }
+        
+        console.log(`[POST /quotes] Coupon "${couponCode}" validation passed, Stripe ID: ${coupon.stripeCouponId}`);
+        appliedCoupon = coupon;
+        appliedCouponId = coupon.id;
+      }
 
       // Check for existing booking if bookingId is provided
       let existingBooking = null;
@@ -234,30 +286,63 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         throw new Error("Missing Stripe Customer ID after calling helper for quote");
       }
 
-      // 4. Prepare line items - use items from existing booking if available
-      let lineItems;
-      if (existingBooking && existingBooking.inventoryItems.length > 0) {
-        // Use inventory items from the existing booking
-        lineItems = existingBooking.inventoryItems.map(item => ({
-          quantity: item.quantity,
-          price_data: {
-            currency: 'usd',
-            unit_amount: Math.round(item.price * 100), // Amount in cents
-            product: item.inventory.stripeProductId,
+      // 4a. Ensure Stripe customer is up to date with destination address for tax
+      await stripe.customers.update(
+        stripeCustomerId,
+        {
+          email: customerEmail,
+          address: {
+            line1: eventAddress,
+            city: eventCity,
+            state: eventState,
+            postal_code: eventZipCode,
+            country: 'US',
           },
+        },
+        { stripeAccount: stripeConnectedAccountId }
+      );
+
+      // 4b. Prepare line items - use items from existing booking if available
+      let itemsToProcess = [];
+      
+      if (existingBooking && existingBooking.inventoryItems.length > 0) {
+        itemsToProcess = existingBooking.inventoryItems.map(item => ({
+          price: item.price,
+          quantity: item.quantity,
+          stripeProductId: item.inventory.stripeProductId,
+          stripePriceId: item.inventory.stripePriceId,
         }));
-        console.log(`Using ${lineItems.length} items from existing booking for quote.`);
+        console.log(`Using ${itemsToProcess.length} items from existing booking for quote.`);
       } else {
-        // Use items from the request
-        lineItems = selectedItems.map(item => ({
+        itemsToProcess = selectedItems.map(item => ({
+          price: item.price,
+          quantity: item.quantity,
+          stripeProductId: item.stripeProductId,
+          stripePriceId: item.stripePriceId,
+        }));
+      }
+
+      // Convert to Stripe line items format (no manual discount calculation)
+      const lineItems = itemsToProcess.map(item => {
+        const priceId = item.stripePriceId;
+        if (priceId) {
+          // Prefer using price ID when available
+          return {
+            quantity: item.quantity,
+            price: priceId,
+          };
+        }
+        return {
           quantity: item.quantity,
           price_data: {
             currency: 'usd',
             unit_amount: Math.round(item.price * 100),
             product: item.stripeProductId,
+            // Required when automatic_tax is enabled
+            tax_behavior: 'exclusive',
           },
-        }));
-      }
+        };
+      });
 
       // 5. Create Stripe Quote (Draft) with idempotency
       const targetBookingId = bookingId || holdId;
@@ -266,7 +351,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       
       console.log(`Creating Stripe quote draft for booking ID: ${targetBookingId} with idempotency key: ${idempotencyKey}`);
       
-      const stripeQuoteDraft = await stripe.quotes.create({
+      const quoteParams: Stripe.QuoteCreateParams = {
         customer: stripeCustomerId,
         line_items: lineItems as unknown as Stripe.QuoteCreateParams.LineItem[],
         application_fee_amount: 0,
@@ -279,9 +364,26 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           prismaBookingId: targetBookingId || null,
           prismaBusinessId: businessId,
           prismaCustomerId: customer.id,
+          couponCode: appliedCoupon?.code || null,
+          stripeCouponId: appliedCoupon?.stripeCouponId || null,
         },
         description: `Quote for event on ${eventDate}`,
-      }, { 
+        // Enable automatic tax for quotes (flows through to the generated invoice)
+        automatic_tax: { enabled: true },
+        // Provide default invoice shipping address used for tax destination
+        default_tax_rates: undefined,
+        on_behalf_of: undefined,
+      };
+
+      // Add Stripe coupon if applied
+      if (appliedCoupon?.stripeCouponId) {
+        quoteParams.discounts = [{
+          coupon: appliedCoupon.stripeCouponId,
+        }];
+        console.log(`[POST /quotes] Adding Stripe coupon discount: ${appliedCoupon.stripeCouponId}`);
+      }
+      
+      const stripeQuoteDraft = await stripe.quotes.create(quoteParams, { 
         stripeAccount: stripeConnectedAccountId,
         idempotencyKey: idempotencyKey
       });
@@ -321,6 +423,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
       const startDateTime = localToUTC(eventDate, startTime, tz);
       const endDateTime = localToUTC(eventDate, endTime, tz);
 
+      // Pull Stripe-calculated amounts (in cents)
+      const amountSubtotalCents = finalized.amount_subtotal ?? 0;
+      const amountTotalCents = finalized.amount_total ?? 0;
+      const amountTaxCents = finalized.total_details?.amount_tax ?? Math.max(0, amountTotalCents - amountSubtotalCents);
+      const amountDiscountCents = finalized.total_details?.amount_discount ?? 0;
+
       // 9. Update existing Booking and Create Quote in DB Transaction
       console.log(`Starting database transaction for updating Booking ${targetBookingId} and creating Quote...`);
       const [updatedBooking, createdQuote] = await prisma.$transaction(async (tx) => {
@@ -350,6 +458,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
               specialInstructions: specialInstructions,
               customer: { connect: { id: customer.id } },
               expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours for quote
+              ...(appliedCouponId && { coupon: { connect: { id: appliedCouponId } } }),
             }
           });
           console.log(` - Existing booking updated to PENDING: ${booking.id}`);
@@ -387,6 +496,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
               specialInstructions: specialInstructions,
               customer: { connect: { id: customer.id } },
               expiresAt: new Date(Date.now() + 48 * 60 * 60 * 1000), // 48 hours for quote
+              ...(appliedCouponId && { coupon: { connect: { id: appliedCouponId } } }),
             }
           });
           console.log(` - Booking updated from HOLD to PENDING: ${booking.id}`);
@@ -408,9 +518,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           data: {
             stripeQuoteId: finalized.id,
             status: QuoteStatus.OPEN, // Store as OPEN status
-            amountTotal: totalAmount,
-            amountSubtotal: subtotalAmount,
-            amountTax: taxAmount,
+            amountTotal: amountTotalCents / 100,
+            amountSubtotal: amountSubtotalCents / 100,
+            amountTax: amountTaxCents / 100,
             currency: (finalized.currency ?? 'usd').toUpperCase(),
             appQuoteUrl: null, // No app URL needed
             stripeHostedUrl: null, // Not using Stripe's hosted view
@@ -448,7 +558,9 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
           prismaBusinessId: businessId,
           prismaBookingId: updatedBooking.id,
           prismaCustomerId: customer.id,
-          prismaQuoteId: createdQuote.id
+          prismaQuoteId: createdQuote.id,
+          couponCode: appliedCoupon?.code || null,
+          stripeCouponId: appliedCoupon?.stripeCouponId || null,
         }
       }, { stripeAccount: stripeConnectedAccountId });
 
@@ -461,7 +573,15 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         html: `
           <p>Hi ${customerName},</p>
           <p>Here's your quote for ${eventDate}.</p>
-          <p><strong>Total:</strong> $${totalAmount.toFixed(2)} (Subtotal $${subtotalAmount.toFixed(2)} + Tax $${taxAmount.toFixed(2)})</p>
+          ${appliedCoupon && amountDiscountCents > 0 ? `
+            <p><strong>Original Subtotal:</strong> $${(amountSubtotalCents / 100).toFixed(2)}</p>
+            <p><strong>Discount Applied:</strong> ${appliedCoupon.code} (-$${(amountDiscountCents / 100).toFixed(2)})</p>
+            <p><strong>Discounted Subtotal:</strong> $${((amountSubtotalCents - amountDiscountCents) / 100).toFixed(2)}</p>
+            <p><strong>Tax:</strong> $${(amountTaxCents / 100).toFixed(2)}</p>
+            <p><strong>Total:</strong> $${(amountTotalCents / 100).toFixed(2)}</p>
+          ` : `
+            <p><strong>Total:</strong> $${(amountTotalCents / 100).toFixed(2)} (Subtotal $${(amountSubtotalCents / 100).toFixed(2)} + Tax $${(amountTaxCents / 100).toFixed(2)})</p>
+          `}
           <p>This quote expires on ${new Date(finalized.expires_at! * 1000).toLocaleString()}.</p>
           <p><a href="${pdfUrl}">Download the quote PDF</a></p>
           <p>When you're ready, we'll email your invoice to pay.</p>
@@ -476,7 +596,12 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ bus
         bookingId: updatedBooking.id,
         quoteId: createdQuote.id,
         stripeQuoteId: createdQuote.stripeQuoteId,
-        pdfUrl: createdQuote.pdfUrl
+        pdfUrl: createdQuote.pdfUrl,
+        // Include Stripe-calculated amounts for frontend reference
+        amountSubtotal: amountSubtotalCents / 100,
+        amountTax: amountTaxCents / 100,
+        amountDiscount: amountDiscountCents / 100,
+        amountTotal: amountTotalCents / 100,
       }, { status: 200 });
 
     } catch (error) {
@@ -540,6 +665,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
           select: {
             id: true,
             eventDate: true,
+            eventTimeZone: true,
             startTime: true,
             endTime: true,
             eventAddress: true,
@@ -556,7 +682,18 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
       }
     });
 
-    return NextResponse.json(quotes, { status: 200 });
+    // Normalize: date-only string to avoid TZ shifts on client
+    const normalized = quotes.map((q) => ({
+      ...q,
+      booking: {
+        ...q.booking,
+        eventDateString: q.booking?.eventDate
+          ? new Date(q.booking.eventDate).toISOString().slice(0, 10)
+          : null,
+      },
+    }));
+
+    return NextResponse.json(normalized, { status: 200 });
   } catch (error) {
     console.error("Error fetching quotes:", error);
     return NextResponse.json({ error: "An error occurred while fetching quotes." }, { status: 500 });

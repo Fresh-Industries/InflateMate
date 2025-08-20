@@ -29,6 +29,10 @@ interface ReviewPayStepProps {
   discountedTax: number;
   discountedTotal: number; // Renamed from getDiscountedTotal for clarity as a passed value
 
+  // Tax calculation info
+  usingStripeTax?: boolean; // Whether Stripe Tax API is being used
+  stripeTaxError?: string | null; // Any error from Stripe Tax calculation
+
   // Loading states for actions
   isApplyingCoupon: boolean;
   isProcessingQuote: boolean;
@@ -55,6 +59,8 @@ export function ReviewPayStep({
   subtotal, // Use passed calculated values
   discountedTax,
   discountedTotal,
+  usingStripeTax,
+  stripeTaxError,
   isApplyingCoupon,
   isProcessingQuote,
   isSubmittingPayment,
@@ -64,11 +70,12 @@ export function ReviewPayStep({
   onSendAsQuote,
   onProceedToPayment,
 }: ReviewPayStepProps) {
-  console.log({
-    isSubmittingPayment,
-    isProcessingQuote,
-    selectedItemsSize: selectedItems.size,
-    discountedTotal
+  console.log('[ReviewPayStep] Summary loaded with tax data:', {
+    taxRate: taxRate.toFixed(2) + '%',
+    taxAmount: '$' + discountedTax.toFixed(2),
+    total: '$' + discountedTotal.toFixed(2),
+    usingStripeTax,
+    stripeTaxError
   });
 
   return (
@@ -261,7 +268,15 @@ export function ReviewPayStep({
           )}
           {applyTax && taxRate > 0 && ( // Use props
             <div className="flex justify-between text-muted-foreground">
-              <span>Tax ({taxRate}%):</span> {/* Use prop */}
+              <div className="flex flex-col">
+                <span>Tax ({taxRate.toFixed(2)}%){usingStripeTax ? ' *' : ''}:</span>
+                {usingStripeTax && (
+                  <span className="text-xs text-green-600">* Location-based rate</span>
+                )}
+                {stripeTaxError && (
+                  <span className="text-xs text-amber-600">Using fallback calculation</span>
+                )}
+              </div>
               <span>${discountedTax.toFixed(2)}</span> {/* Use passed prop */}
             </div>
           )}

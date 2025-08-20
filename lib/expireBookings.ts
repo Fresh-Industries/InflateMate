@@ -8,15 +8,16 @@ export async function expireOverdueBookings() {
 
   try {
     // Use a direct SQL update for efficiency
+    // Expire any HOLD or PENDING bookings whose expiresAt is in the past
     const result = await prisma.$executeRaw`
       UPDATE "Booking"
       SET status = 'EXPIRED', "updatedAt" = NOW()
-      WHERE status = 'PENDING' AND "expiresAt" < NOW();
+      WHERE status IN ('HOLD','PENDING') AND "expiresAt" < NOW();
     `;
 
     console.log(`[expireOverdueBookings] Updated ${result} PENDING bookings to EXPIRED status.`);
 
-    // Also update related BookingItems to EXPIRED status
+    // Also update related BookingItems to EXPIRED status for those bookings we just expired (last minute window)
     const bookingItemsResult = await prisma.$executeRaw`
       UPDATE "BookingItem"
       SET "bookingStatus" = 'EXPIRED', "updatedAt" = NOW()

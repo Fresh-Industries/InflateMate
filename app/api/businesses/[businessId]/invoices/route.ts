@@ -22,6 +22,7 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
           select: {
             id: true,
             eventDate: true,
+            eventTimeZone: true,
             startTime: true,
             endTime: true,
             eventAddress: true,
@@ -37,7 +38,19 @@ export async function GET(req: NextRequest, { params }: { params: Promise<{ busi
       }
     });
 
-    return NextResponse.json(invoices, { status: 200 });
+    // Normalize: add amountTotal and a date-only string to avoid TZ shifts on client
+    const normalized = invoices.map((inv) => ({
+      ...inv,
+      amountTotal: (Number(inv.amountPaid ?? 0) + Number(inv.amountRemaining ?? 0)),
+      booking: {
+        ...inv.booking,
+        eventDateString: inv.booking?.eventDate
+          ? new Date(inv.booking.eventDate).toISOString().slice(0, 10)
+          : null,
+      },
+    }));
+
+    return NextResponse.json(normalized, { status: 200 });
   } catch (error) {
     console.error("Error fetching invoices:", error);
     return NextResponse.json({ error: "An error occurred while fetching invoices." }, { status: 500 });

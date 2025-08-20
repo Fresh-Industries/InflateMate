@@ -349,14 +349,6 @@ export function EventDetailsStep({
 
   return (
     <div className="space-y-6">
-      {/* Info Notice */}
-      <div className="p-4 bg-blue-50 border border-blue-200 rounded-md text-blue-700 mb-4">
-        <p className="font-medium">24-Hour Rental Period</p>
-        <p className="text-sm">
-          All bookings are for a full day (24-hour rental). This gives our team time to deliver,
-          set up, and clean the equipment.
-        </p>
-      </div>
 
       {/* Notice Window Warning */}
       {!getNoticeWindowStatus.isValid && (

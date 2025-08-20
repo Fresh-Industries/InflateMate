@@ -22,12 +22,15 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { format } from 'date-fns';
+import { utcToLocal } from '@/lib/utils';
 
 // Define the structure of the waiver data based on the API response
 interface Waiver {
   id: string;
   status: 'PENDING' | 'SIGNED' | 'REJECTED' | 'EXPIRED';
   documentUrl: string;
+  auditLogUrl?: string;
+  originalAuditLogUrl?: string;
   createdAt: string; // Assuming ISO string format from API
   updatedAt: string; // Assuming ISO string format from API
   customer: {
@@ -35,7 +38,11 @@ interface Waiver {
     email: string;
   };
   booking: {
-    eventDate: string; // Assuming ISO string format from API
+    eventDate: string; // ISO from DB
+    eventDateString?: string; // normalized date-only from API
+    startTime?: string;
+    endTime?: string;
+    eventTimeZone?: string;
   };
 }
 
@@ -136,17 +143,40 @@ export default function DocumentsPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">
-                    {format(new Date(waiver.booking.eventDate), 'PP')}
+                    {waiver.booking.startTime && waiver.booking.eventTimeZone
+                      ? utcToLocal(new Date(waiver.booking.startTime), waiver.booking.eventTimeZone, 'PP')
+                      : (() => {
+                          const d = waiver.booking.eventDateString || waiver.booking.eventDate;
+                          if (/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+                            const [y, m, da] = d.split('-').map(Number);
+                            return format(new Date(Date.UTC(y, m - 1, da)), 'PP');
+                          }
+                          return format(new Date(d), 'PP');
+                        })()
+                    }
                   </TableCell>
                    <TableCell className="hidden md:table-cell">
                     {format(new Date(waiver.status === 'SIGNED' ? waiver.updatedAt : waiver.createdAt), 'PPpp')}
                   </TableCell>
                   <TableCell className="text-right">
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={waiver.documentUrl} target="_blank" rel="noopener noreferrer">
-                        View
-                      </Link>
-                    </Button>
+                    <div className="flex justify-end gap-2">
+                      <Button asChild variant="outline" size="sm">
+                        <Link href={waiver.documentUrl} target="_blank" rel="noopener noreferrer">
+                          View
+                        </Link>
+                      </Button>
+                      {(waiver.auditLogUrl || waiver.originalAuditLogUrl) && (
+                        <Button asChild variant="outline" size="sm">
+                          <Link
+                            href={(waiver.auditLogUrl || waiver.originalAuditLogUrl) as string}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            Audit Log
+                          </Link>
+                        </Button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

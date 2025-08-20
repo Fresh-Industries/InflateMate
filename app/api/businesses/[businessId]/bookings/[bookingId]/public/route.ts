@@ -68,6 +68,7 @@ export async function GET(
       id: booking.id,
       status: booking.status,
       eventDate: booking.eventDate,
+      eventTimeZone: booking.eventTimeZone,
       startTime: booking.startTime,
       endTime: booking.endTime,
       eventAddress: booking.eventAddress,

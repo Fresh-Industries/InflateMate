@@ -14,12 +14,20 @@ import { DatePickerWithRange } from "@/components/DatePicker";
 import { toast } from "sonner";
 
 const optionalNumber = z.preprocess(
-  (val) => (val === "" || val === null ? undefined : Number(val)),
+  (val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const coerced = typeof val === "string" ? Number(val) : (val as unknown as number);
+    return Number.isFinite(coerced) ? coerced : undefined;
+  },
   z.number().positive().optional()
 );
 
 const optionalNonNegativeNumber = z.preprocess(
-  (val) => (val === "" || val === null ? undefined : Number(val)),
+  (val) => {
+    if (val === "" || val === null || val === undefined) return undefined;
+    const coerced = typeof val === "string" ? Number(val) : (val as unknown as number);
+    return Number.isFinite(coerced) ? coerced : undefined;
+  },
   z.number().nonnegative().optional()
 );
 

@@ -10,12 +10,22 @@ const utapi = new UTApi()
 
 /* ────────── DocuSeal payload interface ────────── */
 interface DocuSealWebhook {
-  event_type: 'form.completed' | 'form.declined' | string
+  event_type:
+    | 'form.completed'
+    | 'form.declined'
+    | 'submission.completed'
+    | 'submission.declined'
+    | string
   timestamp: string
   data: {
+    // DocuSeal submission id
     id: number
-    external_id: string | null            // we set this to customer email
-    status: 'completed' | 'declined'
+    // We set this to the customer email when creating the submission
+    external_id?: string | null
+    status?: 'completed' | 'declined' | string
+    // First submitter is ours; its id matches what we stored in Waiver.docuSealDocumentId
+    submitters?: Array<{ id: number; email?: string; external_id?: string }>
+    audit_log_url?: string
     documents?: { name: string; url: string }[]
   }
 }
@@ -41,19 +51,43 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Bad JSON' }, { status: 400 })
   }
 
-  const { id, documents = [] } = payload.data
-  if (!id || !payload.event_type) {
+  const submissionId = payload.data?.id
+  const submitterId = payload.data?.submitters?.[0]?.id
+  const documents = payload.data?.documents ?? []
+  const auditLogUrl = payload.data?.audit_log_url
+  if (!submissionId || !payload.event_type) {
     return NextResponse.json({ error: 'Missing fields' }, { status: 400 })
   }
 
   /* ---------- 2. Find matching waiver ---------- */
-  const waiver = await prisma.waiver.findFirst({
-    where: { docuSealDocumentId: id.toString() },   
+  const primaryLookupId = (submitterId ?? submissionId).toString()
+  let waiver = await prisma.waiver.findFirst({
+    where: { docuSealDocumentId: primaryLookupId },
     include: { customer: true },
   })
+
+  // Fallback: try by external_id (customer email) if present
+  if (!waiver && payload.data.external_id) {
+    const customer = await prisma.customer.findFirst({
+      where: { email: payload.data.external_id },
+      select: { id: true },
+    })
+    if (customer) {
+      waiver = await prisma.waiver.findFirst({
+        where: {
+          customerId: customer.id,
+          // Not already terminal; prefer the most recent pending/open waiver
+          NOT: [{ status: 'SIGNED' }, { status: 'REJECTED' }],
+        },
+        orderBy: { createdAt: 'desc' },
+        include: { customer: true },
+      })
+    }
+  }
+
   if (!waiver) {
-    console.error('No waiver found for submission', id)
-    return NextResponse.json({ ok: true })      // ack so DocuSeal stops retrying
+    console.error('No waiver found. submissionId=', submissionId, 'submitterId=', submitterId)
+    return NextResponse.json({ ok: true }) // ack so DocuSeal stops retrying
   }
 
   // Idempotency guard: if already processed, acknowledge and exit
@@ -67,7 +101,7 @@ export async function POST(req: NextRequest) {
   }
 
   /* ---------- 3A. Completed ---------- */
-  if (payload.event_type === 'form.completed') {
+  if (payload.event_type === 'form.completed' || payload.event_type === 'submission.completed') {
     const signedPdfUrl = documents[0]?.url
     if (!signedPdfUrl) {
       console.error('No signed PDF URL in payload')
@@ -122,10 +156,30 @@ export async function POST(req: NextRequest) {
       const ufsUrl = upRes.data?.ufsUrl
       if (!ufsUrl) throw new Error('UploadThing failed')
 
+      // Optionally fetch and upload audit log
+      let uploadedAuditUrl: string | null = null
+      try {
+        if (auditLogUrl) {
+          const auditResp = await fetchWithBackoff(auditLogUrl)
+          const auditBuf = await auditResp.arrayBuffer()
+          const auditName = `AuditLog-${safeName}-${waiver.bookingId}.pdf`
+          const upAudit = await utapi.uploadFiles(new FileEsque([auditBuf], auditName))
+          uploadedAuditUrl = upAudit.data?.ufsUrl ?? null
+        }
+      } catch (e) {
+        console.warn('Audit log fetch/upload failed:', e)
+      }
+
       // save to DB
       await prisma.waiver.update({
         where: { id: waiver.id },
-        data: { status: 'SIGNED', documentUrl: ufsUrl, updatedAt: new Date() },
+        data: {
+          status: 'SIGNED',
+          documentUrl: ufsUrl,
+          auditLogUrl: uploadedAuditUrl ?? undefined,
+          originalAuditLogUrl: auditLogUrl ?? undefined,
+          updatedAt: new Date(),
+        },
       })
       console.log('Waiver', waiver.id, 'marked SIGNED')
     } catch (err) {
@@ -136,7 +190,7 @@ export async function POST(req: NextRequest) {
     }
 
   /* ---------- 3B. Declined ---------- */
-  } else if (payload.event_type === 'form.declined') {
+  } else if (payload.event_type === 'form.declined' || payload.event_type === 'submission.declined') {
     await prisma.waiver.update({
       where: { id: waiver.id },
       data: { status: 'REJECTED', updatedAt: new Date() },

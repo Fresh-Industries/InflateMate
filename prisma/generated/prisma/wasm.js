@@ -330,6 +330,8 @@ exports.Prisma.WaiverScalarFieldEnum = {
   status: 'status',
   templateVersion: 'templateVersion',
   documentUrl: 'documentUrl',
+  auditLogUrl: 'auditLogUrl',
+  originalAuditLogUrl: 'originalAuditLogUrl',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   docuSealDocumentId: 'docuSealDocumentId'

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import { EventDetailsStep } from "./Availbility";
 import { CustomerDetailsStep } from "./CustomerInfo";
 import { ReviewPayStep } from "./Summary";
@@ -9,6 +9,7 @@ import { useSelectedItems } from '@/hooks/useSelectedItems';
 import { useCoupon } from '@/hooks/useCoupon';
 import { useBusinessDetails } from '@/hooks/useBusinessDetails';
 import { useBookingCalculations } from '@/hooks/useBookingCalculations';
+
 import { NewBookingState, InventoryItem } from '@/types/booking';
 import Header from "./Header";
 import { Elements } from "@stripe/react-stripe-js";
@@ -81,14 +82,29 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
   const [clientSecret, setClientSecret] = useState<string | null>(null);
   const [showPaymentForm, setShowPaymentForm] = useState(false);
   const [bookingId, setBookingId] = useState<string | null>(null);
+  const [displaySubtotal, setDisplaySubtotal] = useState<number | null>(null);
+  const [displayTaxAmount, setDisplayTaxAmount] = useState<number | null>(null);
+  const [displayTotal, setDisplayTotal] = useState<number | null>(null);
+  const [calculatedTaxData, setCalculatedTaxData] = useState<{
+    subtotal: number;
+    taxAmount: number;
+    taxRate: number;
+    total: number;
+    method: string;
+  } | null>(null);
+  
+  // Simple flag to track when coupon changes and trigger tax recalculation
+  const [shouldRecalculateTax, setShouldRecalculateTax] = useState(false);
+  const lastCouponCode = useRef<string | null>(null);
 
   const { selectedItems, selectInventoryItem, updateQuantity, clearSelection } = useSelectedItems();
 
   const itemsForCalculation = React.useMemo(() => Array.from(selectedItems.values()), [selectedItems]);
 
   const { businessData, taxRate, applyTax } = useBusinessDetails(businessId);
-  const [couponCode, setCouponCode] = useState("");
   const {
+    couponCode,
+    setCouponCode,
     appliedCoupon,
     couponError,
     isApplyingCoupon,
@@ -99,12 +115,118 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
     amountBeforeTax: itemsForCalculation.reduce((sum, { item, quantity }) => sum + (item.price * quantity), 0)
   });
 
-  const { rawSubtotal, discountedSubtotal, taxAmount, total } = useBookingCalculations({
+  // Use manual tax calculation (will be overridden by calculatedTaxData when available)
+  const manualCalculations = useBookingCalculations({
     selectedItems: new Map(itemsForCalculation.map(({ item, quantity }) => [item.id, { item, quantity }])),
     taxRate: taxRate || 0,
     applyTax: !!applyTax,
     appliedCoupon,
+    useStripeTax: false // Disable Stripe Tax calculation in frontend
   });
+
+  // Use calculated tax data if available, otherwise fall back to manual calculations
+  const rawSubtotal = calculatedTaxData?.subtotal ?? manualCalculations.rawSubtotal;
+  const discountedSubtotal = calculatedTaxData?.subtotal ?? manualCalculations.discountedSubtotal;
+  const taxAmount = calculatedTaxData?.taxAmount ?? manualCalculations.taxAmount;
+  const total = calculatedTaxData?.total ?? manualCalculations.total;
+  const effectiveTaxRate = calculatedTaxData?.taxRate ?? manualCalculations.effectiveTaxRate;
+  const usingStripeTax = calculatedTaxData?.method === 'stripe_tax_api';
+  const stripeTaxError = calculatedTaxData?.method === 'fallback_no_tax' ? 'Tax calculation unavailable' : null;
+
+  // Function to recalculate tax when coupons change
+  const recalculateTax = useCallback(async (currentCoupon: { code: string; amount: number } | null) => {
+    console.log('[NewBookingForm] Recalculating tax with coupon:', currentCoupon?.code || 'none');
+
+    if (!calculatedTaxData || calculatedTaxData.method !== 'stripe_tax_api') {
+      // If we don't have Stripe tax data, fall back to manual calculation
+      const rawSubtotal = itemsForCalculation.reduce((sum, { item, quantity }) => sum + (item.price * quantity), 0);
+      const discountedSubtotal = currentCoupon ? Math.max(0, rawSubtotal - currentCoupon.amount) : rawSubtotal;
+      const manualTaxAmount = applyTax ? discountedSubtotal * (taxRate || 0) / 100 : 0;
+      
+      setCalculatedTaxData({
+        subtotal: discountedSubtotal,
+        taxAmount: manualTaxAmount,
+        taxRate: taxRate || 0,
+        total: discountedSubtotal + manualTaxAmount,
+        method: 'manual_recalculation'
+      });
+      setShouldRecalculateTax(false); // Reset flag
+      return;
+    }
+
+    // Check if we have customer address for Stripe Tax recalculation
+    const customerAddress = (newBooking.eventAddress && newBooking.eventCity && newBooking.eventState && newBooking.eventZipCode) ? {
+      line1: newBooking.eventAddress,
+      city: newBooking.eventCity,
+      state: newBooking.eventState,
+      postalCode: newBooking.eventZipCode,
+      country: 'US'
+    } : null;
+
+    if (!customerAddress) {
+      console.warn('[NewBookingForm] Cannot recalculate tax - missing customer address');
+      return;
+    }
+
+    try {
+      console.log('[NewBookingForm] Recalculating tax with coupon:', currentCoupon?.code || 'none');
+      
+      // Prepare selected items for tax calculation
+      const itemsPayload = Array.from(selectedItems.values()).map(({ item, quantity }) => ({
+        inventoryId: item.id,
+        quantity: quantity,
+        price: item.price,
+      }));
+
+      // Calculate tax using Stripe Tax API with current coupon
+      const { calculateTaxForFrontend } = await import('@/lib/stripe/frontend-tax-utils');
+      const taxResult = await calculateTaxForFrontend(businessId, {
+        selectedItems: itemsPayload,
+        customerAddress,
+        couponCode: currentCoupon?.code || null,
+      });
+
+      if (taxResult.success) {
+        setCalculatedTaxData({
+          subtotal: taxResult.subtotalCents / 100,
+          taxAmount: taxResult.taxCents / 100,
+          taxRate: taxResult.taxRate,
+          total: taxResult.totalCents / 100,
+          method: 'stripe_tax_api'
+        });
+        console.log('[NewBookingForm] Tax recalculated successfully:', {
+          subtotal: taxResult.subtotalCents / 100,
+          tax: taxResult.taxCents / 100,
+          total: taxResult.totalCents / 100
+        });
+      } else {
+        console.warn('[NewBookingForm] Tax recalculation failed:', taxResult.error);
+      }
+    } catch (error) {
+      console.error('[NewBookingForm] Error recalculating tax:', error);
+    } finally {
+      setShouldRecalculateTax(false); // Reset flag
+    }
+  }, [calculatedTaxData, itemsForCalculation, applyTax, taxRate, newBooking.eventAddress, newBooking.eventCity, newBooking.eventState, newBooking.eventZipCode, selectedItems, businessId]);
+
+  // Simple coupon handlers that set recalculation flag
+  const handleApplyCouponWithTaxRecalc = async () => {
+    await handleApplyCoupon();
+    setShouldRecalculateTax(true); // Set flag to trigger recalculation
+  };
+
+  const handleRemoveCouponWithTaxRecalc = async () => {
+    await handleRemoveCoupon();
+    setShouldRecalculateTax(true); // Set flag to trigger recalculation
+  };
+
+  // Watch for flag and recalculate tax when needed
+  useEffect(() => {
+    if (shouldRecalculateTax && currentStep === 3 && calculatedTaxData) {
+      console.log('[NewBookingForm] Flag set - recalculating tax...');
+      recalculateTax(appliedCoupon);
+    }
+  }, [shouldRecalculateTax, currentStep, calculatedTaxData, appliedCoupon, recalculateTax]);
 
   const router = useRouter();
   const { toast } = useToast();
@@ -188,6 +310,7 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
       price: item.price,
       quantity: quantity,
       stripeProductId: item.stripeProductId,
+      stripePriceId: (item as unknown as { stripePriceId?: string }).stripePriceId,
     }));
   };
 
@@ -219,9 +342,9 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
           ? Number(newBooking.participantAge)
           : null,
         specialInstructions: newBooking.specialInstructions,
-        subtotalAmount: rawSubtotal,
+        subtotalAmount: discountedSubtotal,
         taxAmount: taxAmount,
-        taxRate: taxRate || 0,
+        taxRate: effectiveTaxRate,
         totalAmount: total,
         amountCents,
         couponCode: appliedCoupon?.code || undefined,
@@ -242,6 +365,13 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
       if (!clientSecret) throw new Error("Missing client secret from server.");
       setClientSecret(clientSecret);
       setBookingId(bookingId);
+      // Prefer Stripe Tax computed amounts when available
+      const stripeSubtotal = typeof paymentData.stripeTaxSubtotal === 'number' ? paymentData.stripeTaxSubtotal : null;
+      const stripeTax = typeof paymentData.stripeTaxAmount === 'number' ? paymentData.stripeTaxAmount : null;
+      const stripeTotal = typeof paymentData.stripeTaxTotal === 'number' ? paymentData.stripeTaxTotal : null;
+      setDisplaySubtotal(stripeSubtotal ?? rawSubtotal);
+      setDisplayTaxAmount(stripeTax ?? taxAmount);
+      setDisplayTotal(stripeTotal ?? total);
       setShowPaymentForm(true);
     } catch (error) {
       toast({
@@ -276,12 +406,13 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
         participantCount: newBooking.participantCount || 1,
         participantAge: newBooking.participantAge || "",
         specialInstructions: newBooking.specialInstructions || '',
-        subtotalAmount: rawSubtotal,
+        subtotalAmount: discountedSubtotal,
         taxAmount: taxAmount,
-        taxRate: taxRate || 0,
+        taxRate: effectiveTaxRate,
         totalAmount: total,
         businessId: businessId,
         holdId: holdState.id,
+        couponCode: appliedCoupon?.code || null, // Add coupon code to quote payload
       };
       const response = await fetch(`/api/businesses/${businessId}/quotes`, {
         method: "POST",
@@ -346,11 +477,11 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
           }}
         >
           <PaymentForm
-            amount={total}
+            amount={displayTotal ?? total}
             customerEmail={newBooking.customerEmail}
             businessId={businessId}
-            subtotal={rawSubtotal}
-            taxAmount={taxAmount}
+            subtotal={displaySubtotal ?? rawSubtotal}
+            taxAmount={displayTaxAmount ?? taxAmount}
             taxRate={taxRate || 0}
             bookingId={bookingId || undefined}
             onSuccess={async () => {
@@ -386,31 +517,40 @@ export function NewBookingForm({ businessId }: NewBookingFormProps) {
               holdId={holdState.id}
             />
           )}
-          {currentStep === 2 && (
-            <CustomerDetailsStep
-              newBooking={newBooking}
-              setNewBooking={setNewBooking}
-              onContinue={() => setCurrentStep((s) => s + 1)}
-            />
-          )}
+                     {currentStep === 2 && (
+             <CustomerDetailsStep
+               newBooking={newBooking}
+               setNewBooking={setNewBooking}
+               businessId={businessId}
+               selectedItems={selectedItems}
+               appliedCoupon={appliedCoupon}
+               onTaxCalculated={(taxData) => {
+                 console.log('[NewBookingForm] Tax calculated:', taxData);
+                 setCalculatedTaxData(taxData);
+               }}
+               onContinue={() => setCurrentStep((s) => s + 1)}
+             />
+           )}
           {currentStep === 3 && (
             <ReviewPayStep
               newBooking={newBooking}
               selectedItems={new Map(itemsForCalculation.map(({ item, quantity }) => [item.id, { item, quantity }]))}
-              taxRate={taxRate || 0}
-              applyTax={!!applyTax}
+              taxRate={effectiveTaxRate}
+              applyTax={usingStripeTax || !!applyTax}
               couponCode={couponCode}
               appliedCoupon={appliedCoupon}
               couponError={couponError}
               subtotal={rawSubtotal}
               discountedTax={taxAmount}
               discountedTotal={total}
+              usingStripeTax={usingStripeTax}
+              stripeTaxError={stripeTaxError}
               isApplyingCoupon={isApplyingCoupon}
               isProcessingQuote={isProcessingQuote}
               isSubmittingPayment={isSubmitting}
               setCouponCode={setCouponCode}
-              onApplyCoupon={handleApplyCoupon}
-              onRemoveCoupon={handleRemoveCoupon}
+                             onApplyCoupon={handleApplyCouponWithTaxRecalc}
+               onRemoveCoupon={handleRemoveCouponWithTaxRecalc}
               onRemoveItem={(itemId) => selectInventoryItem({ ...selectedItems.get(itemId)!.item, quantity: 0 }, 0)}
               onSendAsQuote={handleSendAsQuote}
               onProceedToPayment={handleProceedToPayment}
