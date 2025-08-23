@@ -42,21 +42,19 @@ const plans: Plan[] = [
   {
     id: 'starter',
     name: 'Starter Plan',
-    price: 49,
+    price: 50,
     description: 'Everything you need to run a single‑operator rental business.',
     features: [
       '1 admin seat',
       'Branded booking website / subdomain',
       'Unlimited items & bookings',
       'Real‑time conflict checks',
-      'Coupons & lead‑capture pop‑ups',
       'Stripe payments & digital waivers',
       'Embedded booking components',
       'Basic CRM & revenue dashboard'
     ],
     limitations: [
-      'Pay‑as‑you‑go SMS when released',
-      'No additional team members'
+      
     ],
     icon: <Users className="h-5 w-5" />,
     recommended: false,
@@ -65,14 +63,15 @@ const plans: Plan[] = [
   {
     id: 'growth',
     name: 'Growth Plan (Founding Members)',
-    price: 119,
+    price: 100,
     description: 'Invite your team and get first access to every new feature we ship.',
     features: [
-      'Up to 3 user seats (add more $15/user)',
+      'Up to 3 user seats',
       'All Starter features',
       'Priority chat support',
       '500 outbound SMS/mo included when SMS launches',
-      'Early access to new modules & roadmap voting'
+      'Early access to new modules & roadmap voting',
+      'Coupons & lead‑capture pop‑ups'
     ],
     limitations: [],
     icon: <Zap className="h-5 w-5" />,
@@ -205,13 +204,10 @@ export default function PricingGrid() {
             {/* CTA */}
             <div>
               <Button
-                className={cn(
-                  'h-11 w-full gap-2 text-base transition-colors focus-visible:ring-4 focus-visible:ring-[#6366F1]/30',
-                  plan.recommended
-                    ? 'bg-[#6366F1] text-white hover:bg-[#5458E3]'
-                    : 'border border-black/10 bg-white text-[#0B1220] hover:border-[#2DD4BF] hover:bg-[rgba(45,212,191,0.08)]'
-                )}
-                variant={plan.recommended ? undefined : 'outline'}
+                size="lg"
+                className="w-full gap-2 text-base"
+                variant={plan.recommended ? 'default' : 'outline'}
+                brand={plan.recommended ? 'indigo' : 'teal'}
                 disabled={isLoading && hoveredPlan === plan.id}
                 onClick={() => handleSubscribe(plan.id)}
               >
