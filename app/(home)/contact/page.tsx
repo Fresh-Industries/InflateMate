@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,13 +12,73 @@ import {
   Mail,
   Send,
   ArrowRight,
-  Phone,
   MapPin,
   HelpCircle,
 } from "lucide-react";
 import Link from "next/link";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ContactPage() {
+  const { toast } = useToast();
+
+  // Contact form state
+  const [contactLoading, setContactLoading] = useState(false);
+  const [contact, setContact] = useState({
+    name: "",
+    email: "",
+    company: "",
+    subject: "",
+    message: "",
+  });
+
+  async function handleContactSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (contactLoading) return;
+    try {
+      setContactLoading(true);
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(contact),
+      });
+      if (!res.ok) throw new Error("Failed to send");
+      toast({ title: "Message sent", description: "We\'ll get back to you shortly." });
+      setContact({ name: "", email: "", company: "", subject: "", message: "" });
+    } catch {
+      toast({ title: "Could not send message", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setContactLoading(false);
+    }
+  }
+
+  // Feature request state
+  const [featureLoading, setFeatureLoading] = useState(false);
+  const [feature, setFeature] = useState({
+    featureName: "",
+    description: "",
+    name: "",
+    email: "",
+  });
+
+  async function handleFeatureSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    if (featureLoading) return;
+    try {
+      setFeatureLoading(true);
+      const res = await fetch("/api/feature-request", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(feature),
+      });
+      if (!res.ok) throw new Error("Failed to send");
+      toast({ title: "Feature sent", description: "Thanks for helping us improve!" });
+      setFeature({ featureName: "", description: "", name: "", email: "" });
+    } catch {
+      toast({ title: "Could not send feature", description: "Please try again.", variant: "destructive" });
+    } finally {
+      setFeatureLoading(false);
+    }
+  }
   return (
     <div className="relative overflow-hidden">
       {/* Decorative Background Elements */}
@@ -63,7 +125,7 @@ export default function ContactPage() {
                   <div className="h-2 bg-gradient-to-r from-primary to-accent"></div>
                   <div className="p-8">
                     <h2 className="text-2xl font-bold mb-6">Send a Message</h2>
-                    <form className="space-y-5">
+                    <form className="space-y-5" onSubmit={handleContactSubmit}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                         <div className="space-y-2">
                           <Label htmlFor="name" className="text-sm font-medium">
@@ -73,6 +135,8 @@ export default function ContactPage() {
                             id="name"
                             placeholder="Jane Smith"
                             className="h-12 bg-background border-muted"
+                            value={contact.name}
+                            onChange={(e) => setContact((s) => ({ ...s, name: e.target.value }))}
                           />
                         </div>
                         <div className="space-y-2">
@@ -84,6 +148,8 @@ export default function ContactPage() {
                             type="email"
                             placeholder="you@company.com"
                             className="h-12 bg-background border-muted"
+                            value={contact.email}
+                            onChange={(e) => setContact((s) => ({ ...s, email: e.target.value }))}
                           />
                         </div>
                       </div>
@@ -96,6 +162,8 @@ export default function ContactPage() {
                           id="company"
                           placeholder="Your Bounce House Business"
                           className="h-12 bg-background border-muted"
+                          value={contact.company}
+                          onChange={(e) => setContact((s) => ({ ...s, company: e.target.value }))}
                         />
                       </div>
 
@@ -107,6 +175,8 @@ export default function ContactPage() {
                           id="subject"
                           placeholder="What's this regarding?"
                           className="h-12 bg-background border-muted"
+                          value={contact.subject}
+                          onChange={(e) => setContact((s) => ({ ...s, subject: e.target.value }))}
                         />
                       </div>
 
@@ -119,11 +189,13 @@ export default function ContactPage() {
                           placeholder="Tell us what you need help with..."
                           rows={6}
                           className="resize-none bg-background border-muted"
+                          value={contact.message}
+                          onChange={(e) => setContact((s) => ({ ...s, message: e.target.value }))}
                         />
                       </div>
 
-                      <Button size="lg" className="w-full md:w-auto px-8 h-12">
-                        <Send size={18} className="mr-2" /> Send Message
+                      <Button size="lg" className="w-full md:w-auto px-8 h-12" type="submit" disabled={contactLoading}>
+                        <Send size={18} className="mr-2" /> {contactLoading ? 'Sending…' : 'Send Message'}
                       </Button>
                     </form>
                   </div>
@@ -146,26 +218,10 @@ export default function ContactPage() {
                               href="mailto:support@inflatemate.com"
                               className="text-foreground hover:text-primary transition-colors"
                             >
-                              support@inflatemate.com
+                              hello@inflatemate.com
                             </a>
                           </div>
                         </div>
-
-                        <div className="flex items-start">
-                          <div className="p-2 rounded-full bg-primary/10 mr-4">
-                            <Phone size={20} className="text-primary" />
-                          </div>
-                          <div>
-                            <p className="text-sm text-muted-foreground">Phone</p>
-                            <a
-                              href="tel:+12065551234"
-                              className="text-foreground hover:text-primary transition-colors"
-                            >
-                              (206) 555-1234
-                            </a>
-                          </div>
-                        </div>
-
                         <div className="flex items-start">
                           <div className="p-2 rounded-full bg-primary/10 mr-4">
                             <MapPin size={20} className="text-primary" />
@@ -173,7 +229,7 @@ export default function ContactPage() {
                           <div>
                             <p className="text-sm text-muted-foreground">Office</p>
                             <p className="text-foreground">
-                              Seattle, WA - Available Remotely
+                              Texas, USA - Available Remotely
                             </p>
                           </div>
                         </div>
@@ -189,11 +245,11 @@ export default function ContactPage() {
                       <div className="space-y-3">
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Monday - Friday</span>
-                          <span className="font-medium">9AM - 6PM PST</span>
+                          <span className="font-medium">9AM - 6PM CST</span>
                         </div>
                         <div className="flex justify-between">
                           <span className="text-muted-foreground">Weekend</span>
-                          <span className="font-medium">10AM - 4PM PST</span>
+                          <span className="font-medium">10AM - 4PM CST</span>
                         </div>
                         <div className="pt-3">
                           <p className="text-sm text-muted-foreground">
@@ -249,7 +305,7 @@ export default function ContactPage() {
                     </p>
                   </div>
 
-                  <form className="space-y-5 max-w-3xl mx-auto">
+                  <form className="space-y-5 max-w-3xl mx-auto" onSubmit={handleFeatureSubmit}>
                     <div className="space-y-2">
                       <Label htmlFor="feature-name" className="text-sm font-medium">
                         Feature Name
@@ -258,6 +314,8 @@ export default function ContactPage() {
                         id="feature-name"
                         placeholder="Give your feature idea a short name"
                         className="h-12 bg-background border-muted"
+                        value={feature.featureName}
+                        onChange={(e) => setFeature((s) => ({ ...s, featureName: e.target.value }))}
                       />
                     </div>
 
@@ -270,6 +328,8 @@ export default function ContactPage() {
                         placeholder="Describe your feature idea in detail. What problem would it solve? How would it work?"
                         rows={8}
                         className="resize-none bg-background border-muted"
+                        value={feature.description}
+                        onChange={(e) => setFeature((s) => ({ ...s, description: e.target.value }))}
                       />
                     </div>
 
@@ -282,6 +342,8 @@ export default function ContactPage() {
                           id="your-name"
                           placeholder="Jane Smith"
                           className="h-12 bg-background border-muted"
+                          value={feature.name}
+                          onChange={(e) => setFeature((s) => ({ ...s, name: e.target.value }))}
                         />
                       </div>
                       <div className="space-y-2">
@@ -293,13 +355,15 @@ export default function ContactPage() {
                           type="email"
                           placeholder="you@company.com"
                           className="h-12 bg-background border-muted"
+                          value={feature.email}
+                          onChange={(e) => setFeature((s) => ({ ...s, email: e.target.value }))}
                         />
                       </div>
                     </div>
 
                     <div className="pt-2 text-center">
-                      <Button size="lg" className="px-8 h-12">
-                        <Lightbulb size={18} className="mr-2" /> Submit Feature Idea
+                      <Button size="lg" className="px-8 h-12" type="submit" disabled={featureLoading}>
+                        <Lightbulb size={18} className="mr-2" /> {featureLoading ? 'Submitting…' : 'Submit Feature Idea'}
                       </Button>
                     </div>
                   </form>
@@ -307,28 +371,6 @@ export default function ContactPage() {
               </Card>
             </TabsContent>
           </Tabs>
-        </div>
-
-        {/* Testimonial/Social Proof Section */}
-        <div className="mt-24 max-w-4xl mx-auto text-center">
-          <div className="p-3 bg-primary/5 rounded-full inline-flex mb-6">
-            <h2 className="text-sm font-medium text-primary px-3">
-              Trusted by bounce house businesses nationwide
-            </h2>
-          </div>
-          
-          <blockquote className="text-xl md:text-2xl italic text-muted-foreground mb-6">
-            &quot;InflateMate transformed how we manage our bounce house rentals. 
-            Their support team is quick and incredibly helpful!&quot;
-          </blockquote>
-          
-          <div className="flex items-center justify-center">
-            <div className="size-12 rounded-full bg-gray-200 mr-4"></div>
-            <div className="text-left">
-              <p className="font-medium">Sarah Johnson</p>
-              <p className="text-sm text-muted-foreground">Jump Around Rentals</p>
-            </div>
-          </div>
         </div>
       </section>
     </div>
