@@ -102,26 +102,17 @@ export default function Hero() {
 
             {/* CTAs */}
             <div className="mt-6 flex flex-col items-center gap-3 sm:flex-row lg:justify-start">
-              <Button
-                size="lg"
-                className="group rounded-full bg-[#6366F1] px-7 py-6 text-base font-semibold text-white shadow-[0_6px_20px_rgba(99,102,241,0.18)] hover:bg-gradient-to-r hover:from-[#6366F1] hover:to-[#4F46E5] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6366F1]/30"
-                asChild
-              >
+              <Button asChild size="lg" variant="default" brand="indigo" className="px-7 py-6 text-base font-semibold shadow-[0_6px_20px_rgba(99,102,241,0.18)]">
                 <Link href="/sign-up" aria-label="Get started" prefetch>
                   <span className="flex items-center">
                     Get started
-                    <span className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/20 transition-transform group-hover:translate-x-1">
+                    <span className="ml-2 flex h-8 w-8 items-center justify-center rounded-full bg-white/20">
                       <ArrowRight className="h-4 w-4 text-white" />
                     </span>
                   </span>
                 </Link>
               </Button>
-              <Button
-                variant="outline"
-                size="lg"
-                className="rounded-full border border-black/10 bg-white px-7 py-6 text-base font-semibold text-[#0B1220] shadow-none transition-colors hover:border-[#2DD4BF] hover:bg-[rgba(45,212,191,0.08)] focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[#6366F1]/25"
-                asChild
-              >
+              <Button asChild variant="outline" brand="teal" size="lg" className="px-7 py-6 text-base font-semibold">
                 <Link href="/demo" aria-label="See how it works" prefetch>
                   <span className="flex items-center">
                     <span className="mr-2 flex h-8 w-8 items-center justify-center rounded-full bg-[rgba(45,212,191,0.12)]">
