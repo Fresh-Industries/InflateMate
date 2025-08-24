@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
 import { revalidateTag } from "next/cache";
-import { supabaseAdmin } from "@/lib/supabaseClient";
+import { completeBooking } from "@/features/booking/booking.service";
 
 export async function POST(
   req: NextRequest,
@@ -22,39 +21,7 @@ export async function POST(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Find the booking (no need to check business.userId anymore)
-    const booking = await prisma.booking.findFirst({
-      where: {
-        id: bookingId,
-        businessId: businessId,
-      },
-    });
-
-    if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-    }
-
-    // Update the booking status
-    const updatedBooking = await prisma.booking.update({
-      where: { id: bookingId },
-      data: {
-        status: "COMPLETED",
-        isCompleted: true,
-      },
-    });
-
-    // Send real-time update via Supabase for completed booking
-    if (supabaseAdmin) {
-      await supabaseAdmin
-        .from('Booking')
-        .update({
-          status: 'COMPLETED',
-          isCompleted: true,
-          updatedAt: new Date().toISOString(),
-        })
-        .eq('id', bookingId);
-      console.log("Booking completed: real-time update sent via Supabase");
-    }
+    const updatedBooking = await completeBooking(businessId, bookingId);
 
     // Revalidate the bookings tag to update cached lists
     revalidateTag(`bookings-${businessId}`);
@@ -63,10 +30,9 @@ export async function POST(
     return NextResponse.json(updatedBooking, { status: 200 });
 
   } catch (error) {
-    console.error("Error completing booking:", error);
-    return NextResponse.json(
-      { error: "Internal server error" },
-      { status: 500 }
-    );
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const e: any = error;
+    if (e?.issues?.[0]?.message) return NextResponse.json({ error: e.issues[0].message }, { status: 400 });
+    return NextResponse.json({ error: e?.message || "Failed to complete booking" }, { status: e?.status || 500 });
   }
 }

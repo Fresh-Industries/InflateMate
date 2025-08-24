@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/prisma";
 import { getCurrentUserWithOrgAndBusiness, getMembershipByBusinessId } from "@/lib/auth/clerk-utils";
-import { updateBookingSafely, UpdateBookingDataInput, BookingConflictError } from '@/lib/updateBookingSafely';
+import { UpdateBookingDataInput, BookingConflictError } from '@/lib/updateBookingSafely';
 import { z } from 'zod'; // Import Zod for schema validation
-import { supabaseAdmin } from "@/lib/supabaseClient";
+import { getBookingForEdit, updateBooking, deleteBookingSafely } from "@/features/booking/booking.service";
+import { updateBookingSchema } from "@/features/booking/booking.schema";
 
 export async function GET(
   req: NextRequest,
@@ -24,93 +24,8 @@ export async function GET(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    const booking = await prisma.booking.findFirst({
-      where: { id: bookingId, businessId },
-      include: {
-        inventoryItems: { 
-          include: { 
-            inventory: {
-              select: { id: true, name: true, description: true, primaryImage: true }
-            }
-          }
-        },
-        customer: true,
-        waivers: {
-          select: {
-            id: true,
-            status: true,
-            docuSealDocumentId: true
-          }
-        }
-      },
-    });
-
-    if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-    }
-
-    // Transform to match the BookingFullDetails format expected by the edit form
-    const hasSignedWaiver = booking.waivers.some((waiver: { status: string }) => waiver.status === 'SIGNED');
-    
-    const bookingFullDetails = {
-      booking: {
-        id: booking.id,
-        eventDate: booking.eventDate,
-        startTime: booking.startTime,
-        endTime: booking.endTime,
-        status: booking.status,
-        totalAmount: booking.totalAmount,
-        subtotalAmount: booking.subtotalAmount,
-        taxAmount: booking.taxAmount,
-        taxRate: booking.taxRate,
-        depositAmount: booking.depositAmount,
-        depositPaid: booking.depositPaid,
-        eventType: booking.eventType,
-        participantCount: booking.participantCount,
-        participantAge: booking.participantAge,
-        eventAddress: booking.eventAddress,
-        eventCity: booking.eventCity,
-        eventState: booking.eventState,
-        eventZipCode: booking.eventZipCode,
-        eventTimeZone: booking.eventTimeZone || "America/Chicago",
-        specialInstructions: booking.specialInstructions,
-        expiresAt: booking.expiresAt,
-        isCompleted: booking.status === 'COMPLETED',
-      },
-      customer: booking.customer ? {
-        id: booking.customer.id,
-        name: booking.customer.name,
-        email: booking.customer.email,
-        phone: booking.customer.phone,
-      } : null,
-      bookingItems: booking.inventoryItems.map((item: any) => ({
-        id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-        startUTC: item.startUTC || booking.startTime,
-        endUTC: item.endUTC || booking.endTime,
-        inventoryId: item.inventoryId,
-        bookingId: item.bookingId,
-        inventory: {
-          id: item.inventory.id,
-          name: item.inventory.name,
-          description: item.inventory.description,
-          primaryImage: item.inventory.primaryImage,
-        },
-      })),
-      // Additional properties that might be used by the edit form
-      waivers: booking.waivers,
-      hasSignedWaiver,
-      inventoryItems: booking.inventoryItems.map((item: any) => ({
-        id: item.id,
-        quantity: item.quantity,
-        price: item.price,
-        inventoryId: item.inventoryId,
-        bookingId: item.bookingId,
-      })),
-    };
-
-    return NextResponse.json(bookingFullDetails);
+    const details = await getBookingForEdit(businessId, bookingId);
+    return NextResponse.json(details);
   } catch (error) {
     console.error("Error in GET booking route:", error);
     return NextResponse.json(
@@ -120,61 +35,7 @@ export async function GET(
   }
 }
 
-// Define a schema for the booking update request body
-const UpdateBookingSchema = z.object({
-  // Customer information
-  customerName: z.string().optional(),
-  customerEmail: z.string().email().optional(),
-  customerPhone: z.string().optional(),
-  
-  // Special instructions
-  specialInstructions: z.string().nullable().optional(),
-  
-  // Event location fields
-  eventAddress: z.string().optional(),
-  eventCity: z.string().optional(),
-  eventState: z.string().optional(),
-  eventZipCode: z.string().optional(),
-  
-  // Participant fields
-  participantCount: z.number().int().min(1).optional(),
-  participantAge: z.number().int().positive().nullable().optional(),
-  
-  // Original date/time fields - typically shouldn't change in edit flow but kept for validation
-  eventDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).optional(),
-  startTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-  endTime: z.string().regex(/^\d{2}:\d{2}$/).optional(),
-  eventTimeZone: z.string().optional(),
-  
-  // Inventory items - make optional to allow confirmed booking updates without items
-  items: z.array(
-    z.object({
-      inventoryId: z.string(),
-      quantity: z.number().int().min(1),
-      price: z.number().min(0),
-      // These will be converted to Date objects in updateBookingSafely
-      startUTC: z.date().or(z.string()),
-      endUTC: z.date().or(z.string()),
-      status: z.string().optional(),
-    })
-  ).optional(),
-  
-  // Amounts for validation
-  subtotalAmount: z.number().min(0).optional(),
-  taxAmount: z.number().min(0).optional(),
-  totalAmount: z.number().min(0).optional(),
-  
-  // Coupon
-  couponCode: z.string().optional().nullable(),
-  
-  // Intent for prepare_for_quote or prepare_for_payment
-  intent: z.enum([
-    "prepare_for_quote", 
-    "prepare_for_payment", 
-    "prepare_for_payment_difference",
-    "update_customer_info_only"
-  ]).optional(),
-});
+// Schema moved to features/booking/booking.schema.ts
 
 export async function PATCH(
   request: NextRequest,
@@ -201,7 +62,7 @@ export async function PATCH(
       console.log('[API PATCH Booking] Request body:', JSON.stringify(rawBody));
       
       // Validate the request body with Zod schema
-      const validatedData = UpdateBookingSchema.parse(rawBody);
+      const validatedData = updateBookingSchema.parse(rawBody);
       body = validatedData as UpdateBookingDataInput;
       
       // Log if we're processing an intent
@@ -219,203 +80,8 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
     }
 
-    console.log(`[API PATCH Booking] User ${user.id} attempting to update booking ${bookingId} for business ${businessId}`);
-    
-    // Check if this is a CONFIRMED booking
-    const booking = await prisma.booking.findUnique({ 
-      where: { id: bookingId },
-      select: { status: true }
-    });
-
-    // Special handling for CONFIRMED bookings without items array (just updating customer info)
-    if (booking?.status === "CONFIRMED" && (!body.items || body.intent === "update_customer_info_only")) {
-      console.log(`[API PATCH Booking] Processing simple update for CONFIRMED booking without modifying items`);
-      
-      // Directly update the booking without affecting booking items
-      const updatedBooking = await prisma.booking.update({
-        where: { id: bookingId },
-        data: {
-          eventAddress: body.eventAddress,
-          eventCity: body.eventCity,
-          eventState: body.eventState,
-          eventZipCode: body.eventZipCode,
-          participantCount: body.participantCount,
-          participantAge: body.participantAge,
-          specialInstructions: body.specialInstructions,
-          eventDate: body.eventDate ? new Date(body.eventDate) : undefined,
-          startTime: body.startTime && body.eventDate 
-            ? new Date(`${body.eventDate}T${body.startTime}:00.000Z`) 
-            : undefined,
-          endTime: body.endTime && body.eventDate 
-            ? new Date(`${body.eventDate}T${body.endTime}:00.000Z`) 
-            : undefined,
-          eventTimeZone: body.eventTimeZone,
-          updatedAt: new Date(),
-          // If we have customer info, also update the customer
-          ...(body.customerName && body.customerEmail && body.customerPhone ? {
-            customer: {
-              update: {
-                name: body.customerName,
-                email: body.customerEmail,
-                phone: body.customerPhone,
-                updatedAt: new Date(),
-              }
-            }
-          } : {})
-        },
-        include: {
-          customer: true,
-          inventoryItems: {
-            include: { inventory: true }
-          }
-        }
-      });
-      
-      // Send real-time update via Supabase for booking update
-      if (supabaseAdmin) {
-        await supabaseAdmin
-          .from('Booking')
-          .update({
-            updatedAt: new Date().toISOString(),
-          })
-          .eq('id', bookingId);
-        console.log("Booking updated: real-time update sent via Supabase");
-      }
-      
-      console.log(`[API PATCH Booking] Successfully updated CONFIRMED booking ${bookingId} (simple update)`);
-      return NextResponse.json(updatedBooking, { status: 200 });
-    }
-    
-    // Special handling for CONFIRMED bookings with prepare_for_payment_difference intent
-    if (booking?.status === "CONFIRMED" && body.intent === "prepare_for_payment_difference" && body.items) {
-      console.log(`[API PATCH Booking] Processing payment for additional items for CONFIRMED booking`);
-      
-      try {
-        // First, update the booking with the new items using updateBookingSafely
-        const updatedBookingWithItems = await updateBookingSafely(bookingId, businessId, body);
-        
-        // Now we need to create a payment intent for the difference amount
-        // Get the business for Stripe account info
-        const business = await prisma.business.findUnique({
-          where: { id: businessId },
-          select: { stripeAccountId: true }
-        });
-
-        if (!business?.stripeAccountId) {
-          return NextResponse.json({ 
-            error: "Business Stripe account not configured",
-            code: "STRIPE_ACCOUNT_MISSING"
-          }, { status: 400 });
-        }
-
-        // Calculate the difference amount (added items + tax)
-        const differenceAmount = (body.subtotalAmount || 0) + (body.taxAmount || 0);
-        const differenceAmountCents = Math.round(differenceAmount * 100);
-
-        if (differenceAmountCents <= 0) {
-          return NextResponse.json({ 
-            error: "No additional payment required",
-            code: "NO_PAYMENT_NEEDED"
-          }, { status: 400 });
-        }
-
-        // Get or create customer for Stripe
-        const customer = await prisma.customer.findFirst({
-          where: { 
-            email: body.customerEmail || "",
-            businessId: businessId 
-          }
-        });
-
-        if (!customer) {
-          return NextResponse.json({ 
-            error: "Customer not found",
-            code: "CUSTOMER_NOT_FOUND"
-          }, { status: 400 });
-        }
-
-        // Find or create Stripe customer
-        const { findOrCreateStripeCustomer } = await import("@/lib/stripe/customer-utils");
-        const stripeCustomerId = await findOrCreateStripeCustomer(
-          customer.email,
-          customer.name,
-          customer.phone || "",
-          body.eventCity || "",
-          body.eventState || "",
-          body.eventAddress || "",
-          body.eventZipCode || "",
-          businessId,
-          business.stripeAccountId
-        );
-
-        // Create payment intent for the difference
-        const { stripe } = await import("@/lib/stripe-server");
-        
-        const paymentIntent = await stripe.paymentIntents.create({
-          amount: differenceAmountCents,
-          currency: "usd",
-          customer: stripeCustomerId,
-          receipt_email: customer.email,
-          metadata: {
-            prismaBookingId: bookingId,
-            prismaBusinessId: businessId,
-            prismaCustomerId: customer.id,
-            paymentType: "booking_addition",
-            addedItemsAmount: (body.subtotalAmount || 0).toString(),
-            taxAmount: (body.taxAmount || 0).toString(),
-            totalDifferenceAmount: differenceAmount.toString(),
-            customerName: customer.name,
-            customerEmail: customer.email,
-          }
-        }, {
-          stripeAccount: business.stripeAccountId
-        });
-
-        if (!paymentIntent.client_secret) {
-          return NextResponse.json({ 
-            error: "Failed to create payment intent",
-            code: "PAYMENT_INTENT_FAILED"
-          }, { status: 500 });
-        }
-
-        console.log(`[API PATCH Booking] Created payment intent for difference: $${differenceAmount}`);
-        
-        // Return the updated booking with client secret
-        return NextResponse.json({
-          ...updatedBookingWithItems,
-          clientSecret: paymentIntent.client_secret,
-          differenceAmount: differenceAmount,
-          paymentIntentId: paymentIntent.id
-        }, { status: 200 });
-        
-      } catch (error) {
-        console.error("[API PATCH Booking] Error processing payment difference:", error);
-        return NextResponse.json({ 
-          error: error instanceof Error ? error.message : "Failed to process payment for additional items",
-          code: "PAYMENT_DIFFERENCE_ERROR"
-        }, { status: 400 });
-      }
-    }
-    
-    // For non-confirmed bookings or confirmed bookings with items array, use the regular update process
-    const updatedBooking = await updateBookingSafely(bookingId, businessId, body);
-
-    console.log(`[API PATCH Booking] Successfully updated booking ${updatedBooking.id} to status ${updatedBooking.status}`);
-    
-    // Send real-time update via Supabase for general booking update
-    if (supabaseAdmin) {
-      await supabaseAdmin
-        .from('Booking')
-        .update({
-          status: updatedBooking.status,
-          updatedAt: new Date().toISOString(),
-        })
-        .eq('id', updatedBooking.id);
-      console.log("Booking updated: real-time update sent via Supabase");
-    }
-    
-    // Return the fully updated booking
-    return NextResponse.json(updatedBooking, { status: 200 });
+    const updated = await updateBooking(businessId, bookingId, body);
+    return NextResponse.json(updated, { status: 200 });
 
   } catch (error: any) {
     try {
@@ -447,10 +113,7 @@ export async function PATCH(
       }, { status: 404 });
     }
 
-    return NextResponse.json({ 
-      error: "Internal Server Error.", 
-      message: error.message || "An unexpected error occurred." 
-    }, { status: 500 });
+    return NextResponse.json({ error: error.message || "Internal Server Error." }, { status: 500 });
   }
 }
 
@@ -472,86 +135,12 @@ export async function DELETE(
       return NextResponse.json({ error: "Access denied" }, { status: 403 });
     }
 
-    // Get the booking with all related records
-    const booking = await prisma.booking.findFirst({
-      where: { id: bookingId, businessId },
-      include: {
-        payments: true,
-        waivers: true,
-        invoices: true,
-        quotes: true,
-        inventoryItems: true,
-      },
-    });
-
-    if (!booking) {
-      return NextResponse.json({ error: "Booking not found" }, { status: 404 });
-    }
-
-    // Only allow deletion of PENDING or HOLD bookings
-    if (booking.status !== "PENDING" && booking.status !== "HOLD") {
-      return NextResponse.json(
-        { error: "Only PENDING or HOLD bookings can be deleted" },
-        { status: 400 }
-      );
-    }
-
-    // Check if there are any completed payments
-    const hasCompletedPayments = booking.payments?.some(
-      (payment: any) => payment.status === "COMPLETED"
-    ) || false;
-    if (hasCompletedPayments) {
-      return NextResponse.json(
-        { error: "Cannot delete booking with completed payments" },
-        { status: 400 }
-      );
-    }
-
-    // Delete the booking and all related records in a transaction
-    await prisma.$transaction(async (tx) => {
-      // Delete related records first
-      if (booking.invoices && booking.invoices.length > 0) {
-        await tx.invoice.deleteMany({
-          where: { bookingId },
-        });
-      }
-
-      if (booking.quotes && booking.quotes.length > 0) {
-        await tx.quote.deleteMany({
-          where: { bookingId },
-        });
-      }
-
-      // Delete payments
-      await tx.payment.deleteMany({
-        where: { bookingId },
-      });
-
-      // Delete waivers
-      await tx.waiver.deleteMany({
-        where: { bookingId },
-      });
-
-      // Delete booking items
-      await tx.bookingItem.deleteMany({
-        where: { bookingId },
-      });
-
-      // Finally delete the booking
-      await tx.booking.delete({
-        where: { id: bookingId },
-      });
-    });
-
-    return NextResponse.json(
-      { message: "Booking and related records deleted successfully" },
-      { status: 200 }
-    );
+    const result = await deleteBookingSafely(businessId, bookingId);
+    return NextResponse.json(result, { status: 200 });
   } catch (error) {
     console.error("Error in DELETE booking route:", error);
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Internal Server Error" },
-      { status: 500 }
-    );
+    const e = error as { message?: string; status?: number; issues?: { message?: string }[] };
+    if (e?.issues?.[0]?.message) return NextResponse.json({ error: e.issues[0].message }, { status: 400 });
+    return NextResponse.json({ error: e?.message || "Internal Server Error" }, { status: e?.status || 500 });
   }
 }
