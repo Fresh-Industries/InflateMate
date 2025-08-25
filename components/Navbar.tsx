@@ -102,7 +102,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/images/inflatemate-Navbar.PNG"
+              src="/public/images/inflatemate-Navbar.PNG"
               alt="InflateMate"
               width={900}
               height={300}

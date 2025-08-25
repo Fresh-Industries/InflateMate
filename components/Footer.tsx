@@ -16,7 +16,7 @@ export default function Footer() {
           <div className="space-y-6">
             <Link href="/" className="inline-block" aria-label="InflateMate home">
               <Image
-                src="/images/inflatemate-Navbar.PNG"
+                src="/public/images/inflatemate-Navbar.PNG"
                 alt="InflateMate logo"
                 width={900}
                 height={300}
