@@ -13,13 +13,28 @@ export default function AuthPage() {
           forceRedirectUrl={process.env.NEXT_PUBLIC_API_HOST + '/callback'}
           appearance={{
             elements: {
-              formButtonPrimary: 'bg-gradient-to-r from-primary to-accent text-white rounded-full shadow-lg hover:scale-105 transform transition-transform duration-300 rounded-full',
-              card: 'rounded-xl border-none shadow-none',
-              headerTitle: 'text-2xl font-bold bg-gradient-to-r from-blue-500 to-purple-500 bg-clip-text text-transparent',
-              formFieldInput: 'rounded-lg border-gray-200 focus:border-purple-400 focus:ring-purple-400',
-              footer: 'text-gray-500',
-              dividerLine: 'bg-gradient-to-r from-transparent via-gray-300 to-transparent',
-              dividerText: 'text-gray-400'
+              formButtonPrimary: 'bg-primary text-primary-foreground rounded-full px-8 py-3 font-medium shadow-lg hover:scale-105 transform transition-all duration-300 hover:shadow-xl',
+              card: 'rounded-2xl border border-border bg-card shadow-2xl p-8',
+              headerTitle: 'text-3xl font-bold text-foreground mb-6',
+              formFieldInput: 'rounded-xl border-2 border-input bg-background px-4 py-3 text-foreground focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all duration-200',
+              formFieldLabel: 'text-foreground font-medium mb-2',
+              footer: 'text-muted-foreground text-center',
+              dividerLine: 'bg-border h-px',
+              dividerText: 'text-muted-foreground bg-background px-4',
+              socialButtonsBlockButton: 'border-2 border-border bg-background text-foreground hover:bg-accent hover:text-accent-foreground rounded-xl px-4 py-3 transition-all duration-200',
+              socialButtonsBlockButtonText: 'font-medium',
+              formFieldSuccessText: 'text-teal-600',
+              formFieldErrorText: 'text-red-500',
+              identityPreviewText: 'text-muted-foreground',
+              identityPreviewEditButton: 'text-primary hover:text-primary/80',
+              footerActionLink: 'text-primary hover:text-primary/80 font-medium'
+            },
+            variables: {
+              colorPrimary: 'hsl(var(--primary))',
+              colorBackground: 'hsl(var(--background))',
+              colorInputBackground: 'hsl(var(--background))',
+              colorInputText: 'hsl(var(--foreground))',
+              borderRadius: '1rem'
             }
           }}
         />

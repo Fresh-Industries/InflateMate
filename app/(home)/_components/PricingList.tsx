@@ -42,7 +42,7 @@ const plans: Plan[] = [
   {
     id: 'starter',
     name: 'Starter Plan',
-    price: 50,
+    price: 59,
     description: 'Everything you need to run a single‑operator rental business.',
     features: [
       '1 admin seat',
@@ -63,7 +63,7 @@ const plans: Plan[] = [
   {
     id: 'growth',
     name: 'Growth Plan (Founding Members)',
-    price: 100,
+    price: 99,
     description: 'Invite your team and get first access to every new feature we ship.',
     features: [
       'Up to 3 user seats',
