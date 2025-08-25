@@ -82,7 +82,7 @@ const ACCENT_FG: Record<'teal' | 'coral' | 'indigo' | 'yellow', string> = {
 export function FeatureBento() {
   return (
     <section className="relative overflow-hidden py-12 md:py-20">
-      <div className="pointer-events-none absolute inset-0 bg-grid-pattern opacity-[0.05]" />
+      <div className="pointer-events-none absolute inset-0 opacity-[0.05]" />
 
       <div className="container mx-auto px-4 sm:px-6 relative z-10">
         <div className="max-w-5xl mx-auto">

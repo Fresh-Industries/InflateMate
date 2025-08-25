@@ -9,91 +9,130 @@ export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="relative border-t border-border/30 bg-[var(--brand-indigo)] text-white pt-16 pb-10 overflow-hidden">
-      
-
-      <div className="container mx-auto px-4 relative">
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-10">
-          {/* Brand + blurb */}
-          <div className="md:col-span-6 space-y-6">
-            <Link href="/" className="inline-flex items-center gap-3" aria-label="InflateMate home">
+    <footer className="relative border-t border-slate-200 bg-gradient-to-br from-slate-50 to-white pt-16 pb-8">
+      <div className="container mx-auto px-4 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+          {/* Brand Section */}
+          <div className="space-y-6">
+            <Link href="/" className="inline-block" aria-label="InflateMate home">
               <Image
-                src="/images/inflatemate-logo.PNG"
+                src="/images/inflatemate-Navbar.PNG"
                 alt="InflateMate logo"
-                width={52}
-                height={52}
-                className="rounded-md ring-1 ring-white/15"
+                width={900}
+                height={300}
                 priority
+                className="h-28 w-auto"
               />
-              <span className="text-3xl font-bold">InflateMate</span>
             </Link>
             
-            <p className="text-base leading-relaxed max-w-xl text-white/80">
-              Software that makes booking bounce houses effortless for you and magical for your customers.
+            <p className="text-lg text-slate-600 leading-relaxed max-w-lg">
+              The all-in-one platform that turns your bounce house rental business 
+              into a 24/7 booking machine.
             </p>
 
             {/* Contact */}
-            <div className="flex items-center gap-3 text-white/90">
-              <div className="w-10 h-10 rounded-full flex items-center justify-center border border-white/20 bg-white/10">
-                <Mail className="h-5 w-5" />
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center">
+                <Mail className="h-5 w-5 text-indigo-600" />
               </div>
-              <a href="mailto:hello@inflatemate.co" className="text-lg hover:opacity-90 transition-opacity">
+              <a 
+                href="mailto:hello@inflatemate.co" 
+                className="text-slate-700 hover:text-indigo-600 transition-colors font-medium"
+              >
                 hello@inflatemate.co
               </a>
             </div>
+          </div>
+
+          {/* CTA Section */}
+          <div className="flex flex-col justify-center space-y-6">
+            <div>
+              <h3 className="text-xl font-semibold text-slate-900 mb-2">
+                Ready to grow your business?
+              </h3>
+              <p className="text-slate-600">
+                Join the waitlist and be among the first to transform your rental business.
+              </p>
             </div>
 
-          {/* Primary links */}
-          <div className="md:col-span-6">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-start gap-4">
-              <Button asChild variant="default" brand="coral" size="lg" className="px-7">
-                <Link href="/pricing" className="inline-flex items-center">
-                  View Pricing
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Button asChild variant="default" brand="indigo" size="lg">
+                <Link href="/waitlist" className="inline-flex items-center">
+                  Join Waitlist
                   <ArrowRight className="h-4 w-4 ml-2" />
                 </Link>
               </Button>
 
-              <Button asChild variant="outline" brand="white" size="lg" className="px-7">
+              <Button asChild variant="outline" brand="slate" size="lg">
                 <Link href="/contact">Contact Us</Link>
               </Button>
-            </div>
-
-            <div className="mt-6 text-sm text-white/80">
-              Ready when you are. No setup headaches, just plug in and start taking bookings.
             </div>
           </div>
         </div>
 
-        {/* Bottom bar */}
-        <div className="mt-14 pt-6 border-t border-white/10">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-white/70">
-              <p className="flex items-center">
-              © {currentYear} InflateMate • Made with
-              <Heart className="h-4 w-4 mx-1 text-[var(--brand-coral)] fill-[var(--brand-coral)]" />
-              for rental businesses
-              </p>
-            <p className="inline-flex items-center gap-1">
-              Product of
-                <a 
-                  href="https://www.freshdigitalsolutions.tech" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                className="hover:opacity-90 transition-opacity inline-flex items-center gap-1"
-                >
-                  Fresh Digital Solution
-                  <ExternalLink className="h-3 w-3" />
-                </a>
-              </p>
-            </div>
+        {/* Quick Links */}
+        <div className="mt-12 pt-8 border-t border-slate-200">
+          <div className="flex flex-wrap justify-center gap-8 mb-8">
+            <Link 
+              href="/pricing" 
+              className="text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Pricing
+            </Link>
+            <Link 
+              href="/contact" 
+              className="text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Contact
+            </Link>
+            <Link 
+              href="/privacy" 
+              className="text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Privacy Policy
+            </Link>
+            <Link 
+              href="/terms" 
+              className="text-slate-600 hover:text-slate-900 transition-colors"
+            >
+              Terms of Service
+            </Link>
+          </div>
 
-          {/* Back to top */}
-          <div className="flex justify-center mt-6">
-            <a href="#top" aria-label="Back to top" className="inline-flex items-center gap-2 text-xs text-white/70 hover:text-white transition-colors">
+          {/* Bottom Bar */}
+          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-slate-500">
+            <p className="flex items-center gap-1">
+              © {currentYear} InflateMate • Made with
+              <Heart className="h-4 w-4 text-red-500 fill-red-500" />
+              for rental businesses
+            </p>
+            
+            <p className="flex items-center gap-1">
+              Product of
+              <a 
+                href="https://www.freshdigitalsolutions.tech" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="hover:text-slate-700 transition-colors inline-flex items-center gap-1 font-medium"
+              >
+                Fresh Digital Solutions
+                <ExternalLink className="h-3 w-3" />
+              </a>
+            </p>
+          </div>
+
+          {/* Back to Top */}
+          <div className="flex justify-center mt-8">
+            <button
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors group"
+              aria-label="Back to top"
+            >
               <span>Back to top</span>
-              <div className="h-7 w-7 rounded-full border border-white/20 flex items-center justify-center rotate-180 bg-white/10">
-                <ArrowRight className="h-3.5 w-3.5" />
+              <div className="h-8 w-8 rounded-full border border-slate-300 flex items-center justify-center group-hover:border-slate-400 transition-colors">
+                <ArrowRight className="h-4 w-4 -rotate-90" />
               </div>
-            </a>
+            </button>
           </div>
         </div>
       </div>
