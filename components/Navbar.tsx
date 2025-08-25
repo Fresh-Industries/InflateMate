@@ -46,9 +46,11 @@ export default function Navbar() {
             setDashboardHref(`/dashboard/${data.business.id}`);
           }
         } else {
+          console.error("Failed to fetch user status:", response.status);
           setDashboardHref("/sign-in");
         }
-      } catch {
+      } catch (error) {
+        console.error("Error fetching user status:", error);
         setDashboardHref("/sign-in");
       } finally {
         setLoadingUserStatus(false);
@@ -102,7 +104,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center">
             <Image
-              src="/images/inflatemate-Navbar.PNG"
+              src="/images/Inflatemate-Navbar.png"
               alt="InflateMate"
               width={900}
               height={300}
