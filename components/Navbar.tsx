@@ -46,9 +46,11 @@ export default function Navbar() {
             setDashboardHref(`/dashboard/${data.business.id}`);
           }
         } else {
+          console.error("Failed to fetch user status:", response.status);
           setDashboardHref("/sign-in");
         }
-      } catch {
+      } catch (error) {
+        console.error("Error fetching user status:", error);
         setDashboardHref("/sign-in");
       } finally {
         setLoadingUserStatus(false);
